@@ -3,7 +3,13 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "multer": "^2.2.0",
     "mysql2": "^3.22.5",
+    "node-cron": "^4.6.0",
+    "nodemailer": "^9.0.4",
+    "pdfkit": "^0.19.1",
+    "pg": "^8.22.0",
     "sequelize": "^6.37.8"
   },
   "name": "backend",
@@ -18,5 +24,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
 }
