@@ -11,7 +11,7 @@ export const pool = new Pool({
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
   password: process.env.DB_PASSWORD,
-  port: Number(process.env.DB_PORT) || 5000, // Aseguramos que sea un número
+  port: Number(process.env.DB_PORT) || 5432, // Aseguramos que sea un número
 });
 
 // 2. Escuchamos el evento para saber cuándo se conecta un nuevo cliente
