@@ -1,5 +1,4 @@
-import { useForm } from "../Hooks/useForm.js";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -21,19 +20,72 @@ export default function Login() {
     alert("Logueado");
     navigate("/home");
   };
-  return (
-    <>
-      <div>
-        <h1>Login</h1>
-      </div>
-      <div>
 
-      <form onSubmit={handleLogin}>
-        <input type="text" name="username" value={formState.username} onChange={handleChange}/>
-        <input type="text" name="password" value={formState.password} onChange={handleChange}/>
-        <button type="submit">LOGUEARSE</button>
-      </form>
+  return (
+    <div className="min-h-screen w-full bg-[#132A46] flex flex-col items-center justify-center relative text-white font-sans">
+      <div className="w-full px-10">
+        <h1 className="text-4xl font-serif font-bold text-center mb-12">
+          Bienvenido de vuelta
+        </h1>
+
+        <form className="flex flex-col">
+          <div className="mb-6">
+            <label className="block text-lg font-bold" htmlFor="email">
+              Correo electrónico
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              className="w-64 h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
+              required
+            />
+          </div>
+
+          <div className="mt-5">
+            <label className="block text-lg font-bold" htmlFor="password">
+              Contraseña
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              className="w-64 h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
+              required
+            />
+          </div>
+
+          <div className="justify-end mb-10">
+            <a href="#" className="text-sm hover:underline">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <div className="flex justify-center mb-12">
+            <button
+              type="submit"
+              className="bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold py-2 px-10 rounded-full text-lg transition-colors"
+            >
+              Iniciar Sesión
+            </button>
+          </div>
+
+          <div className="text-center text-sm">
+            <span>¿No tienes una cuenta? </span>
+            <Link to="/register" className="text-[#3b82f6] hover:underline">
+              Créala aquí
+            </Link>
+          </div>
+        </form>
       </div>
-    </>
+
+      <div className="absolute bottom-4 left-10">
+        <img
+          src="../assets/img/Logo.png"
+          alt="Logo CAPYMEF"
+          className="w-40 opacity-90"
+        />
+      </div>
+    </div>
   );
 }
