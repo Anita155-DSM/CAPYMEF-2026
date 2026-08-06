@@ -173,12 +173,14 @@ export default function Register() {
       </div>
 
       {/* Logo en la esquina inferior izquierda (Misma configuración que el Login) */}
-      <div className="absolute bottom-4 left-10">
-        <img
-          src="../assets/img/Logo.png"
-          alt="Logo CAPYMEF"
-          className="w-40 opacity-90"
-        />
+      <div className="absolute bottom-4 left-4 mb-10">
+        <Link to="/">
+          <img
+            src="../src/assets/img/Logo.png"
+            alt="Logo CAPYMEF"
+            className="w-40 opacity-90 cursor-pointer"
+          />
+        </Link>
       </div>
     </div>
   );

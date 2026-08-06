@@ -31,7 +31,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full bg-[#132A46] flex flex-col items-center justify-center relative text-white font-sans">
-      <div className="w-full px-10">
+      <div className="w-full px-10 items-center flex flex-col justify-center">
         <h1 className="text-4xl font-serif font-bold text-center mb-12">
           Bienvenido de vuelta
         </h1>
@@ -93,11 +93,13 @@ export default function Login() {
       </div>
 
       <div className="absolute bottom-4 left-4 mb-10">
-        <img
-          src="../assets/img/Logo.png"
-          alt="Logo CAPYMEF"
-          className="w-40 opacity-90"
-        />
+        <Link to="/">
+          <img
+            src="../src/assets/img/Logo.png"
+            alt="Logo CAPYMEF"
+            className="w-40 opacity-90 cursor-pointer"
+          />
+        </Link>
       </div>
     </div>
   );
