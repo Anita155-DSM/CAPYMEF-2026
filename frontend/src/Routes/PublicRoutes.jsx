@@ -1,9 +1,5 @@
-import Login from "../Pages/Login";
+import { Outlet } from "react-router-dom";
 
 export default function PublicRoutes() {
-  return (
-    <div>
-      <Login />
-    </div>
-  );
+  return <Outlet />;
 }

@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "../Hooks/useForm.js";
 
 export default function Login() {
@@ -82,6 +82,7 @@ export default function Login() {
               Iniciar Sesión
             </button>
           </div>
+        </form>
 
           <div className="text-center text-sm">
             <span>¿No tienes una cuenta? </span>
@@ -89,7 +90,6 @@ export default function Login() {
               Créala aquí
             </Link>
           </div>
-        </form>
       </div>
 
       <div className="absolute bottom-4 left-4 mb-10">

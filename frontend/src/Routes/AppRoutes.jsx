@@ -1,30 +1,32 @@
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Home from "../Pages/Home";
 import Login from "../Pages/Login";
+import Profile from "../Pages/Profile"; // Corregí la R mayúscula
 import Register from "../Pages/Register";
 import PrivateRoutes from "./PrivateRoutes";
-import PublicRoutes from "./PublicROutes";
-import Home from "../Pages/Home";
-import Profile from "../Pages/PRofile";
+import PublicRoutes from "./PublicRoutes"; // Corregí la O mayúscula
+
 export default function AppRoutes() {
   return (
-    <>
-      <Routes>     
-           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
+    <Routes>
+      {/* RUTA PRINCIPAL */}
+      <Route path="/" element={<Home />} />
+      {/* Opcional: Si querés que /home también funcione, descomentá la línea de abajo */}
+      {/* <Route path="/home" element={<Home />} /> */}
 
-        <Route element={<PublicRoutes />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Navigate to={"/login"} />} />
-          <Route path="*" element={<Navigate to={"/login "} />} />
-        </Route>
-        <Route element={<PrivateRoutes/>}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/" element={<Navigate to={"/home"} />} />
-          <Route path="*" element={<Navigate to={"/home"} />} />
-        </Route>
-      </Routes>
-    </>
+      {/* RUTAS PÚBLICAS (Login / Register) */}
+      <Route element={<PublicRoutes />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Route>
+
+      {/* RUTAS PRIVADAS (Solo usuarios logueados) */}
+      <Route element={<PrivateRoutes />}>
+        <Route path="/profile" element={<Profile />} />
+      </Route>
+
+      {/* RUTA SALVAVIDAS: Solo se pone una vez y al final */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
