@@ -1,9 +1,10 @@
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useForm } from "../Hooks/useForm.js";
 
 export default function Login() {
   const navigate = useNavigate();
   const { formState, handleChange } = useForm({
-    username: "",
+    email: "",
     password: "",
   });
   const handleLogin = async (e) => {
@@ -17,8 +18,15 @@ export default function Login() {
       credentials: "include",
     });
     const data = await response.json();
-    alert("Logueado");
-    navigate("/home");
+
+    // ESTO ES LO NUEVO: Evaluamos si el backend dijo que todo salió bien (código 200)
+    if (response.ok) {
+      alert("Logueado con éxito");
+      navigate("/home");
+    } else {
+      // Si la contraseña o correo están mal, mostramos el error que mande el backend
+      alert(data.message || "Error al iniciar sesión");
+    }
   };
 
   return (
@@ -28,12 +36,15 @@ export default function Login() {
           Bienvenido de vuelta
         </h1>
 
-        <form className="flex flex-col">
+        <form className="flex flex-col" onSubmit={handleLogin}>
+          
           <div className="mb-6">
             <label className="block text-lg font-bold" htmlFor="email">
               Correo electrónico
             </label>
             <input
+              value={formState.email}
+              onChange={handleChange}
               type="email"
               id="email"
               name="email"
@@ -47,6 +58,8 @@ export default function Login() {
               Contraseña
             </label>
             <input
+              value={formState.password}
+              onChange={handleChange}
               type="password"
               id="password"
               name="password"
@@ -79,7 +92,7 @@ export default function Login() {
         </form>
       </div>
 
-      <div className="absolute bottom-4 left-10">
+      <div className="absolute bottom-4 left-4 mb-10">
         <img
           src="../assets/img/Logo.png"
           alt="Logo CAPYMEF"
