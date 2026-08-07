@@ -5,7 +5,7 @@ import Profile from "../Pages/Profile"; // Corregí la R mayúscula
 import Register from "../Pages/Register";
 import PrivateRoutes from "./PrivateRoutes";
 import PublicRoutes from "./PublicRoutes"; // Corregí la O mayúscula
-import {Capacitacion,Contacto,Eventos,Nosotros,Noticias,Socios} from "../Pages/HomePage/HomePagesIndex.js"
+import {Capacitacion,Contacto,Eventos,Nosotros,Noticias,Socios} from "../Pages/HomePage/index.js"
 
 export default function AppRoutes() {
   return (
