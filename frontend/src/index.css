@@ -6,7 +6,7 @@
   background-color: #132A46;
 }
 
-/* Definimos los pasos de la animación (arranca achicado y transparente, y termina en su tamaño original) */
+/*Animación para que el Modal haga una animación de entrada*/
 @keyframes pop-modal {
   0% {
     opacity: 0;
@@ -22,5 +22,5 @@
 /* Creamos la clase que le vamos a poner a tu modal */
 .animacion-modal {
   /* cubic-bezier hace que el final de la animación sea un poquito más suave y frenado */
-  animation: pop-modal 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: pop-modal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

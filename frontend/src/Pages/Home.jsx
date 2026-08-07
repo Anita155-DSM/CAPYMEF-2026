@@ -64,23 +64,16 @@ export default function Home() {
                     TITULO
                   </h3>
                   <p className="text-gray-600 mb-8 leading-relaxed">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    Incidunt quis assumenda consequuntur nobis sunt minima! Ut aperiam dignissimos accusamus ipsum.
-                    Quae earum eos unde vitae optio beatae iure corrupti veniam?
+                    Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.
                   </p>
 
                   <div className="flex justify-end gap-4">
+
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="px-5 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-md transition-colors"
+                      className="px-5 py-2 bg-[#1D7BB6] hover:bg-[#c00a22] text-white font-bold rounded-md transition-colors"
                     >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={() => setIsOpen(false)}
-                      className="px-5 py-2 bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold rounded-md transition-colors"
-                    >
-                      Confirmar
+                      Cerrar
                     </button>
                   </div>
                 </div>
