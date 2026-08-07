@@ -1,57 +1,78 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { query } from '../config/database.js';
+import { User } from '../models/user.models.js';
 
-// SECRET para firmar tokens (debe estar en tu archivo .env)
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ==========================================
-// 1. REGISTRO DE USUARIO
+// 1. REGISTRO DE SOLICITUD DE SOCIO
 // ==========================================
 export const registrarUsuario = async (req, res) => {
   try {
-    const { nombre, email, password } = req.body;
+    const { razonSocial, cuit, email, password } = req.body;
+    const constanciaFile = req.file; // Archivo subido mediante Multer
 
-    // A. Validar que no falten campos
-    if (!nombre || !email || !password) {
+    // A. Validar campos obligatorios de texto
+    if (!razonSocial || !cuit || !email || !password) {
       return res.status(400).json({
         exito: false,
-        mensaje: 'Todos los campos son obligatorios.',
+        mensaje: 'Todos los campos de texto (Razón Social, CUIT, Email y Contraseña) son obligatorios.',
       });
     }
 
-    // B. Verificar si el usuario ya existe
-    const usuarioExistente = await query(
-      'SELECT id FROM usuario WHERE email = $1;',
-      [email]
-    );
-
-    if (usuarioExistente.rowCount > 0) {
+    // B. Validar que se haya adjuntado el comprobante AFIP/DGR
+    if (!constanciaFile) {
       return res.status(400).json({
         exito: false,
-        mensaje: 'El correo electrónico ya está registrado.',
+        mensaje: 'Debe adjuntar el archivo comprobante de AFIP/DGR.',
       });
     }
 
-    // C. Encriptar la contraseña (Hash)
+    // C. Verificar si el email o el CUIT ya están registrados
+    const emailExistente = await User.findOne({ where: { email } });
+    if (emailExistente) {
+      return res.status(400).json({
+        exito: false,
+        mensaje: 'El correo electrónico ya se encuentra registrado.',
+      });
+    }
+
+    const cuitExistente = await User.findOne({ where: { cuit } });
+    if (cuitExistente) {
+      return res.status(400).json({
+        exito: false,
+        mensaje: 'El CUIT ingresado ya se encuentra registrado.',
+      });
+    }
+
+    // D. Encriptar la contraseña (Hash)
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // D. Guardar en PostgreSQL (NUNCA guardamos la contraseña plana)
-    const nuevoUsuario = await query(
-      `INSERT INTO usuario (nombre, email, password)
-       VALUES ($1, $2, $3)
-       RETURNING id, nombre, email, rol, creado_en;`,
-      [nombre, email, passwordHash]
-    );
+    // E. Crear el registro en PostgreSQL
+    const nuevoUsuario = await User.create({
+      razonSocial,
+      cuit,
+      email,
+      password: passwordHash,
+      constanciaUrl: constanciaFile.path, // Guarda la ruta local del archivo
+      estado: 'pendiente',                 // Queda pendiente para revisión manual
+      rol: 'socio'
+    });
 
     res.status(201).json({
       exito: true,
-      mensaje: 'Usuario registrado correctamente',
-      data: nuevoUsuario.rows[0],
+      mensaje: 'Solicitud enviada correctamente. Queda pendiente de revisión por la administración.',
+      data: {
+        id: nuevoUsuario.id,
+        razonSocial: nuevoUsuario.razonSocial,
+        cuit: nuevoUsuario.cuit,
+        email: nuevoUsuario.email,
+        estado: nuevoUsuario.estado,
+      },
     });
   } catch (error) {
-    console.error('Error al registrar usuario:', error.message);
+    console.error('Error al registrar solicitud de socio:', error.message);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
 };
@@ -70,22 +91,17 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    // A. Buscar al usuario en la base de datos
-    const result = await query(
-      'SELECT * FROM usuario WHERE email = $1;',
-      [email]
-    );
+    // A. Buscar al usuario en la BD mediante Sequelize
+    const usuario = await User.findOne({ where: { email } });
 
-    if (result.rowCount === 0) {
+    if (!usuario) {
       return res.status(401).json({
         exito: false,
         mensaje: 'Credenciales inválidas (usuario o contraseña incorrectos).',
       });
     }
 
-    const usuario = result.rows[0];
-
-    // B. Comparar la contraseña enviada con el HASH almacenado en PostgreSQL
+    // B. Comparar la contraseña enviada con el HASH almacenado
     const passwordEsCorrecta = await bcrypt.compare(password, usuario.password);
 
     if (!passwordEsCorrecta) {
@@ -95,27 +111,45 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    // C. Generar el Token JWT para mantener la sesión activa
+    // C. Verificar estado de aprobación por administración
+    if (usuario.estado === 'pendiente') {
+      return res.status(403).json({
+        exito: false,
+        mensaje: 'Tu solicitud de registro está siendo revisada por la administración de CAPYMEF.',
+      });
+    }
+
+    if (usuario.estado === 'rechazado') {
+      return res.status(403).json({
+        exito: false,
+        mensaje: 'Tu solicitud de registro fue rechazada. Ponete en contacto con la administración.',
+      });
+    }
+
+    // D. Generar el Token JWT
     const tokenPayload = {
       id: usuario.id,
       email: usuario.email,
       rol: usuario.rol,
+      estado: usuario.estado,
     };
 
     const token = jwt.sign(tokenPayload, JWT_SECRET, {
-      expiresIn: '8h', // El token expira en 8 horas
+      expiresIn: '8h',
     });
 
-    // D. Responder al Frontend excluyendo la contraseña
+    // E. Responder al Frontend
     res.status(200).json({
       exito: true,
       mensaje: 'Inicio de sesión exitoso',
       token,
       usuario: {
         id: usuario.id,
-        nombre: usuario.nombre,
+        razonSocial: usuario.razonSocial,
+        cuit: usuario.cuit,
         email: usuario.email,
         rol: usuario.rol,
+        estado: usuario.estado,
       },
     });
   } catch (error) {

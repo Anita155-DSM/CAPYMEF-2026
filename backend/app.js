@@ -4,7 +4,7 @@ import cors from 'cors';
 import { sequelize } from './config/database.js';
 
 // IMPORTAMOS MODELOS
-import './models/user.model.js'; 
+import './models/user.models.js'; 
 
 // IMPORTAMOS TUS RUTAS
 import authRoutes from './routes/authRoutes.js'; 
