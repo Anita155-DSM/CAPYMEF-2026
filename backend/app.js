@@ -44,7 +44,6 @@ const startServer = async () => {
     });
   } catch (error) {
     console.error('Error crítico: No se pudo conectar a PostgreSQL', error.message);
-    process.exit(1); 
   }
 };
 
