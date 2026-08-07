@@ -1,22 +1,10 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import AppRoutes from "./Routes/AppRoutes"
 
-function Home() {
+
+export default function App() {
   return (
-    <div>
-      <h1>Bienvenido a CAPYMEF 2026</h1>
-      <p>Tu punto de inicio ya está listo.</p>
-    </div>
+    <>
+    <AppRoutes/>
+    </>
   )
 }
-
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </BrowserRouter>
-  )
-}
-
-export default App
