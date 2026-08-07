@@ -18,11 +18,12 @@ export default function AppRoutes() {
       <Route element={<PublicRoutes />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
 
       {/* RUTAS PRIVADAS (Solo usuarios logueados) */}
       <Route element={<PrivateRoutes />}>
-        <Route path="/profile" element={<Profile />} />
+        {/* <Route path="/profile" element={<Profile />} /> */}
       </Route>
 
       {/* RUTA SALVAVIDAS: Solo se pone una vez y al final */}

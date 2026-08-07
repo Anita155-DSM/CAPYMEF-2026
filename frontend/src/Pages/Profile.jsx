@@ -15,7 +15,7 @@ export default function Profile() {
       setUser(data.user);
     } catch (error) {
       console.log(error);
-      navigate("/login");
+      // navigate("/login");
     }
   };
   useEffect(() => {

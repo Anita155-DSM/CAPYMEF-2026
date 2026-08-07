@@ -161,15 +161,15 @@ export default function Home() {
           - md:grid-cols-3: En computadoras pone las 3 tarjetas en la misma fila.
           - gap-8: Genera el espacio en blanco entre las tarjetas.
         */}
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
               {/* --- TARJETA 1: Socio Padrino --- */}
               <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center mb-6">
+                <h3 className="text-2xl font-bold text-center">
                   Socio Padrino
                 </h3>
-                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8">
+                <ul className="list-disc pl-5 text-base font-medium mt-8">
                   <li>Acceso gratuito o con bonificación especial a eventos tarifados</li>
                   <li>Reconocimiento por su respaldo institucional</li>
                   <li>Misma información y transparencia que el resto de los socios</li>
@@ -178,7 +178,7 @@ export default function Home() {
 
               {/* --- TARJETA 2: Socio Activo --- */}
               <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center mb-6">
+                <h3 className="text-2xl font-bold text-center">
                   Socio Activo
                 </h3>
                 <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8">
@@ -190,7 +190,7 @@ export default function Home() {
 
               {/* --- TARJETA 3: Socio Adherente --- */}
               <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center mb-6">
+                <h3 className="text-2xl font-bold text-center">
                   Socio Adherente
                 </h3>
                 <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8">
