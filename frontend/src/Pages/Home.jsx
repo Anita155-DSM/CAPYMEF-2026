@@ -49,9 +49,15 @@ export default function Home() {
             {/* Lista de entidades a la derecha */}
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-16 text-lg md:text-xl font-bold text-gray-800">
               {/* Usamos &bull; que es el código HTML para hacer ese puntito grueso */}
-              <span>&bull; AFIP</span>
-              <span>&bull; DGR</span>
-              <span>&bull; CAME</span>
+              <Link to="https://www.afip.gob.ar/landing/default.asp" target="_blank" rel="noopener noreferrer">
+                <span>&bull; AFIP</span>
+              </Link>
+              <Link to="https://www.atpformosa.gob.ar/" target="_blank" rel="noopener noreferrer">
+                <span>&bull; DGR</span>
+              </Link>
+              <Link to="https://www.redcame.org.ar/" target="_blank" rel="noopener noreferrer">
+                <span>&bull; CAME</span>
+              </Link>
             </div>
 
           </div>
