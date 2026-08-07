@@ -1,10 +1,16 @@
+import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import Navbar from "../Components/Navbar.jsx";
-import fondoHome from '../assets/img/FondoCapymef.png';
 import Came from '../assets/img/Came.png';
 import Came70years from '../assets/img/Came70years.png';
 import Escudo from '../assets/img/Escudo.png';
-import { Link } from 'react-router-dom';
+import fondoHome from '../assets/img/FondoCapymef.png';
+//asdad
 export default function Home() {
+
+  const [isOpen, setIsOpen] = useState(false);
+
+
   return (
     <>
       {/* Se coloca dentro del main para poder hacer que ocupe la pantalla completa con el w-full */}
@@ -29,14 +35,57 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Este boton debería de Loguearte si no lo estas, y si estas Asociado debería de desaparecer */}
-          <div className="mt-5 ml-4">
-            <Link
-              to="/login"
-              className="bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold py-2 px-4 rounded-md "
+          {/* Boton que abre el MODAL */}
+          <div className="mt-5 ml-6">
+
+
+            <button
+              className="mt-8 bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold py-3 px-8 rounded-full transition-colors shadow-lg"
+              onClick={() => setIsOpen(true)}
             >
               Quiero Asociarme
-            </Link>
+            </button>
+            {/*ACA VA EL MODAL */}
+            {isOpen && (
+              <div onClick={() => setIsOpen(false)}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" >
+                <div onClick={(e) => e.stopPropagation()}
+                  className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md relative mx-4 animacion-modal">
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+
+                  <h3 className="text-2xl font-bold text-[#132A46] mb-4">
+                    TITULO
+                  </h3>
+                  <p className="text-gray-600 mb-8 leading-relaxed">
+                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
+                    Incidunt quis assumenda consequuntur nobis sunt minima! Ut aperiam dignissimos accusamus ipsum.
+                    Quae earum eos unde vitae optio beatae iure corrupti veniam?
+                  </p>
+
+                  <div className="flex justify-end gap-4">
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="px-5 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-md transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="px-5 py-2 bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold rounded-md transition-colors"
+                    >
+                      Confirmar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           {/* Aca va el supuesto Footer pero en realidad la web sigue por debajo al scrollear*/}
           <div className="absolute bottom-0 left-0 w-full bg-white/50 backdrop-blur-sm py-5 px-10 md:px-24 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-white/20">
@@ -155,7 +204,7 @@ export default function Home() {
 
           {/* Título de la sección */}
           <div className="flex flex-col text-start mb-12">
-            <h2 className="text-4xl font-serif font-bold text-[#132A46]">
+            <h2 className="text-4xl font-serif font-bold text-[#132A46]mb-5">
               Tres Formas de ser Socio
             </h2>
             <div className="w-24 h-1 bg-[#1D7BB6] mt-2"></div>
@@ -167,7 +216,7 @@ export default function Home() {
           - md:grid-cols-3: En computadoras pone las 3 tarjetas en la misma fila.
           - gap-8: Genera el espacio en blanco entre las tarjetas.
         */}
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
               {/* --- TARJETA 1: Socio Padrino --- */}
@@ -209,7 +258,8 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </main>
+
+      </main >
     </>
   );
 }

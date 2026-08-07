@@ -22,9 +22,9 @@ export default function Navbar() {
         <Link to="/nosotros" className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors">
           Nosotros
         </Link>
-        <Link to="/contacto" className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors">
-          Contacto
-        </Link>
+          {/* <Link to="/contacto" className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors">
+            Contacto
+          </Link> */}
         <Link to="/socios" className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors">
           Socios
         </Link>
