@@ -19,18 +19,10 @@ export const registrarUsuario = async (req, res) => {
   const constanciaFile = req.file; // Archivo subido mediante Multer
 
   try {
-    const { razonSocial, cuit, email, password } = req.body;
+    // Extraemos todos los campos, incluyendo los nuevos del Estatuto
+    const { razonSocial, cuit, email, password, telefono, localidad, categoria } = req.body;
 
-    // A. Validar campos obligatorios de texto
-    if (!razonSocial || !cuit || !email || !password) {
-      if (constanciaFile) eliminarArchivo(constanciaFile.path);
-      return res.status(400).json({
-        exito: false,
-        mensaje: 'Todos los campos de texto (Razón Social, CUIT, Email y Contraseña) son obligatorios.',
-      });
-    }
-
-    // B. Validar comprobante AFIP/DGR
+    // A. Validar comprobante AFIP/DGR (express-validator valida texto, nosotros validamos el archivo acá)
     if (!constanciaFile) {
       return res.status(400).json({
         exito: false,
@@ -38,7 +30,7 @@ export const registrarUsuario = async (req, res) => {
       });
     }
 
-    // C. Verificar si Email o CUIT ya existen
+    // B. Verificar si Email o CUIT ya existen en la base de datos
     const usuarioExistente = await User.findOne({
       where: {
         [User.sequelize.Sequelize.Op.or]: [{ email }, { cuit }]
@@ -46,7 +38,7 @@ export const registrarUsuario = async (req, res) => {
     });
 
     if (usuarioExistente) {
-      eliminarArchivo(constanciaFile.path); // Borramos el archivo subido innecesariamente
+      eliminarArchivo(constanciaFile.path); // Borramos el archivo subido para no ocupar espacio
       const mensaje = usuarioExistente.email === email 
         ? 'El correo electrónico ya se encuentra registrado.' 
         : 'El CUIT ingresado ya se encuentra registrado.';
@@ -54,18 +46,21 @@ export const registrarUsuario = async (req, res) => {
       return res.status(400).json({ exito: false, mensaje });
     }
 
-    // D. Encriptar contraseña
+    // C. Encriptar contraseña
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // E. Crear el registro en PostgreSQL
+    // D. Crear el registro en PostgreSQL con todos los datos
     const nuevoUsuario = await User.create({
       razonSocial,
       cuit,
       email,
       password: passwordHash,
+      telefono,                 // NUEVO
+      localidad,                // NUEVO
+      categoria: categoria || 'adherente', // NUEVO (Por defecto adherente si no envían nada)
       constanciaUrl: constanciaFile.path,
-      estado: 'pendiente',
+      estado: 'pendiente',      // Queda pendiente de aprobación
       rol: 'socio'
     });
 
@@ -77,6 +72,7 @@ export const registrarUsuario = async (req, res) => {
         razonSocial: nuevoUsuario.razonSocial,
         cuit: nuevoUsuario.cuit,
         email: nuevoUsuario.email,
+        categoria: nuevoUsuario.categoria,
         estado: nuevoUsuario.estado,
       },
     });
@@ -93,13 +89,6 @@ export const registrarUsuario = async (req, res) => {
 export const loginUsuario = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        exito: false,
-        mensaje: 'Email y contraseña son obligatorios.',
-      });
-    }
 
     // Buscar al usuario
     const usuario = await User.findOne({ where: { email } });
@@ -136,12 +125,13 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    // Generar JWT
+    // Generar JWT incluyendo la categoría para que el Frontend sepa qué cobrarle
     const tokenPayload = {
       id: usuario.id,
       email: usuario.email,
       rol: usuario.rol,
       estado: usuario.estado,
+      categoria: usuario.categoria // Agregamos la categoría al token
     };
 
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '8h' });
@@ -155,6 +145,8 @@ export const loginUsuario = async (req, res) => {
         razonSocial: usuario.razonSocial,
         cuit: usuario.cuit,
         email: usuario.email,
+        telefono: usuario.telefono,
+        categoria: usuario.categoria,
         rol: usuario.rol,
         estado: usuario.estado,
       },

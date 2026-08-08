@@ -1,6 +1,6 @@
 import { body, validationResult } from 'express-validator';
 
-// Middleware que revisa si express-validator atrapó algún error de formato
+// Middleware genérico que revisa si express-validator atrapó algún error
 export const validarResultado = (req, res, next) => {
   const errores = validationResult(req);
   if (!errores.isEmpty()) {
@@ -17,10 +17,11 @@ export const validarResultado = (req, res, next) => {
 // Reglas para el Registro de Socio
 // ==========================================
 export const validacionRegistro = [
+  // 1. Datos de Identificación
   body('razonSocial')
     .trim()
     .notEmpty().withMessage('La Razón Social es obligatoria.')
-    .isLength({ min: 6, max: 150 }).withMessage('La Razón Social debe tener entre 6 y 150 caracteres.'),
+    .isLength({ min: 3, max: 150 }).withMessage('La Razón Social debe tener entre 3 y 150 caracteres.'),
 
   body('cuit')
     .trim()
@@ -31,13 +32,27 @@ export const validacionRegistro = [
     .trim()
     .notEmpty().withMessage('El correo electrónico es obligatorio.')
     .isEmail().withMessage('Debe proporcionar un correo electrónico válido.')
-    .normalizeEmail(), // convierte todo el email a minusculas para evitar inconsistencias
+    .normalizeEmail(),
 
   body('password')
     .notEmpty().withMessage('La contraseña es obligatoria.')
     .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres.')
     .matches(/\d/).withMessage('La contraseña debe contener al menos un número.')
     .matches(/[A-Z]/).withMessage('La contraseña debe contener al menos una letra mayúscula.'),
+
+  // 2. Datos de Contacto (Nuevos por Estatuto)
+  body('telefono')
+    .trim()
+    .notEmpty().withMessage('El número de teléfono es obligatorio.'),
+
+  body('localidad')
+    .trim()
+    .notEmpty().withMessage('La localidad es obligatoria.'),
+
+  // 3. Categorización
+  body('categoria')
+    .optional() // Es opcional porque el controlador le pone 'adherente' por defecto si no lo envían
+    .isIn(['activo', 'adherente', 'padrino']).withMessage('La categoría no es válida.'),
 
   validarResultado
 ];
