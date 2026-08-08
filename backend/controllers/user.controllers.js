@@ -1,26 +1,36 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import fs from 'fs';
 import { User } from '../models/user.models.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
+// Función auxiliar para borrar archivos subidos si falla el registro
+const eliminarArchivo = (filePath) => {
+  if (filePath && fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+};
 
 // ==========================================
 // 1. REGISTRO DE SOLICITUD DE SOCIO
 // ==========================================
 export const registrarUsuario = async (req, res) => {
+  const constanciaFile = req.file; // Archivo subido mediante Multer
+
   try {
     const { razonSocial, cuit, email, password } = req.body;
-    const constanciaFile = req.file; // Archivo subido mediante Multer
 
     // A. Validar campos obligatorios de texto
     if (!razonSocial || !cuit || !email || !password) {
+      if (constanciaFile) eliminarArchivo(constanciaFile.path);
       return res.status(400).json({
         exito: false,
         mensaje: 'Todos los campos de texto (Razón Social, CUIT, Email y Contraseña) son obligatorios.',
       });
     }
 
-    // B. Validar que se haya adjuntado el comprobante AFIP/DGR
+    // B. Validar comprobante AFIP/DGR
     if (!constanciaFile) {
       return res.status(400).json({
         exito: false,
@@ -28,24 +38,23 @@ export const registrarUsuario = async (req, res) => {
       });
     }
 
-    // C. Verificar si el email o el CUIT ya están registrados
-    const emailExistente = await User.findOne({ where: { email } });
-    if (emailExistente) {
-      return res.status(400).json({
-        exito: false,
-        mensaje: 'El correo electrónico ya se encuentra registrado.',
-      });
+    // C. Verificar si Email o CUIT ya existen
+    const usuarioExistente = await User.findOne({
+      where: {
+        [User.sequelize.Sequelize.Op.or]: [{ email }, { cuit }]
+      }
+    });
+
+    if (usuarioExistente) {
+      eliminarArchivo(constanciaFile.path); // Borramos el archivo subido innecesariamente
+      const mensaje = usuarioExistente.email === email 
+        ? 'El correo electrónico ya se encuentra registrado.' 
+        : 'El CUIT ingresado ya se encuentra registrado.';
+        
+      return res.status(400).json({ exito: false, mensaje });
     }
 
-    const cuitExistente = await User.findOne({ where: { cuit } });
-    if (cuitExistente) {
-      return res.status(400).json({
-        exito: false,
-        mensaje: 'El CUIT ingresado ya se encuentra registrado.',
-      });
-    }
-
-    // D. Encriptar la contraseña (Hash)
+    // D. Encriptar contraseña
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
@@ -55,8 +64,8 @@ export const registrarUsuario = async (req, res) => {
       cuit,
       email,
       password: passwordHash,
-      constanciaUrl: constanciaFile.path, // Guarda la ruta local del archivo
-      estado: 'pendiente',                 // Queda pendiente para revisión manual
+      constanciaUrl: constanciaFile.path,
+      estado: 'pendiente',
       rol: 'socio'
     });
 
@@ -72,6 +81,7 @@ export const registrarUsuario = async (req, res) => {
       },
     });
   } catch (error) {
+    if (constanciaFile) eliminarArchivo(constanciaFile.path);
     console.error('Error al registrar solicitud de socio:', error.message);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -91,7 +101,7 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    // A. Buscar al usuario en la BD mediante Sequelize
+    // Buscar al usuario
     const usuario = await User.findOne({ where: { email } });
 
     if (!usuario) {
@@ -101,7 +111,7 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    // B. Comparar la contraseña enviada con el HASH almacenado
+    // Validar Contraseña
     const passwordEsCorrecta = await bcrypt.compare(password, usuario.password);
 
     if (!passwordEsCorrecta) {
@@ -111,7 +121,7 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    // C. Verificar estado de aprobación por administración
+    // Validar Estado de la Cuenta
     if (usuario.estado === 'pendiente') {
       return res.status(403).json({
         exito: false,
@@ -126,7 +136,7 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    // D. Generar el Token JWT
+    // Generar JWT
     const tokenPayload = {
       id: usuario.id,
       email: usuario.email,
@@ -134,11 +144,8 @@ export const loginUsuario = async (req, res) => {
       estado: usuario.estado,
     };
 
-    const token = jwt.sign(tokenPayload, JWT_SECRET, {
-      expiresIn: '8h',
-    });
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '8h' });
 
-    // E. Responder al Frontend
     res.status(200).json({
       exito: true,
       mensaje: 'Inicio de sesión exitoso',
