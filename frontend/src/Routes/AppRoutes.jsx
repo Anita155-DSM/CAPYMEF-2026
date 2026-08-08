@@ -5,6 +5,7 @@ import Profile from "../Pages/Profile"; // Corregí la R mayúscula
 import Register from "../Pages/Register";
 import PrivateRoutes from "./PrivateRoutes";
 import PublicRoutes from "./PublicRoutes"; // Corregí la O mayúscula
+import {Capacitacion,Contacto,Eventos,Nosotros,Noticias,Socios} from "../Pages/HomePage/index.js"
 
 export default function AppRoutes() {
   return (
@@ -19,6 +20,12 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/Capacitacion" element={<Capacitacion />} />
+        <Route path="/Contactos" element={<Contacto />} />
+        <Route path="/Eventos" element={<Eventos />} />
+        <Route path="/Nosotros" element={<Nosotros />} />
+        <Route path="/Noticias" element={<Noticias />} />
+        <Route path="/Socios" element={<Socios />} />
       </Route>
 
       {/* RUTAS PRIVADAS (Solo usuarios logueados) */}

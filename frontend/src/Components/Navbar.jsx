@@ -6,12 +6,14 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 w-full z-50 bg-white flex items-center justify-between px-8 py-1.5 shadow-sm font-sans border-b border-gray-200">
 
       <div className="flex-shrink-0">
-        {/* Redujimos la altura del logo de h-14 a h-10 */}
-        <img
-          src={Logo}
-          alt="LogoCAPYMEF"
-          className="h-10 w-auto object-contain"
-        />
+        <Link to="/">
+          {/* Redujimos la altura del logo de h-14 a h-10 */}
+          <img
+            src={Logo}
+            alt="LogoCAPYMEF"
+            className="h-10 w-auto object-contain"
+          />
+        </Link>
       </div>
 
       {/* Redujimos el espacio entre enlaces (gap-6) y achicamos la fuente (text-sm) */}
@@ -22,9 +24,9 @@ export default function Navbar() {
         <Link to="/nosotros" className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors">
           Nosotros
         </Link>
-        <Link to="/contacto" className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors">
-          Contacto
-        </Link>
+        {/* <Link to="/contacto" className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors">
+            Contacto
+          </Link> */}
         <Link to="/socios" className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors">
           Socios
         </Link>
