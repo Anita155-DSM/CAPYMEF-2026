@@ -1,14 +1,17 @@
 import { Router } from 'express';
-import { loginUsuario, registrarUsuario } from '../controllers/user.controllers.js';
+import { loginUsuario, registrarUsuario, obtenerPerfil, actualizarPerfil } from '../controllers/user.controllers.js';
 import { validacionRegistro, validacionLogin } from '../middlewares/user.validator.js';
-import { upload } from '../middlewares/multerMiddleware.js'; // Tu middleware de Multer
+import { verificarToken } from '../middlewares/authMiddleware.js'; // Importamos guardia de seguridad
+import { upload } from '../middlewares/multerMiddleware.js';
 
 const router = Router();
 
-// 1. Ruta de Registro (Multer procesa el archivo, luego se valida el texto, esto para evitr archivos huerfanos)
+// Rutas Públicas (No requieren token)
 router.post('/registro', upload.single('constancia'), validacionRegistro, registrarUsuario);
-
-// 2. Ruta de Login
 router.post('/login', validacionLogin, loginUsuario);
+
+// Rutas Protegidas (SÍ requieren token)
+router.get('/perfil', verificarToken, obtenerPerfil);
+router.put('/perfil', verificarToken, actualizarPerfil);
 
 export default router;

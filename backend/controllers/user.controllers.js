@@ -156,3 +156,62 @@ export const loginUsuario = async (req, res) => {
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
 };
+
+// ==========================================
+// 3. OBTENER PERFIL DEL USUARIO LOGUEADO
+// ==========================================
+export const obtenerPerfil = async (req, res) => {
+  try {
+    // El id viene del token gracias a tu middleware verificarToken
+    const usuarioId = req.usuario.id; 
+
+    // Buscamos al usuario excluyendo la contraseña por seguridad
+    const usuario = await User.findByPk(usuarioId, {
+      attributes: { exclude: ['password'] }
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ exito: false, mensaje: 'Usuario no encontrado.' });
+    }
+
+    res.status(200).json({ exito: true, data: usuario });
+  } catch (error) {
+    console.error('Error al obtener perfil:', error.message);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
+  }
+};
+
+// ==========================================
+// 4. ACTUALIZAR DATOS DEL PERFIL
+// ==========================================
+export const actualizarPerfil = async (req, res) => {
+  try {
+    const usuarioId = req.usuario.id;
+    // Extraemos SOLAMENTE los campos que está permitido editar
+    const { telefono, localidad } = req.body; 
+
+    const usuario = await User.findByPk(usuarioId);
+
+    if (!usuario) {
+      return res.status(404).json({ exito: false, mensaje: 'Usuario no encontrado.' });
+    }
+
+    // Actualizamos solo los campos de contacto
+    if (telefono) usuario.telefono = telefono;
+    if (localidad) usuario.localidad = localidad;
+
+    await usuario.save(); // Sequelize guarda los cambios en PostgreSQL
+
+    res.status(200).json({ 
+      exito: true, 
+      mensaje: 'Perfil actualizado correctamente.',
+      data: {
+        telefono: usuario.telefono,
+        localidad: usuario.localidad
+      }
+    });
+  } catch (error) {
+    console.error('Error al actualizar perfil:', error.message);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
+  }
+};
