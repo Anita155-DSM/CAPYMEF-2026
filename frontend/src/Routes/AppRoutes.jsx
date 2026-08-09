@@ -1,19 +1,18 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import Login from "../Pages/Auth/Login.jsx";
+import Register from "../Pages/Auth/Register.jsx";
 import Home from "../Pages/Home";
-import Login from "../Pages/Login";
-import Profile from "../Pages/Profile"; // Corregí la R mayúscula
-import Register from "../Pages/Register";
+import { Capacitacion, Contacto, Eventos, Nosotros, Noticias, Socios } from "../Pages/HomePage/index.js";
+import Profile from "../Pages/Profile"; 
 import PrivateRoutes from "./PrivateRoutes";
-import PublicRoutes from "./PublicRoutes"; // Corregí la O mayúscula
-import {Capacitacion,Contacto,Eventos,Nosotros,Noticias,Socios} from "../Pages/HomePage/index.js"
+import PublicRoutes from "./PublicRoutes";
+import AdminNoticias from "../Pages/Admin/AdminNoticias.jsx";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* RUTA PRINCIPAL */}
       <Route path="/" element={<Home />} />
-      {/* Opcional: Si querés que /home también funcione, descomentá la línea de abajo */}
-      {/* <Route path="/home" element={<Home />} /> */}
 
       {/* RUTAS PÚBLICAS (Login / Register) */}
       <Route element={<PublicRoutes />}>
@@ -26,6 +25,7 @@ export default function AppRoutes() {
         <Route path="/Nosotros" element={<Nosotros />} />
         <Route path="/Noticias" element={<Noticias />} />
         <Route path="/Socios" element={<Socios />} />
+        <Route path="/AdminNoticias" element={<AdminNoticias />} />
       </Route>
 
       {/* RUTAS PRIVADAS (Solo usuarios logueados) */}
@@ -33,7 +33,6 @@ export default function AppRoutes() {
         {/* <Route path="/profile" element={<Profile />} /> */}
       </Route>
 
-      {/* RUTA SALVAVIDAS: Solo se pone una vez y al final */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
