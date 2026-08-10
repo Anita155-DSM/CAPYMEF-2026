@@ -5,6 +5,7 @@ import Came70years from '../assets/img/Came70years.png';
 import Escudo from '../assets/img/Escudo.png';
 import fondoHome from '../assets/img/FondoCapymef.png';
 import Navbar from "../Components/Navbar.jsx";
+import Footer from '../Components/Footer.jsx';
 //asdad
 export default function Home() {
 
@@ -79,29 +80,6 @@ export default function Home() {
                 </div>
               </div>
             )}
-          </div>
-          {/* Aca va el supuesto Footer pero en realidad la web sigue por debajo al scrollear*/}
-          <div className="absolute bottom-0 left-0 w-full bg-white/50 backdrop-blur-sm py-5 px-10 md:px-24 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-white/20">
-
-            {/* Título de la izquierda */}
-            <div className="text-xl md:text-2xl font-bold text-gray-800">
-              Vinculación institucional
-            </div>
-
-            {/* Lista de entidades a la derecha */}
-            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-16 text-lg md:text-xl font-bold text-gray-800">
-              {/* Usamos &bull; que es el código HTML para hacer ese puntito grueso */}
-              <Link to="https://www.afip.gob.ar/landing/default.asp" target="_blank" rel="noopener noreferrer">
-                <span>&bull; AFIP</span>
-              </Link>
-              <Link to="https://www.atpformosa.gob.ar/" target="_blank" rel="noopener noreferrer">
-                <span>&bull; DGR</span>
-              </Link>
-              <Link to="https://www.redcame.org.ar/" target="_blank" rel="noopener noreferrer">
-                <span>&bull; CAME</span>
-              </Link>
-            </div>
-
           </div>
 
 
@@ -217,7 +195,7 @@ export default function Home() {
                 <h3 className="text-2xl font-bold text-center">
                   Socio Padrino
                 </h3>
-                <ul className="list-disc pl-5 text-base font-medium mt-8">
+                <ul className="list-disc pl-5 text-base font-medium mt-8 space-y-5">
                   <li>Acceso gratuito o con bonificación especial a eventos tarifados</li>
                   <li>Reconocimiento por su respaldo institucional</li>
                   <li>Misma información y transparencia que el resto de los socios</li>
@@ -229,7 +207,7 @@ export default function Home() {
                 <h3 className="text-2xl font-bold text-center">
                   Socio Activo
                 </h3>
-                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8">
+                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8 space-y-5">
                   <li>Bonificaciones máximas en eventos y capacitaciones</li>
                   <li>Participación plena en la vida institucional</li>
                   <li>Cuota mensual con ventana de pago del 1 al 10</li>
@@ -241,7 +219,7 @@ export default function Home() {
                 <h3 className="text-2xl font-bold text-center">
                   Socio Adherente
                 </h3>
-                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8">
+                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8 space-y-5">
                   <li>Acceso a eventos con arancel</li>
                   <li>Becas o descuentos especiales según disponibilidad</li>
                   <li>Puerta de entrada natural a la comunidad CAPyMEF</li>
@@ -253,6 +231,9 @@ export default function Home() {
         </section>
 
       </main >
+      <footer className='bg-[#132A46]'>
+        <Footer />
+      </footer>
     </>
   );
 }
