@@ -34,7 +34,7 @@ export default function Footer() {
                         <div>
                             <p className="text-sm font-bold tracking-widest text-white uppercase">Navegación</p>
                             <ul className="mt-6 space-y-4">
-                                <li><Link to="/noticias" className="hover:text-blue-300 transition-colors">Inicio</Link></li>
+                                <li><Link to="/noticias" className="hover:text-blue-300 transition-colors">Noticias</Link></li>
                                 <li><Link to="/nosotros" className="hover:text-blue-300 transition-colors">Nosotros</Link></li>
                                 <li><Link to="/socios" className="hover:text-blue-300 transition-colors">Socios</Link></li>
                                 <li><Link to="/eventos" className="hover:text-blue-300 transition-colors">Eventos</Link></li>

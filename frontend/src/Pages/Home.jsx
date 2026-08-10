@@ -15,77 +15,142 @@ export default function Home() {
   return (
     <>
       {/* Se coloca dentro del main para poder hacer que ocupe la pantalla completa con el w-full */}
-      <main className="w-full overflow-x-hidden overflow-y-hidden">
+      {/*Header */}
+      <header>
+        {/*Navbar */}
         <Navbar />
+      </header>
+      <main className="w-full overflow-x-hidden overflow-y-hidden">
         {/*La Vista N1 */}
-        <div
-          className="min-h-screen w-full bg-cover bg-no-repeat justify-center items-start flex flex-col"
-          style={{ backgroundImage: `url(${fondoHome})` }}
-        >
+        <section className="w-full  font-sans">
+          <div
+            className="min-h-screen w-full bg-cover bg-no-repeat justify-center items-start flex flex-col"
+            style={{ backgroundImage: `url(${fondoHome})` }}
+          >
 
-          {/* Contenedor del texto central */}
-          <div className="px-4 py-4">
-            <h1 className="text-5xl md:text-7xl text-white font-serif font-bold px8 py-4 -rounded-xl inline-block">
-              Camara de Pequeñas y Medianas Empresas Formosa
-            </h1>
+            {/* Contenedor del texto central */}
+            <div className="px-4 py-4 line-clamp-3">
+              <h1 className="text-5xl md:text-7xl text-white font-serif font-bold px8 py-4 -rounded-xl inline-block">
+                Camara de Pequeñas y Medianas Empresas Formosa
+              </h1>
 
-            <br /> {/* Salto de línea para separar el título del subtítulo */}
+              <br /> {/* Salto de línea para separar el título del subtítulo */}
 
-            <p className="mt-6 text-xl text-white font-medium bg-black/30 inline-block px-6 py-2 rounded-lg max-w-lg line-clamp-2">
-              Sumate a CAPYMEF. Accedé a beneficios exclusivos, capacitaciones y herramientas digitales para hacer crecer tu negocio.
-            </p>
-          </div>
+              <p className="mt-6 text-xl text-white font-bold bg-black/20 inline-block px-6 py-2 rounded-lg max-w-lg">
+                Sumate a CAPYMEF. Accedé a beneficios exclusivos, capacitaciones y herramientas digitales para hacer crecer tu negocio.
+              </p>
+            </div>
 
-          {/* Boton que abre el MODAL */}
-          <div className="mt-5 ml-6">
+            {/* Boton que abre el MODAL */}
+            <div className="mt-5 ml-6">
 
 
-            <button
-              className="mt-8 bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold py-3 px-8 rounded-full transition-colors shadow-lg"
-              onClick={() => setIsOpen(true)}
-            >
-              Quiero Asociarme
-            </button>
-            {/*ACA VA EL MODAL */}
-            {isOpen && (
-              <div onClick={() => setIsOpen(false)}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" >
-                <div onClick={(e) => e.stopPropagation()}
-                  className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md relative mx-4 animacion-modal">
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-
-                  <h3 className="text-2xl font-bold text-[#132A46] mb-4">
-                    TITULO
-                  </h3>
-                  <p className="text-gray-600 mb-8 leading-relaxed">
-                    Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.
-                  </p>
-
-                  <div className="flex justify-end gap-4">
-
+              <button
+                className="mt-8 bg-[#1D7BB6] hover:bg-[#156091] text-[18px] text-white font-black py-3 px-3 rounded-lg transition-colors shadow-lg"
+                onClick={() => setIsOpen(true)}
+              >
+                Quiero asociarme
+              </button>
+              {/*ACA VA EL MODAL */}
+              {isOpen && (
+                <div onClick={() => setIsOpen(false)}
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" >
+                  <div onClick={(e) => e.stopPropagation()}
+                    className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md relative mx-4 animacion-modal">
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="px-5 py-2 bg-[#1D7BB6] hover:bg-[#c00a22] text-white font-bold rounded-md transition-colors"
+                      className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
                     >
-                      Cerrar
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
+
+                    <h3 className="text-2xl font-bold text-[#132A46] mb-4">
+                      TITULO
+                    </h3>
+                    <p className="text-gray-600 mb-8 leading-relaxed">
+                      Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.
+                    </p>
+
+                    <div className="flex justify-end gap-4">
+
+                      <button
+                        onClick={() => setIsOpen(false)}
+                        className="px-5 py-2 bg-[#1D7BB6] hover:bg-[#c00a22] text-white font-bold rounded-md transition-colors"
+                      >
+                        Cerrar
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+
+          </div>
+        </section>
+        {/*La Vista N2 */}
+        <section className="w-full bg-white px-10 md:px-24 py-27 font-sans">
+
+          {/* Título de la sección */}
+          <div className="flex flex-col text-start mb-12">
+            <h2 className="text-4xl font-serif font-bold text-[#132A46]mb-5">
+              Tres Formas de ser Socio
+            </h2>
+            <div className="w-24 h-1 bg-[#1D7BB6] mt-2"></div>
           </div>
 
+          {/* 
+          Contenedor Grid: 
+          - grid-cols-1: En celulares pone 1 tarjeta por fila (una abajo de la otra).
+          - md:grid-cols-3: En computadoras pone las 3 tarjetas en la misma fila.
+          - gap-8: Genera el espacio en blanco entre las tarjetas.
+        */}
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-        </div>
-        {/*La Vista N2 */}
-        <section className="w-full bg-[#132A46] px-10 md:px-24 py-16 font-sans text-white">
+              {/* --- TARJETA 1: Socio Padrino --- */}
+              <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
+                <h3 className="text-2xl font-bold text-center">
+                  Socio Padrino
+                </h3>
+                <ul className="list-disc pl-5 text-base font-medium mt-8 space-y-5">
+                  <li>Acceso gratuito o con bonificación especial a eventos tarifados</li>
+                  <li>Reconocimiento por su respaldo institucional</li>
+                  <li>Misma información y transparencia que el resto de los socios</li>
+                </ul>
+              </div>
+
+              {/* --- TARJETA 2: Socio Activo --- */}
+              <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
+                <h3 className="text-2xl font-bold text-center">
+                  Socio Activo
+                </h3>
+                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8 space-y-5">
+                  <li>Bonificaciones máximas en eventos y capacitaciones</li>
+                  <li>Participación plena en la vida institucional</li>
+                  <li>Cuota mensual con ventana de pago del 1 al 10</li>
+                </ul>
+              </div>
+
+              {/* --- TARJETA 3: Socio Adherente --- */}
+              <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
+                <h3 className="text-2xl font-bold text-center">
+                  Socio Adherente
+                </h3>
+                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8 space-y-5">
+                  <li>Acceso a eventos con arancel</li>
+                  <li>Becas o descuentos especiales según disponibilidad</li>
+                  <li>Puerta de entrada natural a la comunidad CAPyMEF</li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+        </section>
+        {/*La vista N3*/}
+        <section className="w-full bg-[#1b4f7a] px-10 md:px-24 pt-16 font-sans text-white">
 
           {/* Encabezado de la sección */}
           <div className="relative flex flex-col md:flex-row items-center justify-center mb-12">
@@ -169,69 +234,9 @@ export default function Home() {
 
           </div>
         </section>
-        <br />
-        {/*La vista N3*/}
-        <section className="w-full bg-white px-10 md:px-24 py-27 font-sans">
-
-          {/* Título de la sección */}
-          <div className="flex flex-col text-start mb-12">
-            <h2 className="text-4xl font-serif font-bold text-[#132A46]mb-5">
-              Tres Formas de ser Socio
-            </h2>
-            <div className="w-24 h-1 bg-[#1D7BB6] mt-2"></div>
-          </div>
-
-          {/* 
-          Contenedor Grid: 
-          - grid-cols-1: En celulares pone 1 tarjeta por fila (una abajo de la otra).
-          - md:grid-cols-3: En computadoras pone las 3 tarjetas en la misma fila.
-          - gap-8: Genera el espacio en blanco entre las tarjetas.
-        */}
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-              {/* --- TARJETA 1: Socio Padrino --- */}
-              <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center">
-                  Socio Padrino
-                </h3>
-                <ul className="list-disc pl-5 text-base font-medium mt-8 space-y-5">
-                  <li>Acceso gratuito o con bonificación especial a eventos tarifados</li>
-                  <li>Reconocimiento por su respaldo institucional</li>
-                  <li>Misma información y transparencia que el resto de los socios</li>
-                </ul>
-              </div>
-
-              {/* --- TARJETA 2: Socio Activo --- */}
-              <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center">
-                  Socio Activo
-                </h3>
-                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8 space-y-5">
-                  <li>Bonificaciones máximas en eventos y capacitaciones</li>
-                  <li>Participación plena en la vida institucional</li>
-                  <li>Cuota mensual con ventana de pago del 1 al 10</li>
-                </ul>
-              </div>
-
-              {/* --- TARJETA 3: Socio Adherente --- */}
-              <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center">
-                  Socio Adherente
-                </h3>
-                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8 space-y-5">
-                  <li>Acceso a eventos con arancel</li>
-                  <li>Becas o descuentos especiales según disponibilidad</li>
-                  <li>Puerta de entrada natural a la comunidad CAPyMEF</li>
-                </ul>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
       </main >
-      <footer className='bg-[#132A46]'>
+      {/*Footer */}
+      <footer className='bg-[#1b4f7a]'>
         <Footer />
       </footer>
     </>
