@@ -1,21 +1,26 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import { pool } from './config/database.js';
-// 1. IMPORTAMOS TUS RUTAS LIMPIAS, unciamente las que tenemos por ahora
+import { sequelize } from './config/database.js';
+
+// IMPORTAMOS MODELOS
+import './models/user.models.js'; 
+
+// IMPORTAMOS TUS RUTAS
 import authRoutes from './routes/authRoutes.js'; 
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+
+// Cambiamos el puerto por defecto a 3000 para no chocar con el puerto 5000 de Postgres, exceptuando como lo tengan
+const port = process.env.PORT || 3000;
 
 // Middlewares
 app.use(cors());
 app.use(express.json()); 
 
-// 2. CONECTAMOS LAS RUTAS A EXPRESS
-// Todo lo que esté en authRoutes responderá bajo la url /api/auth
+// Rutas
 app.use('/api/auth', authRoutes); 
 
 // Ruta de prueba
@@ -26,18 +31,19 @@ app.get('/', (req, res) => {
   });
 });
 
-// Función para probar DB y levantar el servidor
+// Función para conectar a la base de datos, sincronizar tablas y levantar el servidor
 const startServer = async () => {
   try {
-    const res = await pool.query('SELECT NOW()');
-    console.log(` Conectado a PostgreSQL a las: ${res.rows[0].now}`);
+    // 1. Probar la conexión y sincronizar tablas (las crea si no existen)
+    await sequelize.sync({ alter: true }); 
+    console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 
+    // 2. Levantar el servidor Express
     app.listen(port, () => {
-      console.log(` Servidor corriendo en http://localhost:${port}`);
+      console.log(`Servidor corriendo en http://localhost:${port}`);
     });
   } catch (error) {
-    console.error(' Error crítico: No se pudo conectar a PostgreSQL', error.message);
-    process.exit(1); 
+    console.error('Error crítico: No se pudo conectar a PostgreSQL', error.message);
   }
 };
 

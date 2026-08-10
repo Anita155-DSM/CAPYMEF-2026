@@ -12,6 +12,7 @@
     "nodemailer": "^9.0.4",
     "pdfkit": "^0.19.1",
     "pg": "^8.22.0",
+    "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.8"
   },
   "name": "backend",

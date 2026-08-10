@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'clave_secreta_super_segura';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const verificarToken = (req, res, next) => {
   // El token se envía normalmente en la cabecera "Authorization: Bearer <token>"
