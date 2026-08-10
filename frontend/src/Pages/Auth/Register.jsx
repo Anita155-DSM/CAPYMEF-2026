@@ -1,5 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
-import { useForm } from "../Hooks/useForm.js";
+import { useForm } from "../../Hooks/useForm.js";
 
 
 export default function Register() {
@@ -60,6 +60,7 @@ export default function Register() {
                   type="email"
                   id="email"
                   name="email"
+                  placeholder="email@gmail.com"
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   required
                 />
@@ -76,15 +77,11 @@ export default function Register() {
                   type="password"
                   id="password"
                   name="password"
+                  placeholder="Contraseña123"
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   required
                 />
                 {/* Nota: Este enlace aparece en tu imagen de diseño. Lo incluí para que sea idéntico. */}
-                <div className="mt-1">
-                  <a href="#" className="text-sm hover:underline">
-                    ¿Olvidaste tu contraseña??
-                  </a>
-                </div>
               </div>
             </div>
 
@@ -101,6 +98,7 @@ export default function Register() {
                   type="text"
                   id="razonSocial"
                   name="razonSocial"
+                  placeholder="ACA TIENE Q HABER PARA ELEGIR"
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   required
                 />
@@ -114,6 +112,7 @@ export default function Register() {
                   type="text"
                   id="cuit"
                   name="cuit"
+                  placeholder="0-00000000-00"
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   required
                 />
