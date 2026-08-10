@@ -1,12 +1,11 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import Login from "../Pages/Auth/Login.jsx";
-import Register from "../Pages/Auth/Register.jsx";
+import AdminNoticias from "../Pages/Admin/AdminNoticias.jsx";
+import { Login, Register } from "../Pages/Auth/index.js";
 import Home from "../Pages/Home";
 import { Capacitacion, Contacto, Eventos, Nosotros, Noticias, Socios } from "../Pages/HomePage/index.js";
-import Profile from "../Pages/Profile"; 
+import Profile from "../Pages/Profile";
 import PrivateRoutes from "./PrivateRoutes";
 import PublicRoutes from "./PublicRoutes";
-import AdminNoticias from "../Pages/Admin/AdminNoticias.jsx";
 
 export default function AppRoutes() {
   return (
@@ -19,13 +18,13 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/Capacitacion" element={<Capacitacion />} />
-        <Route path="/Contactos" element={<Contacto />} />
-        <Route path="/Eventos" element={<Eventos />} />
-        <Route path="/Nosotros" element={<Nosotros />} />
-        <Route path="/Noticias" element={<Noticias />} />
-        <Route path="/Socios" element={<Socios />} />
-        <Route path="/AdminNoticias" element={<AdminNoticias />} />
+        <Route path="/capacitacion" element={<Capacitacion />} />
+        <Route path="/contactos" element={<Contacto />} />
+        <Route path="/eventos" element={<Eventos />} />
+        <Route path="/nosotros" element={<Nosotros />} />
+        <Route path="/noticias" element={<Noticias />} />
+        <Route path="/socios" element={<Socios />} />
+        <Route path="/adminNoticias" element={<AdminNoticias />} />
       </Route>
 
       {/* RUTAS PRIVADAS (Solo usuarios logueados) */}
