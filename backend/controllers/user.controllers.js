@@ -20,7 +20,17 @@ export const registrarUsuario = async (req, res) => {
 
   try {
     // Extraemos todos los campos, incluyendo los nuevos del Estatuto
-    const { razonSocial, cuit, email, password, telefono, localidad, categoria } = req.body;
+    const { razonSocial, 
+      cuit, 
+      email, 
+      password, 
+      telefono, 
+      localidad, 
+      categoria,
+      rubro,           // <-- NUEVO
+      actividad,       // <-- NUEVO
+      tamano_empresa   // <-- NUEVO
+     } = req.body;
 
     // A. Validar comprobante AFIP/DGR (express-validator valida texto, nosotros validamos el archivo acá)
     if (!constanciaFile) {
@@ -56,9 +66,12 @@ export const registrarUsuario = async (req, res) => {
       cuit,
       email,
       password: passwordHash,
-      telefono,                 // NUEVO
-      localidad,                // NUEVO
-      categoria: categoria || 'adherente', // NUEVO (Por defecto adherente si no envían nada)
+      telefono,                 
+      localidad,               
+      categoria: categoria || 'adherente', // (Por defecto adherente si no envían nada)
+      rubro,          
+      actividad,       
+      tamano_empresa,  
       constanciaUrl: constanciaFile.path,
       estado: 'pendiente',      // Queda pendiente de aprobación
       rol: 'socio'

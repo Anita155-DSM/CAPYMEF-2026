@@ -43,6 +43,23 @@ export const User = sequelize.define('User', {
     type: DataTypes.ENUM('Pendiente', 'Aprobado', 'Rechazado'),
     defaultValue: 'Pendiente', // Todo usuario nuevo nace bloqueado
     allowNull: false
+  },
+
+  localidad: {
+    type: DataTypes.STRING,
+    allowNull: false, // Es obligatorio por el Estatuto
+  },
+  rubro: {
+    type: DataTypes.ENUM('Comercio', 'Industria', 'Servicios', 'Agropecuario', 'Otro'),
+    allowNull: false, // Obligatorio para los reportes de Fabián
+  },
+  actividad: {
+    type: DataTypes.STRING,
+    allowNull: true, // Puede ser opcional, texto libre
+  },
+  tamano_empresa: {
+    type: DataTypes.ENUM('Micro', 'Pequeña', 'Mediana', 'Grande'),
+    allowNull: true, // Opcional
   }
 },
   {

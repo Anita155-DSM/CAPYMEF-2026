@@ -46,3 +46,31 @@ export const gestionarSolicitud = async (req, res) => {
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
 };
+
+// Dar de baja/Desactivar a un socio
+export const darDeBajaSocio = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const usuario = await User.findByPk(id);
+
+    if (!usuario) {
+      return res.status(404).json({ exito: false, mensaje: 'Usuario no encontrado.' });
+    }
+
+    // Cambiamos su estado para que la barrera del login lo bloquee
+    usuario.estado = 'inactivo';
+    await usuario.save();
+
+    // Opcional: Borrado lógico con Sequelize
+    // await usuario.destroy(); 
+
+    res.status(200).json({
+      exito: true,
+      mensaje: `El socio ${usuario.razonSocial} ha sido dado de baja correctamente.`
+    });
+  } catch (error) {
+    console.error('Error al dar de baja al socio:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
+  }
+};
