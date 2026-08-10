@@ -4,8 +4,8 @@ import Came from '../assets/img/Came.png';
 import Came70years from '../assets/img/Came70years.png';
 import Escudo from '../assets/img/Escudo.png';
 import fondoHome from '../assets/img/FondoCapymef.png';
-import Navbar from "../Components/Navbar.jsx";
 import Footer from '../Components/Footer.jsx';
+import Navbar from "../Components/Navbar.jsx";
 //asdad
 export default function Home() {
 
