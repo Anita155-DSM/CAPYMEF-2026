@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import Navbar from "../Components/Navbar.jsx";
+import { Link } from 'react-router-dom';
 import Came from '../assets/img/Came.png';
 import Came70years from '../assets/img/Came70years.png';
 import Escudo from '../assets/img/Escudo.png';
 import fondoHome from '../assets/img/FondoCapymef.png';
+import Navbar from "../Components/Navbar.jsx";
 //asdad
 export default function Home() {
 
