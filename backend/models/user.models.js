@@ -1,7 +1,9 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
 
+// Exportación limpia sin espacios raros
 export const User = sequelize.define('User', {
+  
   // ==========================================
   // 1. Datos de Identificación (Obligatorios)
   // ==========================================
@@ -15,39 +17,16 @@ export const User = sequelize.define('User', {
   // 2. Datos de Contacto (Nuevos - Estatuto Capymef)
   // ==========================================
   telefono: { type: DataTypes.STRING(20), allowNull: false },
+  // Dejamos un solo campo localidad
   localidad: { type: DataTypes.STRING(100), allowNull: false },
 
   // ==========================================
-  // 3. Categorización Capymef
+  // 3. Categorización Capymef y Reportes
   // ==========================================
   categoria: {
-    // Crucial para saber a quién cobrarle y cuánto (Épica 2)
     type: DataTypes.ENUM('activo', 'adherente', 'padrino'),
     allowNull: false,
     defaultValue: 'adherente'
-  },
-
-  // ==========================================
-  // 4. Control de Administración y Accesos
-  // ==========================================
-  estado: {
-    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado'),
-    defaultValue: 'pendiente'
-  },
-  rol: {
-    type: DataTypes.ENUM('socio', 'admin'),
-    defaultValue: 'socio'
-  }, 
-  // 5. esto nos permite visualizar los usuarios que esten en pendiente aprobación, y filtrarlos al admin
-  estado_registro: {
-    type: DataTypes.ENUM('Pendiente', 'Aprobado', 'Rechazado'),
-    defaultValue: 'Pendiente', // Todo usuario nuevo nace bloqueado
-    allowNull: false
-  },
-
-  localidad: {
-    type: DataTypes.STRING,
-    allowNull: false, // Es obligatorio por el Estatuto
   },
   rubro: {
     type: DataTypes.ENUM('Comercio', 'Industria', 'Servicios', 'Agropecuario', 'Otro'),
@@ -58,11 +37,24 @@ export const User = sequelize.define('User', {
     allowNull: true, // Puede ser opcional, texto libre
   },
   tamano_empresa: {
-    type: DataTypes.ENUM('Micro', 'Pequeña', 'Mediana', 'Grande'),
-    allowNull: true, // Opcional
+    // Acomodado a los valores exactos que manda tu Frontend en Register.jsx
+    type: DataTypes.ENUM('Micro', 'Pequena', 'Mediana', 'Grande'),
+    allowNull: true, 
+  },
+
+  // ==========================================
+  // 4. Control de Administración y Accesos
+  // ==========================================
+  // Unificamos a un solo campo 'estado' para manejar todo el flujo de vida del socio
+  estado: {
+    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado', 'inactivo'),
+    defaultValue: 'pendiente'
+  },
+  rol: {
+    type: DataTypes.ENUM('socio', 'admin'),
+    defaultValue: 'socio'
   }
-},
-  {
-    paranoid: true,
-    timestamps: true
-  });
+}, {
+  paranoid: true,
+  timestamps: true
+});
