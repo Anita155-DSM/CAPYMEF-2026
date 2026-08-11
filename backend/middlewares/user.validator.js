@@ -40,7 +40,7 @@ export const validacionRegistro = [
     .matches(/\d/).withMessage('La contraseña debe contener al menos un número.')
     .matches(/[A-Z]/).withMessage('La contraseña debe contener al menos una letra mayúscula.'),
 
-  // 2. Datos de Contacto (Nuevos por Estatuto)
+  // 2. Datos de Contacto y Ubicación
   body('telefono')
     .trim()
     .notEmpty().withMessage('El número de teléfono es obligatorio.'),
@@ -49,10 +49,21 @@ export const validacionRegistro = [
     .trim()
     .notEmpty().withMessage('La localidad es obligatoria.'),
 
-  // 3. Categorización
+  // 3. Categorización e Información de Negocio
   body('categoria')
-    .optional() // Es opcional porque el controlador le pone 'adherente' por defecto si no lo envían
+    .optional()
     .isIn(['activo', 'adherente', 'padrino']).withMessage('La categoría no es válida.'),
+
+  body('rubro')
+    .notEmpty().withMessage('El rubro es obligatorio.'),
+
+  body('actividad')
+    .optional()
+    .isString().withMessage('La actividad debe ser texto.'),
+
+  body('tamano_empresa')
+    .optional()
+    .isString().withMessage('El tamaño de empresa debe ser texto.'),
 
   validarResultado
 ];

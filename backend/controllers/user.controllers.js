@@ -20,7 +20,17 @@ export const registrarUsuario = async (req, res) => {
 
   try {
     // Extraemos todos los campos, incluyendo los nuevos del Estatuto
-    const { razonSocial, cuit, email, password, telefono, localidad, categoria } = req.body;
+    const { razonSocial, 
+      cuit, 
+      email, 
+      password, 
+      telefono, 
+      localidad, 
+      categoria,
+      rubro,           // <-- NUEVO
+      actividad,       // <-- NUEVO
+      tamano_empresa   // <-- NUEVO
+     } = req.body;
 
     // A. Validar comprobante AFIP/DGR (express-validator valida texto, nosotros validamos el archivo acá)
     if (!constanciaFile) {
@@ -39,10 +49,10 @@ export const registrarUsuario = async (req, res) => {
 
     if (usuarioExistente) {
       eliminarArchivo(constanciaFile.path); // Borramos el archivo subido para no ocupar espacio
-      const mensaje = usuarioExistente.email === email 
-        ? 'El correo electrónico ya se encuentra registrado.' 
+      const mensaje = usuarioExistente.email === email
+        ? 'El correo electrónico ya se encuentra registrado.'
         : 'El CUIT ingresado ya se encuentra registrado.';
-        
+
       return res.status(400).json({ exito: false, mensaje });
     }
 
@@ -56,9 +66,12 @@ export const registrarUsuario = async (req, res) => {
       cuit,
       email,
       password: passwordHash,
-      telefono,                 // NUEVO
-      localidad,                // NUEVO
-      categoria: categoria || 'adherente', // NUEVO (Por defecto adherente si no envían nada)
+      telefono,                 
+      localidad,               
+      categoria: categoria || 'adherente', // (Por defecto adherente si no envían nada)
+      rubro,          
+      actividad,       
+      tamano_empresa,  
       constanciaUrl: constanciaFile.path,
       estado: 'pendiente',      // Queda pendiente de aprobación
       rol: 'socio'
@@ -66,7 +79,7 @@ export const registrarUsuario = async (req, res) => {
 
     res.status(201).json({
       exito: true,
-      mensaje: 'Solicitud enviada correctamente. Queda pendiente de revisión por la administración.',
+      mensaje: 'Registro completado. Tu cuenta está en estado PENDIENTE hasta que la administración valide tus datos.',
       data: {
         id: nuevoUsuario.id,
         razonSocial: nuevoUsuario.razonSocial,
@@ -125,7 +138,9 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    // Generar JWT incluyendo la categoría para que el Frontend sepa qué cobrarle
+    // Si pasa los IFs (es decir, es 'Aprobado')
+
+    // Generar JWT incluyendo la categoría para que el Frontend sepa qué cobrarle (esto cuando implementemos la API de pagos)
     const tokenPayload = {
       id: usuario.id,
       email: usuario.email,
@@ -163,7 +178,7 @@ export const loginUsuario = async (req, res) => {
 export const obtenerPerfil = async (req, res) => {
   try {
     // El id viene del token gracias a tu middleware verificarToken
-    const usuarioId = req.usuario.id; 
+    const usuarioId = req.usuario.id;
 
     // Buscamos al usuario excluyendo la contraseña por seguridad
     const usuario = await User.findByPk(usuarioId, {
@@ -188,7 +203,7 @@ export const actualizarPerfil = async (req, res) => {
   try {
     const usuarioId = req.usuario.id;
     // Extraemos SOLAMENTE los campos que está permitido editar
-    const { telefono, localidad } = req.body; 
+    const { telefono, localidad } = req.body;
 
     const usuario = await User.findByPk(usuarioId);
 
@@ -202,8 +217,8 @@ export const actualizarPerfil = async (req, res) => {
 
     await usuario.save(); // Sequelize guarda los cambios en PostgreSQL
 
-    res.status(200).json({ 
-      exito: true, 
+    res.status(200).json({
+      exito: true,
       mensaje: 'Perfil actualizado correctamente.',
       data: {
         telefono: usuario.telefono,
