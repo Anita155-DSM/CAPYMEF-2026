@@ -1,5 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
-import { useForm } from "../../Hooks/useForm.js";
+import { useForm } from "react-hook-form";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -32,6 +32,109 @@ export default function Register() {
       throw new Error(error);
     }
   };
+
+  {
+    /*LISTA PARA LOCALIDAD*/
+  }
+  const localidadesPorDepartamento = [
+    {
+      departamento: "Bermejo",
+      ciudades: [
+        "Laguna Yema",
+        "Los Chiriguanos",
+        "Pozo de Maza",
+        "Pozo del Mortero",
+      ],
+    },
+    {
+      departamento: "Formosa",
+      ciudades: [
+        "Formosa",
+        "Colonia Pastoril",
+        "Gran Guardia",
+        "San Hilario",
+        "Mariano Boedo",
+        "Mojón de Fierro",
+        "Villa del Carmen",
+        "Villa Trinidad",
+      ],
+    },
+    {
+      departamento: "Laishí",
+      ciudades: [
+        "San Francisco de Laishí",
+        "Banco Payaguá",
+        "General Lucio V. Mansilla",
+        "Herradura",
+        "Tatané",
+        "Villa Escolar",
+      ],
+    },
+    {
+      departamento: "Matacos",
+      ciudades: ["Ingeniero Juárez"],
+    },
+    {
+      departamento: "Patiño",
+      ciudades: [
+        "Comandante Fontana",
+        "Bartolomé de las Casas",
+        "Colonia Sarmiento",
+        "El Recreo",
+        "Estanislao del Campo",
+        "Fortín Leyes",
+        "Fortín Lugones",
+        "General Manuel Belgrano",
+        "Ibarreta",
+        "Juan G. Bazán",
+        "Las Lomitas",
+        "Posta Cambio Zalazar",
+        "Pozo del Tigre",
+        "San Martín 1",
+        "San Martín 2",
+        "Subteniente Perín",
+        "Villa General Güemes",
+      ],
+    },
+    {
+      departamento: "Pilagás",
+      ciudades: [
+        "El Espinillo",
+        "Buena Vista",
+        "Misión Tacaaglé",
+        "Portón Negro",
+        "Tres Lagunas",
+      ],
+    },
+    {
+      departamento: "Pilcomayo",
+      ciudades: [
+        "Clorinda",
+        "Laguna Blanca",
+        "Laguna Naick Neck",
+        "Palma Sola",
+        "Puerto Pilcomayo",
+        "Riacho He-Hé",
+        "Riacho Negro",
+        "Siete Palmas",
+      ],
+    },
+    {
+      departamento: "Pirané",
+      ciudades: [
+        "Pirané",
+        "El Colorado",
+        "Mayor Vicente Villafañe",
+        "Palo Santo",
+        "Villa Dos Trece",
+      ],
+    },
+    {
+      departamento: "Ramón Lista",
+      ciudades: ["El Chorro", "El Potrillo"],
+    },
+  ];
+  const { register, handleSubmit, reset } = useForm();
   return (
     <div className="min-h-screen w-full bg-[#132A46] flex flex-col items-center justify-center relative text-white font-sans">
       <div className="w-full px-10 flex flex-col items-center">
@@ -114,7 +217,9 @@ export default function Register() {
                   focus:ring-[#2084b6]"
                   required
                 >
-                  <option value={""}>Seleccioná una opcion</option>
+                  <option value={""} disabled>
+                    Seleccioná una opcion
+                  </option>
                   <option value="activo">Activo</option>
                   <option value={"Adherente"}>Adherente</option>
                   <option value={"Padrino"}>Padrino</option>
@@ -132,24 +237,30 @@ export default function Register() {
                   Localidad
                 </label>
                 <select
-                  type="text"
                   id="localidad"
-                  name="localidad"
+                  {...register("localidad", { required: true })}
                   className="w-full
                   h-8 px-4 text-black bg-white focus:outline-none focus:ring-2
                   focus:ring-[#2084b6]"
                   required
                 >
-                  <option value={""}>Seleccioná una opcion</option>
-                  <option value="Bermejo">Bermejo</option>
-                  <option value={"Formosa"}>Formosa</option>
-                  <option value={"Laishi"}>Laishí</option>
-                  <option value={"Matacos"}>Matacos</option>
-                  <option value={"Patiño"}>Patiño</option>
-                  <option value={"Pilagas"}>Pilagás</option>
-                  <option value={"Pilcomayo"}>Pilcomayo</option>
-                  <option value={"Pirane"}>Pirané </option>
-                  <option value={"RamónLista"}>Ramón Lista</option>
+                  <option value={""} disabled>
+                    Seleccioná una opcion
+                  </option>
+                  {localidadesPorDepartamento.map((dep) => (
+                    
+                    <optgroup
+                      key={dep.departamento}
+                      label={`--- ${dep.departamento} ---`}
+                    >
+                      {/* Por cada departamento, recorremos sus ciudades */}
+                      {dep.ciudades.map((ciudad) => (
+                        <option key={ciudad} value={ciudad}>
+                          {ciudad}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </div>
               {/*Tamaño de Empresa */}
@@ -169,7 +280,9 @@ export default function Register() {
                   focus:ring-[#2084b6]"
                   required
                 >
-                  <option value={""}>Seleccioná una opcion</option>
+                  <option value={""} disabled>
+                    Seleccioná una opcion
+                  </option>
                   <option value="Micro">Micro(1-9)</option>
                   <option value={"Pequena"}>Pequeña(10-49)</option>
                   <option value={"Mediana"}>Mediana(50-200)</option>
@@ -189,7 +302,9 @@ export default function Register() {
                   focus:ring-[#2084b6]"
                   required
                 >
-                  <option value={""}>Seleccioná una opcion</option>
+                  <option value={""} disabled>
+                    Seleccioná una opcion
+                  </option>
                   <option value="Comercio">Comercio</option>
                   <option value={"Industria"}>Industria</option>
                   <option value={"Servicios"}>Servicios</option>

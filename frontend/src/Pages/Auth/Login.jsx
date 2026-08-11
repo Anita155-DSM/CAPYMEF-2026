@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useForm } from "../../Hooks/useForm.js";
+import { useForm } from "react-hook-form";
 
 export default function Login() {
   const navigate = useNavigate();

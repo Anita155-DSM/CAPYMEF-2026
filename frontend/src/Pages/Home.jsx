@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import Came from '../assets/img/Came.png';
-import Came70years from '../assets/img/Came70years.png';
-import Escudo from '../assets/img/Escudo.png';
-import fondoHome from '../assets/img/FondoCapymef.png';
-import Footer from '../Components/Footer.jsx';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import Came from "../assets/img/Came.png";
+import Came70years from "../assets/img/Came70years.png";
+import Escudo from "../assets/img/Escudo.png";
+import fondoHome from "../assets/img/FondoCapymef.png";
+import Footer from "../Components/Footer.jsx";
 import Navbar from "../Components/Navbar.jsx";
+import { FaPhone } from "react-icons/fa6";
+import { AiFillHome } from "react-icons/ai";
+import { MdEmail } from "react-icons/md";
 //asdad
 export default function Home() {
-
   const [isOpen, setIsOpen] = useState(false);
-
 
   return (
     <>
@@ -27,24 +28,20 @@ export default function Home() {
             className="min-h-screen w-full bg-cover bg-no-repeat justify-center items-start flex flex-col"
             style={{ backgroundImage: `url(${fondoHome})` }}
           >
-
             {/* Contenedor del texto central */}
             <div className="px-4 py-4 line-clamp-3">
               <h1 className="text-5xl md:text-7xl text-white font-serif font-bold px8 py-4 -rounded-xl inline-block">
                 Camara de Pequeñas y Medianas Empresas Formosa
               </h1>
-
               <br /> {/* Salto de línea para separar el título del subtítulo */}
-
               <p className="mt-6 text-xl text-white font-bold bg-black/20 inline-block px-6 py-2 rounded-lg max-w-lg">
-                Sumate a CAPYMEF. Accedé a beneficios exclusivos, capacitaciones y herramientas digitales para hacer crecer tu negocio.
+                Sumate a CAPYMEF. Accedé a beneficios exclusivos, capacitaciones
+                y herramientas digitales para hacer crecer tu negocio.
               </p>
             </div>
 
             {/* Boton que abre el MODAL */}
             <div className="mt-5 ml-6">
-
-
               <button
                 className="mt-8 bg-[#1D7BB6] hover:bg-[#156091] text-[18px] text-white font-black py-3 px-3 rounded-lg transition-colors shadow-lg"
                 onClick={() => setIsOpen(true)}
@@ -53,28 +50,65 @@ export default function Home() {
               </button>
               {/*ACA VA EL MODAL */}
               {isOpen && (
-                <div onClick={() => setIsOpen(false)}
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" >
-                  <div onClick={(e) => e.stopPropagation()}
-                    className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md relative mx-4 animacion-modal">
+                <div
+                  onClick={() => setIsOpen(false)}
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                >
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md relative mx-4 animacion-modal"
+                  >
                     <button
                       onClick={() => setIsOpen(false)}
                       className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
 
                     <h3 className="text-2xl font-bold text-[#132A46] mb-4">
-                      TITULO
+                      COMO SUMARSE A CAPYMEF
                     </h3>
                     <p className="text-gray-600 mb-8 leading-relaxed">
-                      Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.
+                      Para garantizar una atención personalizada y asignarte la
+                      categoría ideal para tu pyme, el proceso de alta inicial
+                      lo realizamos de forma directa. ¿Cómo ser socio?
+                      Contactanos: Escribinos o acercate a nuestras oficinas
+                      para conocer los requisitos formales y completar tu
+                      solicitud de ingreso oficial. Tu Alta: Tu solicitud será
+                      evaluada y aprobada por la Comisión Directiva para darte
+                      la bienvenida a la Cámara. Registro Digital: Una vez que
+                      tu alta sea aprobada, podrás volver a esta página web,
+                      crear tu cuenta y subir tu documentación para acceder a tu
+                      panel de autogestión, beneficios y pago de cuotas.
+                      Nuestras vías de contacto:
                     </p>
 
-                    <div className="flex justify-end gap-4">
+                    <div className="space-y-2 text-center">
+                      <p className="flex items-center mt-2">
+                        <AiFillHome className="w-5 h-5 mr-2" /> Junin
+                        651,Formosa
+                      </p>
+                      <p className="flex items-center">
+                        <FaPhone className="w-5 h-5 mr-2" /> (0370) 123-4567
+                      </p>
+                      <p className="flex">
+                        <MdEmail className="w-5 h-5 mr-2" /> info@capymef.ar
+                      </p>
+                    </div>
 
+                    <div className="flex justify-end gap-4">
                       <button
                         onClick={() => setIsOpen(false)}
                         className="px-5 py-2 bg-[#1D7BB6] hover:bg-[#c00a22] text-white font-bold rounded-md transition-colors"
@@ -86,13 +120,10 @@ export default function Home() {
                 </div>
               )}
             </div>
-
-
           </div>
         </section>
         {/*La Vista N2 */}
         <section className="w-full bg-white px-10 md:px-24 py-27 font-sans">
-
           {/* Título de la sección */}
           <div className="flex flex-col text-start mb-12">
             <h2 className="text-4xl font-serif font-bold text-[#132A46]mb-5">
@@ -109,24 +140,26 @@ export default function Home() {
         */}
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
               {/* --- TARJETA 1: Socio Padrino --- */}
               <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
                 <h3 className="text-2xl font-bold text-center">
                   Socio Padrino
                 </h3>
                 <ul className="list-disc pl-5 text-base font-medium mt-8 space-y-5">
-                  <li>Acceso gratuito o con bonificación especial a eventos tarifados</li>
+                  <li>
+                    Acceso gratuito o con bonificación especial a eventos
+                    tarifados
+                  </li>
                   <li>Reconocimiento por su respaldo institucional</li>
-                  <li>Misma información y transparencia que el resto de los socios</li>
+                  <li>
+                    Misma información y transparencia que el resto de los socios
+                  </li>
                 </ul>
               </div>
 
               {/* --- TARJETA 2: Socio Activo --- */}
               <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center">
-                  Socio Activo
-                </h3>
+                <h3 className="text-2xl font-bold text-center">Socio Activo</h3>
                 <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8 space-y-5">
                   <li>Bonificaciones máximas en eventos y capacitaciones</li>
                   <li>Participación plena en la vida institucional</li>
@@ -145,18 +178,18 @@ export default function Home() {
                   <li>Puerta de entrada natural a la comunidad CAPyMEF</li>
                 </ul>
               </div>
-
             </div>
           </div>
         </section>
         {/*La vista N3*/}
         <section className="w-full bg-[#1b4f7a] px-10 md:px-24 pt-16 font-sans text-white">
-
           {/* Encabezado de la sección */}
           <div className="relative flex flex-col md:flex-row items-center justify-center mb-12">
             {/* Título centrado */}
             <div className="flex flex-col items-center">
-              <h2 className="text-4xl font-serif font-bold">Últimas noticias</h2>
+              <h2 className="text-4xl font-serif font-bold">
+                Últimas noticias
+              </h2>
               {/* Subrayado celeste */}
               <div className="w-24 h-1 bg-[#1D7BB6] mt-2"></div>
             </div>
@@ -172,7 +205,6 @@ export default function Home() {
 
           {/* Contenedor Grid para las 3 Tarjetas */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
             {/* --- TARJETA 1 --- */}
             <article className="bg-white text-black rounded-2xl p-5 flex flex-col relative shadow-xl hover:shadow-2xl transition-shadow">
               {/* Etiqueta / Badge */}
@@ -182,14 +214,22 @@ export default function Home() {
               {/* Espacio reservado para la imagen (Podés cambiar este div por tu etiqueta <img>) */}
               <img src={Came} alt="" />
 
-              <span className="text-gray-500 text-sm font-medium mb-2">&bull; Julio,2026</span>
+              <span className="text-gray-500 text-sm font-medium mb-2">
+                &bull; Julio,2026
+              </span>
               <h3 className="text-xl font-bold mb-3 leading-tight text-gray-900">
                 Cambios en los envíos postales
               </h3>
               <p className="text-gray-600 text-sm mb-6 flex-grow">
-                Desde la Dirección de Comercio Exterior de la Confederación Empresaria de la Mediana Empresa (CAME), informamos que se ha publicado el Decreto 604/26, que introduce modificaciones al régimen de envíos postales.
+                Desde la Dirección de Comercio Exterior de la Confederación
+                Empresaria de la Mediana Empresa (CAME), informamos que se ha
+                publicado el Decreto 604/26, que introduce modificaciones al
+                régimen de envíos postales.
               </p>
-              <Link to="#" className="text-right text-[#1D7BB6] font-bold text-sm hover:underline mt-auto">
+              <Link
+                to="#"
+                className="text-right text-[#1D7BB6] font-bold text-sm hover:underline mt-auto"
+              >
                 Leer más
               </Link>
             </article>
@@ -201,14 +241,23 @@ export default function Home() {
               </span>
               <img src={Escudo} alt="" />
 
-              <span className="text-gray-500 text-sm font-medium mb-2">&bull; Junio,2026</span>
+              <span className="text-gray-500 text-sm font-medium mb-2">
+                &bull; Junio,2026
+              </span>
               <h3 className="text-xl font-bold mb-3 leading-tight text-gray-900">
-                El Gobierno precisó criterios sobre aportes y contribuciones laborales
+                El Gobierno precisó criterios sobre aportes y contribuciones
+                laborales
               </h3>
               <p className="text-gray-600 text-sm mb-6 flex-grow">
-                Mediante el Decreto 612/2026, el Poder Ejecutivo estableció precisiones para el cálculo, destino y administración de los aportes y contribuciones previstos en convenios colectivos de trabajo.
+                Mediante el Decreto 612/2026, el Poder Ejecutivo estableció
+                precisiones para el cálculo, destino y administración de los
+                aportes y contribuciones previstos en convenios colectivos de
+                trabajo.
               </p>
-              <Link to="#" className="text-right text-[#1D7BB6] font-bold text-sm hover:underline mt-auto">
+              <Link
+                to="#"
+                className="text-right text-[#1D7BB6] font-bold text-sm hover:underline mt-auto"
+              >
                 Leer más
               </Link>
             </article>
@@ -220,23 +269,31 @@ export default function Home() {
               </span>
               <img src={Came70years} alt="" />
 
-              <span className="text-gray-500 text-sm font-medium mb-2">&bull; Junio,2026</span>
+              <span className="text-gray-500 text-sm font-medium mb-2">
+                &bull; Junio,2026
+              </span>
               <h3 className="text-xl font-bold mb-3 leading-tight text-gray-900">
-                CAME acompaña una nueva edición del Concurso Emprendimiento Argentino 2026
+                CAME acompaña una nueva edición del Concurso Emprendimiento
+                Argentino 2026
               </h3>
               <p className="text-gray-600 text-sm mb-6 flex-grow">
-                La Confederación Argentina de la Mediana Empresa (CAME) informa que ya se encuentra abierta la inscripción para participar del Concurso Emprendimiento Argentino 2026, una iniciativa del Ministerio de Economía...
+                La Confederación Argentina de la Mediana Empresa (CAME) informa
+                que ya se encuentra abierta la inscripción para participar del
+                Concurso Emprendimiento Argentino 2026, una iniciativa del
+                Ministerio de Economía...
               </p>
-              <Link to="#" className="text-right text-[#1D7BB6] font-bold text-sm hover:underline mt-auto">
+              <Link
+                to="#"
+                className="text-right text-[#1D7BB6] font-bold text-sm hover:underline mt-auto"
+              >
                 Leer más
               </Link>
             </article>
-
           </div>
         </section>
-      </main >
+      </main>
       {/*Footer */}
-      <footer className='bg-[#1b4f7a]'>
+      <footer className="bg-[#1b4f7a]">
         <Footer />
       </footer>
     </>
