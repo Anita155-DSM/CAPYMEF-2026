@@ -49,7 +49,7 @@ export default function Navbar() {
           Capacitación
         </Link>
         <Link
-          to="/AdminNoticias"
+          to="/admin/inicio"
           className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors"
         >
           AdminNoticias

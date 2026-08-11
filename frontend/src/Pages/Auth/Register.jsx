@@ -1,17 +1,16 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { registrarSocio } from "../../services/authServices"; // Importamos el servicio
 
 export default function Register() {
   const navigate = useNavigate();
-  // Inicializamos react-hook-form
   const { register, handleSubmit } = useForm();
 
   const handleRegister = async (data) => {
     try {
-      // 1. Usamos FormData para empaquetar textos y el archivo PDF/IMG
+      // 1. Armamos el paquete de datos en el frontend
       const formData = new FormData();
 
-      // 2. Agregamos los campos obligatorios para el backend
       formData.append("email", data.email);
       formData.append("password", data.password);
       formData.append("cuit", data.cuit);
@@ -19,37 +18,38 @@ export default function Register() {
       formData.append("telefono", data.telefono);
       formData.append("localidad", data.localidad);
       formData.append("categoria", data.categoria);
-
-      // Agregamos tus campos extra (Aunque el backend aún no los guarde, los mandamos)
       formData.append("tamanoEmpresa", data.tamanoEmpresa);
       formData.append("rubro", data.rubro);
       formData.append("actividad", data.actividad);
 
-      // 3. Capturamos el archivo de la constancia
       if (data.constancia && data.constancia[0]) {
         formData.append("constancia", data.constancia[0]);
       }
 
-      // 4. Enviamos a la ruta exacta de tu backend
-      const response = await fetch("http://localhost:3000/api/auth/registro", {
-        method: "POST",
-        body: formData,
-        // No enviamos header de Content-Type, el navegador lo pone solo al usar FormData
-      });
+      // 2. Le pasamos el paquete al SERVICIO (chao al fetch largo y feo)
+      const result = await registrarSocio(formData);
 
-      const result = await response.json();
-
+      // 3. Evaluamos la respuesta
       if (result.exito) {
         console.log(result);
         alert("Registrado Correctamente. Queda pendiente de revisión.");
         navigate("/login");
       } else {
-        alert("Error: " + result.mensaje);
+        // Evaluamos si falló el validador estricto o si es un error general
+        if (result.errores) {
+          const listaDeErrores = result.errores
+            .map((err) => `- ${err.mensaje}`)
+            .join("\n");
+          alert("Revisá los siguientes campos:\n" + listaDeErrores);
+        } else {
+          alert("Atención: " + result.mensaje);
+        }
       }
     } catch (error) {
       console.error(error);
       alert(
-        "Error de red. Verificá que el backend en el puerto 3000 esté encendido.",
+        error.message ||
+          "Error de red. Verificá que el servidor esté encendido.",
       );
     }
   };
@@ -88,10 +88,7 @@ export default function Register() {
         "Villa Escolar",
       ],
     },
-    {
-      departamento: "Matacos",
-      ciudades: ["Ingeniero Juárez"],
-    },
+    { departamento: "Matacos", ciudades: ["Ingeniero Juárez"] },
     {
       departamento: "Patiño",
       ciudades: [
@@ -147,10 +144,7 @@ export default function Register() {
         "Villa Dos Trece",
       ],
     },
-    {
-      departamento: "Ramón Lista",
-      ciudades: ["El Chorro", "El Potrillo"],
-    },
+    { departamento: "Ramón Lista", ciudades: ["El Chorro", "El Potrillo"] },
   ];
 
   return (
@@ -164,13 +158,12 @@ export default function Register() {
           solicitud.
         </p>
 
-        {/* Conectamos el formulario con handleSubmit */}
         <form
           onSubmit={handleSubmit(handleRegister)}
           className="flex flex-col items-center w-full max-w-4xl"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-2 w-full justify-items-center">
-            {/* --- Columna Izquierda --- */}
+            {/* Columna Izquierda */}
             <div className="w-full flex flex-col items-end md:items-start max-w-[320px]">
               <div className="w-full my-3">
                 <label className="block text-lg font-bold mb-1" htmlFor="email">
@@ -184,7 +177,6 @@ export default function Register() {
                   {...register("email", { required: true })}
                 />
               </div>
-
               <div className="w-full my-3">
                 <label
                   className="block text-lg font-bold mb-1"
@@ -200,7 +192,6 @@ export default function Register() {
                   {...register("password", { required: true })}
                 />
               </div>
-
               <div className="w-full my-3">
                 <label className="block text-lg font-bold mb-1" htmlFor="cuit">
                   CUIT
@@ -208,13 +199,11 @@ export default function Register() {
                 <input
                   type="text"
                   id="cuit"
-                  placeholder="0-00000000-0"
+                  placeholder="20-12345678-9"
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   {...register("cuit", { required: true })}
                 />
               </div>
-
-              {/* Razón Social corregida a input de texto */}
               <div className="w-full my-3">
                 <label
                   className="block text-lg font-bold mb-1"
@@ -230,8 +219,6 @@ export default function Register() {
                   {...register("razonSocial", { required: true })}
                 />
               </div>
-
-              {/* Teléfono (Agregado) */}
               <div className="w-full my-3">
                 <label
                   className="block text-lg font-bold mb-1"
@@ -249,7 +236,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* --- Columna Derecha --- */}
+            {/* Columna Derecha */}
             <div className="w-full flex flex-col items-start max-w-[320px]">
               <div className="w-full my-3">
                 <label
@@ -281,7 +268,6 @@ export default function Register() {
                   ))}
                 </select>
               </div>
-
               <div className="w-full my-3">
                 <label
                   className="block text-lg font-bold mb-1"
@@ -303,7 +289,6 @@ export default function Register() {
                   <option value="Mediana">Mediana (50-200)</option>
                 </select>
               </div>
-
               <div className="w-full my-3">
                 <label className="block text-lg font-bold mb-1" htmlFor="rubro">
                   Rubro
@@ -324,7 +309,6 @@ export default function Register() {
                   <option value="Otro">Otro</option>
                 </select>
               </div>
-
               <div className="w-full my-3">
                 <label
                   className="block text-lg font-bold mb-1"
@@ -340,8 +324,6 @@ export default function Register() {
                   {...register("actividad", { required: true })}
                 />
               </div>
-
-              {/* Categoría (Agregado) */}
               <div className="w-full my-3">
                 <label
                   className="block text-lg font-bold mb-1"
@@ -366,7 +348,6 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Input Constancia (File) */}
           <div className="mt-8 mb-8">
             <label className="flex items-center justify-center gap-2 bg-[#E2E8F0] text-[#132A46] py-2 px-4 cursor-pointer hover:bg-[#cbd5e1] transition-colors border border-transparent">
               <span className="font-semibold text-sm">
