@@ -6,10 +6,8 @@ import { sequelize } from './config/database.js';
 // IMPORTAMOS MODELOS
 import './models/user.models.js'; 
 
-// IMPORTAMOS RUTAS
+// IMPORTAMOS TUS RUTAS
 import authRoutes from './routes/authRoutes.js'; 
-import authRoutes from './routes/authRoutes.js'; 
-import adminRoutes from './routes/admin.routes.js'
 
 dotenv.config();
 
@@ -23,8 +21,7 @@ app.use(cors());
 app.use(express.json()); 
 
 // Rutas
-app.use('/api/auth', authRoutes);   // Maneja /registro, /login, /perfil
-app.use('/api/admin', adminRoutes); //rutas de administrador
+app.use('/api/auth', authRoutes); 
 
 // Ruta de prueba
 app.get('/', (req, res) => {

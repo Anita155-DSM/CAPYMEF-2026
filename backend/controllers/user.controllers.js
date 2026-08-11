@@ -12,28 +12,17 @@ const eliminarArchivo = (filePath) => {
   }
 };
 
-/// ==========================================
+// ==========================================
 // 1. REGISTRO DE SOLICITUD DE SOCIO
 // ==========================================
 export const registrarUsuario = async (req, res) => {
   const constanciaFile = req.file; // Archivo subido mediante Multer
 
   try {
-    // 1. EXTRAEMOS LOS NUEVOS CAMPOS DEL req.body
-    const { 
-      razonSocial, 
-      cuit, 
-      email, 
-      password, 
-      telefono, 
-      localidad, 
-      categoria,
-      rubro,           // NUEVO
-      actividad,       // NUEVO
-      tamanoEmpresa    // NUEVO (Viene del Frontend)
-    } = req.body;
+    // Extraemos todos los campos, incluyendo los nuevos del Estatuto
+    const { razonSocial, cuit, email, password, telefono, localidad, categoria } = req.body;
 
-    // A. Validar comprobante AFIP/DGR
+    // A. Validar comprobante AFIP/DGR (express-validator valida texto, nosotros validamos el archivo acá)
     if (!constanciaFile) {
       return res.status(400).json({
         exito: false,
@@ -61,21 +50,17 @@ export const registrarUsuario = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // D. Crear el registro en PostgreSQL
-    // 2. INYECTAMOS LOS NUEVOS CAMPOS EN LA BASE DE DATOS
+    // D. Crear el registro en PostgreSQL con todos los datos
     const nuevoUsuario = await User.create({
       razonSocial,
       cuit,
       email,
       password: passwordHash,
-      telefono,
-      localidad,
-      categoria: categoria || 'adherente',
-      rubro,                           // NUEVO
-      actividad,                       // NUEVO
-      tamano_empresa: tamanoEmpresa,   // NUEVO (Conectamos la variable del front con la columna de la DB)
+      telefono,                 // NUEVO
+      localidad,                // NUEVO
+      categoria: categoria || 'adherente', // NUEVO (Por defecto adherente si no envían nada)
       constanciaUrl: constanciaFile.path,
-      estado: 'pendiente',
+      estado: 'pendiente',      // Queda pendiente de aprobación
       rol: 'socio'
     });
 
@@ -140,9 +125,7 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
-    // Si pasa los IFs (es decir, es 'Aprobado')
-
-    // Generar JWT incluyendo la categoría para que el Frontend sepa qué cobrarle (esto cuando implementemos la API de pagos)
+    // Generar JWT incluyendo la categoría para que el Frontend sepa qué cobrarle
     const tokenPayload = {
       id: usuario.id,
       email: usuario.email,
@@ -180,7 +163,7 @@ export const loginUsuario = async (req, res) => {
 export const obtenerPerfil = async (req, res) => {
   try {
     // El id viene del token gracias a tu middleware verificarToken
-    const usuarioId = req.usuario.id;
+    const usuarioId = req.usuario.id; 
 
     // Buscamos al usuario excluyendo la contraseña por seguridad
     const usuario = await User.findByPk(usuarioId, {
@@ -205,7 +188,7 @@ export const actualizarPerfil = async (req, res) => {
   try {
     const usuarioId = req.usuario.id;
     // Extraemos SOLAMENTE los campos que está permitido editar
-    const { telefono, localidad } = req.body;
+    const { telefono, localidad } = req.body; 
 
     const usuario = await User.findByPk(usuarioId);
 
@@ -219,8 +202,8 @@ export const actualizarPerfil = async (req, res) => {
 
     await usuario.save(); // Sequelize guarda los cambios en PostgreSQL
 
-    res.status(200).json({
-      exito: true,
+    res.status(200).json({ 
+      exito: true, 
       mensaje: 'Perfil actualizado correctamente.',
       data: {
         telefono: usuario.telefono,
