@@ -2,10 +2,19 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import AdminNoticias from "../Pages/Admin/AdminNoticias.jsx";
 import { Login, Register } from "../Pages/Auth/index.js";
 import Home from "../Pages/Home";
-import { Capacitacion, Contacto, Eventos, Nosotros, Noticias, Socios } from "../Pages/HomePage/index.js";
+import {
+  Capacitacion,
+  Contacto,
+  Eventos,
+  Nosotros,
+  Noticias,
+  Socios,
+} from "../Pages/HomePage/index.js";
 import Profile from "../Pages/Profile";
 import PrivateRoutes from "./PrivateRoutes";
 import PublicRoutes from "./PublicRoutes";
+import Inicio from "../Pages/Admin/Inicio.jsx";
+import MainLayout from "../layouts/MainLayout.jsx";
 
 export default function AppRoutes() {
   return (
@@ -24,7 +33,11 @@ export default function AppRoutes() {
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/noticias" element={<Noticias />} />
         <Route path="/socios" element={<Socios />} />
-        <Route path="/adminNoticias" element={<AdminNoticias />} />
+        {/*LAS RUTAS DE ABAJO TIENEN QUE IR PRIVADAS */}
+        <Route element={<MainLayout />}>
+          <Route path="/admin/inicio" element={<Inicio />} />
+          <Route path="/admin/noticias" element={<AdminNoticias />} />
+        </Route>
       </Route>
 
       {/* RUTAS PRIVADAS (Solo usuarios logueados) */}
