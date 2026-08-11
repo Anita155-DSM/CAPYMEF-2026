@@ -1,7 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "../../Hooks/useForm.js";
 
-
 export default function Register() {
   const navigate = useNavigate();
   const { formState, handleChange } = useForm({
@@ -52,7 +51,8 @@ export default function Register() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6 w-full justify-items-center">
             {/* --- Columna Izquierda --- */}
             <div className="w-full flex flex-col items-end md:items-start max-w-[320px]">
-              <div className="mb-6 w-full">
+              {/*Correo Electrónico */}
+              <div className="w-full my-4">
                 <label className="block text-lg font-bold mb-1" htmlFor="email">
                   Correo electrónico
                 </label>
@@ -65,8 +65,8 @@ export default function Register() {
                   required
                 />
               </div>
-
-              <div className="w-full">
+              {/*Contraseña */}
+              <div className="w-full my-4">
                 <label
                   className="block text-lg font-bold mb-1"
                   htmlFor="password"
@@ -83,28 +83,8 @@ export default function Register() {
                 />
                 {/* Nota: Este enlace aparece en tu imagen de diseño. Lo incluí para que sea idéntico. */}
               </div>
-            </div>
-
-            {/* --- Columna Derecha --- */}
-            <div className="w-full flex flex-col items-start max-w-[320px]">
-              <div className="mb-6 w-full">
-                <label
-                  className="block text-lg font-bold mb-1"
-                  htmlFor="razonSocial"
-                >
-                  Razón Social
-                </label>
-                <input
-                  type="text"
-                  id="razonSocial"
-                  name="razonSocial"
-                  placeholder="ACA TIENE Q HABER PARA ELEGIR"
-                  className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                  required
-                />
-              </div>
-
-              <div className="w-full">
+              {/*CUIT */}
+              <div className="w-full my-4">
                 <label className="block text-lg font-bold mb-1" htmlFor="cuit">
                   CUIT
                 </label>
@@ -113,6 +93,123 @@ export default function Register() {
                   id="cuit"
                   name="cuit"
                   placeholder="0-00000000-00"
+                  className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
+                  required
+                />
+              </div>
+              {/*Razon Social */}
+              <div className="w-full my-4">
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="razonSocial"
+                >
+                  Razón Social
+                </label>
+                <select
+                  type="text"
+                  id="razonSocial"
+                  name="razonSocial"
+                  className="w-full
+                  h-8 px-4 text-black bg-white focus:outline-none focus:ring-2
+                  focus:ring-[#2084b6]"
+                  required
+                >
+                  <option value={""}>Seleccioná una opcion</option>
+                  <option value="activo">Activo</option>
+                  <option value={"Adherente"}>Adherente</option>
+                  <option value={"Padrino"}>Padrino</option>
+                </select>
+              </div>
+            </div>
+            {/* --- Columna Derecha --- */}
+            <div className="w-full flexflex-col items-start max-w-[320px] ">
+              {/*Localidad */}
+              <div className="w-full mt-4">
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="localidad"
+                >
+                  Localidad
+                </label>
+                <select
+                  type="text"
+                  id="localidad"
+                  name="localidad"
+                  className="w-full
+                  h-8 px-4 text-black bg-white focus:outline-none focus:ring-2
+                  focus:ring-[#2084b6]"
+                  required
+                >
+                  <option value={""}>Seleccioná una opcion</option>
+                  <option value="Bermejo">Bermejo</option>
+                  <option value={"Formosa"}>Formosa</option>
+                  <option value={"Laishi"}>Laishí</option>
+                  <option value={"Matacos"}>Matacos</option>
+                  <option value={"Patiño"}>Patiño</option>
+                  <option value={"Pilagas"}>Pilagás</option>
+                  <option value={"Pilcomayo"}>Pilcomayo</option>
+                  <option value={"Pirane"}>Pirané </option>
+                  <option value={"RamónLista"}>Ramón Lista</option>
+                </select>
+              </div>
+              {/*Tamaño de Empresa */}
+              <div className="w-full mt-7">
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="tamanoEmpresa"
+                >
+                  Tamaño de la Empresa
+                </label>
+                <select
+                  type="text"
+                  id="tamanoEmpresa"
+                  name="tamanoEmpresa"
+                  className="w-full
+                  h-8 px-4 text-black bg-white focus:outline-none focus:ring-2
+                  focus:ring-[#2084b6]"
+                  required
+                >
+                  <option value={""}>Seleccioná una opcion</option>
+                  <option value="Micro">Micro(1-9)</option>
+                  <option value={"Pequena"}>Pequeña(10-49)</option>
+                  <option value={"Mediana"}>Mediana(50-200)</option>
+                </select>
+              </div>
+              {/*Rubro */}
+              <div className="w-full mt-8">
+                <label className="block text-lg font-bold mb-1" htmlFor="rubro">
+                  Rubro
+                </label>
+                <select
+                  type="text"
+                  id="rubro"
+                  name="rubro"
+                  className="w-full
+                  h-8 px-4 text-black bg-white focus:outline-none focus:ring-2
+                  focus:ring-[#2084b6]"
+                  required
+                >
+                  <option value={""}>Seleccioná una opcion</option>
+                  <option value="Comercio">Comercio</option>
+                  <option value={"Industria"}>Industria</option>
+                  <option value={"Servicios"}>Servicios</option>
+                  <option value={"Agropecuario"}>Agropecuario</option>
+                  <option value={"Otro"}>Otro</option>
+                </select>
+              </div>
+              {/*Actividad*/}
+              <div className="w-full mt-9">
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="actividad"
+                >
+                  Actividad
+                </label>
+                <input
+                  type="text"
+                  id="actividad"
+                  name="actividad"
+                  placeholder='Ej. "Venta de repuestos de motos"'
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   required
                 />
