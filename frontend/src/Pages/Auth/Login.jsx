@@ -9,7 +9,7 @@ export default function Login() {
   });
   const handleLogin = async (e) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:3000/login", {
+    const response = await fetch("http://localhost:3000/api/auth/login", {
       method: "POST",
       body: JSON.stringify(formState),
       headers: {
@@ -83,7 +83,7 @@ export default function Login() {
             </button>
           </div>
         </form>
-
+        
           <div className="text-center text-sm">
             <span>¿No tienes una cuenta? </span>
             <Link to="/register" className="text-[#3b82f6] hover:underline">

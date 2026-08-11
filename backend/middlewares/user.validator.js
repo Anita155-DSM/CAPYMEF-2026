@@ -4,6 +4,7 @@ import { body, validationResult } from 'express-validator';
 export const validarResultado = (req, res, next) => {
   const errores = validationResult(req);
   if (!errores.isEmpty()) {
+    console.log(errores)
     return res.status(400).json({
       exito: false,
       mensaje: 'Error de validación en los datos enviados.',
@@ -61,7 +62,7 @@ export const validacionRegistro = [
     .optional()
     .isString().withMessage('La actividad debe ser texto.'),
 
-  body('tamano_empresa')
+  body('tamanoEmpresa')
     .optional()
     .isString().withMessage('El tamaño de empresa debe ser texto.'),
 

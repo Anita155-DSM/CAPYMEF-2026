@@ -10,7 +10,7 @@ export default function Register() {
     try {
       // 1. Usamos FormData para empaquetar textos y el archivo PDF/IMG
       const formData = new FormData();
-      
+
       // 2. Agregamos los campos obligatorios para el backend
       formData.append("email", data.email);
       formData.append("password", data.password);
@@ -19,7 +19,7 @@ export default function Register() {
       formData.append("telefono", data.telefono);
       formData.append("localidad", data.localidad);
       formData.append("categoria", data.categoria);
-      
+
       // Agregamos tus campos extra (Aunque el backend aún no los guarde, los mandamos)
       formData.append("tamanoEmpresa", data.tamanoEmpresa);
       formData.append("rubro", data.rubro);
@@ -48,22 +48,45 @@ export default function Register() {
       }
     } catch (error) {
       console.error(error);
-      alert("Error de red. Verificá que el backend en el puerto 3000 esté encendido.");
+      alert(
+        "Error de red. Verificá que el backend en el puerto 3000 esté encendido.",
+      );
     }
   };
 
   const localidadesPorDepartamento = [
     {
       departamento: "Bermejo",
-      ciudades: ["Laguna Yema", "Los Chiriguanos", "Pozo de Maza", "Pozo del Mortero"],
+      ciudades: [
+        "Laguna Yema",
+        "Los Chiriguanos",
+        "Pozo de Maza",
+        "Pozo del Mortero",
+      ],
     },
     {
       departamento: "Formosa",
-      ciudades: ["Formosa", "Colonia Pastoril", "Gran Guardia", "San Hilario", "Mariano Boedo", "Mojón de Fierro", "Villa del Carmen", "Villa Trinidad"],
+      ciudades: [
+        "Formosa",
+        "Colonia Pastoril",
+        "Gran Guardia",
+        "San Hilario",
+        "Mariano Boedo",
+        "Mojón de Fierro",
+        "Villa del Carmen",
+        "Villa Trinidad",
+      ],
     },
     {
       departamento: "Laishí",
-      ciudades: ["San Francisco de Laishí", "Banco Payaguá", "General Lucio V. Mansilla", "Herradura", "Tatané", "Villa Escolar"],
+      ciudades: [
+        "San Francisco de Laishí",
+        "Banco Payaguá",
+        "General Lucio V. Mansilla",
+        "Herradura",
+        "Tatané",
+        "Villa Escolar",
+      ],
     },
     {
       departamento: "Matacos",
@@ -71,19 +94,58 @@ export default function Register() {
     },
     {
       departamento: "Patiño",
-      ciudades: ["Comandante Fontana", "Bartolomé de las Casas", "Colonia Sarmiento", "El Recreo", "Estanislao del Campo", "Fortín Leyes", "Fortín Lugones", "General Manuel Belgrano", "Ibarreta", "Juan G. Bazán", "Las Lomitas", "Posta Cambio Zalazar", "Pozo del Tigre", "San Martín 1", "San Martín 2", "Subteniente Perín", "Villa General Güemes"],
+      ciudades: [
+        "Comandante Fontana",
+        "Bartolomé de las Casas",
+        "Colonia Sarmiento",
+        "El Recreo",
+        "Estanislao del Campo",
+        "Fortín Leyes",
+        "Fortín Lugones",
+        "General Manuel Belgrano",
+        "Ibarreta",
+        "Juan G. Bazán",
+        "Las Lomitas",
+        "Posta Cambio Zalazar",
+        "Pozo del Tigre",
+        "San Martín 1",
+        "San Martín 2",
+        "Subteniente Perín",
+        "Villa General Güemes",
+      ],
     },
     {
       departamento: "Pilagás",
-      ciudades: ["El Espinillo", "Buena Vista", "Misión Tacaaglé", "Portón Negro", "Tres Lagunas"],
+      ciudades: [
+        "El Espinillo",
+        "Buena Vista",
+        "Misión Tacaaglé",
+        "Portón Negro",
+        "Tres Lagunas",
+      ],
     },
     {
       departamento: "Pilcomayo",
-      ciudades: ["Clorinda", "Laguna Blanca", "Laguna Naick Neck", "Palma Sola", "Puerto Pilcomayo", "Riacho He-Hé", "Riacho Negro", "Siete Palmas"],
+      ciudades: [
+        "Clorinda",
+        "Laguna Blanca",
+        "Laguna Naick Neck",
+        "Palma Sola",
+        "Puerto Pilcomayo",
+        "Riacho He-Hé",
+        "Riacho Negro",
+        "Siete Palmas",
+      ],
     },
     {
       departamento: "Pirané",
-      ciudades: ["Pirané", "El Colorado", "Mayor Vicente Villafañe", "Palo Santo", "Villa Dos Trece"],
+      ciudades: [
+        "Pirané",
+        "El Colorado",
+        "Mayor Vicente Villafañe",
+        "Palo Santo",
+        "Villa Dos Trece",
+      ],
     },
     {
       departamento: "Ramón Lista",
@@ -98,19 +160,22 @@ export default function Register() {
           Registro de socio
         </h1>
         <p className="text-center text-sm font-medium mb-12">
-          Completá tus datos comerciales. El equipo administrativo revisará tu solicitud.
+          Completá tus datos comerciales. El equipo administrativo revisará tu
+          solicitud.
         </p>
 
         {/* Conectamos el formulario con handleSubmit */}
-        <form onSubmit={handleSubmit(handleRegister)} className="flex flex-col items-center w-full max-w-4xl">
-          
+        <form
+          onSubmit={handleSubmit(handleRegister)}
+          className="flex flex-col items-center w-full max-w-4xl"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-2 w-full justify-items-center">
-            
             {/* --- Columna Izquierda --- */}
             <div className="w-full flex flex-col items-end md:items-start max-w-[320px]">
-              
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="email">Correo electrónico</label>
+                <label className="block text-lg font-bold mb-1" htmlFor="email">
+                  Correo electrónico
+                </label>
                 <input
                   type="email"
                   id="email"
@@ -121,7 +186,12 @@ export default function Register() {
               </div>
 
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="password">Contraseña</label>
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="password"
+                >
+                  Contraseña
+                </label>
                 <input
                   type="password"
                   id="password"
@@ -132,7 +202,9 @@ export default function Register() {
               </div>
 
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="cuit">CUIT</label>
+                <label className="block text-lg font-bold mb-1" htmlFor="cuit">
+                  CUIT
+                </label>
                 <input
                   type="text"
                   id="cuit"
@@ -144,7 +216,12 @@ export default function Register() {
 
               {/* Razón Social corregida a input de texto */}
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="razonSocial">Razón Social</label>
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="razonSocial"
+                >
+                  Razón Social
+                </label>
                 <input
                   type="text"
                   id="razonSocial"
@@ -156,7 +233,12 @@ export default function Register() {
 
               {/* Teléfono (Agregado) */}
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="telefono">Teléfono</label>
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="telefono"
+                >
+                  Teléfono
+                </label>
                 <input
                   type="text"
                   id="telefono"
@@ -165,25 +247,35 @@ export default function Register() {
                   {...register("telefono", { required: true })}
                 />
               </div>
-
             </div>
 
             {/* --- Columna Derecha --- */}
             <div className="w-full flex flex-col items-start max-w-[320px]">
-              
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="localidad">Localidad</label>
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="localidad"
+                >
+                  Localidad
+                </label>
                 <select
                   id="localidad"
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   defaultValue=""
                   {...register("localidad", { required: true })}
                 >
-                  <option value="" disabled>Seleccioná una opcion</option>
+                  <option value="" disabled>
+                    Seleccioná una opcion
+                  </option>
                   {localidadesPorDepartamento.map((dep) => (
-                    <optgroup key={dep.departamento} label={`--- ${dep.departamento} ---`}>
+                    <optgroup
+                      key={dep.departamento}
+                      label={`--- ${dep.departamento} ---`}
+                    >
                       {dep.ciudades.map((ciudad) => (
-                        <option key={ciudad} value={ciudad}>{ciudad}</option>
+                        <option key={ciudad} value={ciudad}>
+                          {ciudad}
+                        </option>
                       ))}
                     </optgroup>
                   ))}
@@ -191,14 +283,21 @@ export default function Register() {
               </div>
 
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="tamanoEmpresa">Tamaño de la Empresa</label>
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="tamanoEmpresa"
+                >
+                  Tamaño de la Empresa
+                </label>
                 <select
                   id="tamanoEmpresa"
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   defaultValue=""
                   {...register("tamanoEmpresa", { required: true })}
                 >
-                  <option value="" disabled>Seleccioná una opcion</option>
+                  <option value="" disabled>
+                    Seleccioná una opcion
+                  </option>
                   <option value="Micro">Micro (1-9)</option>
                   <option value="Pequena">Pequeña (10-49)</option>
                   <option value="Mediana">Mediana (50-200)</option>
@@ -206,14 +305,18 @@ export default function Register() {
               </div>
 
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="rubro">Rubro</label>
+                <label className="block text-lg font-bold mb-1" htmlFor="rubro">
+                  Rubro
+                </label>
                 <select
                   id="rubro"
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   defaultValue=""
                   {...register("rubro", { required: true })}
                 >
-                  <option value="" disabled>Seleccioná una opcion</option>
+                  <option value="" disabled>
+                    Seleccioná una opcion
+                  </option>
                   <option value="Comercio">Comercio</option>
                   <option value="Industria">Industria</option>
                   <option value="Servicios">Servicios</option>
@@ -223,7 +326,12 @@ export default function Register() {
               </div>
 
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="actividad">Actividad</label>
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="actividad"
+                >
+                  Actividad
+                </label>
                 <input
                   type="text"
                   id="actividad"
@@ -235,29 +343,48 @@ export default function Register() {
 
               {/* Categoría (Agregado) */}
               <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="categoria">Categoría</label>
+                <label
+                  className="block text-lg font-bold mb-1"
+                  htmlFor="categoria"
+                >
+                  Categoría
+                </label>
                 <select
                   id="categoria"
                   className="w-full h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                   defaultValue=""
                   {...register("categoria", { required: true })}
                 >
-                  <option value="" disabled>Seleccioná una opcion</option>
+                  <option value="" disabled>
+                    Seleccioná una opcion
+                  </option>
                   <option value="activo">Activo</option>
                   <option value="adherente">Adherente</option>
                   <option value="padrino">Padrino</option>
                 </select>
               </div>
-
             </div>
           </div>
 
           {/* Input Constancia (File) */}
           <div className="mt-8 mb-8">
             <label className="flex items-center justify-center gap-2 bg-[#E2E8F0] text-[#132A46] py-2 px-4 cursor-pointer hover:bg-[#cbd5e1] transition-colors border border-transparent">
-              <span className="font-semibold text-sm">Subir constancia de AFIP/DGR</span>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+              <span className="font-semibold text-sm">
+                Subir constancia de AFIP/DGR
+              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
+                />
               </svg>
               <input
                 type="file"

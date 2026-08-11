@@ -8,7 +8,6 @@ import './models/user.models.js';
 
 // IMPORTAMOS RUTAS
 import authRoutes from './routes/authRoutes.js'; 
-import authRoutes from './routes/authRoutes.js'; 
 import adminRoutes from './routes/admin.routes.js'
 
 dotenv.config();

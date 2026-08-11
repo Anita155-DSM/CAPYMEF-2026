@@ -39,3 +39,6 @@ src/
 │
 └── services/ (¡NUEVA CARPETA!)
     └── authService.js (¡NUEVO ARCHIVO!)
+
+
+    git checkout origin/develop-ana -- backend/
