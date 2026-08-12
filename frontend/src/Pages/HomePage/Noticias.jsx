@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Modal from "../../Components/Modal.jsx";
 import Navbar from "../../Components/Navbar.jsx";
+import Loading from "../../Components/Loading.jsx";
 
 export default function Noticias() {
   const [noticiaOpen, setNoticiaOpen] = useState(false);
@@ -13,9 +14,10 @@ export default function Noticias() {
         <h1 className="mt-7 text-center text-3xl font-bold text-[#132A46] mb-8">
           Últimas Noticias
         </h1>
+        <Loading />
         {/* HACE QUE LA WEB SEA ATRAVEZ DE Filas(infinito) y Columnas(2) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+
         </div>
       </div>
     </>

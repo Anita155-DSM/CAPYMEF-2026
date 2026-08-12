@@ -25,3 +25,30 @@
   animation: pop-modal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Animación de subrayado de izquierda a derecha */
+.titulo-animado {
+  position: relative;
+  padding-bottom: 8px; /* Le da espacio para que la línea no pise las letras */
+  transition: color 0.3s ease; /* Suaviza el cambio de color del texto */
+}
+
+/* Acá creamos la línea invisible */
+.titulo-animado::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0; /* Empieza invisible */
+  height: 3px; /* Grosor de la línea */
+  background-color: #1D7BB6; /* Color azul de CAPyMEF */
+  transition: width 0.5s ease; /* Acá están los 500ms (medio segundo) */
+}
+
+/* Cuando el contenedor padre (.group) tiene el mouse encima... */
+.group:hover .titulo-animado::after {
+  width: 100%; /* La línea crece al 100% */
+}
+
+.group:hover .titulo-animado {
+  color: #1D7BB6; /* El texto se vuelve azul */
+}

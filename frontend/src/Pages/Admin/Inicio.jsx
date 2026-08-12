@@ -9,7 +9,6 @@ import Navbar from "../../Components/Navbar";
 export default function Inicio() {
   return (
     <>
-     
       <div className="p-10 flex flex-col items-center">
         
         {/* TARJETA PRINCIPAL: SOCIOS */}

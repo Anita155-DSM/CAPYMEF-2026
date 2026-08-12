@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form"; // Importamos la magia
-import Navbar from "../../Components/Navbar";
 
-export default function AdminNoticias() {
-  // Sacamos las herramientas que necesitamos de la librería
+export default function NoticiasAdmin() {
   const { register, handleSubmit, reset } = useForm();
 
   // Mantenemos solo el estado para la vista previa de la imagen
   const [imagenPreview, setImagenPreview] = useState(null);
 
-  // La misma función de antes para leer la foto
+  // PREVISUALIZACION DE LA FOTO
   const handleImagen = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -21,7 +19,6 @@ export default function AdminNoticias() {
     }
   };
 
-  // onSubmit recibe directamente los datos agrupados por la librería
   const onSubmit = (data) => {
     const nuevaNoticia = {
       id: Date.now().toString(),
@@ -42,8 +39,7 @@ export default function AdminNoticias() {
 
   return (
     <>
-      <Navbar />
-      <div className="min-h-screen bg-gray-100 p-10 font-sans">
+      <div className="bg-gray-100 p-10 font-sans">
         <div className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg">
           <h1 className="text-3xl font-bold text-[#132A46] mb-2">
             Panel Administrativo
