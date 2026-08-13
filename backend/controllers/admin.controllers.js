@@ -1,6 +1,31 @@
 // IMPORTANTE: Importamos usando las llaves {} porque no hay un export default en el modelo
 import { User } from "../models/user.models.js"; 
 
+// ==========================================
+// OBTENER EL PADRÓN COMPLETO DE USUARIOS (SOCIOS)
+// ==========================================
+export const obtenerTodosLosUsuarios = async (req, res) => {
+  try {
+    // Obtenemos todos los registros excluyendo la contraseña por seguridad
+    const usuarios = await User.findAll({
+      attributes: { exclude: ["password"] },
+      order: [["createdAt", "DESC"]], // Los más recientes primero
+    });
+
+    res.status(200).json({
+      exito: true,
+      total: usuarios.length,
+      data: usuarios,
+    });
+  } catch (error) {
+    console.error("Error al obtener la lista de usuarios:", error);
+    res.status(500).json({
+      exito: false,
+      mensaje: "Error interno del servidor al recuperar los usuarios.",
+    });
+  }
+};
+
 // Obtener todos los usuarios que están esperando aprobación
 export const obtenerSolicitudesPendientes = async (req, res) => {
   try {
