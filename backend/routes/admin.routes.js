@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { obtenerSolicitudesPendientes, gestionarSolicitud } from '../controllers/admin.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
-import { darDeBajaSocio } from '../controllers/admin.controllers.js';
+import { darDeBajaSocio, obtenerTodosLosUsuarios } from '../controllers/admin.controllers.js';
 
 const router = Router();
 
@@ -12,7 +12,9 @@ router.use(verificarToken);
 router.get('/solicitudes', obtenerSolicitudesPendientes);
 router.put('/solicitudes/:id', gestionarSolicitud);
 router.put('/socios/:id/baja', darDeBajaSocio);
+router.get("/usuarios", obtenerTodosLosUsuarios);
 
+// Endpoint de Reporte (Geolocalización / Rubros)
 /* ÉPICA 2 (FINANZAS):
   cuando hagamos el panel financiero,
   podremos agregar aquí tus rutas de finanzas, ej
