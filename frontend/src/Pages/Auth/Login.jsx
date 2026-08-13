@@ -1,31 +1,28 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { iniciarSesion } from "../../services/authServices"; // Importamos el servicio
 
 export default function Login() {
   const navigate = useNavigate();
-  const { formState, handleChange } = useForm({
-    email: "",
-    password: "",
-  });
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const response = await fetch("http://localhost:3000/api/login", {
-      method: "POST",
-      body: JSON.stringify(formState),
-      headers: {
-        "Content-type": "application/json",
-      },
-      credentials: "include",
-    });
-    const data = await response.json();
+  const { register, handleSubmit } = useForm();
 
-    // ESTO ES LO NUEVO: Evaluamos si el backend dijo que todo salió bien (código 200)
-    if (response.ok) {
-      alert("Logueado con éxito");
-      navigate("/home");
-    } else {
-      // Si la contraseña o correo están mal, mostramos el error que mande el backend
-      alert(data.message || "Error al iniciar sesión");
+  const handleLogin = async (data) => {
+    try {
+      // 1. Llamamos al servicio y le pasamos la data visual
+      const result = await iniciarSesion(data);
+
+      // 2. Evaluamos la respuesta
+      if (result.exito) {
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("usuario", JSON.stringify(result.usuario));
+
+        alert(result.mensaje);
+        navigate("/"); // Te mando directo al admin para que pruebes
+      } else {
+        alert("Error: " + result.mensaje);
+      }
+    } catch (error) {
+      alert(error.message);
     }
   };
 
@@ -36,39 +33,35 @@ export default function Login() {
           Bienvenido de vuelta
         </h1>
 
-        <form className="flex flex-col" onSubmit={handleLogin}>
-          
+        {/* Conectamos el form con handleSubmit */}
+        <form className="flex flex-col" onSubmit={handleSubmit(handleLogin)}>
           <div className="mb-6">
-            <label className="block text-lg font-bold" htmlFor="email">
+            <label className="block text-lg font-bold mb-1" htmlFor="email">
               Correo electrónico
             </label>
             <input
-              value={formState.email}
-              onChange={handleChange}
               type="email"
               id="email"
-              name="email"
+              placeholder="email@ejemplo.com"
               className="w-64 h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-              required
+              {...register("email", { required: true })} // Capturamos el input
             />
           </div>
 
           <div className="mt-5">
-            <label className="block text-lg font-bold" htmlFor="password">
+            <label className="block text-lg font-bold mb-1" htmlFor="password">
               Contraseña
             </label>
             <input
-              value={formState.password}
-              onChange={handleChange}
               type="password"
               id="password"
-              name="password"
+              placeholder="********"
               className="w-64 h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-              required
+              {...register("password", { required: true })} // Capturamos el input
             />
           </div>
 
-          <div className="justify-end mb-10">
+          <div className="justify-end mb-10 mt-2">
             <a href="#" className="text-sm hover:underline">
               ¿Olvidaste tu contraseña?
             </a>
@@ -84,12 +77,12 @@ export default function Login() {
           </div>
         </form>
 
-          <div className="text-center text-sm">
-            <span>¿No tienes una cuenta? </span>
-            <Link to="/register" className="text-[#3b82f6] hover:underline">
-              Créala aquí
-            </Link>
-          </div>
+        <div className="text-center text-sm">
+          <span>¿No tienes una cuenta? </span>
+          <Link to="/register" className="text-[#3b82f6] hover:underline">
+            Créala aquí
+          </Link>
+        </div>
       </div>
 
       <div className="absolute bottom-4 left-4 mb-10">

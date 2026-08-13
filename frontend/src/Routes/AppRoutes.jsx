@@ -1,5 +1,7 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import AdminNoticias from "../Pages/Admin/AdminNoticias.jsx";
+import { Navigate, Route, Routes,useLocation } from "react-router-dom";
+import MainLayout from "../layouts/MainLayout.jsx";
+import { EventosAdmin, FinanzasAdmin, RegistrosAdmin, SociosAdmin,NoticiasAdmin, } from "../Pages/Admin/index.js"; // Importamos el nuevo guardia
+import Inicio from "../Pages/Admin/Inicio.jsx";
 import { Login, Register } from "../Pages/Auth/index.js";
 import Home from "../Pages/Home";
 import {
@@ -11,21 +13,19 @@ import {
   Socios,
 } from "../Pages/HomePage/index.js";
 import Profile from "../Pages/Profile";
+import AdminRoutes from "./AdminRoutes.jsx";
 import PrivateRoutes from "./PrivateRoutes";
-import PublicRoutes from "./PublicRoutes";
-import Inicio from "../Pages/Admin/Inicio.jsx";
-import MainLayout from "../layouts/MainLayout.jsx";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* RUTA PRINCIPAL */}
+      {/*NO LOGUEADOS */}
       <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-      {/* RUTAS PÚBLICAS (Login / Register) */}
-      <Route element={<PublicRoutes />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+      {/*LOGUEADOS*/}
+      <Route element={<PrivateRoutes />}>
         <Route path="/profile" element={<Profile />} />
         <Route path="/capacitacion" element={<Capacitacion />} />
         <Route path="/contactos" element={<Contacto />} />
@@ -33,18 +33,21 @@ export default function AppRoutes() {
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/noticias" element={<Noticias />} />
         <Route path="/socios" element={<Socios />} />
-        {/*LAS RUTAS DE ABAJO TIENEN QUE IR PRIVADAS */}
+      </Route>
+
+      {/* ADMINS*/}
+      <Route element={<AdminRoutes />}>
         <Route element={<MainLayout />}>
           <Route path="/admin/inicio" element={<Inicio />} />
-          <Route path="/admin/noticias" element={<AdminNoticias />} />
+          <Route path="/admin/noticias" element={<NoticiasAdmin />} />
+          <Route path="/admin/eventos" element={<EventosAdmin />} />
+          <Route path="/admin/finanzas" element={<FinanzasAdmin />} />
+          <Route path="/admin/registros" element={<RegistrosAdmin />} />
+          <Route path="/admin/socios" element={<SociosAdmin />} />
         </Route>
       </Route>
 
-      {/* RUTAS PRIVADAS (Solo usuarios logueados) */}
-      <Route element={<PrivateRoutes />}>
-        {/* <Route path="/profile" element={<Profile />} /> */}
-      </Route>
-
+      {/* RUTA COMODÍN */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

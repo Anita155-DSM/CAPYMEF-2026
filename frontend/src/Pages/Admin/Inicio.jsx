@@ -4,11 +4,13 @@ import {
   FaChalkboardTeacher,
 } from "react-icons/fa";
 import MainLayout from "../../layouts/MainLayout";
+import Navbar from "../../Components/Navbar";
 
 export default function Inicio() {
   return (
     <>
       <div className="p-10 flex flex-col items-center">
+        
         {/* TARJETA PRINCIPAL: SOCIOS */}
         <div className="bg-[#2673A6] w-full max-w-4xl rounded-[2rem] p-8 text-white shadow-md">
           <div className="text-center mb-6">
@@ -91,7 +93,6 @@ export default function Inicio() {
           </div>
         </div>
       </div>
-     
     </>
   );
 }

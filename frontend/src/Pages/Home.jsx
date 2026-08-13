@@ -6,7 +6,7 @@ import Escudo from "../assets/img/Escudo.png";
 import fondoHome from "../assets/img/FondoCapymef.png";
 import Footer from "../Components/Footer.jsx";
 import Navbar from "../Components/Navbar.jsx";
-import { FaPhone } from "react-icons/fa6";
+import { FaPhone, FaGem, FaUser, FaStar, FaHandshake } from "react-icons/fa6";
 import { AiFillHome } from "react-icons/ai";
 import { MdEmail } from "react-icons/md";
 //asdad
@@ -23,15 +23,15 @@ export default function Home() {
       </header>
       <main className="w-full overflow-x-hidden overflow-y-hidden">
         {/*La Vista N1 */}
-        <section className="w-full  font-sans">
+        <section className="w-full font-sans">
           <div
             className="min-h-screen w-full bg-cover bg-no-repeat justify-center items-start flex flex-col"
             style={{ backgroundImage: `url(${fondoHome})` }}
           >
             {/* Contenedor del texto central */}
             <div className="px-4 py-4 line-clamp-3">
-              <h1 className="text-5xl md:text-7xl text-white font-serif font-bold px8 py-4 -rounded-xl inline-block">
-                Camara de Pequeñas y Medianas Empresas Formosa
+              <h1 className="text-5xl md:text-7xl text-white font-serif font-semibold px8 py-4 -rounded-xl inline-block">
+                Cámara de Pequeñas y Medianas Empresas Formosa
               </h1>
               <br /> {/* Salto de línea para separar el título del subtítulo */}
               <p className="mt-6 text-xl text-white font-bold bg-black/20 inline-block px-6 py-2 rounded-lg max-w-lg">
@@ -52,70 +52,57 @@ export default function Home() {
               {isOpen && (
                 <div
                   onClick={() => setIsOpen(false)}
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                  className="rounded-sm fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
                 >
                   <div
                     onClick={(e) => e.stopPropagation()}
-                    className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md relative mx-4 animacion-modal"
+                    // Fondo claro como en tu imagen, max-w-4xl para hacerlo ancho pero sin ocupar todo, y padding generoso
+                    className="bg-[#F4F8FB] border border-gray-300 rounded-sm shadow-2xl p-8 md:p-12 w-full max-w-4xl relative mx-4 animacion-modal"
                   >
-                    <button
-                      onClick={() => setIsOpen(false)}
-                      className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
-                    >
-                      <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
 
-                    <h3 className="text-2xl font-bold text-[#132A46] mb-4">
+                    {/* Título centrado con color azul y fuente Sans */}
+                    <h3 className="text-2xl md:text-[26px] font-normal text-center text-[#1D7BB6] mb-8 font-sans tracking-wide">
                       COMO SUMARSE A CAPYMEF
                     </h3>
-                    <p className="text-gray-600 mb-8 leading-relaxed">
-                      Para garantizar una atención personalizada y asignarte la
-                      categoría ideal para tu pyme, el proceso de alta inicial
-                      lo realizamos de forma directa. ¿Cómo ser socio?
-                      Contactanos: Escribinos o acercate a nuestras oficinas
-                      para conocer los requisitos formales y completar tu
-                      solicitud de ingreso oficial. Tu Alta: Tu solicitud será
-                      evaluada y aprobada por la Comisión Directiva para darte
-                      la bienvenida a la Cámara. Registro Digital: Una vez que
-                      tu alta sea aprobada, podrás volver a esta página web,
-                      crear tu cuenta y subir tu documentación para acceder a tu
-                      panel de autogestión, beneficios y pago de cuotas.
-                      Nuestras vías de contacto:
-                    </p>
 
-                    <div className="space-y-2 text-center">
-                      <p className="flex items-center mt-2">
-                        <AiFillHome className="w-5 h-5 mr-2" /> Junin
-                        651,Formosa
+                    {/* Contenedor del texto con fuente Serif para igualar la imagen */}
+                    <div className="font-serif text-gray-900 text-lg md:text-[19px] leading-relaxed space-y-1">
+                      <p>
+                        Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.
                       </p>
-                      <p className="flex items-center">
-                        <FaPhone className="w-5 h-5 mr-2" /> (0370) 123-4567
+                      <p>¿Cómo ser socio?</p>
+                      <p>
+                        Contactanos: Escribinos o acercate a nuestras oficinas para conocer los requisitos formales y completar tu solicitud de ingreso oficial.
                       </p>
-                      <p className="flex">
-                        <MdEmail className="w-5 h-5 mr-2" /> info@capymef.ar
+                      <p>
+                        Tu Alta: Tu solicitud será evaluada y aprobada por la Comisión Directiva para darte la bienvenida a la Cámara.
                       </p>
+                      <p>
+                        Registro Digital: Una vez que tu alta sea aprobada, podrás volver a esta página web, crear tu cuenta y subir tu documentación para acceder a tu panel de autogestión, beneficios y pago de cuotas.
+                      </p>
+
+                      <p className="pt-2">Nuestras vías de contacto:</p>
+                      {/* Lista con los emojis exactos de tu imagen */}
+                      <div className="flex">
+                        <ul className="space-y-3">
+                          <li>📍 Dirección: Maipú 651, Formosa, Argentina, 3600.</li>
+                          <li>📱 Tel: 370-123-4567, 0370 446-2508</li>
+                          <li>✉️ Correo: info@capymef.ar</li>
+                        </ul>
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" width="570" height="200" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                      </div>
                     </div>
 
-                    <div className="flex justify-end gap-4">
+                    {/* Botón ENTENDIDO abajo a la derecha */}
+                    <div className="flex justify-end mt-10 font-sans">
                       <button
                         onClick={() => setIsOpen(false)}
-                        className="px-5 py-2 bg-[#1D7BB6] hover:bg-[#c00a22] text-white font-bold rounded-md transition-colors"
+                        className="px-8 py-2.5 bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold rounded-full transition-colors text-sm tracking-wide shadow-md"
                       >
-                        Cerrar
+                        ENTENDIDO
                       </button>
                     </div>
+
                   </div>
                 </div>
               )}
@@ -123,66 +110,80 @@ export default function Home() {
           </div>
         </section>
         {/*La Vista N2 */}
-        <section className="w-full bg-white px-10 md:px-24 py-27 font-sans">
+        <section className="w-full bg-[#F4F8FB] px-6 md:px-24 py-20 font-sans">
+
           {/* Título de la sección */}
-          <div className="flex flex-col text-start mb-12">
-            <h2 className="text-4xl font-serif font-bold text-[#132A46]mb-5">
-              Tres Formas de ser Socio
+          <div className="flex flex-col items-center mb-16">
+            <h2 className="text-3xl md:text-5xl my-6.5 font-light text-[#1D7BB6] uppercase tracking-wide">
+              Formas de ser socio
             </h2>
-            <div className="w-24 h-1 bg-[#1D7BB6] mt-2"></div>
           </div>
 
-          {/* 
-          Contenedor Grid: 
-          - grid-cols-1: En celulares pone 1 tarjeta por fila (una abajo de la otra).
-          - md:grid-cols-3: En computadoras pone las 3 tarjetas en la misma fila.
-          - gap-8: Genera el espacio en blanco entre las tarjetas.
-        */}
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* --- TARJETA 1: Socio Padrino --- */}
-              <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center">
-                  Socio Padrino
+          {/* Contenedor Grid */}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-y-12">
+
+              {/* --- COLUMNA 1: Padrino --- */}
+              <div className="group flex flex-col items-center px-6 md:border-r border-gray-300 hover:-translate-y-1 transition-transform duration-300">
+                {/* Ícono */}
+                <div className="text-[#1D7BB6] mb-6 h-24 flex items-center justify-center">
+                  <FaGem className="text-7xl" />
+                </div>
+
+                <h3 className="text-xl font-medium text-gray-800 mb-6 titulo-animado">
+                  Padrino
                 </h3>
-                <ul className="list-disc pl-5 text-base font-medium mt-8 space-y-5">
-                  <li>
-                    Acceso gratuito o con bonificación especial a eventos
-                    tarifados
-                  </li>
+
+                <ul className="list-disc text-lg text-dark space-y-4 w-full max-w-[280px] text-left">
+                  <li>Acceso gratuito o con bonificación especial a eventos tarifados</li>
                   <li>Reconocimiento por su respaldo institucional</li>
-                  <li>
-                    Misma información y transparencia que el resto de los socios
-                  </li>
+                  <li>Misma información y transparencia que el resto de los socios</li>
                 </ul>
               </div>
 
-              {/* --- TARJETA 2: Socio Activo --- */}
-              <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center">Socio Activo</h3>
-                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8 space-y-5">
+              {/* --- COLUMNA 2: Activo --- */}
+              <div className="group flex flex-col items-center px-6 md:border-r border-gray-300 hover:-translate-y-1 transition-transform duration-300">
+                {/* Ícono (Usuario con estrellita simulada) */}
+                <div className="text-[#1D7BB6] mb-6 h-24 flex items-center justify-center relative">
+                  <FaUser className="text-7xl" />
+                  {/* Estrellita superpuesta con borde del color del fondo para dar el efecto de corte */}
+                  <FaStar className="text-3xl absolute -bottom-2 -right-3 text-[#1D7BB6] bg-[#F4F8FB] rounded-full border-4 border-[#F4F8FB]" />
+                </div>
+
+                <h3 className="text-xl font-medium text-gray-800 mb-6 titulo-animado">
+                  Activo
+                </h3>
+
+                <ul className="list-disc text-lg text-dark space-y-4 w-full max-w-[280px] text-left">
                   <li>Bonificaciones máximas en eventos y capacitaciones</li>
                   <li>Participación plena en la vida institucional</li>
                   <li>Cuota mensual con ventana de pago del 1 al 10</li>
                 </ul>
               </div>
 
-              {/* --- TARJETA 3: Socio Adherente --- */}
-              <div className="bg-[#1D7BB6] text-white rounded-xl p-8 shadow-lg aspect-square flex flex-col justify-start hover:-translate-y-1 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-center">
-                  Socio Adherente
+              {/* --- COLUMNA 3: Adherente --- */}
+              <div className=" group flex flex-col items-center px-6 hover:-translate-y-1 transition-transform duration-300">
+                {/* Ícono */}
+                <div className="text-[#1D7BB6] mb-6 h-24 flex items-center justify-center">
+                  <FaHandshake className="text-[5.5rem]" />
+                </div>
+
+                <h3 className="text-xl font-medium text-gray-800 mb-6 titulo-animado">
+                  Adherente
                 </h3>
-                <ul className="list-disc pl-5 space-y-4 text-base font-medium mt-8 space-y-5">
+
+                <ul className="list-disc text-lg text-dark space-y-5 w-full max-w-[280px] text-left">
                   <li>Acceso a eventos con arancel</li>
                   <li>Becas o descuentos especiales según disponibilidad</li>
                   <li>Puerta de entrada natural a la comunidad CAPyMEF</li>
                 </ul>
               </div>
+
             </div>
           </div>
         </section>
         {/*La vista N3*/}
-        <section className="w-full bg-[#1b4f7a] px-10 md:px-24 pt-16 font-sans text-white">
+        <section className="w-full bg-[#1b4f7a] px-10 md:px-24 pt-16 font-sans text-white pb-7">
           {/* Encabezado de la sección */}
           <div className="relative flex flex-col md:flex-row items-center justify-center mb-12">
             {/* Título centrado */}
@@ -293,7 +294,7 @@ export default function Home() {
         </section>
       </main>
       {/*Footer */}
-      <footer className="bg-[#1b4f7a]">
+      <footer className="bg-[#1b4f7a] pt-5">
         <Footer />
       </footer>
     </>
