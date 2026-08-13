@@ -13,6 +13,8 @@ import authRoutes from './routes/authRoutes.js';
 import noticiaRoutes from './routes/noticia.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import gastoRoutes from './routes/gasto.routes.js'
+import cuotaRoutes from './routes/cuota.routes.js'
+import { iniciarCronJobs } from './config/cron.js';//automatizados de cuotas
 
 
 dotenv.config();
@@ -34,6 +36,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/auth', authRoutes); 
 app.use('/api/admin', adminRoutes); // wndpoints: /api/admin/solicitudes, etc
 app.use('/api/noticias', noticiaRoutes);
+app.use('/api/cuotas', cuotaRoutes) //pago de cuptas
 
 // Ruta de prueba
 app.get('/', (req, res) => {
