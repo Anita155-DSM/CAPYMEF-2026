@@ -1,6 +1,12 @@
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout.jsx";
-import { EventosAdmin, FinanzasAdmin, NoticiasAdmin, RegistrosAdmin, SociosAdmin, } from "../Pages/Admin/index.js"; // Importamos el nuevo guardia
+import {
+  EventosAdmin,
+  FinanzasAdmin,
+  NoticiasAdmin,
+  RegistrosAdmin,
+  SociosAdmin,
+} from "../Pages/Admin/index.js"; // Importamos el nuevo guardia
 import Inicio from "../Pages/Admin/Inicio.jsx";
 import { Login, Register } from "../Pages/Auth/index.js";
 import Home from "../Pages/Home";
@@ -16,17 +22,10 @@ import Profile from "../Pages/Profile";
 import { Autoridades, Balance, Estatuto } from "../Pages/PublicPages/index.js";
 import AdminRoutes from "./AdminRoutes.jsx";
 import PrivateRoutes from "./PrivateRoutes";
-import { Navbar, NavbarPublico } from "../Components/index.js"
 
 export default function AppRoutes() {
-  const token = localStorage.getItem("token");
-  const location = useLocation();
-  const rutasSinNavbar = ["/login", "/register"];
-  const mostrarNavbar = !rutasSinNavbar.includes(location.pathname);
   return (
     <>
-
-      {mostrarNavbar && token ? <Navbar /> : <NavbarPublico />}
       <Routes>
         {/*NO LOGUEADOS */}
         <Route path="/" element={<Home />} />

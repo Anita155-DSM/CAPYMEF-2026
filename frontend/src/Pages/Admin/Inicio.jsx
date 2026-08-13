@@ -7,7 +7,7 @@ import {
 import MainLayout from "../../layouts/MainLayout";
 import Navbar from "../../Components/Navbar";
 // Importamos tu servicio
-import { obtenerTodosLosUsuarios } from "../../services/adminServices"; 
+import { obtenerTodosLosUsuarios } from "../../services/adminServices";
 
 export default function Inicio() {
   // 1. Creamos un estado para guardar nuestros contadores
@@ -26,19 +26,27 @@ export default function Inicio() {
 
         if (result.exito) {
           // Filtramos solo los usuarios que ya son parte oficial de la cámara (aprobados)
-          const sociosAprobados = result.data.filter(socio => socio.estado === 'aprobado');
+          const sociosAprobados = result.data.filter(
+            (socio) => socio.estado === "aprobado",
+          );
 
           // Contamos cuántos hay de cada categoría (pasamos a minúscula por si acaso)
-          const activos = sociosAprobados.filter(s => s.categoria?.toLowerCase() === 'activo').length;
-          const padrinos = sociosAprobados.filter(s => s.categoria?.toLowerCase() === 'padrino').length;
-          const adherentes = sociosAprobados.filter(s => s.categoria?.toLowerCase() === 'adherente').length;
+          const activos = sociosAprobados.filter(
+            (s) => s.categoria?.toLowerCase() === "activo",
+          ).length;
+          const padrinos = sociosAprobados.filter(
+            (s) => s.categoria?.toLowerCase() === "padrino",
+          ).length;
+          const adherentes = sociosAprobados.filter(
+            (s) => s.categoria?.toLowerCase() === "adherente",
+          ).length;
 
           // Guardamos los números reales en el estado
           setConteoSocios({
             total: sociosAprobados.length,
             activos,
             padrinos,
-            adherentes
+            adherentes,
           });
         }
       } catch (error) {
@@ -52,7 +60,6 @@ export default function Inicio() {
   return (
     <>
       <div className="p-10 flex flex-col items-center">
-        
         {/* TARJETA PRINCIPAL: SOCIOS */}
         <div className="bg-[#2673A6] w-full max-w-4xl rounded-[2rem] p-8 text-white shadow-md">
           <div className="text-center mb-6">
@@ -71,7 +78,7 @@ export default function Inicio() {
               <p className="text-4xl font-bold">{conteoSocios.activos}</p>
             </div>
             <div className="absolute left-1/3 h-16 w-px bg-white/30"></div>
-            
+
             <div className="text-center w-1/3">
               <h3 className="text-xs font-bold tracking-widest mb-1 uppercase">
                 PADRINOS
@@ -79,7 +86,7 @@ export default function Inicio() {
               <p className="text-4xl font-bold">{conteoSocios.padrinos}</p>
             </div>
             <div className="absolute right-1/3 h-16 w-px bg-white/30"></div>
-            
+
             <div className="text-center w-1/3">
               <h3 className="text-xs font-bold tracking-widest mb-1 uppercase">
                 ADHERENTES
