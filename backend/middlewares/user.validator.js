@@ -4,7 +4,6 @@ import { body, validationResult } from 'express-validator';
 export const validarResultado = (req, res, next) => {
   const errores = validationResult(req);
   if (!errores.isEmpty()) {
-    console.log(errores)
     return res.status(400).json({
       exito: false,
       mensaje: 'Error de validación en los datos enviados.',
@@ -41,7 +40,7 @@ export const validacionRegistro = [
     .matches(/\d/).withMessage('La contraseña debe contener al menos un número.')
     .matches(/[A-Z]/).withMessage('La contraseña debe contener al menos una letra mayúscula.'),
 
-  // 2. Datos de Contacto y Ubicación
+  // 2. Datos de Contacto (Nuevos por Estatuto)
   body('telefono')
     .trim()
     .notEmpty().withMessage('El número de teléfono es obligatorio.'),
@@ -50,21 +49,10 @@ export const validacionRegistro = [
     .trim()
     .notEmpty().withMessage('La localidad es obligatoria.'),
 
-  // 3. Categorización e Información de Negocio
+  // 3. Categorización
   body('categoria')
-    .optional()
+    .optional() // Es opcional porque el controlador le pone 'adherente' por defecto si no lo envían
     .isIn(['activo', 'adherente', 'padrino']).withMessage('La categoría no es válida.'),
-
-  body('rubro')
-    .notEmpty().withMessage('El rubro es obligatorio.'),
-
-  body('actividad')
-    .optional()
-    .isString().withMessage('La actividad debe ser texto.'),
-
-  body('tamanoEmpresa')
-    .optional()
-    .isString().withMessage('El tamaño de empresa debe ser texto.'),
 
   validarResultado
 ];

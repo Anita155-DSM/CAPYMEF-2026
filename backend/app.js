@@ -5,10 +5,15 @@ import { sequelize } from './config/database.js';
 
 // IMPORTAMOS MODELOS
 import './models/user.models.js'; 
+import './models/gasto.models.js';
+import './models/noticia.models.js';
 
-// IMPORTAMOS RUTAS
+// IMPORTAMOS TUS RUTAS
 import authRoutes from './routes/authRoutes.js'; 
-import adminRoutes from './routes/admin.routes.js'
+import noticiaRoutes from './routes/noticia.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import gastoRoutes from './routes/gasto.routes.js'
+
 
 dotenv.config();
 
@@ -20,10 +25,15 @@ const port = process.env.PORT || 3000;
 // Middlewares
 app.use(cors());
 app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); // recomendado para parsear formularios
 
-// Rutas
-app.use('/api/auth', authRoutes);   // Maneja /registro, /login, /perfil
-app.use('/api/admin', adminRoutes); //rutas de administrador
+// Servir la carpeta de archivos subidos públicamente (constancias, imágenes de noticias, etc.)
+app.use('/uploads', express.static('uploads'));
+
+// 4. REGISTRO DE RUTAS API
+app.use('/api/auth', authRoutes); 
+app.use('/api/admin', adminRoutes); // wndpoints: /api/admin/solicitudes, etc
+app.use('/api/noticias', noticiaRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
