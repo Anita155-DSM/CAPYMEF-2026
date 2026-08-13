@@ -7,6 +7,7 @@ import { sequelize } from './config/database.js';
 import './models/user.models.js'; 
 import './models/gasto.models.js';
 import './models/noticia.models.js';
+import './models/pago.models.js';
 
 // IMPORTAMOS TUS RUTAS
 import authRoutes from './routes/authRoutes.js'; 
