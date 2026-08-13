@@ -78,7 +78,8 @@ frontend/
 ├── package.json
 ├── README.md
 └── vite.config.js
-
+--------------------------------------------------
+    git checkout origin/develop-ana -- backend/
 --------------------------------------------------
     Comando para copiar la rama:
     git fetch
