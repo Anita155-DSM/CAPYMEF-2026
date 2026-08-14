@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   FaHandHoldingUsd,
   FaExclamationTriangle,
@@ -5,19 +6,68 @@ import {
 } from "react-icons/fa";
 import MainLayout from "../../layouts/MainLayout";
 import Navbar from "../../Components/Navbar";
+// Importamos tu servicio
+import { obtenerTodosLosUsuarios } from "../../services/adminServices";
 
 export default function Inicio() {
+  // 1. Creamos un estado para guardar nuestros contadores
+  const [conteoSocios, setConteoSocios] = useState({
+    total: 0,
+    activos: 0,
+    padrinos: 0,
+    adherentes: 0,
+  });
+
+  // 2. Usamos useEffect para ir a buscar la info apenas carga el Dashboard
+  useEffect(() => {
+    const cargarEstadisticas = async () => {
+      try {
+        const result = await obtenerTodosLosUsuarios();
+
+        if (result.exito) {
+          // Filtramos solo los usuarios que ya son parte oficial de la cámara (aprobados)
+          const sociosAprobados = result.data.filter(
+            (socio) => socio.estado === "aprobado",
+          );
+
+          // Contamos cuántos hay de cada categoría (pasamos a minúscula por si acaso)
+          const activos = sociosAprobados.filter(
+            (s) => s.categoria?.toLowerCase() === "activo",
+          ).length;
+          const padrinos = sociosAprobados.filter(
+            (s) => s.categoria?.toLowerCase() === "padrino",
+          ).length;
+          const adherentes = sociosAprobados.filter(
+            (s) => s.categoria?.toLowerCase() === "adherente",
+          ).length;
+
+          // Guardamos los números reales en el estado
+          setConteoSocios({
+            total: sociosAprobados.length,
+            activos,
+            padrinos,
+            adherentes,
+          });
+        }
+      } catch (error) {
+        console.error("Error al cargar estadísticas de socios:", error);
+      }
+    };
+
+    cargarEstadisticas();
+  }, []);
+
   return (
     <>
       <div className="p-10 flex flex-col items-center">
-        
         {/* TARJETA PRINCIPAL: SOCIOS */}
         <div className="bg-[#2673A6] w-full max-w-4xl rounded-[2rem] p-8 text-white shadow-md">
           <div className="text-center mb-6">
             <h2 className="text-lg font-bold tracking-widest mb-1 uppercase">
               SOCIOS
             </h2>
-            <p className="text-6xl font-bold">248</p>
+            {/* 3. Reemplazamos el número duro por nuestro estado dinámico */}
+            <p className="text-6xl font-bold">{conteoSocios.total}</p>
           </div>
 
           <div className="flex justify-around items-center border-t border-white/30 pt-6 relative">
@@ -25,26 +75,28 @@ export default function Inicio() {
               <h3 className="text-xs font-bold tracking-widest mb-1 uppercase">
                 ACTIVOS
               </h3>
-              <p className="text-4xl font-bold">180</p>
+              <p className="text-4xl font-bold">{conteoSocios.activos}</p>
             </div>
             <div className="absolute left-1/3 h-16 w-px bg-white/30"></div>
+
             <div className="text-center w-1/3">
               <h3 className="text-xs font-bold tracking-widest mb-1 uppercase">
                 PADRINOS
               </h3>
-              <p className="text-4xl font-bold">18</p>
+              <p className="text-4xl font-bold">{conteoSocios.padrinos}</p>
             </div>
             <div className="absolute right-1/3 h-16 w-px bg-white/30"></div>
+
             <div className="text-center w-1/3">
               <h3 className="text-xs font-bold tracking-widest mb-1 uppercase">
                 ADHERENTES
               </h3>
-              <p className="text-4xl font-bold">50</p>
+              <p className="text-4xl font-bold">{conteoSocios.adherentes}</p>
             </div>
           </div>
         </div>
 
-        {/* 3 TARJETAS INFERIORES */}
+        {/* 3 TARJETAS INFERIORES (Aún hardcodeadas, se conectarán en la Épica 2) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl mt-16">
           {/* Tarjeta 1 */}
           <div className="bg-white rounded-3xl p-6 text-center shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 relative pt-14">

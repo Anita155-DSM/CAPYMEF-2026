@@ -4,22 +4,20 @@ import Came from "../assets/img/Came.png";
 import Came70years from "../assets/img/Came70years.png";
 import Escudo from "../assets/img/Escudo.png";
 import fondoHome from "../assets/img/FondoCapymef.png";
-import Footer from "../Components/Footer.jsx";
-import Navbar from "../Components/Navbar.jsx";
+import {Navbar,NavbarPublico,Footer} from "../Components/index.js";
 import { FaPhone, FaGem, FaUser, FaStar, FaHandshake } from "react-icons/fa6";
 import { AiFillHome } from "react-icons/ai";
 import { MdEmail } from "react-icons/md";
 //asdad
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
-
+  const token = localStorage.getItem("token")
   return (
     <>
       {/* Se coloca dentro del main para poder hacer que ocupe la pantalla completa con el w-full */}
       {/*Header */}
       <header>
-        {/*Navbar */}
-        <Navbar />
+        {token ? <Navbar/> : <NavbarPublico/>}
       </header>
       <main className="w-full overflow-x-hidden overflow-y-hidden">
         {/*La Vista N1 */}
