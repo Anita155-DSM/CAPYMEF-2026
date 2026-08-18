@@ -3,11 +3,13 @@ import { obtenerSolicitudesPendientes, gestionarSolicitud } from '../controllers
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { darDeBajaSocio, obtenerTodosLosUsuarios } from '../controllers/admin.controllers.js';
 import { obtenerDistribucionPorLocalidad, obtenerDistribucionPorRubro } from '../controllers/admin.controllers.js';
+import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 
 const router = Router();
 
 // Todas las rutas de este archivo exigirán que el usuario esté logueado
 router.use(verificarToken); 
+router.use(verificarAdmin);
 
 // Rutas para la gestión de nuevos socios
 router.get('/solicitudes', obtenerSolicitudesPendientes);

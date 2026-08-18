@@ -10,6 +10,7 @@ import {
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { uploadNoticia } from '../middlewares/multerNoticias.js';
 import { validacionNoticia } from '../middlewares/noticia.validator.js';
+import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 
 const router = Router();
 
@@ -27,8 +28,8 @@ router.get('/socios', verificarToken, obtenerNoticiasSocios);
 // ==========================================
 // Rutas Administrativas (Gestión de Noticias)
 // ==========================================
-router.post('/admin', verificarToken, uploadNoticia.single('imagen'), validacionNoticia, crearNoticia);
-router.put('/admin/:id', verificarToken, uploadNoticia.single('imagen'), validacionNoticia, actualizarNoticia);
-router.delete('/admin/:id', verificarToken, eliminarNoticia);
+router.post('/admin', verificarToken, verificarAdmin, uploadNoticia.single('imagen'), validacionNoticia, crearNoticia);
+router.put('/admin/:id', verificarToken, verificarAdmin, uploadNoticia.single('imagen'), validacionNoticia, actualizarNoticia);
+router.delete('/admin/:id', verificarToken, verificarAdmin, eliminarNoticia);
 
 export default router;
