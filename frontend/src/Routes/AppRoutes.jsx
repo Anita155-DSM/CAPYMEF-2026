@@ -8,7 +8,7 @@ import {
   SociosAdmin,
 } from "../Pages/Admin/index.js"; // Importamos el nuevo guardia
 import Inicio from "../Pages/Admin/Inicio.jsx";
-import { Login, Register } from "../Pages/Auth/index.js";
+import { ForgotPassword, Login, Register } from "../Pages/Auth/index.js";
 import Home from "../Pages/Home";
 import {
   Capacitacion,
@@ -31,6 +31,7 @@ export default function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/autoridades" element={<Autoridades />} />
         <Route path="/balance" element={<Balance />} />
         <Route path="/estatuto" element={<Estatuto />} />
