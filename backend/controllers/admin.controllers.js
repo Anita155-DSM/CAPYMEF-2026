@@ -1,5 +1,68 @@
 // IMPORTANTE: Importamos usando las llaves {} porque no hay un export default en el modelo
 import { User } from "../models/user.models.js"; 
+import { fn, col, literal } from "sequelize";
+
+// ============================================================================
+// PANTALLA: DASHBOARD DE REPORTES (Gráficos y Geolocalización)
+// ============================================================================
+
+/**
+ * Mapeo agrupado por Localidad para gráficos / mapa de distribución geográfica
+ */
+export const obtenerDistribucionPorLocalidad = async (req, res) => {
+  try {
+    const distribucion = await User.findAll({
+      attributes: [
+        "localidad",
+        [fn("COUNT", col("id")), "cantidad"]
+      ],
+      where: { estado: "aprobado" }, // Contamos solo a los socios activos/aprobados
+      group: ["localidad"],
+      order: [[literal("cantidad"), "DESC"]]
+    });
+
+    res.status(200).json({
+      exito: true,
+      totalLocalidades: distribucion.length,
+      data: distribucion,
+    });
+  } catch (error) {
+    console.error("Error al obtener reporte por localidad:", error);
+    res.status(500).json({
+      exito: false,
+      mensaje: "Error interno al recuperar la distribución por localidad.",
+    });
+  }
+};
+
+/**
+ * Agrupamiento por Rubro para gráficos circulares / estadísticas del dashboard
+ */
+export const obtenerDistribucionPorRubro = async (req, res) => {
+  try {
+    const distribucion = await User.findAll({
+      attributes: [
+        "rubro",
+        [fn("COUNT", col("id")), "cantidad"]
+      ],
+      where: { estado: "aprobado" },
+      group: ["rubro"],
+      order: [[literal("cantidad"), "DESC"]]
+    });
+
+    res.status(200).json({
+      exito: true,
+      totalRubros: distribucion.length,
+      data: distribucion,
+    });
+  } catch (error) {
+    console.error("Error al obtener reporte por rubro:", error);
+    res.status(500).json({
+      exito: false,
+      mensaje: "Error interno al recuperar la distribución por rubro.",
+    });
+  }
+};
 
 // ==========================================
 // OBTENER EL PADRÓN COMPLETO DE USUARIOS (SOCIOS)
