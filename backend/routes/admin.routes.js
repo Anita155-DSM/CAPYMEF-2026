@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { obtenerSolicitudesPendientes, gestionarSolicitud } from '../controllers/admin.controllers.js';
+import { obtenerSolicitudesPendientes, gestionarSolicitud, obtenerAuditorias } from '../controllers/admin.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { darDeBajaSocio, obtenerTodosLosUsuarios } from '../controllers/admin.controllers.js';
 import { obtenerDistribucionPorLocalidad, obtenerDistribucionPorRubro } from '../controllers/admin.controllers.js';
@@ -20,5 +20,9 @@ router.get("/usuarios", obtenerTodosLosUsuarios);
 // Endpoint de Reporte (Geolocalización / Rubros)
 router.get("/reportes/distribucion-rubros", obtenerDistribucionPorRubro);
 router.get("/reportes/distribucion-localidad", obtenerDistribucionPorLocalidad);
+
+// enpoint de registros de logs (de acciones de quien hizo que, solo puede acceder el administrador)
+router.get('/auditorias', obtenerAuditorias)
+
 
 export default router;

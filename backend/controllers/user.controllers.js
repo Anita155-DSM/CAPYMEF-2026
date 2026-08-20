@@ -64,6 +64,10 @@ export const registrarUsuario = async (req, res) => {
       rol: 'socio'
     });
 
+    //auditoria
+    req.auditoriaMensaje = `Nueva solicitud de registro recibida de la empresa ${razonSocial} (CUIT: ${cuit})`;
+    req.auditoriaCodigo = 'REGISTRO_SOCIO_SOLICITUD';
+
     res.status(201).json({
       exito: true,
       mensaje: 'Solicitud enviada correctamente. Queda pendiente de revisión por la administración.',
@@ -136,6 +140,10 @@ export const loginUsuario = async (req, res) => {
 
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '8h' });
 
+    //auditoria
+    req.auditoriaMensaje = `El usuario ${usuario.razonSocial} (${usuario.email}) inició sesión con éxito`;
+    req.auditoriaCodigo = 'LOGIN_SUCCESS';
+
     res.status(200).json({
       exito: true,
       mensaje: 'Inicio de sesión exitoso',
@@ -201,6 +209,10 @@ export const actualizarPerfil = async (req, res) => {
     if (localidad) usuario.localidad = localidad;
 
     await usuario.save(); // Sequelize guarda los cambios en PostgreSQL
+
+    //auditoria
+    req.auditoriaMensaje = `El usuario actualizó sus datos de contacto (Teléfono/Localidad)`;
+    req.auditoriaCodigo = 'UPDATE_MI_PERFIL';
 
     res.status(200).json({ 
       exito: true, 

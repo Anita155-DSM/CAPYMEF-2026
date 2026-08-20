@@ -86,6 +86,10 @@ export const crearNoticia = async (req, res) => {
       imagenUrl: imagenFile ? imagenFile.path : null,
     });
 
+    //auditoria
+    req.auditoriaMensaje = `Se creó la noticia: "${titulo}" (${visibilidad})`;
+    req.auditoriaCodigo = 'CREATE_NOTICIA';
+
     res.status(201).json({
       exito: true,
       mensaje: 'Noticia creada exitosamente.',
@@ -130,6 +134,10 @@ export const actualizarNoticia = async (req, res) => {
 
     await noticia.save();
 
+    //auditoria
+    req.auditoriaMensaje = `Se actualizó la noticia #${id}: "${noticia.titulo}"`;
+    req.auditoriaCodigo = 'UPDATE_NOTICIA';
+
     res.status(200).json({
       exito: true,
       mensaje: 'Noticia actualizada correctamente.',
@@ -155,6 +163,9 @@ export const eliminarNoticia = async (req, res) => {
     }
 
     await noticia.destroy(); // Soft delete por el 'paranoid: true'
+    //auditoria
+    req.auditoriaMensaje = `Se eliminó la noticia #${id}: "${tituloBorrado}"`;
+    req.auditoriaCodigo = 'DELETE_NOTICIA';
 
     res.status(200).json({
       exito: true,

@@ -9,6 +9,10 @@ import { Pago } from '../models/pago.models.js';
 export const ejecutarGeneracionCuotas = async (req, res) => {
   try {
     const resultado = await generarCuotasDelMes();
+
+    //auditoria
+    req.auditoriaMensaje = `Se ejecutó la generación masiva de cuotas. Creadas: ${resultado.creadas} cuotas para el periodo ${resultado.periodo}`;
+    req.auditoriaCodigo = 'GENERAR_CUOTAS_MASIVO';
     
     res.status(200).json({
       exito: true,
@@ -95,6 +99,10 @@ export const registrarPagoManual = async (req, res) => {
     // 2. Actualizamos el estado de la cuota
     cuota.estado = 'pagada';
     await cuota.save();
+
+    //auditoria
+    req.auditoriaMensaje = `Se registró el pago manual de $${montoAbonado || cuota.monto} para la cuota #${cuota.id} del socio ${cuota.socio?.razonSocial || cuota.usuarioId}`;
+    req.auditoriaCodigo = 'REGISTRAR_PAGO_MANUAL';
 
     res.status(200).json({
       exito: true,

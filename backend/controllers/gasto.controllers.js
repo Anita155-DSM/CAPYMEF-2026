@@ -25,6 +25,10 @@ export const registrarGasto = async (req, res) => {
       url_comprobante: comprobanteFile ? comprobanteFile.path : null,
     });
 
+    //auditoria
+    req.auditoriaMensaje = `Se registró un egreso por $${monto} (Concepto: ${concepto})`;
+    req.auditoriaCodigo = 'CREATE_GASTO_OPERATIVO';
+
     res.status(201).json({
       exito: true,
       mensaje: 'Gasto registrado correctamente.',
@@ -66,6 +70,10 @@ export const eliminarGasto = async (req, res) => {
     }
 
     await gasto.destroy(); // Soft delete gracias a paranoid: true
+
+    //auditoria
+    req.auditoriaMensaje = `Se eliminó el registro de gasto #${id}: ${conceptoEliminado} ($${montoEliminado})`;
+    req.auditoriaCodigo = 'DELETE_GASTO_OPERATIVO';
 
     res.status(200).json({
       exito: true,
