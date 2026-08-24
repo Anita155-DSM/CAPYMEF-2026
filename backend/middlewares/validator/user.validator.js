@@ -26,7 +26,8 @@ export const validacionRegistro = [
   body('cuit')
     .trim()
     .notEmpty().withMessage('El CUIT es obligatorio.')
-    .matches(/^\d{2}-\d{8}-\d{1}$|\d{11}$/).withMessage('Formato de CUIT inválido (ej: 20-12345678-9 o 20123456789).'),
+    // Antes la segunda alternativa no tenía '^', por lo que algo como "hola12345678901" pasaba la validación
+    .matches(/^(\d{2}-\d{8}-\d{1}|\d{11})$/).withMessage('Formato de CUIT inválido (ej: 20-12345678-9 o 20123456789).'),
 
   body('email')
     .trim()

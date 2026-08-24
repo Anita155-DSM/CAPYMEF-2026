@@ -45,7 +45,9 @@ export const User = sequelize.define('User', {
   // 4. Control de Administración y Accesos
   // ==========================================
   estado: { 
-    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado'), 
+    // Se agregó 'inactivo' para poder dar de baja a un socio sin confundirlo con 'rechazado'
+    // (rechazado = nunca se aprobó el registro; inactivo = fue socio activo y se dio de baja)
+    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado', 'inactivo'), 
     defaultValue: 'pendiente' 
   },
   rol: { 

@@ -1,3 +1,8 @@
+// ⚠️ DEPRECADO: este middleware guarda archivos en disco local y ya no se usa en ninguna ruta
+// (el registro de socios ahora usa multerCloudinary.js -> uploadNube).
+// No se encontraron referencias a este archivo en el resto del backend.
+// Se deja por si tu compañero lo necesita en otra rama; si no, se puede eliminar junto
+// con la carpeta 'uploads/constancias' local que quedó de cuando sí se usaba.
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';

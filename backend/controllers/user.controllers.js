@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 //import fs from 'fs'; YA NO LO USAMOS 
+import { v2 as cloudinary } from 'cloudinary';
 import { User } from '../models/user.models.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -43,7 +44,7 @@ export const registrarUsuario = async (req, res) => {
     });
 
     if (usuarioExistente) {
-      eliminarArchivoNube(constanciaFile.path); // Borramos el archivo subido para no ocupar espacio
+      eliminarArchivoNube(constanciaFile.filename); // Borramos el archivo subido para no ocupar espacio
       const mensaje = usuarioExistente.email === email 
         ? 'El correo electrónico ya se encuentra registrado.' 
         : 'El CUIT ingresado ya se encuentra registrado.';
@@ -89,7 +90,7 @@ export const registrarUsuario = async (req, res) => {
       },
     });
   } catch (error) {
-    if (constanciaFile) eliminarArchivoNube(constanciaFile.path);
+    if (constanciaFile) eliminarArchivoNube(constanciaFile.filename);
     console.error('Error al registrar solicitud de socio:', error.message);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -143,7 +144,8 @@ export const loginUsuario = async (req, res) => {
       email: usuario.email,
       rol: usuario.rol,
       estado: usuario.estado,
-      categoria: usuario.categoria // Agregamos la categoría al token
+      categoria: usuario.categoria, // Agregamos la categoría al token
+      razonSocial: usuario.razonSocial // Necesario para que la auditoría muestre el nombre real, no "Usuario"
     };
 
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '8h' });

@@ -18,12 +18,17 @@ const router = Router();
 // Rutas Públicas (Landing)
 // ==========================================
 router.get('/publicas', obtenerNoticiasLanding);
-router.get('/:id', obtenerNoticiaPorId);
 
 // ==========================================
 // Rutas Protegidas para Socios Logueados
 // ==========================================
+// IMPORTANTE: esta ruta literal debe ir ANTES que '/:id'. Express matchea en orden,
+// y '/:id' captura cualquier segmento (incluido "socios"), por lo que este endpoint
+// nunca se ejecutaba y ni siquiera pasaba por verificarToken.
 router.get('/socios', verificarToken, obtenerNoticiasSocios);
+
+// Esta ruta con parámetro dinámico va al final para no "tapar" rutas literales
+router.get('/:id', obtenerNoticiaPorId);
 
 // ==========================================
 // Rutas Administrativas (Gestión de Noticias)

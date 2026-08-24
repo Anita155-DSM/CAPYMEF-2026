@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { ejecutarGeneracionCuotas, obtenerCuotas, obtenerCuotasPendientes, registrarPagoManual, obtenerResumenFinanciero } from '../controllers/cuota.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
+import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 
 const router = Router();
 
 // Todas las rutas requieren token administrativo
 router.use(verificarToken);
+router.use(verificarAdmin);
 
 //generacion y consulta general de cuotas
 // Endpoint para disparar la generación manualmente

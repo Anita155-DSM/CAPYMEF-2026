@@ -138,8 +138,8 @@ export const gestionarSolicitud = async (req, res) => {
     await usuario.save();
 
     //auditoria
-    req.auditoriaMensaje = `Se ${estado === 'aprobado' ? 'aprobó' : 'rechazó'} la solicitud de registro del socio: ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
-    req.auditoriaCodigo = `SOLICITUD_${estado.toUpperCase()}`;
+    req.auditoriaMensaje = `Se ${nuevoEstado === 'aprobado' ? 'aprobó' : 'rechazó'} la solicitud de registro del socio: ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
+    req.auditoriaCodigo = `SOLICITUD_${nuevoEstado.toUpperCase()}`;
 
     res.status(200).json({
       exito: true,

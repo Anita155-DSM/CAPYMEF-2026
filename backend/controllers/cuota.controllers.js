@@ -76,7 +76,9 @@ export const registrarPagoManual = async (req, res) => {
     const { id } = req.params; // ID de la Cuota
     const { metodoPago, nroComprobante, observaciones } = req.body;
 
-    const cuota = await Cuota.findByPk(id);
+    const cuota = await Cuota.findByPk(id, {
+      include: [{ model: User, as: 'socio', attributes: ['id', 'razonSocial'] }]
+    });
 
     if (!cuota) {
       return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
@@ -101,7 +103,7 @@ export const registrarPagoManual = async (req, res) => {
     await cuota.save();
 
     //auditoria
-    req.auditoriaMensaje = `Se registró el pago manual de $${montoAbonado || cuota.monto} para la cuota #${cuota.id} del socio ${cuota.socio?.razonSocial || cuota.usuarioId}`;
+    req.auditoriaMensaje = `Se registró el pago manual de $${cuota.monto} para la cuota #${cuota.id} del socio ${cuota.socio?.razonSocial || cuota.usuario_id}`;
     req.auditoriaCodigo = 'REGISTRAR_PAGO_MANUAL';
 
     res.status(200).json({

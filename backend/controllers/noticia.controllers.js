@@ -162,6 +162,7 @@ export const eliminarNoticia = async (req, res) => {
       return res.status(404).json({ exito: false, mensaje: 'Noticia no encontrada.' });
     }
 
+    const tituloBorrado = noticia.titulo; // Lo guardamos antes de destruir el registro
     await noticia.destroy(); // Soft delete por el 'paranoid: true'
     //auditoria
     req.auditoriaMensaje = `Se eliminó la noticia #${id}: "${tituloBorrado}"`;

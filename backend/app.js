@@ -87,6 +87,17 @@ app.get('/', (req, res) => {
   });
 });
 
+// Manejador global de errores: SIEMPRE va al final, después de todas las rutas.
+// Atrapa errores no controlados (ej: Multer rechazando un archivo con cb(new Error(...)))
+// para no exponer el stack trace ni romper el servidor.
+app.use((error, req, res, next) => {
+  console.error('Error no controlado:', error);
+  res.status(error.status || 500).json({
+    exito: false,
+    mensaje: error.message || 'Error interno del servidor.',
+  });
+});
+
 // Función para conectar a la base de datos, sincronizar tablas y levantar el servidor
 const startServer = async () => {
   try {
@@ -94,7 +105,10 @@ const startServer = async () => {
     await sequelize.sync({ alter: true }); 
     console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 
-    // 2. Levantar el servidor Express
+    // 2. Iniciar las tareas programadas (generación automática de cuotas el día 1 de cada mes)
+    //iniciarCronJobs(); todavia nop
+
+    // 3. Levantar el servidor Express
     app.listen(port, () => {
       console.log(`Servidor corriendo en http://localhost:${port}`);
     });
