@@ -63,8 +63,8 @@ export default function Home() {
                       COMO SUMARSE A CAPYMEF
                     </h3>
 
-                    {/* Contenedor del texto con la misma tipografía que Sobre Nosotros */}
-                    <div className="font-sans text-gray-900 text-lg leading-relaxed space-y-1">
+                    {/* Contenedor del texto con fuente Serif para igualar la imagen */}
+                    <div className="font-serif text-gray-900 text-lg md:text-[19px] leading-relaxed space-y-1">
                       <p>
                         Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.
                       </p>
@@ -107,43 +107,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-        
-      {/* --- Sobre Nosotros --- */}
-        <section className="w-full bg-white px-6 md:px-24 py-20 font-sans">
-          <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
-            
-            <h2 className="text-3xl md:text-5xl font-light text-[#1D7BB6] uppercase tracking-wide mb-4">
-              Sobre CAPyMEF
-            </h2>
-            <div className="w-24 h-1 bg-[#1D7BB6] mb-10"></div>
-            
-            <div className="space-y-6 text-lg text-gray-700 leading-relaxed text-justify md:text-center">
-              <p>
-                Esta institución fue creada promediando la década de los ´40 en una incipiente Formosa comercial con el nombre de Cámara de Almaceneros Minoristas y Afines de Formosa. Actualmente es una de las asociaciones empresarias más representativas de la provincia. Si bien su sede está en la Ciudad de Formosa, hace poco tiempo inició un política de acercamiento a micro, pequeños y medianos empresarios del interior provincial concentrando sus esfuerzos en las localidades de Clorinda, El Colorado y Pirané.
-              </p>
-              <p>
-                Su estructura interna contempla la conformación de la Comisión de Mujeres PyME y la Comisión de Jóvenes Empresarios; éstos últimos han logrado posicionar a jóvenes empresarios formoseños en lugares destacados en la última edición del Premio Nacional al Joven Empresario PyMe. La Cámara, a su vez, es miembro de la Confederación Argentina de la Mediana Empresa (CAME) donde ocupa, por segundo período consecutivo, la Vicepresidencia Región NEA.
-              </p>
-              <p>
-                La CAPYMEF es la entidad gremial empresaria más representativa del empresariado Mipyme de Formosa, cuenta con más de un centenar de asociados de diversos rubros y sectores económicos.
-              </p>
-              <p>
-                Se inició una política de acercamiento a otras entidades locales, provinciales y regionales con el objetivo central de potenciar el trabajo cooperativo y complementario en temas como diseño, elaboración y formulación de proyectos de inversión y puesta en marcha de un observatorio de desempeño de las Mipymes locales denominado Monitor PyME del NEA. Se acordó aportar recursos humanos e infraestructura disponible por cada entidad y gestión de vínculos ante otros actores públicos y privados.
-              </p>
-            </div>
-
-            <div className="mt-12">
-              <Link
-                to="/autoridades"
-                className="inline-block px-8 py-3 bg-[#1A4B76] hover:bg-[#1F81B2] text-white font-bold rounded-md transition-colors shadow-md"
-              >
-                Conocé a la Comisión Directiva
-              </Link>
-            </div>
-
-          </div>
-        </section>
-
         {/*La Vista N2 */}
         <section className="w-full bg-[#F4F8FB] px-6 md:px-24 py-20 font-sans">
 
