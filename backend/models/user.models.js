@@ -26,6 +26,19 @@ export const User = sequelize.define('User', {
     allowNull: false,
     defaultValue: 'adherente' 
   },
+  rubro: { 
+    type: DataTypes.ENUM('Comercio', 'Industria', 'Servicios', 'Agropecuario', 'Otro'), 
+    allowNull: false 
+  },
+  actividad: { 
+    type: DataTypes.STRING, 
+    allowNull: true 
+  },
+  tamano_empresa: { 
+    type: DataTypes.ENUM('Micro', 'Pequena', 'Mediana', 'Grande'), 
+    allowNull: true 
+  },
+  // ...
   
   // ==========================================
   // 4. Control de Administración y Accesos

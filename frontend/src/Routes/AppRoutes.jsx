@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout.jsx";
 import {
   EventosAdmin,
@@ -8,7 +8,7 @@ import {
   SociosAdmin,
 } from "../Pages/Admin/index.js"; // Importamos el nuevo guardia
 import Inicio from "../Pages/Admin/Inicio.jsx";
-import { Login, Register } from "../Pages/Auth/index.js";
+import { ForgotPassword, Login, Register } from "../Pages/Auth/index.js";
 import Home from "../Pages/Home";
 import {
   Capacitacion,
@@ -31,12 +31,14 @@ export default function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/autoridades" element={<Autoridades />} />
         <Route path="/balance" element={<Balance />} />
         <Route path="/estatuto" element={<Estatuto />} />
 
         {/*LOGUEADOS*/}
         <Route element={<PrivateRoutes />}>
+
           <Route path="/profile" element={<Profile />} />
           <Route path="/capacitacion" element={<Capacitacion />} />
           <Route path="/contactos" element={<Contacto />} />
@@ -44,6 +46,7 @@ export default function AppRoutes() {
           <Route path="/nosotros" element={<Nosotros />} />
           <Route path="/noticias" element={<Noticias />} />
           <Route path="/socios" element={<Socios />} />
+
         </Route>
 
         {/* ADMINS*/}

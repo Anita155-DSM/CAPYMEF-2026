@@ -16,12 +16,13 @@ export default function Footer() {
                         {/* 1. Contactos */}
                         <div>
                             <p className="text-sm font-bold tracking-widest text-white uppercase">Contacto</p>
+                            <div className="w-12 h-1 bg-[#1D7BB6] mt-2"></div>
                             <ul className="mt-6 space-y-4">
                                 <li>
                                     <p className="flex items-center"><AiFillHome className="w-5 h-5 mr-2" /> Junin 651, Formosa</p>
                                 </li>
                                 <li>
-                                    <p className="flex items-center"><FaPhone className="w-5 h-5 mr-2" /> (0370) 123-4567</p>
+                                    <p className="flex items-center"><FaPhone className="w-5 h-5 mr-2" /> 0370 446-2508</p>
                                 </li>
                                 <li className="flex items-center">
                                     <MdEmail className="w-5 h-5 mr-2" />
@@ -33,18 +34,19 @@ export default function Footer() {
                         {/* 2. Navegación */}
                         <div>
                             <p className="text-sm font-bold tracking-widest text-white uppercase">Navegación</p>
+                            <div className="w-12 h-1 bg-[#1D7BB6] mt-2"></div>
                             <ul className="mt-6 space-y-4">
-                                <li><Link to="/noticias" className="hover:text-blue-300 transition-colors">Noticias</Link></li>
-                                <li><Link to="/nosotros" className="hover:text-blue-300 transition-colors">Nosotros</Link></li>
-                                <li><Link to="/socios" className="hover:text-blue-300 transition-colors">Socios</Link></li>
-                                <li><Link to="/eventos" className="hover:text-blue-300 transition-colors">Eventos</Link></li>
-                                <li><Link to="/capacitacion" className="hover:text-blue-300 transition-colors">Capacitación</Link></li>
+                                <li><Link to="/" className="hover:text-blue-300 transition-colors">Inicio</Link></li>
+                                <li><Link to="/Autoridades" className="hover:text-blue-300 transition-colors">Autoridades</Link></li>
+                                <li><Link to="/Estatuto" className="hover:text-blue-300 transition-colors">Estatuto</Link></li>
+                                <li><Link to="/Balance" className="hover:text-blue-300 transition-colors">Balance</Link></li>
                             </ul>
                         </div>
 
                         {/* 3. Vinculación Institucional */}
                         <div>
                             <p className="text-sm font-bold tracking-widest text-white uppercase">Vinculación Institucional</p>
+                            <div className="w-12 h-1 bg-[#1D7BB6] mt-2"></div>
                             <ul className="mt-6 space-y-4 text-white">
                                 <li>
                                     <a href="https://www.afip.gob.ar/" target="_blank" rel="noreferrer" className="flex text-base transition-all duration-200 hover:text-blue-300">AFIP</a>
@@ -61,6 +63,7 @@ export default function Footer() {
                         {/* 4. Redes Sociales */}
                         <div>
                             <p className="text-sm font-bold tracking-widest text-white uppercase">Redes Sociales</p>
+                            <div className="w-12 h-1 bg-[#1D7BB6] mt-2"></div>
                             {/* Cambié a flex-row para que los íconos queden uno al lado del otro (se ve más moderno) */}
                             <ul className="mt-6 space-x-5 flex flex-col ml-12 space-y-4">
                                 <li>
