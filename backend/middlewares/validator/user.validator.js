@@ -53,6 +53,19 @@ export const validacionRegistro = [
   body('categoria')
     .optional() // Es opcional porque el controlador le pone 'adherente' por defecto si no lo envían
     .isIn(['activo', 'adherente', 'padrino']).withMessage('La categoría no es válida.'),
+  // 4. Datos Institucionales y Comerciales
+  body('rubro')
+    .notEmpty().withMessage('El rubro es obligatorio.')
+    .isIn(['Comercio', 'Industria', 'Servicios', 'Agropecuario', 'Otro']).withMessage('El rubro seleccionado no es válido.'),
+
+  body('actividad')
+    .optional() 
+    .isString().withMessage('La actividad debe ser texto.')
+    .trim(),
+
+  body('tamano_empresa')
+    .optional() 
+    .isIn(['Micro', 'Pequena', 'Mediana']).withMessage('El tamaño de empresa no es válido.'),
 
   validarResultado
 ];

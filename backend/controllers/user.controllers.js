@@ -198,8 +198,15 @@ export const obtenerPerfil = async (req, res) => {
 export const actualizarPerfil = async (req, res) => {
   try {
     const usuarioId = req.usuario.id;
-    // Extraemos SOLAMENTE los campos que está permitido editar
-    const { telefono, localidad } = req.body; 
+    
+    // 1. Agregamos los 3 nuevos campos a la extracción
+    const { 
+      telefono, 
+      localidad, 
+      rubro, 
+      actividad, 
+      tamano_empresa 
+    } = req.body; 
 
     const usuario = await User.findByPk(usuarioId);
 
@@ -207,22 +214,29 @@ export const actualizarPerfil = async (req, res) => {
       return res.status(404).json({ exito: false, mensaje: 'Usuario no encontrado.' });
     }
 
-    // Actualizamos solo los campos de contacto
+    // 2. Actualizamos si los envían desde el Frontend
     if (telefono) usuario.telefono = telefono;
     if (localidad) usuario.localidad = localidad;
+    if (rubro) usuario.rubro = rubro;
+    if (actividad) usuario.actividad = actividad;
+    if (tamano_empresa) usuario.tamano_empresa = tamano_empresa;
 
     await usuario.save(); // Sequelize guarda los cambios en PostgreSQL
 
-    //auditoria
-    req.auditoriaMensaje = `El usuario actualizó sus datos de contacto (Teléfono/Localidad)`;
+    // 3. Adaptamos el mensaje de auditoría (ya que ahora no es solo contacto)
+    req.auditoriaMensaje = `El usuario actualizó los datos de su perfil comercial/contacto`;
     req.auditoriaCodigo = 'UPDATE_MI_PERFIL';
 
     res.status(200).json({ 
       exito: true, 
       mensaje: 'Perfil actualizado correctamente.',
+      // 4. Devolvemos los datos actualizados al Frontend
       data: {
         telefono: usuario.telefono,
-        localidad: usuario.localidad
+        localidad: usuario.localidad,
+        rubro: usuario.rubro,
+        actividad: usuario.actividad,
+        tamano_empresa: usuario.tamano_empresa
       }
     });
   } catch (error) {

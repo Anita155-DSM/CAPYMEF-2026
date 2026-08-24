@@ -28,14 +28,15 @@ export const User = sequelize.define('User', {
   },
   rubro: { 
     type: DataTypes.ENUM('Comercio', 'Industria', 'Servicios', 'Agropecuario', 'Otro'), 
-    allowNull: false 
+    allowNull: false,
+    defaultValue: 'Otro'
   },
   actividad: { 
     type: DataTypes.STRING, 
     allowNull: true 
   },
   tamano_empresa: { 
-    type: DataTypes.ENUM('Micro', 'Pequena', 'Mediana', 'Grande'), 
+    type: DataTypes.ENUM('Micro', 'Pequena', 'Mediana'), 
     allowNull: true 
   },
   // ...
