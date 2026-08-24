@@ -1,23 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { FaGem, FaHandshake, FaStar, FaUser } from "react-icons/fa6";
 import { Link } from "react-router-dom";
-import Came from "../assets/img/Came.png";
-import Came70years from "../assets/img/Came70years.png";
-import Escudo from "../assets/img/Escudo.png";
 import fondoHome from "../assets/img/FondoCapymef.png";
-import {Navbar,NavbarPublico,Footer} from "../Components/index.js";
-import { FaPhone, FaGem, FaUser, FaStar, FaHandshake } from "react-icons/fa6";
-import { AiFillHome } from "react-icons/ai";
-import { MdEmail } from "react-icons/md";
+import { Card, Footer, Navbar, NavbarPublico,Modal } from "../Components/index.js";
+import { obtenerNoticiasPublicas } from "../services/noticiasService.js";
 //asdad
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const token = localStorage.getItem("token")
+
+  // 1. ESTADOS PARA LAS NOTICIAS
+  const [noticias, setNoticias] = useState([]);
+  const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  
+
+  // 2. TRAEMOS LAS NOTICIAS AL CARGAR LA PÁGINA
+  useEffect(() => {
+    const cargarNoticias = async () => {
+      try {
+        const result = await obtenerNoticiasPublicas();
+        if (result.exito) {
+          setNoticias(result.data.slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Error cargando noticias en el Home:", error);
+      } finally {
+        setCargando(false); // AGREGAMOS ESTO AL FINAL
+      }
+    };
+
+    cargarNoticias();
+  }, []);
   return (
     <>
       {/* Se coloca dentro del main para poder hacer que ocupe la pantalla completa con el w-full */}
       {/*Header */}
       <header>
-        {token ? <Navbar/> : <NavbarPublico/>}
+        {token ? <Navbar /> : <NavbarPublico />}
       </header>
       <main className="w-full overflow-x-hidden overflow-y-hidden">
         {/*La Vista N1 */}
@@ -63,8 +83,8 @@ export default function Home() {
                       COMO SUMARSE A CAPYMEF
                     </h3>
 
-                    {/* Contenedor del texto con fuente Serif para igualar la imagen */}
-                    <div className="font-serif text-gray-900 text-lg md:text-[19px] leading-relaxed space-y-1">
+                    {/* Contenedor del texto con la misma tipografía que Sobre Nosotros */}
+                    <div className="font-sans text-gray-900 text-lg leading-relaxed space-y-1">
                       <p>
                         Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.
                       </p>
@@ -107,6 +127,43 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* --- Sobre Nosotros --- */}
+        <section className="w-full bg-white px-6 md:px-24 py-20 font-sans">
+          <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
+
+            <h2 className="text-3xl md:text-5xl font-light text-[#1D7BB6] uppercase tracking-wide mb-4">
+              Sobre CAPyMEF
+            </h2>
+            <div className="w-24 h-1 bg-[#1D7BB6] mb-10"></div>
+
+            <div className="space-y-6 text-lg text-gray-700 leading-relaxed text-justify md:text-center">
+              <p>
+                Esta institución fue creada promediando la década de los ´40 en una incipiente Formosa comercial con el nombre de Cámara de Almaceneros Minoristas y Afines de Formosa. Actualmente es una de las asociaciones empresarias más representativas de la provincia. Si bien su sede está en la Ciudad de Formosa, hace poco tiempo inició un política de acercamiento a micro, pequeños y medianos empresarios del interior provincial concentrando sus esfuerzos en las localidades de Clorinda, El Colorado y Pirané.
+              </p>
+              <p>
+                Su estructura interna contempla la conformación de la Comisión de Mujeres PyME y la Comisión de Jóvenes Empresarios; éstos últimos han logrado posicionar a jóvenes empresarios formoseños en lugares destacados en la última edición del Premio Nacional al Joven Empresario PyMe. La Cámara, a su vez, es miembro de la Confederación Argentina de la Mediana Empresa (CAME) donde ocupa, por segundo período consecutivo, la Vicepresidencia Región NEA.
+              </p>
+              <p>
+                La CAPYMEF es la entidad gremial empresaria más representativa del empresariado Mipyme de Formosa, cuenta con más de un centenar de asociados de diversos rubros y sectores económicos.
+              </p>
+              <p>
+                Se inició una política de acercamiento a otras entidades locales, provinciales y regionales con el objetivo central de potenciar el trabajo cooperativo y complementario en temas como diseño, elaboración y formulación de proyectos de inversión y puesta en marcha de un observatorio de desempeño de las Mipymes locales denominado Monitor PyME del NEA. Se acordó aportar recursos humanos e infraestructura disponible por cada entidad y gestión de vínculos ante otros actores públicos y privados.
+              </p>
+            </div>
+
+            <div className="mt-12">
+              <Link
+                to="/autoridades"
+                className="inline-block px-8 py-3 bg-[#1A4B76] hover:bg-[#1F81B2] text-white font-bold rounded-md transition-colors shadow-md"
+              >
+                Conocé a la Comisión Directiva
+              </Link>
+            </div>
+
+          </div>
+        </section>
+
         {/*La Vista N2 */}
         <section className="w-full bg-[#F4F8FB] px-6 md:px-24 py-20 font-sans">
 
@@ -203,92 +260,34 @@ export default function Home() {
           </div>
 
           {/* Contenedor Grid para las 3 Tarjetas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* --- TARJETA 1 --- */}
-            <article className="bg-white text-black rounded-2xl p-5 flex flex-col relative shadow-xl hover:shadow-2xl transition-shadow">
-              {/* Etiqueta / Badge */}
-              <span className="absolute top-8 left-8 bg-[#9CA3AF] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-                Comercio exterior
-              </span>
-              {/* Espacio reservado para la imagen (Podés cambiar este div por tu etiqueta <img>) */}
-              <img src={Came} alt="" />
-
-              <span className="text-gray-500 text-sm font-medium mb-2">
-                &bull; Julio,2026
-              </span>
-              <h3 className="text-xl font-bold mb-3 leading-tight text-gray-900">
-                Cambios en los envíos postales
-              </h3>
-              <p className="text-gray-600 text-sm mb-6 flex-grow">
-                Desde la Dirección de Comercio Exterior de la Confederación
-                Empresaria de la Mediana Empresa (CAME), informamos que se ha
-                publicado el Decreto 604/26, que introduce modificaciones al
-                régimen de envíos postales.
-              </p>
-              <Link
-                to="#"
-                className="text-right text-[#1D7BB6] font-bold text-sm hover:underline mt-auto"
-              >
-                Leer más
-              </Link>
-            </article>
-
-            {/* --- TARJETA 2 --- */}
-            <article className="bg-white text-black rounded-2xl p-5 flex flex-col relative shadow-xl hover:shadow-2xl transition-shadow">
-              <span className="absolute top-8 left-8 bg-[#9CA3AF] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-                Institucional
-              </span>
-              <img src={Escudo} alt="" />
-
-              <span className="text-gray-500 text-sm font-medium mb-2">
-                &bull; Junio,2026
-              </span>
-              <h3 className="text-xl font-bold mb-3 leading-tight text-gray-900">
-                El Gobierno precisó criterios sobre aportes y contribuciones
-                laborales
-              </h3>
-              <p className="text-gray-600 text-sm mb-6 flex-grow">
-                Mediante el Decreto 612/2026, el Poder Ejecutivo estableció
-                precisiones para el cálculo, destino y administración de los
-                aportes y contribuciones previstos en convenios colectivos de
-                trabajo.
-              </p>
-              <Link
-                to="#"
-                className="text-right text-[#1D7BB6] font-bold text-sm hover:underline mt-auto"
-              >
-                Leer más
-              </Link>
-            </article>
-
-            {/* --- TARJETA 3 --- */}
-            <article className="bg-white text-black rounded-2xl p-5 flex flex-col relative shadow-xl hover:shadow-2xl transition-shadow">
-              <span className="absolute top-8 left-8 bg-[#9CA3AF] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-                Institucional
-              </span>
-              <img src={Came70years} alt="" />
-
-              <span className="text-gray-500 text-sm font-medium mb-2">
-                &bull; Junio,2026
-              </span>
-              <h3 className="text-xl font-bold mb-3 leading-tight text-gray-900">
-                CAME acompaña una nueva edición del Concurso Emprendimiento
-                Argentino 2026
-              </h3>
-              <p className="text-gray-600 text-sm mb-6 flex-grow">
-                La Confederación Argentina de la Mediana Empresa (CAME) informa
-                que ya se encuentra abierta la inscripción para participar del
-                Concurso Emprendimiento Argentino 2026, una iniciativa del
-                Ministerio de Economía...
-              </p>
-              <Link
-                to="#"
-                className="text-right text-[#1D7BB6] font-bold text-sm hover:underline mt-auto"
-              >
-                Leer más
-              </Link>
-            </article>
-          </div>
+          {cargando ? (
+            <div className="text-center py-10">
+              <p className="text-gray-300 animate-pulse">Cargando las últimas novedades...</p>
+            </div>
+          ) : noticias.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-gray-300">Todavía no hay noticias publicadas.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {noticias.map((noticia) => (
+                <Card
+                  key={noticia.id}
+                  titulo={noticia.titulo}
+                  subtitulo={noticia.subtitulo}
+                  imagenUrl={noticia.imagenUrl}
+                  fecha={noticia.fechaPublicacion}
+                  onLeerMas={() => setNoticiaSeleccionada(noticia)}
+                />
+              ))}
+            </div>
+          )}
+          {noticiaSeleccionada && (
+            <Modal
+              noticia={noticiaSeleccionada}
+              onClose={() => setNoticiaSeleccionada(null)}
+            />
+          )}
         </section>
       </main>
       {/*Footer */}

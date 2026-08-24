@@ -1,10 +1,13 @@
-import { Outlet, Link } from 'react-router-dom';
 import {
-  FaHome, FaUsers,
-  FaCalendarCheck, FaBullhorn, FaCog, FaBell,
-  FaSearch, FaUserCircle, FaUserFriends, FaDollarSign, FaRegCalendarCheck, FaClipboardList
+  FaBell,
+  FaClipboardList,
+  FaDollarSign,
+  FaHome,
+  FaRegCalendarCheck,
+  FaSearch, FaUserCircle, FaUserFriends
 } from 'react-icons/fa';
 import { GiAcousticMegaphone } from 'react-icons/gi';
+import { Link, Outlet } from 'react-router-dom';
 
 
 export default function MainLayout() {

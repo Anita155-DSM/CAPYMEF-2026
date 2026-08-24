@@ -1,6 +1,7 @@
-import { Link, useNavigate } from "react-router-dom";
+   import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { iniciarSesion } from "../../services/authServices"; // Importamos el servicio
+import { iniciarSesion } from "../../services/authServices";
+import Logo from "../../assets/img/Logo.png";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -29,42 +30,43 @@ export default function Login() {
   return (
     <div className="min-h-screen w-full bg-[#132A46] flex flex-col items-center justify-center relative text-white font-sans">
       <div className="w-full px-10 items-center flex flex-col justify-center">
-        <h1 className="text-4xl font-serif font-bold text-center mb-12">
+        <h1 className="text-4xl font-[Trebuchet_MS,sans-serif] font-bold text-center mb-10 tracking-tight">
           Bienvenido de vuelta
         </h1>
 
-        {/* Conectamos el form con handleSubmit */}
-        <form className="flex flex-col" onSubmit={handleSubmit(handleLogin)}>
+        <form className="flex w-full max-w-md flex-col" onSubmit={handleSubmit(handleLogin)}>
           <div className="mb-6">
-            <label className="block text-lg font-bold mb-1" htmlFor="email">
+            <label className="mb-2 block text-base font-bold" htmlFor="email">
               Correo electrónico
             </label>
             <input
               type="email"
               id="email"
-              placeholder="email@ejemplo.com"
-              className="w-64 h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-              {...register("email", { required: true })} // Capturamos el input
+              placeholder="Ingresa tu correo electrónico"
+              autoComplete="email"
+              className="h-11 w-full rounded-md border border-white/30 bg-white px-4 text-base text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
+              {...register("email", { required: true })}
             />
           </div>
 
-          <div className="mt-5">
-            <label className="block text-lg font-bold mb-1" htmlFor="password">
+          <div className="mb-3">
+            <label className="mb-2 block text-base font-bold" htmlFor="password">
               Contraseña
             </label>
             <input
               type="password"
               id="password"
-              placeholder="********"
-              className="w-64 h-8 px-4 text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-              {...register("password", { required: true })} // Capturamos el input
+              placeholder="Ingresa tu contraseña"
+              autoComplete="current-password"
+              className="h-11 w-full rounded-md border border-white/30 bg-white px-4 text-base text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
+              {...register("password", { required: true })}
             />
           </div>
 
-          <div className="justify-end mb-10 mt-2">
-            <a href="#" className="text-sm hover:underline">
+          <div className="mb-9 flex justify-end">
+            <Link to="/forgot-password" className="text-sm hover:underline">
               ¿Olvidaste tu contraseña?
-            </a>
+            </Link>
           </div>
 
           <div className="flex justify-center mb-12">
@@ -84,16 +86,9 @@ export default function Login() {
           </Link>
         </div>
       </div>
-
-      <div className="absolute bottom-4 left-4 mb-10">
-        <Link to="/">
-          <img
-            src="../src/assets/img/Logo.png"
-            alt="Logo CAPYMEF"
-            className="w-40 opacity-90 cursor-pointer"
-          />
-        </Link>
-      </div>
+      <Link to="/" className="absolute bottom-6 left-6">
+        <img src={Logo} alt="LogoCAPYMEF" className="h-16 w-auto object-contain" />
+      </Link>
     </div>
   );
 }
