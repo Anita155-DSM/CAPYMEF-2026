@@ -12,7 +12,7 @@ export default function Modal({ isOpen, onClose, titulo, children }) {
       >
         <div
           className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md md:max-w-lg relative mx-4 animacion-modal"
-          onClick={onClose}
+          onClick={(e) => e.stopPropagation()}
         >
           <div onClick={(e) => e.stopPropagation()}>
             {/*Aca es el boton para cerrar */}

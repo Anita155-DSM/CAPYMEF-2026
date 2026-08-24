@@ -26,6 +26,11 @@ export default function NavbarPublico() {
                     : 'text-black hover:text-[#1D7BB6] hover:border-b-2 hover:border-[#1D7BB6] pb-1'
                     }`}>Autoridades</Link>
 
+                <Link to="/noticias" className={`font-semibold transition-colors ${location.pathname === '/noticias'
+                    ? 'text-[#1D7BB6] border-b-2 border-[#1D7BB6] pb-1'
+                    : 'text-black hover:text-[#1D7BB6] hover:border-b-2 hover:border-[#1D7BB6] pb-1'
+                    }`}>Noticias</Link>
+
                 <Link to="/estatuto" className={`font-semibold transition-colors ${location.pathname === '/estatuto'
                     ? 'text-[#1D7BB6] border-b-2 border-[#1D7BB6] pb-1'
                     : 'text-black hover:text-[#1D7BB6] hover:border-b-2 hover:border-[#1D7BB6] pb-1'
