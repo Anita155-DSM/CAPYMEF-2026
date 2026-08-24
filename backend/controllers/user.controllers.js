@@ -1,14 +1,19 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import fs from 'fs';
+//import fs from 'fs'; YA NO LO USAMOS 
 import { User } from '../models/user.models.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
-
-// Función auxiliar para borrar archivos subidos si falla el registro
-const eliminarArchivo = (filePath) => {
-  if (filePath && fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
+// ==========================================
+// NUEVA Función auxiliar para borrar de la NUBE
+// ==========================================
+const eliminarArchivoNube = async (public_id) => {
+  if (public_id) {
+    try {
+      await cloudinary.uploader.destroy(public_id);
+    } catch (error) {
+      console.error('Error al borrar archivo de Cloudinary:', error);
+    }
   }
 };
 
@@ -38,7 +43,7 @@ export const registrarUsuario = async (req, res) => {
     });
 
     if (usuarioExistente) {
-      eliminarArchivo(constanciaFile.path); // Borramos el archivo subido para no ocupar espacio
+      eliminarArchivoNube(constanciaFile.path); // Borramos el archivo subido para no ocupar espacio
       const mensaje = usuarioExistente.email === email 
         ? 'El correo electrónico ya se encuentra registrado.' 
         : 'El CUIT ingresado ya se encuentra registrado.';
@@ -84,7 +89,7 @@ export const registrarUsuario = async (req, res) => {
       },
     });
   } catch (error) {
-    if (constanciaFile) eliminarArchivo(constanciaFile.path);
+    if (constanciaFile) eliminarArchivoNube(constanciaFile.path);
     console.error('Error al registrar solicitud de socio:', error.message);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
