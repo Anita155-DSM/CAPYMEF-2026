@@ -72,6 +72,32 @@ export const validacionRegistro = [
 ];
 
 // ==========================================
+// Reglas para solicitar la recuperación (paso 1: pedir el mail)
+// ==========================================
+export const validacionSolicitudRecuperacion = [
+  body('email')
+    .trim()
+    .notEmpty().withMessage('El correo electrónico es obligatorio.')
+    .isEmail().withMessage('Debe proporcionar un correo electrónico válido.')
+    .normalizeEmail(),
+
+  validarResultado
+];
+
+// ==========================================
+// Reglas para restablecer la contraseña (paso 2: la nueva contraseña)
+// ==========================================
+export const validacionNuevaPassword = [
+  body('password')
+    .notEmpty().withMessage('La contraseña es obligatoria.')
+    .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres.')
+    .matches(/\d/).withMessage('La contraseña debe contener al menos un número.')
+    .matches(/[A-Z]/).withMessage('La contraseña debe contener al menos una letra mayúscula.'),
+
+  validarResultado
+];
+
+// ==========================================
 // Reglas para el Inicio de Sesión (Login)
 // ==========================================
 export const validacionLogin = [
