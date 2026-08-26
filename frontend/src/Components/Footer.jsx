@@ -38,7 +38,6 @@ export default function Footer() {
                             <ul className="mt-6 space-y-4">
                                 <li><Link to="/" className="hover:text-blue-300 transition-colors">Inicio</Link></li>
                                 <li><Link to="/Autoridades" className="hover:text-blue-300 transition-colors">Autoridades</Link></li>
-                                 <li><Link to="/Noticias" className="hover:text-blue-300 transition-colors">Noticias</Link></li>
                                 <li><Link to="/Estatuto" className="hover:text-blue-300 transition-colors">Estatuto</Link></li>
                                 <li><Link to="/Balance" className="hover:text-blue-300 transition-colors">Balance</Link></li>
                             </ul>

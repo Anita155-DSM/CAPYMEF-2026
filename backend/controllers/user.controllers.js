@@ -20,7 +20,7 @@ export const registrarUsuario = async (req, res) => {
 
   try {
     // Extraemos todos los campos, incluyendo los nuevos del Estatuto
-    const { razonSocial, cuit, email, password, telefono, localidad, categoria } = req.body;
+    const { razonSocial, cuit, email, password, telefono, localidad, categoria, rubro, actividad, tamano_empresa } = req.body;
 
     // A. Validar comprobante AFIP/DGR (express-validator valida texto, nosotros validamos el archivo acá)
     if (!constanciaFile) {
@@ -59,10 +59,17 @@ export const registrarUsuario = async (req, res) => {
       telefono,                 // NUEVO
       localidad,                // NUEVO
       categoria: categoria || 'adherente', // NUEVO (Por defecto adherente si no envían nada)
+      rubro,             // NUEVO
+      actividad,         // NUEVO
+      tamano_empresa,    // NUEVO
       constanciaUrl: constanciaFile.path,
       estado: 'pendiente',      // Queda pendiente de aprobación
       rol: 'socio'
     });
+
+    //auditoria
+    req.auditoriaMensaje = `Nueva solicitud de registro recibida de la empresa ${razonSocial} (CUIT: ${cuit})`;
+    req.auditoriaCodigo = 'REGISTRO_SOCIO_SOLICITUD';
 
     res.status(201).json({
       exito: true,
@@ -136,6 +143,10 @@ export const loginUsuario = async (req, res) => {
 
     const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '8h' });
 
+    //auditoria
+    req.auditoriaMensaje = `El usuario ${usuario.razonSocial} (${usuario.email}) inició sesión con éxito`;
+    req.auditoriaCodigo = 'LOGIN_SUCCESS';
+
     res.status(200).json({
       exito: true,
       mensaje: 'Inicio de sesión exitoso',
@@ -201,6 +212,10 @@ export const actualizarPerfil = async (req, res) => {
     if (localidad) usuario.localidad = localidad;
 
     await usuario.save(); // Sequelize guarda los cambios en PostgreSQL
+
+    //auditoria
+    req.auditoriaMensaje = `El usuario actualizó sus datos de contacto (Teléfono/Localidad)`;
+    req.auditoriaCodigo = 'UPDATE_MI_PERFIL';
 
     res.status(200).json({ 
       exito: true, 

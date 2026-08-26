@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 
+import { interceptorAuditoria } from './middlewares/auditoria.middleware.js';
+
 // IMPORTAMOS MODELOS
 import './models/user.models.js'; 
 import './models/gasto.models.js';
@@ -70,6 +72,8 @@ app.use(helmet());
 app.use('/uploads', express.static('uploads'));
 
 // 4. REGISTRO DE RUTAS API
+//incorporacion de logs globalmente para auditar lo que se haga:)
+app.use('/api', interceptorAuditoria)
 app.use('/api/auth', authRoutes); 
 app.use('/api/admin', adminRoutes); // wndpoints: /api/admin/solicitudes, etc
 app.use('/api/noticias', noticiaRoutes);

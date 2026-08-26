@@ -1,6 +1,7 @@
 // IMPORTANTE: Importamos usando las llaves {} porque no hay un export default en el modelo
 import { User } from "../models/user.models.js"; 
-import { fn, col, literal } from "sequelize";
+import { fn, col, literal, Op } from "sequelize";
+import { Auditoria } from "../models/auditoria.models.js";
 
 // ============================================================================
 // PANTALLA: DASHBOARD DE REPORTES (Gráficos y Geolocalización)
@@ -136,6 +137,10 @@ export const gestionarSolicitud = async (req, res) => {
     usuario.estado = nuevoEstado;
     await usuario.save();
 
+    //auditoria
+    req.auditoriaMensaje = `Se ${estado === 'aprobado' ? 'aprobó' : 'rechazó'} la solicitud de registro del socio: ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
+    req.auditoriaCodigo = `SOLICITUD_${estado.toUpperCase()}`;
+
     res.status(200).json({
       exito: true,
       mensaje: `La cuenta de ${usuario.razonSocial} ha sido pasada a ${nuevoEstado} exitosamente.`,
@@ -160,6 +165,10 @@ export const darDeBajaSocio = async (req, res) => {
     usuario.estado = "inactivo";
     await usuario.save();
 
+    //auditoria
+    req.auditoriaMensaje = `Se dio de baja al socio ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
+    req.auditoriaCodigo = 'SOCIO_BAJA';
+
     res.status(200).json({
       exito: true,
       mensaje: `El socio ${usuario.razonSocial} ha sido dado de baja correctamente.`,
@@ -167,5 +176,79 @@ export const darDeBajaSocio = async (req, res) => {
   } catch (error) {
     console.error("Error al dar de baja al socio:", error);
     res.status(500).json({ exito: false, mensaje: "Error interno del servidor." });
+  }
+};
+
+// ======================================================
+// OBTENER HISTORIAL DE AUDITORÍA CON FILTROS Y PAGINACIÓN PARA PANTALLA DE LOGS ADMINISTRACION
+// ======================================================
+export const obtenerAuditorias = async (req, res) => {
+  try {
+    const { 
+      modulo, 
+      accionTipo, 
+      busqueda, 
+      fechaInicio, 
+      fechaFin,
+      page = 1, 
+      limit = 10 
+    } = req.query;
+
+    // Objeto dinámico de condiciones WHERE para PostgreSQL
+    const condiciones = {};
+
+    // 1. Filtro por módulo (ej: SOCIOS, GASTOS, CUOTAS)
+    if (modulo) {
+      condiciones.modulo = modulo.toUpperCase();
+    }
+
+    // 2. Filtro por tipo de acción (ej: CREACION, MODIFICACION, ELIMINACION)
+    if (accionTipo) {
+      condiciones.accionTipo = accionTipo.toUpperCase();
+    }
+
+    // 3. Buscador rápido de texto (busca en usuario, descripción o código técnico)
+    if (busqueda) {
+      condiciones[Op.or] = [
+        { usuarioNombre: { [Op.iLike]: `%${busqueda}%` } },
+        { descripcion: { [Op.iLike]: `%${busqueda}%` } },
+        { codigoTecnico: { [Op.iLike]: `%${busqueda}%` } }
+      ];
+    }
+
+    // 4. Filtro por rango de fechas
+    if (fechaInicio || fechaFin) {
+      condiciones.createdAt = {};
+      if (fechaInicio) condiciones.createdAt[Op.gte] = new Date(fechaInicio);
+      if (fechaFin) condiciones.createdAt[Op.lte] = new Date(`${fechaFin}T23:59:59`);
+    }
+
+    // Configuración de paginación
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    // Consulta en PostgreSQL con Sequelize
+    const { count, rows } = await Auditoria.findAndCountAll({
+      where: condiciones,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']] // Los más recientes primero
+    });
+
+    return res.status(200).json({
+      exito: true,
+      totalRegistros: count,
+      totalPaginas: Math.ceil(count / limit),
+      paginaActual: parseInt(page),
+      registrosPorPagina: parseInt(limit),
+      data: rows
+    });
+
+  } catch (error) {
+    console.error('Error al obtener el historial de auditoría:', error);
+    return res.status(500).json({
+      exito: false,
+      mensaje: 'Error al consultar la auditoría del sistema',
+      error: error.message
+    });
   }
 };

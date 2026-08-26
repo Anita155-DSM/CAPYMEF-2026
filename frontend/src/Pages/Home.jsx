@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import fondoHome from "../assets/img/FondoCapymef.png";
 import { Card, Footer, Navbar, NavbarPublico,Modal } from "../Components/index.js";
 import { obtenerNoticiasPublicas } from "../services/noticiasService.js";
-
+//asdad
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const token = localStorage.getItem("token")
@@ -264,15 +264,15 @@ export default function Home() {
 
           {/* Contenedor Grid para las 3 Tarjetas */}
           {cargando ? (
-            <div className="relative z-10 text-center py-10">
+            <div className="text-center py-10">
               <p className="text-gray-300 animate-pulse">Cargando las últimas novedades...</p>
             </div>
           ) : noticias.length === 0 ? (
-            <div className="relative z-10 text-center py-10">
+            <div className="text-center py-10">
               <p className="text-gray-300">Todavía no hay noticias publicadas.</p>
             </div>
           ) : (
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {noticias.map((noticia) => (
                 <Card
                   key={noticia.id}
