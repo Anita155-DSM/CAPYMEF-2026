@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout.jsx";
 import {
   EventosAdmin,
@@ -39,12 +39,15 @@ export default function AppRoutes() {
 
         {/*LOGUEADOS*/}
         <Route element={<PrivateRoutes />}>
+
           <Route path="/profile" element={<Profile />} />
           <Route path="/capacitacion" element={<Capacitacion />} />
           <Route path="/contactos" element={<Contacto />} />
           <Route path="/eventos" element={<Eventos />} />
           <Route path="/nosotros" element={<Nosotros />} />
+          <Route path="/noticias" element={<Noticias />} />
           <Route path="/socios" element={<Socios />} />
+
         </Route>
 
         {/* ADMINS*/}

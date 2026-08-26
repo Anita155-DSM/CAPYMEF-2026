@@ -1,43 +1,70 @@
-export default function Modal({ isOpen, onClose, titulo, children }) {
-  {
-    /*isOpen es para abrir, onClose para cerrar */
-    /*children es para el contenido entremedio del div */
-  }
-  if (!isOpen) return null;
+export default function Modal({ noticia, onClose }) {
+  if (!noticia) return null;
+
+  const handleClose = (e) => {
+    if (e.target.id === "fondo-modal") {
+      onClose();
+    }
+  };
+
   return (
-    <>
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      >
-        <div
-          className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md md:max-w-lg relative mx-4 animacion-modal"
-          onClick={(e) => e.stopPropagation()}
+    <div
+      id="fondo-modal"
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="noticia-titulo"
+      className="animacion-modal fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+    >
+
+      {/* Contenedor principal del modal */}
+      <article className="relative flex max-h-[92vh] w-full max-w-5xl cursor-default flex-col overflow-hidden bg-white shadow-2xl">
+
+        {/* Botón flotante para cerrar */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar noticia"
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-2xl font-light text-gray-700 shadow-md transition-colors hover:bg-[#132A46] hover:text-white"
         >
-          <div onClick={(e) => e.stopPropagation()}>
-            {/*Aca es el boton para cerrar */}
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
-              onClick={onClose}
-            >
-              <svg className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            {titulo && (
-              <h3 className="text-2xl font-bold text-[#132A46] mb-4 pr-8">
-                {titulo}
-              </h3>
-            )}
-            <div className="text-gray-600 mb-6 leading-relaxed">{children}</div>
+          &times;
+        </button>
+
+        {/* Contenido scrolleable */}
+        <div className="overflow-y-auto px-6 py-8 md:px-16 md:py-10">
+
+          {/* Imagen completa */}
+          {noticia.imagenUrl && (
+            <img
+              src={`${import.meta.env.VITE_API_URL_UPLOADS}/${noticia.imagenUrl}`}
+              alt={noticia.titulo}
+              className="mx-auto mb-9 max-h-[420px] w-full object-contain"
+            />
+          )}
+
+          <div className="mb-4 flex flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-wider text-[#1D7BB6]">
+            <span>Institucional</span>
+            <span className="text-gray-300">&bull;</span>
+            {new Date(noticia.fechaPublicacion).toLocaleDateString('es-AR')}
           </div>
+
+          <h2 id="noticia-titulo" className="mb-7 max-w-4xl text-3xl font-bold leading-tight text-[#252525] md:text-5xl">
+            {noticia.titulo}
+          </h2>
+
+          {noticia.subtitulo && (
+            <h3 className="mb-7 max-w-3xl border-l-4 border-[#1D7BB6] pl-4 text-lg font-medium italic text-gray-500">
+              {noticia.subtitulo}
+            </h3>
+          )}
+
+          {/* whitespace-pre-wrap respeta los "Enter" (párrafos) que hiciste en el textarea del admin */}
+          <p className="max-w-3xl whitespace-pre-wrap text-lg leading-8 text-gray-700">
+            {noticia.contenido}
+          </p>
+
         </div>
-      </div>
-    </>
+      </article>
+    </div>
   );
 }
