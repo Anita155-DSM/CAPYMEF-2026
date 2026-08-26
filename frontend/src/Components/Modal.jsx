@@ -29,7 +29,7 @@ export default function Modal({ noticia, onClose }) {
           {/* Imagen completa */}
           {noticia.imagenUrl && (
             <img
-              src={`${import.meta.env.VITE_API_URL_UPLOADS}/${noticia.imagenUrl}`}
+              src={noticia.imagenUrl}
               alt={noticia.titulo}
               className="mx-auto mb-9 max-h-[420px] w-full object-contain"
             />

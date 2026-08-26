@@ -6,7 +6,7 @@ export default function Card({ titulo, subtitulo, imagenUrl, fecha, tipo = "Inst
       {/* IMAGEN DE LA TARJETA */}
       {imagenUrl ? (
         <img
-          src={`${import.meta.env.VITE_API_URL_UPLOADS}/${imagenUrl}`}
+          src={imagenUrl}
           alt={titulo}
           className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />

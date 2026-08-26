@@ -47,9 +47,9 @@ export default function Home() {
             style={{ backgroundImage: `url(${fondoHome})` }}
           >
             {/* Contenedor del texto central */}
-            <div className="px-4 py-4 line-clamp-3">
-              <h1 className="text-5xl md:text-7xl text-white font-serif font-semibold px8 py-4 -rounded-xl inline-block">
-                Cámara de Pequeñas y Medianas Empresas Formosa
+            <div className="px-4 py-4">
+              <h1 className="max-w-[calc(100vw-2rem)] text-4xl leading-[1.05] text-white font-serif font-semibold sm:text-5xl md:max-w-4xl md:text-7xl">
+                Cámara de Pequeñas y Medianas Empresas de Formosa
               </h1>
               <br /> {/* Salto de línea para separar el título del subtítulo */}
               <p className="mt-6 text-xl text-white font-bold bg-black/20 inline-block px-6 py-2 rounded-lg max-w-lg">

@@ -66,7 +66,7 @@ export default function Footer() {
                             <p className="text-sm font-bold tracking-widest text-white uppercase">Redes Sociales</p>
                             <div className="w-12 h-1 bg-[#1D7BB6] mt-2"></div>
                             {/* Cambié a flex-row para que los íconos queden uno al lado del otro (se ve más moderno) */}
-                            <ul className="mt-6 space-x-5 flex flex-col ml-12 space-y-4">
+                            <ul className="mt-6 flex flex-col space-y-4">
                                 <li>
                                     <a href="https://www.facebook.com/camara.capymef/" target="_blank" rel="noreferrer" className="hover:text-[#1D7BB6] transition-colors">
                                         <FaFacebook className="w-7 h-7" />
