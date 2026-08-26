@@ -238,7 +238,7 @@ export default function Home() {
           </div>
         </section>
         {/*La vista N3*/}
-        <section className="relative w-full overflow-hidden bg-[#1b4f7a] px-6 md:px-24 pt-16 font-sans text-white pb-10">
+        <section className="relative w-full overflow-hidden bg-[#1b4f7a] px-6 pb-10 pt-16 font-sans text-white md:px-24">
           <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
           <div className="pointer-events-none absolute -bottom-16 right-0 h-72 w-72 rounded-full bg-[#1D7BB6]/20 blur-3xl"></div>
 
@@ -246,7 +246,7 @@ export default function Home() {
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-center mb-12">
             {/* Título centrado */}
             <div className="flex flex-col items-center">
-              <h2 className="text-4xl font-serif font-bold">
+              <h2 className="text-3xl font-sans font-normal uppercase tracking-tight text-white">
                 Últimas noticias
               </h2>
               {/* Subrayado celeste */}
@@ -280,6 +280,7 @@ export default function Home() {
                   subtitulo={noticia.subtitulo}
                   imagenUrl={noticia.imagenUrl}
                   fecha={noticia.fechaPublicacion}
+                  tipo={noticia.tipo || noticia.categoria || "Institucional"}
                   onLeerMas={() => setNoticiaSeleccionada(noticia)}
                 />
               ))}
