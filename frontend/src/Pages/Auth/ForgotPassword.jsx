@@ -1,28 +1,11 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { solicitarRecuperacion } from "../../services/authServices";
 
 export default function ForgotPassword() {
   const { register, handleSubmit, reset } = useForm();
-  const [enviando, setEnviando] = useState(false);
-  // Guardamos el mensaje de respuesta para mostrarlo en pantalla (no usamos alert acá
-  // porque el mensaje del backend es intencionalmente genérico, conviene que quede
-  // visible y no se pierda con un popup)
-  const [mensaje, setMensaje] = useState(null);
 
-  const handleRecovery = async (data) => {
-    setEnviando(true);
-    setMensaje(null);
-    try {
-      const result = await solicitarRecuperacion(data.email);
-      setMensaje({ texto: result.mensaje, tipo: result.exito ? "exito" : "error" });
-      if (result.exito) reset();
-    } catch (error) {
-      setMensaje({ texto: error.message, tipo: "error" });
-    } finally {
-      setEnviando(false);
-    }
+  const handleRecovery = () => {
+    reset();
   };
 
   return (
@@ -52,26 +35,11 @@ export default function ForgotPassword() {
             {...register("email", { required: true })}
           />
 
-          {mensaje && (
-            <p
-              className={`mt-4 text-sm text-center ${
-                mensaje.tipo === "exito" ? "text-green-400" : "text-red-400"
-              }`}
-            >
-              {mensaje.texto}
-            </p>
-          )}
-
           <button
             type="submit"
-            disabled={enviando}
-            className={`mt-8 rounded-full px-10 py-2 text-lg font-bold text-white transition-colors ${
-              enviando
-                ? "bg-gray-500 cursor-not-allowed"
-                : "bg-[#1D7BB6] hover:bg-[#156091]"
-            }`}
+            className="mt-8 rounded-full bg-[#1D7BB6] px-10 py-2 text-lg font-bold text-white transition-colors hover:bg-[#156091]"
           >
-            {enviando ? "Enviando..." : "Enviar instrucciones"}
+            Enviar instrucciones
           </button>
         </form>
 

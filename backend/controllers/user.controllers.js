@@ -8,7 +8,7 @@ import { enviarMailRecuperacion } from '../config/mailer.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 // ==========================================
-// NUEVA Función auxiliar para borrar de la NUBE
+// Función auxiliar para borrar de la NUBE
 // ==========================================
 const eliminarArchivoNube = async (public_id) => {
   if (public_id) {
@@ -24,7 +24,7 @@ const eliminarArchivoNube = async (public_id) => {
 // 1. REGISTRO DE SOLICITUD DE SOCIO
 // ==========================================
 export const registrarUsuario = async (req, res) => {
-  const constanciaFile = req.file; // Archivo subido mediante Multer
+  const constanciaFile = req.file; // Archivo ya subido a Cloudinary gracias al middleware
 
   try {
     // Extraemos todos los campos, incluyendo los nuevos del Estatuto
@@ -47,10 +47,10 @@ export const registrarUsuario = async (req, res) => {
 
     if (usuarioExistente) {
       eliminarArchivoNube(constanciaFile.filename); // Borramos el archivo subido para no ocupar espacio
-      const mensaje = usuarioExistente.email === email 
-        ? 'El correo electrónico ya se encuentra registrado.' 
+      const mensaje = usuarioExistente.email === email
+        ? 'El correo electrónico ya se encuentra registrado.'
         : 'El CUIT ingresado ya se encuentra registrado.';
-        
+
       return res.status(400).json({ exito: false, mensaje });
     }
 
@@ -64,14 +64,14 @@ export const registrarUsuario = async (req, res) => {
       cuit,
       email,
       password: passwordHash,
-      telefono,                 // NUEVO
-      localidad,                // NUEVO
-      categoria: categoria || 'adherente', // NUEVO (Por defecto adherente si no envían nada)
-      rubro,             // NUEVO
-      actividad,         // NUEVO
-      tamano_empresa,    // NUEVO
+      telefono,
+      localidad,
+      categoria: categoria || 'adherente',
+      rubro,
+      actividad,
+      tamano_empresa,
       constanciaUrl: constanciaFile.path,
-      estado: 'pendiente',      // Queda pendiente de aprobación
+      estado: 'pendiente',
       rol: 'socio'
     });
 

@@ -97,16 +97,23 @@ app.use((error, req, res, next) => {
     mensaje: error.message || 'Error interno del servidor.',
   });
 });
-
+ 
 // Función para conectar a la base de datos, sincronizar tablas y levantar el servidor
 const startServer = async () => {
   try {
     // 1. Probar la conexión y sincronizar tablas (las crea si no existen)
-    await sequelize.sync({ alter: true }); 
+    // Usamos sync() SIN "alter: true" para el día a día: revisa que las tablas existan,
+    // pero no intenta reescribir columnas en cada arranque (eso es lento y frágil,
+    // sobre todo contra el connection pooler de Supabase — puede cortarse a mitad de
+    // camino y dejar la tabla desincronizada, como nos pasó).
+    // Si agregás o cambiás un campo en algún modelo, cambiá esta línea a
+    // sequelize.sync({ alter: true }) UNA vez, confirmá en la consola que terminó bien,
+    // y volvé a dejarla como está ahora.
+    await sequelize.sync({ alter: true }); //{ alter: true } en caso de adaptar nuevos modelos
     console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 
     // 2. Iniciar las tareas programadas (generación automática de cuotas el día 1 de cada mes)
-    //iniciarCronJobs(); todavia nop
+    iniciarCronJobs();
 
     // 3. Levantar el servidor Express
     app.listen(port, () => {
