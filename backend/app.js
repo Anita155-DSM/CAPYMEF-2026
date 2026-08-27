@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { sequelize } from './config/database.js';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+//import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 
 import { interceptorAuditoria } from './middlewares/auditoria.middleware.js';
@@ -78,6 +78,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes); // wndpoints: /api/admin/solicitudes, etc
 app.use('/api/noticias', noticiaRoutes);
 app.use('/api/cuotas', cuotaRoutes) //pago de cuptas
+app.use('/api/gastos', gastoRoutes)
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -109,7 +110,7 @@ const startServer = async () => {
     // Si agregás o cambiás un campo en algún modelo, cambiá esta línea a
     // sequelize.sync({ alter: true }) UNA vez, confirmá en la consola que terminó bien,
     // y volvé a dejarla como está ahora.
-    await sequelize.sync({ alter: true }); //{ alter: true } en caso de adaptar nuevos modelos
+    await sequelize.sync(); //{ alter: true } en caso de adaptar nuevos modelos
     console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 
     // 2. Iniciar las tareas programadas (generación automática de cuotas el día 1 de cada mes)
