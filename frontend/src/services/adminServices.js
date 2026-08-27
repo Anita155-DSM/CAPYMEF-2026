@@ -21,3 +21,27 @@ export const obtenerTodosLosUsuarios = async () => {
         throw new Error("Error de conexión con el servidor");
     }
 };
+
+// src/services/adminServices.js
+
+export const gestionarEstadoSolicitud = async (id, nuevoEstado) => {
+    try {
+        const token = localStorage.getItem("token");
+
+        // Apuntamos a la ruta exacta de tu adminRoutes: /solicitudes/:id
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/solicitudes/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}` // Pasamos el token porque lo exige tu middleware
+            },
+            // Le mandamos 'nuevoEstado' porque así lo espera tu controller (gestionarSolicitud)
+            body: JSON.stringify({ nuevoEstado })
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error al gestionar la solicitud:", error);
+        throw new Error("Error de conexión con el servidor");
+    }
+};
