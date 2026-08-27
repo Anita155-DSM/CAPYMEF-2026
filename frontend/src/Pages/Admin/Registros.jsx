@@ -140,7 +140,6 @@ export default function RegistrosAdmin() {
                         </div>
 
                         {/* Cuerpo del Modal: Visor del Documento */}
-                        {/* Cuerpo del Modal: Visor del Documento */}
                         <div className="p-4 flex-grow bg-gray-100 overflow-hidden flex flex-col h-[60vh]">
                             <p className="font-semibold text-gray-700 mb-2">Constancia de Inscripción (AFIP):</p>
 
