@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { sequelize } from './config/database.js';
 import helmet from 'helmet';
-//import rateLimit from 'express-rate-limit';
+import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 
 import { interceptorAuditoria } from './middlewares/auditoria.middleware.js';
@@ -13,6 +13,8 @@ import './models/user.models.js';
 import './models/gasto.models.js';
 import './models/noticia.models.js';
 import './models/pago.models.js';
+import './models/evento.models.js';
+import './models/inscripcion.models.js';
 
 // IMPORTAMOS TUS RUTAS
 import authRoutes from './routes/authRoutes.js'; 
@@ -20,6 +22,7 @@ import noticiaRoutes from './routes/noticia.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import gastoRoutes from './routes/gasto.routes.js'
 import cuotaRoutes from './routes/cuota.routes.js'
+import eventoRoutes from './routes/evento.routes.js'
 import { iniciarCronJobs } from './config/cron.js';//automatizados de cuotas
 
 
@@ -78,7 +81,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes); // wndpoints: /api/admin/solicitudes, etc
 app.use('/api/noticias', noticiaRoutes);
 app.use('/api/cuotas', cuotaRoutes) //pago de cuptas
-app.use('/api/gastos', gastoRoutes)
+app.use('/api/gastos', gastoRoutes) // 🔴 BUG encontrado: esta línea faltaba por completo, el módulo de gastos nunca fue alcanzable
+app.use('/api/eventos', eventoRoutes)
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -98,7 +102,7 @@ app.use((error, req, res, next) => {
     mensaje: error.message || 'Error interno del servidor.',
   });
 });
- 
+
 // Función para conectar a la base de datos, sincronizar tablas y levantar el servidor
 const startServer = async () => {
   try {
@@ -110,7 +114,7 @@ const startServer = async () => {
     // Si agregás o cambiás un campo en algún modelo, cambiá esta línea a
     // sequelize.sync({ alter: true }) UNA vez, confirmá en la consola que terminó bien,
     // y volvé a dejarla como está ahora.
-    await sequelize.sync(); //{ alter: true } en caso de adaptar nuevos modelos
+    await sequelize.sync(); 
     console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 
     // 2. Iniciar las tareas programadas (generación automática de cuotas el día 1 de cada mes)
