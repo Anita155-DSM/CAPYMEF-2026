@@ -54,11 +54,11 @@ export default function Balance() {
           <div className="bg-gray-50 rounded-xl p-8 shadow-inner mb-12">
             <h3 className="text-xl font-bold text-[#1A4B76] mb-8 text-center">Evolución de Ingresos vs Egresos</h3>
             
-            <div className="flex flex-col md:flex-row justify-center items-end gap-8 h-64">
+            <div className="grid grid-cols-2 items-end justify-items-center gap-x-4 gap-y-8 md:flex md:flex-row md:justify-center md:gap-8">
               {balancesHistoricos.map((data, index) => (
                 <div 
                   key={index} 
-                  className="flex flex-col items-center group cursor-pointer w-full md:w-auto"
+                  className="group flex w-full cursor-pointer flex-col items-center md:w-auto"
                   onMouseEnter={() => setHoveredYear(data.año)}
                   onMouseLeave={() => setHoveredYear(null)}
                 >

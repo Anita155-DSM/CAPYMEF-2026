@@ -43,13 +43,13 @@ export default function Home() {
         {/*La Vista N1 */}
         <section className="w-full font-sans">
           <div
-            className="min-h-screen w-full bg-cover bg-no-repeat justify-center items-start flex flex-col"
+            className="min-h-screen w-full bg-cover bg-[center_4rem] bg-no-repeat bg-white justify-center items-start flex flex-col"
             style={{ backgroundImage: `url(${fondoHome})` }}
           >
             {/* Contenedor del texto central */}
-            <div className="px-4 py-4 line-clamp-3">
-              <h1 className="text-5xl md:text-7xl text-white font-serif font-semibold px8 py-4 -rounded-xl inline-block">
-                Cámara de Pequeñas y Medianas Empresas Formosa
+            <div className="px-4 py-4">
+              <h1 className="max-w-[calc(100vw-2rem)] text-4xl leading-[1.05] text-white font-serif font-semibold sm:text-5xl md:max-w-4xl md:text-7xl">
+                Cámara de Pequeñas y Medianas Empresas de Formosa
               </h1>
               <br /> {/* Salto de línea para separar el título del subtítulo */}
               <p className="mt-6 text-xl text-white font-bold bg-black/20 inline-block px-6 py-2 rounded-lg max-w-lg">
@@ -75,16 +75,16 @@ export default function Home() {
                   <div
                     onClick={(e) => e.stopPropagation()}
                     // Fondo claro como en tu imagen, max-w-4xl para hacerlo ancho pero sin ocupar todo, y padding generoso
-                    className="bg-[#F4F8FB] border border-gray-300 rounded-sm shadow-2xl p-8 md:p-12 w-full max-w-4xl relative mx-4 animacion-modal"
+                    className="animacion-modal relative mx-2 flex max-h-[90vh] w-full max-w-4xl flex-col overflow-y-auto rounded-sm border border-gray-300 bg-[#F4F8FB] p-5 shadow-2xl sm:mx-4 sm:p-8 md:p-12"
                   >
 
                     {/* Título centrado con color azul y fuente Sans */}
-                    <h3 className="text-2xl md:text-[26px] font-normal text-center text-[#1D7BB6] mb-8 font-sans tracking-wide">
+                    <h3 className="mb-6 text-center font-sans text-xl font-normal tracking-wide text-[#1D7BB6] sm:mb-8 sm:text-2xl md:text-[26px]">
                       COMO SUMARSE A CAPYMEF
                     </h3>
 
                     {/* Contenedor del texto con la misma tipografía que Sobre Nosotros */}
-                    <div className="font-sans text-gray-900 text-lg leading-relaxed space-y-1">
+                    <div className="space-y-1 font-sans text-base leading-relaxed text-gray-900 sm:text-lg">
                       <p>
                         Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.
                       </p>
@@ -101,13 +101,13 @@ export default function Home() {
 
                       <p className="pt-2">Nuestras vías de contacto:</p>
                       {/* Lista con los emojis exactos de tu imagen */}
-                      <div className="flex">
-                        <ul className="space-y-3">
+                      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                        <ul className="min-w-0 space-y-3 break-words lg:flex-1">
                           <li>📍 Dirección: Maipú 651, Formosa, Argentina, 3600.</li>
                           <li>📱 Tel: 370-123-4567, 0370 446-2508</li>
                           <li>✉️ Correo: info@capymef.ar</li>
                         </ul>
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" width="570" height="200" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                        <iframe className="h-48 w-full max-w-full border-0 lg:w-1/2" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" title="Ubicación de CAPYMEF" loading="lazy" referrerPolicy="strict-origin-when-cross-origin"></iframe>
                       </div>
                     </div>
 
@@ -238,12 +238,15 @@ export default function Home() {
           </div>
         </section>
         {/*La vista N3*/}
-        <section className="w-full bg-[#1b4f7a] px-10 md:px-24 pt-16 font-sans text-white pb-7">
+        <section className="relative w-full overflow-hidden bg-[#1b4f7a] px-6 pb-10 pt-16 font-sans text-white md:px-24">
+          <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+          <div className="pointer-events-none absolute -bottom-16 right-0 h-72 w-72 rounded-full bg-[#1D7BB6]/20 blur-3xl"></div>
+
           {/* Encabezado de la sección */}
-          <div className="relative flex flex-col md:flex-row items-center justify-center mb-12">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-center mb-12">
             {/* Título centrado */}
             <div className="flex flex-col items-center">
-              <h2 className="text-4xl font-serif font-bold">
+              <h2 className="text-3xl font-sans font-normal uppercase tracking-tight text-white">
                 Últimas noticias
               </h2>
               {/* Subrayado celeste */}
@@ -253,7 +256,7 @@ export default function Home() {
             {/* Enlace a la derecha */}
             <Link
               to="/noticias"
-              className="md:absolute right-0 mt-6 md:mt-0 text-sm font-bold hover:underline transition-all"
+              className="md:absolute right-0 mt-6 md:mt-0 text-sm font-bold hover:underline transition-all bg-white/10 px-4 py-2 rounded-full hover:bg-white/20"
             >
               Ver todas las noticias &gt;
             </Link>
@@ -277,6 +280,7 @@ export default function Home() {
                   subtitulo={noticia.subtitulo}
                   imagenUrl={noticia.imagenUrl}
                   fecha={noticia.fechaPublicacion}
+                  tipo={noticia.tipo || noticia.categoria || "Institucional"}
                   onLeerMas={() => setNoticiaSeleccionada(noticia)}
                 />
               ))}
