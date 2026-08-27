@@ -43,13 +43,13 @@ export default function Home() {
         {/*La Vista N1 */}
         <section className="w-full font-sans">
           <div
-            className="min-h-screen w-full bg-cover bg-[center_4rem] bg-no-repeat bg-white justify-center items-start flex flex-col"
+            className="min-h-screen w-full bg-cover bg-no-repeat justify-center items-start flex flex-col"
             style={{ backgroundImage: `url(${fondoHome})` }}
           >
             {/* Contenedor del texto central */}
-            <div className="px-4 py-4">
-              <h1 className="max-w-[calc(100vw-2rem)] text-4xl leading-[1.05] text-white font-serif font-semibold sm:text-5xl md:max-w-4xl md:text-7xl">
-                Cámara de Pequeñas y Medianas Empresas de Formosa
+            <div className="px-4 py-4 line-clamp-3">
+              <h1 className="text-5xl md:text-7xl text-white font-serif font-semibold px8 py-4 -rounded-xl inline-block">
+                Cámara de Pequeñas y Medianas Empresas Formosa
               </h1>
               <br /> {/* Salto de línea para separar el título del subtítulo */}
               <p className="mt-6 text-xl text-white font-bold bg-black/20 inline-block px-6 py-2 rounded-lg max-w-lg">
@@ -238,15 +238,12 @@ export default function Home() {
           </div>
         </section>
         {/*La vista N3*/}
-        <section className="relative w-full overflow-hidden bg-[#1b4f7a] px-6 pb-10 pt-16 font-sans text-white md:px-24">
-          <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
-          <div className="pointer-events-none absolute -bottom-16 right-0 h-72 w-72 rounded-full bg-[#1D7BB6]/20 blur-3xl"></div>
-
+        <section className="w-full bg-[#1b4f7a] px-10 md:px-24 pt-16 font-sans text-white pb-7">
           {/* Encabezado de la sección */}
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-center mb-12">
+          <div className="relative flex flex-col md:flex-row items-center justify-center mb-12">
             {/* Título centrado */}
             <div className="flex flex-col items-center">
-              <h2 className="text-3xl font-sans font-normal uppercase tracking-tight text-white">
+              <h2 className="text-4xl font-serif font-bold">
                 Últimas noticias
               </h2>
               {/* Subrayado celeste */}
@@ -256,7 +253,7 @@ export default function Home() {
             {/* Enlace a la derecha */}
             <Link
               to="/noticias"
-              className="md:absolute right-0 mt-6 md:mt-0 text-sm font-bold hover:underline transition-all bg-white/10 px-4 py-2 rounded-full hover:bg-white/20"
+              className="md:absolute right-0 mt-6 md:mt-0 text-sm font-bold hover:underline transition-all"
             >
               Ver todas las noticias &gt;
             </Link>
@@ -280,7 +277,6 @@ export default function Home() {
                   subtitulo={noticia.subtitulo}
                   imagenUrl={noticia.imagenUrl}
                   fecha={noticia.fechaPublicacion}
-                  tipo={noticia.tipo || noticia.categoria || "Institucional"}
                   onLeerMas={() => setNoticiaSeleccionada(noticia)}
                 />
               ))}

@@ -1,54 +1,49 @@
 import Logo from "../assets/img/Logo.png"
-export default function Card({ titulo, subtitulo, imagenUrl, fecha, tipo = "Institucional", onLeerMas }) {
+export default function Card({ titulo, subtitulo, imagenUrl, fecha, onLeerMas }) {
   return (
-    <article className="group h-full transform-gpu overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md transition-all duration-300 ease-out hover:z-10 hover:scale-[1.03] hover:shadow-2xl">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-200 flex flex-col">
 
       {/* IMAGEN DE LA TARJETA */}
       {imagenUrl ? (
         <img
-          src={imagenUrl}
+          src={`${import.meta.env.VITE_API_URL_UPLOADS}/${imagenUrl}`}
           alt={titulo}
-          className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-48 object-cover"
         />
       ) : (
-        <div className="flex h-48 w-full items-center justify-center bg-gradient-to-tr from-[#132A46] to-[#1D7BB6] p-6">
+        <div className="w-full h-48 bg-gradient-to-tr from-[#132A46] to-[#1D7BB6] flex items-center justify-center p-6">
           {/* El logo con un poco de opacidad para que parezca marca de agua */}
           <img src={Logo} alt="CAPYMEF" className="h-24 w-auto object-contain opacity-30" />
         </div>
       )}
 
-      <div className="flex min-h-[236px] flex-grow flex-col p-6">
+      <div className="p-6 flex flex-col flex-grow">
         {/* FECHA */}
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1D7BB6]">
+        <div className="text-xs font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2">
           {new Date(fecha).toLocaleDateString('es-AR')}
-          <span className="text-gray-300">&bull;</span>
-          <span>{tipo}</span>
         </div>
 
         {/* TÍTULO */}
-        <h3 className="mb-3 line-clamp-2 text-xl font-bold leading-tight text-[#132A46]">
+        <h3 className="text-xl font-bold text-[#132A46] mb-2 line-clamp-2">
           {titulo}
         </h3>
 
         {/* SUBTÍTULO */}
         {subtitulo && (
-          <p className="mb-4 line-clamp-3 text-base leading-relaxed text-gray-600">
+          <p className="text-gray-600 mb-4 line-clamp-3">
             {subtitulo}
           </p>
         )}
 
         {/* BOTÓN */}
-        <div className="mt-auto pt-5">
-          <button
-            type="button"
-            onClick={onLeerMas}
-            className="font-semibold text-[#1D7BB6] transition-colors duration-200 hover:text-[#1A4B76]"
-          >
-            Leer más &gt;&gt;
+        <div className="mt-auto pt-4">
+          <button onClick={onLeerMas}
+            className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors">
+            Leer más
           </button>
         </div>
       </div>
 
-    </article>
+    </div>
   );
 }
