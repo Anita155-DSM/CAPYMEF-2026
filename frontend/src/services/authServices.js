@@ -1,5 +1,5 @@
 // Centralizamos la URL para no repetirla
-const API_URL = "http://localhost:3000/api/auth";
+const API_URL = import.meta.env.VITE_API_URL_AUTH;
 
 export const iniciarSesion = async (credenciales) => {
   try {
@@ -23,7 +23,7 @@ export const registrarSocio = async (formData) => {
   try {
     const response = await fetch(`${API_URL}/registro`, {
       method: "POST",
-      body: formData, // Acordate que al ser FormData no lleva headers
+      body: formData,
     });
 
     return await response.json();
