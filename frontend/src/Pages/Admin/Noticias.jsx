@@ -1,10 +1,12 @@
-import { FaSearch, FaPlus, FaRegEdit, FaRegTrashAlt, FaArrowLeft } from "react-icons/fa";
+import { FaSearch, FaPlus, FaArrowLeft } from "react-icons/fa";
+
 import Loading from "../../Components/Loading";
-import logo from "../../assets/img/logo.png"
-import { useNoticiasLogic } from "./Hooks/useNoticiasLogic.js"; // Asegurate de la ruta correcta
+import { Card } from "../../Components";
+import ModalAdmin from "./Components/ModalAdmin"; // <-- Importamos nuestro modal exclusivo de admin
+import { useNoticiasLogic } from "./Hooks/useNoticiasLogic.js";
+import { useState } from "react";
 
 export default function NoticiasAdmin() {
-  // Conectamos nuestra librería propia
   const {
     vistaActual, setVistaActual,
     busqueda, setBusqueda,
@@ -14,9 +16,8 @@ export default function NoticiasAdmin() {
     onSubmit, estaPublicando
   } = useNoticiasLogic();
 
-  // ==========================================
-  // VISTA 1: LISTADO DE TARJETAS
-  // ==========================================
+  const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
+
   const renderLista = () => {
     if (cargando) return <div className="p-10 text-center"><Loading /></div>;
 
@@ -47,46 +48,31 @@ export default function NoticiasAdmin() {
           </button>
         </div>
 
+        {/* Grid de Noticias limpio sin sombras dobles */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
           {noticiasFiltradas.length === 0 ? (
             <p className="col-span-full text-center py-10 text-gray-500">No hay noticias para mostrar.</p>
           ) : (
             noticiasFiltradas.map((noticia) => (
-              <div key={noticia.id} className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden flex flex-col h-full hover:shadow-lg transition-shadow">
-                <div className="p-5 flex flex-col flex-grow">
-                  <div className="mb-4">
-                    <span className="bg-gray-400 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      {noticia.categoria || "General"}
-                    </span>
-                  </div>
-                  <div className="flex justify-center mb-4 bg-gray-50 h-32 rounded">
-                    <img
-                      src={noticia.imagenUrl || "https://placehold.co/400x200/ffffff/0056b3?text=CAPYMEF"}
-                      alt="Portada"
-                      className="h-full object-contain"
-                    />
-                  </div>
-                  <p className="text-gray-500 text-sm font-semibold mb-2 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-500 block"></span>
-                    {noticia.fechaPublicacion || "Fecha no disponible"}
-                  </p>
-                  <h3 className="text-[#132A46] font-bold text-lg leading-tight mb-3">
-                    {noticia.titulo}
-                  </h3>
-                  <p className="text-gray-500 text-sm flex-grow line-clamp-4">
-                    {noticia.subtitulo || noticia.contenido?.substring(0, 100) + "..."}
-                  </p>
-                </div>
+              <div key={noticia.id} className="flex flex-col">
 
-                <div className="px-5 py-4 flex justify-between items-center border-t border-gray-100">
-                  <div className="flex gap-3 text-xl text-[#1D7BB6]">
-                    <button className="hover:text-[#132A46] transition-colors"><FaRegEdit /></button>
-                    <button className="hover:text-red-600 transition-colors"><FaRegTrashAlt /></button>
-                  </div>
-                  <span className={`px-4 py-1.5 rounded-md text-xs font-bold text-white uppercase ${noticia.estado === 'publicado' ? 'bg-[#00B859]' : 'bg-[#FFC107]'}`}>
-                    {noticia.estado}
+                {/* Renderizamos tu Card directamente */}
+                <Card
+                  titulo={noticia.titulo}
+                  subtitulo={noticia.subtitulo}
+                  imagenUrl={noticia.imagenUrl}
+                  fecha={noticia.fechaPublicacion}
+                  onLeerMas={() => setNoticiaSeleccionada(noticia)}
+                />
+
+                {/* Barra inferior integrada visualmente mostrando la visibilidad */}
+                <div className="bg-white px-6 py-3 border-x border-b border-gray-200 rounded-b-xl flex justify-between items-center shadow-sm">
+                  <span className="text-xs text-gray-500 font-medium">Visibilidad:</span>
+                  <span className="px-3 py-1 rounded-md text-xs font-bold uppercase bg-[#1D7BB6] text-white tracking-wider">
+                    {noticia.visibilidad || 'todos'}
                   </span>
                 </div>
+
               </div>
             ))
           )}
@@ -161,7 +147,7 @@ export default function NoticiasAdmin() {
             <div className="flex flex-col gap-2">
               <label className="font-bold text-gray-700">Estado de publicación *</label>
               <select className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] bg-white" {...register("estado", { required: true })}>
-                <option value="publicado">Publicado (Visible ahora mismo)</option>
+                <option value="publicado">Visible ahora mismo</option>
                 <option value="borrador">Borrador (Oculto temporalmente)</option>
               </select>
             </div>
@@ -193,6 +179,14 @@ export default function NoticiasAdmin() {
   return (
     <div className="p-8 w-full font-sans relative min-h-screen bg-gray-100">
       {vistaActual === "lista" ? renderLista() : renderFormulario()}
+
+      {/* Renderizamos el nuevo Modal del Administrador */}
+      {noticiaSeleccionada && (
+        <ModalAdmin
+          noticia={noticiaSeleccionada}
+          onClose={() => setNoticiaSeleccionada(null)}
+        />
+      )}
     </div>
   );
 }

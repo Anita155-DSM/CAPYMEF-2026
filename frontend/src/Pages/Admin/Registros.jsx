@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { obtenerTodosLosUsuarios, gestionarEstadoSolicitud } from "../../services/adminServices";
 import Loading from "../../Components/Loading";
-import ModalRevision from "./Components/ModalRevision";
+import ModalRevision from "./Components/ModalAdmin";
 import Search, { useBuscador } from "./Components/Search";
 
 export default function RegistrosAdmin() {
