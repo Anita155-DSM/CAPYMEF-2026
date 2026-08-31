@@ -54,3 +54,38 @@ export const obtenerNoticiasPublicas = async () => {
     throw new Error("Error de conexión con el servidor al Obtener");
   }
 };
+export const obtenerTodasLasNoticiasAdmin = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`${API_URL}/noticias/admin`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    // Devolvemos el JSON crudo del backend directamente
+    return await response.json();
+
+  } catch (error) {
+    console.error("Error al obtener noticias de admin:", error);
+    return { exito: false, mensaje: "Error de conexión con el servidor al Obtener" };
+  }
+};
+
+export const eliminarNoticia = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/noticias/admin/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) return { exito: false, mensaje: data.mensaje || "Error al eliminar" };
+    return { exito: true, data };
+  } catch (error) {
+    return { exito: false, mensaje: "Error de conexión con el servidor al Eliminar" };
+  }
+};

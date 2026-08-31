@@ -56,7 +56,7 @@ export default function NoticiasAdmin() {
             noticiasFiltradas.map((noticia) => (
               <div key={noticia.id} className="flex flex-col">
 
-                {/* Renderizamos tu Card directamente */}
+                {/* Tu Card original */}
                 <Card
                   titulo={noticia.titulo}
                   subtitulo={noticia.subtitulo}
@@ -65,11 +65,22 @@ export default function NoticiasAdmin() {
                   onLeerMas={() => setNoticiaSeleccionada(noticia)}
                 />
 
-                {/* Barra inferior integrada visualmente mostrando la visibilidad */}
+                {/* Barra inferior de administración */}
                 <div className="bg-white px-6 py-3 border-x border-b border-gray-200 rounded-b-xl flex justify-between items-center shadow-sm">
-                  <span className="text-xs text-gray-500 font-medium">Visibilidad:</span>
-                  <span className="px-3 py-1 rounded-md text-xs font-bold uppercase bg-[#1D7BB6] text-white tracking-wider">
-                    {noticia.visibilidad || 'todos'}
+                  <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
+                    <span>Para:</span>
+                    <span className="font-bold text-[#132A46] capitalize">
+                      {noticia.visibilidad || 'todos'}
+                    </span>
+                  </div>
+
+                  <span
+                    className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider shadow-sm ${noticia.estado === 'publicado'
+                        ? 'bg-[#00B859] text-white'
+                        : 'bg-[#FFC107] text-[#132A46]'
+                      }`}
+                  >
+                    {noticia.estado === 'publicado' ? 'Visible' : 'Oculto'}
                   </span>
                 </div>
 

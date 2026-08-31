@@ -1,8 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-// Cambiamos a la función de admin para que traiga todo (borradores y publicados)
-import { obtenerNoticiasPublicas, publicarNuevaNoticia } from "../../../services/noticiasService.js";
 import { toast } from "sonner";
+import { obtenerTodasLasNoticiasAdmin, publicarNuevaNoticia } from "../../../services/noticiasService.js";
 
 export function useNoticiasLogic() {
     const [vistaActual, setVistaActual] = useState("lista");
@@ -22,15 +21,12 @@ export function useNoticiasLogic() {
     const cargarNoticias = async () => {
         setCargando(true);
         try {
-            // Usamos el endpoint de administración
-            const result = await obtenerNoticiasPublicas();
+            const result = await obtenerTodasLasNoticiasAdmin();
             if (result.exito) {
                 setNoticias(result.data);
-            } else {
-                console.error("Error de base de datos:", result.mensaje);
             }
         } catch (error) {
-            console.error("Error en la petición:", error);
+            console.error("Error:", error);
         } finally {
             setCargando(false);
         }
@@ -80,14 +76,28 @@ export function useNoticiasLogic() {
         } finally {
             setEstaPublicando(false);
         }
+        const cargarNoticias = async () => {
+            setCargando(true);
+            try {
+                const result = await obtenerTodasLasNoticiasAdmin();
+                if (result.exito) {
+                    // Si por algún motivo result.data no es un array, le pasamos un array vacío []
+                    setNoticias(Array.isArray(result.data) ? result.data : []);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            } finally {
+                setCargando(false);
+            }
+        };
     };
 
+
     const noticiasFiltradas = useMemo(() => {
-        return noticias.filter((n) => 
+        return noticias.filter((n) =>
             n.titulo?.toLowerCase().includes(busqueda.toLowerCase())
         );
     }, [noticias, busqueda]);
-
     return {
         vistaActual, setVistaActual,
         busqueda, setBusqueda,
@@ -96,6 +106,6 @@ export function useNoticiasLogic() {
         register, handleSubmit, reset,
         imagenPreview, handleImagen,
         onSubmit, estaPublicando,
-        recargarNoticias: cargarNoticias // Exportamos esto por si el modal necesita refrescar la grilla al editar
+        recargarNoticias: cargarNoticias
     };
 }
