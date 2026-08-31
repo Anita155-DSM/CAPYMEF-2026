@@ -1,6 +1,3 @@
-// src/services/noticiasService.js
-
-// 1. Llamamos a la variable global de Vite
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const publicarNuevaNoticia = async (formData) => {
