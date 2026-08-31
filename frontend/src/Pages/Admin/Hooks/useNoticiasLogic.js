@@ -1,29 +1,28 @@
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
+// Cambiamos a la función de admin para que traiga todo (borradores y publicados)
 import { obtenerNoticiasPublicas, publicarNuevaNoticia } from "../../../services/noticiasService.js";
+import { toast } from "sonner";
 
 export function useNoticiasLogic() {
-    // Estados de navegación visual
-    const [vistaActual, setVistaActual] = useState("lista"); // "lista" o "formulario"
+    const [vistaActual, setVistaActual] = useState("lista");
     const [busqueda, setBusqueda] = useState("");
     const [pestañaActiva, setPestañaActiva] = useState("Noticias");
 
-    // Estados de datos
     const [noticias, setNoticias] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [estaPublicando, setEstaPublicando] = useState(false);
 
-    // Estados del formulario (React Hook Form + Imágenes)
     const { register, handleSubmit, reset } = useForm({
         defaultValues: { visibilidad: "todos", estado: "publicado" }
     });
     const [imagenPreview, setImagenPreview] = useState(null);
     const [imagenArchivo, setImagenArchivo] = useState(null);
 
-    // Fetch para cargar la tabla
     const cargarNoticias = async () => {
         setCargando(true);
         try {
+            // Usamos el endpoint de administración
             const result = await obtenerNoticiasPublicas();
             if (result.exito) {
                 setNoticias(result.data);
@@ -37,12 +36,10 @@ export function useNoticiasLogic() {
         }
     };
 
-    // Cargamos al montar el componente
     useEffect(() => {
         cargarNoticias();
     }, []);
 
-    // Manejador del archivo de imagen
     const handleImagen = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -53,7 +50,6 @@ export function useNoticiasLogic() {
         }
     };
 
-    // Manejador de la publicación
     const onSubmit = async (data) => {
         setEstaPublicando(true);
         try {
@@ -69,31 +65,29 @@ export function useNoticiasLogic() {
             const result = await publicarNuevaNoticia(formData);
 
             if (result.exito) {
-                alert("¡Noticia publicada con éxito en la base de datos!");
+                toast.success("¡Noticia publicada con éxito en la base de datos!");
                 reset();
                 setImagenPreview(null);
                 setImagenArchivo(null);
-                setVistaActual("lista"); // Volvemos al listado visualmente
-                cargarNoticias(); // Refrescamos las tarjetas con el nuevo dato
+                setVistaActual("lista");
+                cargarNoticias();
             } else {
-                alert("Error al publicar: " + result.mensaje);
+                toast.error("Error al publicar: " + result.mensaje);
             }
         } catch (error) {
-            alert("Hubo un error al intentar conectarse con el servidor.");
+            toast.error("Hubo un error al intentar conectarse con el servidor.");
             console.error(error);
         } finally {
             setEstaPublicando(false);
         }
     };
 
-    // Buscador en memoria ultra rápido
     const noticiasFiltradas = useMemo(() => {
         return noticias.filter((n) => 
             n.titulo?.toLowerCase().includes(busqueda.toLowerCase())
         );
     }, [noticias, busqueda]);
 
-    // Retornamos todas las variables y funciones que la vista necesita
     return {
         vistaActual, setVistaActual,
         busqueda, setBusqueda,
@@ -101,6 +95,7 @@ export function useNoticiasLogic() {
         noticiasFiltradas, cargando,
         register, handleSubmit, reset,
         imagenPreview, handleImagen,
-        onSubmit, estaPublicando
+        onSubmit, estaPublicando,
+        recargarNoticias: cargarNoticias // Exportamos esto por si el modal necesita refrescar la grilla al editar
     };
 }

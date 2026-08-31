@@ -15,7 +15,7 @@ export const obtenerTodosLosUsuarios = async () => {
         return await response.json();
     } catch (error) {
         console.error("Error obteniendo usuarios:", error);
-        throw new Error("Error de conexión con el servidor");
+        throw new Error("Error de conexión con el servidor al Obtener");
     }
 };
 

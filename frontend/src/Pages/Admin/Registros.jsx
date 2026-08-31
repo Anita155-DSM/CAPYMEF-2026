@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import {toast} from "sonner"
 import { obtenerTodosLosUsuarios, gestionarEstadoSolicitud } from "../../services/adminServices";
 import Loading from "../../Components/Loading";
 import ModalRevision from "./Components/ModalAdmin";
@@ -35,14 +36,14 @@ export default function RegistrosAdmin() {
         try {
             const result = await gestionarEstadoSolicitud(id, decision);
             if (result.exito) {
-                alert(`¡Solicitud ${decision} con éxito!`);
+                toast.success(`¡Solicitud ${decision} con éxito!`);
                 setSolicitudes((prev) => prev.filter((socio) => socio.id !== id));
                 setSocioSeleccionado(null);
             } else {
-                alert("Error: " + result.mensaje);
+                toast.error("Error: " + result.mensaje);
             }
         } catch (error) {
-            alert("Hubo un error al procesar la solicitud.");
+            toast.error("Hubo un error al procesar la solicitud.");
         } finally {
             setProcesando(false);
         }
