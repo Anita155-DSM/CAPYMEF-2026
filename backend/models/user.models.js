@@ -28,15 +28,14 @@ export const User = sequelize.define('User', {
   },
   rubro: { 
     type: DataTypes.ENUM('Comercio', 'Industria', 'Servicios', 'Agropecuario', 'Otro'), 
-    allowNull: false,
-    defaultValue: 'Otro'
+    allowNull: false 
   },
   actividad: { 
     type: DataTypes.STRING, 
     allowNull: true 
   },
   tamano_empresa: { 
-    type: DataTypes.ENUM('Micro', 'Pequena', 'Mediana'), 
+    type: DataTypes.ENUM('Micro', 'Pequena', 'Mediana', 'Grande'), 
     allowNull: true 
   },
   // ...
@@ -45,27 +44,12 @@ export const User = sequelize.define('User', {
   // 4. Control de Administración y Accesos
   // ==========================================
   estado: { 
-    // Se agregó 'inactivo' para poder dar de baja a un socio sin confundirlo con 'rechazado'
-    // (rechazado = nunca se aprobó el registro; inactivo = fue socio activo y se dio de baja)
-    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado', 'inactivo'), 
+    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado'), 
     defaultValue: 'pendiente' 
   },
   rol: { 
     type: DataTypes.ENUM('socio', 'admin'), 
     defaultValue: 'socio' 
-  },
-
-  // ==========================================
-  // 5. Recuperación de contraseña
-  // ==========================================
-  // Guardamos el token HASHEADO (nunca en texto plano), igual que la contraseña.
-  resetPasswordToken: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  resetPasswordExpires: {
-    type: DataTypes.DATE,
-    allowNull: true
   }
 }, 
 { 

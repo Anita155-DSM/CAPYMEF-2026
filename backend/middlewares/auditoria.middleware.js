@@ -22,12 +22,10 @@ export const interceptorAuditoria = (req, res, next) => {
           const codigoTecnico = req.auditoriaCodigo || `${req.method}_${modulo}`;
 
           // 4. Guardar en PostgreSQL
-          // OJO: authMiddleware.js guarda los datos del token en req.usuario (en español),
-          // por eso acá leemos de ahí y no de req.user (antes nunca coincidían y todo quedaba como "Sistema")
           await Auditoria.create({
-            usuarioId: req.usuario?.id || null,
-            usuarioNombre: req.usuario ? `${req.usuario.nombre || req.usuario.razonSocial || 'Usuario'}` : 'Sistema',
-            usuarioRol: req.usuario?.rol || req.usuario?.categoria || 'SISTEMA',
+            usuarioId: req.user?.id || null,
+            usuarioNombre: req.user ? `${req.user.nombre || req.user.razonSocial || 'Usuario'}` : 'Sistema',
+            usuarioRol: req.user?.rol || req.user?.categoria || 'ADMIN',
             modulo,
             accionTipo,
             codigoTecnico,

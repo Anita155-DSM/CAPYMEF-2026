@@ -1,30 +1,12 @@
+import fs from 'fs';
 import { Op } from 'sequelize';
-import { v2 as cloudinary } from 'cloudinary';
 import { Noticia } from '../models/noticia.models.js';
 
-// Antes esto borraba archivos del disco local con fs.unlinkSync. Ahora las imágenes
-// viven en Cloudinary, así que borramos por su "public_id" en vez de por ruta de archivo.
-const eliminarImagenCloudinary = async (public_id) => {
-  if (public_id) {
-    try {
-      await cloudinary.uploader.destroy(public_id);
-    } catch (error) {
-      console.error('Error al borrar imagen de Cloudinary:', error);
-    }
+// Función auxiliar para eliminar archivos
+const eliminarArchivo = (filePath) => {
+  if (filePath && fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
   }
-};
-
-// Cuando editamos una noticia vieja, en la base solo tenemos la URL guardada (no el
-// public_id por separado). Esta función lo reconstruye a partir de la URL de Cloudinary.
-// Si la URL no es de Cloudinary (por ejemplo, una noticia vieja de antes de este cambio,
-// guardada con ruta local), devuelve null y simplemente no se intenta borrar nada.
-const extraerPublicIdDeUrl = (url) => {
-  if (!url || !url.includes('res.cloudinary.com')) return null;
-  const despuesDeUpload = url.split('/upload/')[1];
-  if (!despuesDeUpload) return null;
-  const sinVersion = despuesDeUpload.replace(/^v\d+\//, '');
-  const sinExtension = sinVersion.replace(/\.[^/.]+$/, '');
-  return sinExtension; // ej: "capymef_noticias/abc123def456"
 };
 
 // ==========================================
@@ -114,7 +96,7 @@ export const crearNoticia = async (req, res) => {
       data: nuevaNoticia,
     });
   } catch (error) {
-    if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
+    if (imagenFile) eliminarArchivo(imagenFile.path);
     console.error('Error al crear noticia:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -133,7 +115,7 @@ export const actualizarNoticia = async (req, res) => {
     const noticia = await Noticia.findByPk(id);
 
     if (!noticia) {
-      if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
+      if (imagenFile) eliminarArchivo(imagenFile.path);
       return res.status(404).json({ exito: false, mensaje: 'Noticia no encontrada.' });
     }
 
@@ -144,12 +126,9 @@ export const actualizarNoticia = async (req, res) => {
     if (visibilidad) noticia.visibilidad = visibilidad;
     if (estado) noticia.estado = estado;
 
-    // Si subieron una nueva imagen, eliminamos la anterior (de Cloudinary) y guardamos la nueva
+    // Si subieron una nueva imagen, eliminamos la anterior y guardamos la nueva
     if (imagenFile) {
-      if (noticia.imagenUrl) {
-        const publicIdAnterior = extraerPublicIdDeUrl(noticia.imagenUrl);
-        eliminarImagenCloudinary(publicIdAnterior);
-      }
+      if (noticia.imagenUrl) eliminarArchivo(noticia.imagenUrl);
       noticia.imagenUrl = imagenFile.path;
     }
 
@@ -165,7 +144,7 @@ export const actualizarNoticia = async (req, res) => {
       data: noticia,
     });
   } catch (error) {
-    if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
+    if (imagenFile) eliminarArchivo(imagenFile.path);
     console.error('Error al actualizar noticia:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -183,7 +162,6 @@ export const eliminarNoticia = async (req, res) => {
       return res.status(404).json({ exito: false, mensaje: 'Noticia no encontrada.' });
     }
 
-    const tituloBorrado = noticia.titulo; // Lo guardamos antes de destruir el registro
     await noticia.destroy(); // Soft delete por el 'paranoid: true'
     //auditoria
     req.auditoriaMensaje = `Se eliminó la noticia #${id}: "${tituloBorrado}"`;

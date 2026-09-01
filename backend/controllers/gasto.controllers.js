@@ -1,14 +1,10 @@
+import fs from 'fs';
 import { Gasto } from '../models/gasto.models.js';
-import { v2 as cloudinary } from 'cloudinary'; // Importamos el SDK para borrar de la nube
 
-// Función para limpiar la nube si ocurre un error en PostgreSQL
-const eliminarArchivoNube = async (public_id) => {
-  if (public_id) {
-    try {
-      await cloudinary.uploader.destroy(public_id);
-    } catch (error) {
-      console.error('Error al borrar archivo de Cloudinary:', error);
-    }
+// Función auxiliar para limpiar archivos si la base de datos falla
+const eliminarArchivo = (filePath) => {
+  if (filePath && fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
   }
 };
 
@@ -16,7 +12,7 @@ const eliminarArchivoNube = async (public_id) => {
 // 1. REGISTRAR UN NUEVO GASTO (Egreso)
 // ==========================================
 export const registrarGasto = async (req, res) => {
-  const comprobanteFile = req.file; // ¡Este archivo ya está en Cloudinary gracias al middleware!
+  const comprobanteFile = req.file; // Foto o PDF del ticket/factura
 
   try {
     const { fecha, concepto, monto, medio_pago } = req.body;
@@ -26,21 +22,20 @@ export const registrarGasto = async (req, res) => {
       concepto,
       monto,
       medio_pago: medio_pago || 'Transferencia',
-      url_comprobante: comprobanteFile ? comprobanteFile.path : null, // Guardamos la URL pública (ej: https://res.cloudinary.com/...)
+      url_comprobante: comprobanteFile ? comprobanteFile.path : null,
     });
 
-    // 📝 Dejamos la nota para tu Middleware de Auditoría
-    req.auditoriaMensaje = `Se registró un gasto por $${monto} (Concepto: ${concepto})`;
+    //auditoria
+    req.auditoriaMensaje = `Se registró un egreso por $${monto} (Concepto: ${concepto})`;
     req.auditoriaCodigo = 'CREATE_GASTO_OPERATIVO';
 
     res.status(201).json({
       exito: true,
-      mensaje: 'Gasto registrado correctamente en la nube.',
+      mensaje: 'Gasto registrado correctamente.',
       data: nuevoGasto,
     });
   } catch (error) {
-    // Si la BD falla, borramos la imagen que recién subimos a Cloudinary para no ocupar espacio basura
-    if (comprobanteFile) await eliminarArchivoNube(comprobanteFile.filename);
+    if (comprobanteFile) eliminarArchivo(comprobanteFile.path);
     console.error('Error al registrar gasto:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -52,7 +47,7 @@ export const registrarGasto = async (req, res) => {
 export const obtenerGastos = async (req, res) => {
   try {
     const gastos = await Gasto.findAll({
-      order: [['fecha', 'DESC'], ['createdAt', 'DESC']], 
+      order: [['fecha', 'DESC'], ['createdAt', 'DESC']], // Los más recientes primero
     });
 
     res.status(200).json({ exito: true, data: gastos });
@@ -76,10 +71,14 @@ export const eliminarGasto = async (req, res) => {
 
     await gasto.destroy(); // Soft delete gracias a paranoid: true
 
-    req.auditoriaMensaje = `Se eliminó el registro del gasto #${id} (${gasto.concepto})`;
-    req.auditoriaCodigo = 'DELETE_GASTO';
+    //auditoria
+    req.auditoriaMensaje = `Se eliminó el registro de gasto #${id}: ${conceptoEliminado} ($${montoEliminado})`;
+    req.auditoriaCodigo = 'DELETE_GASTO_OPERATIVO';
 
-    res.status(200).json({ exito: true, mensaje: 'Gasto eliminado del registro.' });
+    res.status(200).json({
+      exito: true,
+      mensaje: 'Gasto eliminado del registro.',
+    });
   } catch (error) {
     console.error('Error al eliminar gasto:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });

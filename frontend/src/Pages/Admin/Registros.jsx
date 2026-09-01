@@ -140,16 +140,17 @@ export default function RegistrosAdmin() {
                         </div>
 
                         {/* Cuerpo del Modal: Visor del Documento */}
+                        {/* Cuerpo del Modal: Visor del Documento */}
                         <div className="p-4 flex-grow bg-gray-100 overflow-hidden flex flex-col h-[60vh]">
                             <p className="font-semibold text-gray-700 mb-2">Constancia de Inscripción (AFIP):</p>
 
                             <div className="w-full flex-grow bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner">
 
-                                {socioSeleccionado.constanciaUrl ? (
+                                {socioSeleccionado.constanciaURL ? (
                                     // VALIDACIÓN DE SEGURIDAD: Comprobamos que el link sea estrictamente de tu nube
-                                    socioSeleccionado.constanciaUrl.startsWith("https://res.cloudinary.com/") ? (
+                                    socioSeleccionado.constanciaURL.startsWith("https://res.cloudinary.com/") ? (
                                         <iframe
-                                            src={socioSeleccionado.constanciaUrl}
+                                            src={socioSeleccionado.constanciaURL}
                                             title="Visor de Constancia"
                                             className="w-full h-full object-contain"
                                             // EL SANDBOX: Bloquea descargas automáticas, pop-ups y ejecución de scripts maliciosos

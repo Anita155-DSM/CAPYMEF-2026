@@ -1,6 +1,4 @@
 import { generarCuotasDelMes } from '../services/cuota.service.js';
-import { generarComprobantePago } from '../services/comprobante.service.js';
-import { enviarMailComprobantePago } from '../config/mailer.js';
 import { Cuota } from '../models/cuota.models.js';
 import { User } from '../models/user.models.js';
 import { Pago } from '../models/pago.models.js';
@@ -78,9 +76,7 @@ export const registrarPagoManual = async (req, res) => {
     const { id } = req.params; // ID de la Cuota
     const { metodoPago, nroComprobante, observaciones } = req.body;
 
-    const cuota = await Cuota.findByPk(id, {
-      include: [{ model: User, as: 'socio', attributes: ['id', 'razonSocial', 'cuit', 'email'] }]
-    });
+    const cuota = await Cuota.findByPk(id);
 
     if (!cuota) {
       return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
@@ -104,28 +100,8 @@ export const registrarPagoManual = async (req, res) => {
     cuota.estado = 'pagada';
     await cuota.save();
 
-    // 3. Generamos el PDF del comprobante y se lo mandamos por mail al socio.
-    // Esto NO frena la respuesta al admin si falla: el pago ya quedó registrado
-    // en la base, que es lo importante; el mail es un "plus".
-    if (cuota.socio?.email) {
-      try {
-        const pdfBuffer = await generarComprobantePago({
-          socio: cuota.socio,
-          cuota,
-          pago: nuevoPago,
-        });
-        await enviarMailComprobantePago(
-          cuota.socio.email,
-          { razonSocial: cuota.socio.razonSocial, mesAnio: cuota.mes_anio, monto: nuevoPago.montoAbonado },
-          pdfBuffer
-        );
-      } catch (errorComprobante) {
-        console.error('No se pudo generar/enviar el comprobante de pago (el pago sí quedó registrado):', errorComprobante);
-      }
-    }
-
     //auditoria
-    req.auditoriaMensaje = `Se registró el pago manual de $${cuota.monto} para la cuota #${cuota.id} del socio ${cuota.socio?.razonSocial || cuota.usuario_id}`;
+    req.auditoriaMensaje = `Se registró el pago manual de $${montoAbonado || cuota.monto} para la cuota #${cuota.id} del socio ${cuota.socio?.razonSocial || cuota.usuarioId}`;
     req.auditoriaCodigo = 'REGISTRAR_PAGO_MANUAL';
 
     res.status(200).json({
@@ -137,43 +113,6 @@ export const registrarPagoManual = async (req, res) => {
   } catch (error) {
     console.error('Error al registrar el pago:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al procesar el pago.' });
-  }
-};
-
-// ==========================================
-// 2.B DESCARGAR / RE-IMPRIMIR EL COMPROBANTE DE UNA CUOTA YA PAGADA
-// ==========================================
-export const descargarComprobante = async (req, res) => {
-  try {
-    const { id } = req.params; // ID de la Cuota
-
-    const cuota = await Cuota.findByPk(id, {
-      include: [
-        { model: User, as: 'socio', attributes: ['id', 'razonSocial', 'cuit', 'email'] },
-        { model: Pago, as: 'pago' },
-      ],
-    });
-
-    if (!cuota) {
-      return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
-    }
-
-    if (cuota.estado !== 'pagada' || !cuota.pago) {
-      return res.status(400).json({ exito: false, mensaje: 'Esta cuota todavía no tiene un pago registrado.' });
-    }
-
-    const pdfBuffer = await generarComprobantePago({
-      socio: cuota.socio,
-      cuota,
-      pago: cuota.pago,
-    });
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="comprobante-${cuota.mes_anio}.pdf"`);
-    res.send(pdfBuffer);
-  } catch (error) {
-    console.error('Error al generar el comprobante:', error);
-    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al generar el comprobante.' });
   }
 };
 

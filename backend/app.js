@@ -13,8 +13,6 @@ import './models/user.models.js';
 import './models/gasto.models.js';
 import './models/noticia.models.js';
 import './models/pago.models.js';
-import './models/evento.models.js';
-import './models/inscripcion.models.js';
 
 // IMPORTAMOS TUS RUTAS
 import authRoutes from './routes/authRoutes.js'; 
@@ -22,7 +20,6 @@ import noticiaRoutes from './routes/noticia.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import gastoRoutes from './routes/gasto.routes.js'
 import cuotaRoutes from './routes/cuota.routes.js'
-import eventoRoutes from './routes/evento.routes.js'
 import { iniciarCronJobs } from './config/cron.js';//automatizados de cuotas
 
 
@@ -81,8 +78,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes); // wndpoints: /api/admin/solicitudes, etc
 app.use('/api/noticias', noticiaRoutes);
 app.use('/api/cuotas', cuotaRoutes) //pago de cuptas
-app.use('/api/gastos', gastoRoutes) // 🔴 BUG encontrado: esta línea faltaba por completo, el módulo de gastos nunca fue alcanzable
-app.use('/api/eventos', eventoRoutes)
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -92,35 +87,14 @@ app.get('/', (req, res) => {
   });
 });
 
-// Manejador global de errores: SIEMPRE va al final, después de todas las rutas.
-// Atrapa errores no controlados (ej: Multer rechazando un archivo con cb(new Error(...)))
-// para no exponer el stack trace ni romper el servidor.
-app.use((error, req, res, next) => {
-  console.error('Error no controlado:', error);
-  res.status(error.status || 500).json({
-    exito: false,
-    mensaje: error.message || 'Error interno del servidor.',
-  });
-});
-
 // Función para conectar a la base de datos, sincronizar tablas y levantar el servidor
 const startServer = async () => {
   try {
     // 1. Probar la conexión y sincronizar tablas (las crea si no existen)
-    // Usamos sync() SIN "alter: true" para el día a día: revisa que las tablas existan,
-    // pero no intenta reescribir columnas en cada arranque (eso es lento y frágil,
-    // sobre todo contra el connection pooler de Supabase — puede cortarse a mitad de
-    // camino y dejar la tabla desincronizada, como nos pasó).
-    // Si agregás o cambiás un campo en algún modelo, cambiá esta línea a
-    // sequelize.sync({ alter: true }) UNA vez, confirmá en la consola que terminó bien,
-    // y volvé a dejarla como está ahora.
-    await sequelize.sync(); 
+    await sequelize.sync({ alter: true }); 
     console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 
-    // 2. Iniciar las tareas programadas (generación automática de cuotas el día 1 de cada mes)
-    iniciarCronJobs();
-
-    // 3. Levantar el servidor Express
+    // 2. Levantar el servidor Express
     app.listen(port, () => {
       console.log(`Servidor corriendo en http://localhost:${port}`);
     });
