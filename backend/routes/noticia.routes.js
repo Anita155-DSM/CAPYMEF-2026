@@ -9,7 +9,8 @@ import {
   obtenerTodasLasNoticiasAdmin
 } from '../controllers/noticia.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
-import { uploadNoticia } from '../middlewares/multerNoticias.js';
+//import { uploadNoticia } from '../middlewares/multerNoticias.js';
+import { uploadNoticia } from '../middlewares/multer/multerNoticias.js';
 import { validacionNoticia } from '../middlewares/validator/noticia.validator.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 
