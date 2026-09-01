@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { restablecerPassword } from "../../services/authServices";
 import Logo from "../../assets/img/Logo.png";
+import { toast } from "sonner";
 
 export default function ResetPassword() {
   const { token } = useParams(); // viene de la URL: /reset-password/:token
@@ -20,7 +21,7 @@ export default function ResetPassword() {
       const result = await restablecerPassword(token, data.password);
 
       if (result.exito) {
-        alert(result.mensaje);
+        toast.success(result.mensaje);
         navigate("/login");
       } else {
         setMensaje({ texto: result.mensaje, tipo: "error" });

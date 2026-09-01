@@ -1,30 +1,56 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { iniciarSesion } from "../../services/authServices";
+import { toast } from "sonner"; // 1. Importamos el toast de sonner
 import Logo from "../../assets/img/Logo.png";
 
 export default function Login() {
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
 
-  const handleLogin = async (data) => {
-    try {
-      // 1. Llamamos al servicio y le pasamos la data visual
-      const result = await iniciarSesion(data);
+  // Ya no hace falta que handleLogin sea async, porque la asincronía ocurre adentro de la Promesa
+  const handleLogin = (data) => {
+    
+    // 2. Creamos la Promesa que envuelve tu lógica original
+    const loginPromise = new Promise(async (resolve, reject) => {
+      try {
+        // Retraso artificial de 1.5 segundos
+        const esperaMinima = new Promise((res) => setTimeout(res, 1500));
 
-      // 2. Evaluamos la respuesta
-      if (result.exito) {
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("usuario", JSON.stringify(result.usuario));
+        // Llamada real a tu backend
+        const result = await iniciarSesion(data);
 
-        alert(result.mensaje);
-        navigate("/"); // Te mando directo al admin para que pruebes
-      } else {
-        alert("Error: " + result.mensaje);
+        // Obligamos al código a esperar que pase el tiempo mínimo
+        await esperaMinima;
+
+        // Evaluamos la respuesta de tu API
+        if (result.exito) {
+          localStorage.setItem("token", result.token);
+          localStorage.setItem("usuario", JSON.stringify(result.usuario));
+          resolve(result); // Todo salió bien
+        } else {
+          reject(new Error(result.mensaje || "Credenciales incorrectas")); // Falló el login
+        }
+      } catch (error) {
+        reject(new Error(error.message || "Error al conectar con el servidor"));
       }
-    } catch (error) {
-      alert(error.message);
-    }
+    });
+
+    // 3. Le pasamos la promesa a Sonner para que controle los carteles
+    toast.promise(loginPromise, {
+      loading: 'Verificando credenciales...',
+      success: (result) => {
+        // Esperamos 1 segundo después del cartel verde para redirigir, así el usuario lo llega a leer
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+        
+        return result.mensaje || "¡Sesión iniciada correctamente!";
+      },
+      error: (err) => {
+        return err.message;
+      },
+    });
   };
 
   return (

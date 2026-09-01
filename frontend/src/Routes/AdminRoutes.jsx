@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useRef } from "react";
+import { toast } from "sonner";
 
 export default function AdminRoutes() {
   const token = localStorage.getItem("token");
@@ -15,7 +16,7 @@ export default function AdminRoutes() {
   // Si está logueado pero NO es admin, lo rebotamos al Home
   if (usuario.rol !== "admin") {
     if (!alertaMostrada.current) {
-      alert("Acceso Denegado: Esta sección es exclusiva para Administradores.");
+      toast.error("Acceso Denegado: Esta sección es exclusiva para Administradores.");
       alertaMostrada.current = true;
     }
     return <Navigate to="/" replace />;
