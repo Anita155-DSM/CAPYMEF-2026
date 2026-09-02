@@ -7,235 +7,113 @@ import { toast } from "sonner";
 export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
   if (!noticia) return null;
 
-  const [titulo, setTitulo] = useState(noticia.titulo || "");
-  const [subtitulo, setSubtitulo] = useState(noticia.subtitulo || "");
-  const [contenido, setContenido] = useState(noticia.contenido || "");
-  const [visibilidad, setVisibilidad] = useState(noticia.visibilidad || "todos");
-  const [estado, setEstado] = useState(noticia.estado || "publicado");
+  // Optimización: Agrupamos todo el formulario en un solo estado
+  const [form, setForm] = useState({
+    titulo: noticia.titulo || "",
+    subtitulo: noticia.subtitulo || "",
+    contenido: noticia.contenido || "",
+    visibilidad: noticia.visibilidad || "todos",
+    estado: noticia.estado || "publicado",
+  });
 
-  const [imagenArchivo, setImagenArchivo] = useState(null);
-  const [imagenPreview, setImagenPreview] = useState(
-    noticia.imagenUrl
-      ? (noticia.imagenUrl.startsWith("http") ? noticia.imagenUrl : `${import.meta.env.VITE_API_URL_UPLOADS}/${noticia.imagenUrl}`)
-      : null
-  );
+  const [imagen, setImagen] = useState({ archivo: null, preview: noticia.imagenUrl ? (noticia.imagenUrl.includes("res.cloudinary.com") || noticia.imagenUrl.startsWith("http") ? noticia.imagenUrl : `${import.meta.env.VITE_API_URL_UPLOADS}/${noticia.imagenUrl}`) : null });
+  const [ui, setUi] = useState({ guardando: false, confirmando: false, eliminando: false });
 
-  const [estaGuardando, setEstaGuardando] = useState(false);
-
-  // Estado para controlar la vista de confirmación de eliminación
-  const [confirmandoEliminacion, setConfirmandoEliminacion] = useState(false);
-  const [estaEliminando, setEstaEliminando] = useState(false);
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleImagen = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImagenArchivo(file);
       const reader = new FileReader();
-      reader.onloadend = () => setImagenPreview(reader.result);
+      reader.onloadend = () => setImagen({ archivo: file, preview: reader.result });
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmitEdicion = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setEstaGuardando(true);
-
+    setUi({ ...ui, guardando: true });
     try {
       const formData = new FormData();
-      formData.append("titulo", titulo);
-      formData.append("contenido", contenido);
-      formData.append("visibilidad", visibilidad);
-      formData.append("estado", estado);
-      if (subtitulo) formData.append("subtitulo", subtitulo);
-      if (imagenArchivo) formData.append("imagen", imagenArchivo);
+      Object.entries(form).forEach(([key, value]) => value && formData.append(key, value));
+      if (imagen.archivo) formData.append("imagen", imagen.archivo);
 
       const result = await actualizarNoticia(noticia.id, formData);
-
       if (result.exito) {
-        toast.success("¡Noticia actualizada con éxito!");
-        if (onNoticiaActualizada) onNoticiaActualizada();
+        toast.success("¡Noticia actualizada!");
+        onNoticiaActualizada?.();
         onClose();
-      } else {
-        toast.error("Error al actualizar: " + result.mensaje);
-      }
-    } catch (error) {
-      toast.error("Hubo un error al intentar conectarse con el servidor.");
+      } else toast.error("Error: " + result.mensaje);
+    } catch {
+      toast.error("Error de conexión.");
     } finally {
-      setEstaGuardando(false);
+      setUi({ ...ui, guardando: false });
     }
   };
 
-  const handleConfirmarEliminacion = async () => {
-    setEstaEliminando(true);
+  const handleEliminar = async () => {
+    setUi({ ...ui, eliminando: true });
     try {
       const result = await eliminarNoticia(noticia.id);
       if (result.exito) {
-        toast.success("Noticia eliminada correctamente.");
-        if (onNoticiaActualizada) onNoticiaActualizada();
+        toast.success("Noticia ocultada correctamente.");
+        onNoticiaActualizada?.();
         onClose();
-      } else {
-        toast.error("Error al eliminar: " + result.mensaje);
-      }
-    } catch (error) {
-      toast.error("Error de conexión al intentar eliminar.");
+      } else toast.error("Error: " + result.mensaje);
+    } catch {
+      toast.error("Error al intentar eliminar.");
     } finally {
-      setEstaEliminando(false);
-      setConfirmandoEliminacion(false);
+      setUi({ ...ui, eliminando: false, confirmando: false });
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative">
-
-        {/* Cabecera del Modal */}
         <div className="bg-[#132A46] p-4 text-white flex justify-between items-center shrink-0">
           <h3 className="text-lg font-bold">Panel de Edición de Noticia</h3>
-          <button onClick={onClose} className="text-gray-300 hover:text-white text-2xl font-bold">
-            &times;
-          </button>
+          <button onClick={onClose} className="text-gray-300 hover:text-white text-2xl font-bold">&times;</button>
         </div>
 
-        {/* Si está confirmando eliminación, mostramos un panel de advertencia en lugar del formulario */}
-        {confirmandoEliminacion ? (
-          <div className="p-8 flex flex-col items-center justify-center text-center flex-grow gap-4">
+        {ui.confirmando ? (
+          <div className="p-8 flex flex-col items-center text-center flex-grow gap-4">
             <FaExclamationTriangle className="text-red-500 text-5xl mb-2" />
-            <h3 className="text-xl font-bold text-[#132A46]">¿Estás seguro de eliminar esta noticia?</h3>
-            <p className="text-gray-500 max-w-md">
-              La noticia dejará de estar visible en el portal (baja lógica). Podrás gestionarla desde la base de datos si lo necesitas.
-            </p>
+            <h3 className="text-xl font-bold text-[#132A46]">¿Ocultar esta noticia?</h3>
+            <p className="text-gray-500">Pasará a estado borrador (baja lógica).</p>
             <div className="flex gap-4 mt-6">
-              <button
-                type="button"
-                onClick={() => setConfirmandoEliminacion(false)}
-                disabled={estaEliminando}
-                className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-md text-sm transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmarEliminacion}
-                disabled={estaEliminando}
-                className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md text-sm transition-colors shadow-sm"
-              >
-                {estaEliminando ? "Eliminando..." : "Sí, Aceptar"}
-              </button>
+              <button onClick={() => setUi({ ...ui, confirmando: false })} className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-md">Cancelar</button>
+              <button onClick={handleEliminar} disabled={ui.eliminando} className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md shadow-sm">{ui.eliminando ? "Procesando..." : "Sí, Aceptar"}</button>
             </div>
           </div>
         ) : (
-          /* Formulario de edición normal */
-          <form onSubmit={handleSubmitEdicion} className="p-6 overflow-y-auto flex flex-col gap-5 flex-grow">
-
+          <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex flex-col gap-4 flex-grow">
             <div className="flex flex-col gap-2">
               <label className="font-bold text-gray-700 text-sm">Imagen de portada</label>
               <div className="flex items-center gap-4">
-                {imagenPreview ? (
-                  <img src={imagenPreview} alt="Vista previa" className="w-32 h-24 object-cover rounded-lg border border-gray-200 shadow-sm" />
-                ) : (
-                  <div className="w-32 h-24 bg-gradient-to-tr from-[#132A46] to-[#1D7BB6] flex items-center justify-center rounded-lg">
-                    <img src={Logo} alt="CAPYMEF" className="h-10 w-auto object-contain opacity-30" />
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImagen}
-                  className="text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#1D7BB6] file:text-white hover:file:bg-[#156091] cursor-pointer"
-                />
+                {imagen.preview ? <img src={imagen.preview} className="w-32 h-24 object-cover rounded-lg border shadow-sm" /> : <div className="w-32 h-24 bg-gradient-to-tr from-[#132A46] to-[#1D7BB6] flex items-center justify-center rounded-lg"><img src={Logo} className="h-10 opacity-30" /></div>}
+                <input type="file" accept="image/*" onChange={handleImagen} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#1D7BB6] file:text-white cursor-pointer" />
               </div>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="font-bold text-gray-700 text-sm">Título *</label>
-              <input
-                type="text"
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
-                className="p-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] text-sm"
-                required
-              />
+            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Título *</label><input type="text" name="titulo" value={form.titulo} onChange={handleChange} required className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm" /></div>
+            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Subtítulo</label><textarea rows="2" name="subtitulo" value={form.subtitulo} onChange={handleChange} className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm resize-none" /></div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Visibilidad *</label><select name="visibilidad" value={form.visibilidad} onChange={handleChange} className="p-2.5 border rounded-md text-sm"><option value="todos">Todos</option><option value="publico">Solo Público</option><option value="socios">Solo Socios</option></select></div>
+              <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Estado *</label><select name="estado" value={form.estado} onChange={handleChange} className="p-2.5 border rounded-md text-sm"><option value="publicado">Publicado</option><option value="borrador">Borrador</option></select></div>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="font-bold text-gray-700 text-sm">Subtítulo</label>
-              <textarea
-                rows="2"
-                value={subtitulo}
-                onChange={(e) => setSubtitulo(e.target.value)}
-                className="p-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] text-sm resize-none"
-              />
-            </div>
+            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Contenido *</label><textarea rows="5" name="contenido" value={form.contenido} onChange={handleChange} required className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm" /></div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <label className="font-bold text-gray-700 text-sm">¿Dónde se ve? *</label>
-                <select
-                  value={visibilidad}
-                  onChange={(e) => setVisibilidad(e.target.value)}
-                  className="p-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] bg-white text-sm"
-                >
-                  <option value="todos">En la página principal y en el panel</option>
-                  <option value="publico">Solo en la página principal (Landing)</option>
-                  <option value="socios">Solo adentro del panel de socios</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="font-bold text-gray-700 text-sm">Estado *</label>
-                <select
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value)}
-                  className="p-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] bg-white text-sm"
-                >
-                  <option value="publicado">Publicado (Visible)</option>
-                  <option value="borrador">Borrador (Oculto)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="font-bold text-gray-700 text-sm">Contenido completo *</label>
-              <textarea
-                rows="5"
-                value={contenido}
-                onChange={(e) => setContenido(e.target.value)}
-                className="p-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] text-sm"
-                required
-              />
-            </div>
-
-            {/* Pie del Modal con botones de acción */}
-            <div className="pt-4 border-t border-gray-200 flex justify-between items-center shrink-0">
-              <button
-                type="button"
-                onClick={() => setConfirmandoEliminacion(true)}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md flex items-center gap-2 text-sm transition-colors"
-              >
-                <FaRegTrashAlt /> Eliminar Noticia
-              </button>
-
+            <div className="pt-4 border-t flex justify-between items-center">
+              <button type="button" onClick={() => setUi({ ...ui, confirmando: true })} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md flex items-center gap-2 text-sm"><FaRegTrashAlt /> Eliminar</button>
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-md text-sm transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={estaGuardando}
-                  className="px-5 py-2 bg-[#00B859] hover:bg-[#009649] text-white font-semibold rounded-md flex items-center gap-2 text-sm transition-colors shadow-sm"
-                >
-                  <FaRegSave /> {estaGuardando ? "Guardando..." : "Guardar Cambios"}
-                </button>
+                <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-md text-sm">Cancelar</button>
+                <button type="submit" disabled={ui.guardando} className="px-5 py-2 bg-[#00B859] hover:bg-[#009649] text-white font-semibold rounded-md flex items-center gap-2 text-sm shadow-sm"><FaRegSave /> {ui.guardando ? "Guardando..." : "Guardar"}</button>
               </div>
             </div>
-
           </form>
         )}
-
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import {toast} from "sonner"
-import { obtenerTodosLosUsuarios, gestionarEstadoSolicitud } from "../../services/adminServices";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import Loading from "../../Components/Loading";
-import ModalRevision from "./Components/ModalAdmin";
+import { gestionarEstadoSolicitud, obtenerTodosLosUsuarios } from "../../services/adminServices";
+import ModalRevision from "./Components/ModalRevision.jsx";
 import Search, { useBuscador } from "./Components/Search";
 
 export default function RegistrosAdmin() {
