@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  max-width: auto;
-  margin: 0 auto;
-  background-color: #132A46;
+  font-synthesis: none;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 /*Animación para que el Modal haga una animación de entrada*/

@@ -44,15 +44,19 @@ export default function Home() {
         <section className="w-full font-sans">
           <div
             className="min-h-screen w-full bg-cover bg-no-repeat justify-center items-start flex flex-col"
-            style={{ backgroundImage: `url(${fondoHome})` }}
+            style={{
+              backgroundImage: `url(${fondoHome})`,
+              backgroundPosition: "center 56px",
+              backgroundColor: "#f3f3f3",
+            }}
           >
             {/* Contenedor del texto central */}
             <div className="px-4 py-4 line-clamp-3">
-              <h1 className="text-5xl md:text-7xl text-white font-serif font-semibold px8 py-4 -rounded-xl inline-block">
-                Cámara de Pequeñas y Medianas Empresas Formosa
+              <h1 className="text-3xl sm:text-4xl md:text-7xl text-white font-serif font-semibold px-1 sm:px-4 py-3 sm:py-4 inline-block leading-tight max-w-full">
+                Cámara de Pequeñas y Medianas Empresas de Formosa
               </h1>
               <br /> {/* Salto de línea para separar el título del subtítulo */}
-              <p className="mt-6 text-xl text-white font-bold bg-black/20 inline-block px-6 py-2 rounded-lg max-w-lg">
+              <p className="mt-4 sm:mt-6 text-base sm:text-xl text-white font-bold bg-black/20 inline-block px-4 sm:px-6 py-2 rounded-lg max-w-lg leading-relaxed">
                 Sumate a CAPYMEF. Accedé a beneficios exclusivos, capacitaciones
                 y herramientas digitales para hacer crecer tu negocio.
               </p>
@@ -75,16 +79,16 @@ export default function Home() {
                   <div
                     onClick={(e) => e.stopPropagation()}
                     // Fondo claro como en tu imagen, max-w-4xl para hacerlo ancho pero sin ocupar todo, y padding generoso
-                    className="bg-[#F4F8FB] border border-gray-300 rounded-sm shadow-2xl p-8 md:p-12 w-full max-w-4xl relative mx-4 animacion-modal"
+                    className="bg-[#F4F8FB] border border-gray-300 rounded-sm shadow-2xl p-4 sm:p-8 md:p-12 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative mx-2 sm:mx-4 animacion-modal"
                   >
 
                     {/* Título centrado con color azul y fuente Sans */}
-                    <h3 className="text-2xl md:text-[26px] font-normal text-center text-[#1D7BB6] mb-8 font-sans tracking-wide">
+                    <h3 className="text-xl sm:text-2xl md:text-[26px] font-normal text-center text-[#1D7BB6] mb-5 sm:mb-8 font-sans tracking-wide">
                       COMO SUMARSE A CAPYMEF
                     </h3>
 
                     {/* Contenedor del texto con la misma tipografía que Sobre Nosotros */}
-                    <div className="font-sans text-gray-900 text-lg leading-relaxed space-y-1">
+                    <div className="font-sans text-gray-900 text-sm sm:text-lg leading-relaxed space-y-2">
                       <p>
                         Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.
                       </p>
@@ -101,13 +105,13 @@ export default function Home() {
 
                       <p className="pt-2">Nuestras vías de contacto:</p>
                       {/* Lista con los emojis exactos de tu imagen */}
-                      <div className="flex">
-                        <ul className="space-y-3">
+                      <div className="flex flex-col lg:flex-row gap-5">
+                        <ul className="space-y-3 flex-1">
                           <li>📍 Dirección: Maipú 651, Formosa, Argentina, 3600.</li>
                           <li>📱 Tel: 370-123-4567, 0370 446-2508</li>
                           <li>✉️ Correo: info@capymef.ar</li>
                         </ul>
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" width="570" height="200" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                        <iframe className="w-full lg:w-[570px] max-w-full h-44 sm:h-48" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" allowFullScreen loading="lazy" referrerPolicy="strict-origin-when-cross-origin"></iframe>
                       </div>
                     </div>
 
