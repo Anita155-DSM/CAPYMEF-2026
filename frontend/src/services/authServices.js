@@ -33,6 +33,40 @@ export const registrarSocio = async (formData) => {
   }
 };
 
+export const recuperarPassword = async (email) => {
+  try {
+    const response = await fetch(`${API_URL}/recuperar-password`, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error en el servicio de recuperación de contraseña:", error);
+    throw new Error("Error de conexión con el servidor");
+  }
+};
+
+export const restablecerPassword = async (token, password) => {
+  try {
+    const response = await fetch(`${API_URL}/restablecer-password/${token}`, {
+      method: "PUT",
+      body: JSON.stringify({ password }),
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error en el servicio de restablecimiento de contraseña:", error);
+    throw new Error("Error de conexión con el servidor");
+  }
+};
+
 export const cerrarSesion = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("usuario");
