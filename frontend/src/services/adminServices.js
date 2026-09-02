@@ -1,4 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL_ADMIN;
+// ==========================================
+// OBTENER TODOS LOS USUARIOS
+// ==========================================
 export const obtenerTodosLosUsuarios = async () => {
     try {
         const token = localStorage.getItem("token");
@@ -18,9 +21,9 @@ export const obtenerTodosLosUsuarios = async () => {
         throw new Error("Error de conexión con el servidor al Obtener");
     }
 };
-
-// src/services/adminServices.js
-
+// ==========================================
+// GESTIONAR ESTADO DEL SOLICITUD
+// ==========================================
 export const gestionarEstadoSolicitud = async (id, nuevoEstado) => {
     try {
         const token = localStorage.getItem("token");
@@ -30,9 +33,8 @@ export const gestionarEstadoSolicitud = async (id, nuevoEstado) => {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}` // Pasamos el token porque lo exige tu middleware
+                "Authorization": `Bearer ${token}` 
             },
-            // Le mandamos 'nuevoEstado' porque así lo espera tu controller (gestionarSolicitud)
             body: JSON.stringify({ nuevoEstado })
         });
 
@@ -40,5 +42,28 @@ export const gestionarEstadoSolicitud = async (id, nuevoEstado) => {
     } catch (error) {
         console.error("Error al gestionar la solicitud:", error);
         throw new Error("Error de conexión con el servidor");
+    }
+};
+
+// ==========================================
+// ACTUALIZAR DATOS DEL SOCIO
+// ==========================================
+export const actualizarDatosSocio = async (id, datosActualizados) => {
+    try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(`${API_URL}/usuarios/${id}`, {
+            method: "PUT", 
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(datosActualizados)
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error al actualizar socio:", error);
+        return { exito: false, mensaje: "Error de conexión con el servidor al actualizar" };
     }
 };
