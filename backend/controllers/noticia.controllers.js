@@ -48,9 +48,30 @@ export const obtenerNoticiasSocios = async (req, res) => {
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
 };
-
 // ==========================================
-// 3. OBTENER UNA NOTICIA POR ID
+// 3. OBTENER NOTICIAS PARA ADMINS (ocultos y publicos)
+// ==========================================
+export const obtenerTodasLasNoticiasAdmin = async (req, res) => {
+  try {
+    // Volvemos a forzar el ordenamiento por la fecha original de publicación
+    const noticias = await Noticia.findAll({
+      order: [['fechaPublicacion', 'DESC']]
+    });
+
+    return res.status(200).json({
+      exito: true,
+      data: noticias
+    });
+  } catch (error) {
+    console.error("ERROR CRÍTICO EN obtenerTodasLasNoticiasAdmin:", error);
+    return res.status(500).json({
+      exito: false,
+      mensaje: "Error interno del servidor al cargar las noticias."
+    });
+  }
+};
+// ==========================================
+// 4. OBTENER UNA NOTICIA POR ID
 // ==========================================
 export const obtenerNoticiaPorId = async (req, res) => {
   try {
@@ -69,7 +90,7 @@ export const obtenerNoticiaPorId = async (req, res) => {
 };
 
 // ==========================================
-// 4. CREAR NOTICIA (Admin)
+// 5. CREAR NOTICIA (Admin)
 // ==========================================
 export const crearNoticia = async (req, res) => {
   const imagenFile = req.file;
@@ -103,7 +124,7 @@ export const crearNoticia = async (req, res) => {
 };
 
 // ==========================================
-// 5. ACTUALIZAR NOTICIA (Admin)
+// 6. ACTUALIZAR NOTICIA (Admin)
 // ==========================================
 export const actualizarNoticia = async (req, res) => {
   const imagenFile = req.file;
@@ -151,7 +172,7 @@ export const actualizarNoticia = async (req, res) => {
 };
 
 // ==========================================
-// 6. ELIMINAR NOTICIA (Admin)
+// 7. ELIMINAR NOTICIA (Admin)
 // ==========================================
 export const eliminarNoticia = async (req, res) => {
   try {

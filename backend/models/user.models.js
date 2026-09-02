@@ -50,7 +50,14 @@ export const User = sequelize.define('User', {
   rol: { 
     type: DataTypes.ENUM('socio', 'admin'), 
     defaultValue: 'socio' 
-  }
+  },
+   // ==========================================
+  // 5. Recuperación de contraseña
+  // ==========================================
+  // Guardamos el hash SHA-256 del token, nunca el token en texto plano —
+  // así, si alguien accede a la base, no puede generar links de reset válidos.
+  resetPasswordToken: { type: DataTypes.STRING, allowNull: true },
+  resetPasswordExpires: { type: DataTypes.DATE, allowNull: true }
 }, 
 { 
   paranoid: true,

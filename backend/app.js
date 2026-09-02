@@ -9,13 +9,13 @@ import morgan from 'morgan';
 import { interceptorAuditoria } from './middlewares/auditoria.middleware.js';
 
 // IMPORTAMOS MODELOS
-import './models/user.models.js'; 
+import './models/user.models.js';
 import './models/gasto.models.js';
 import './models/noticia.models.js';
 import './models/pago.models.js';
 
 // IMPORTAMOS TUS RUTAS
-import authRoutes from './routes/authRoutes.js'; 
+import authRoutes from './routes/authRoutes.js';
 import noticiaRoutes from './routes/noticia.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import gastoRoutes from './routes/gasto.routes.js'
@@ -62,19 +62,25 @@ app.use(cors({
   },
   credentials: true // Importante en cuanto al manejo de cookies
 }));
-app.use(express.json()); 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // recomendado para parsear formularios
 // HELMET lo que hace es, culta información sensible de Express y protege cabeceras
 app.use(helmet());
 
 
 // Servir la carpeta de archivos subidos públicamente (constancias, imágenes de noticias, etc.)
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('uploads', {
+  setHeaders: (res, path, stat) => {
+    // Estas dos líneas apagan el bloqueo de seguridad para las imágenes
+    res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.set('Access-Control-Allow-Origin', '*');
+  }
+}));
 
 // 4. REGISTRO DE RUTAS API
 //incorporacion de logs globalmente para auditar lo que se haga:)
 app.use('/api', interceptorAuditoria)
-app.use('/api/auth', authRoutes); 
+app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes); // wndpoints: /api/admin/solicitudes, etc
 app.use('/api/noticias', noticiaRoutes);
 app.use('/api/cuotas', cuotaRoutes) //pago de cuptas
@@ -91,7 +97,7 @@ app.get('/', (req, res) => {
 const startServer = async () => {
   try {
     // 1. Probar la conexión y sincronizar tablas (las crea si no existen)
-    await sequelize.sync({ alter: true }); 
+    await sequelize.sync();
     console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 
     // 2. Levantar el servidor Express

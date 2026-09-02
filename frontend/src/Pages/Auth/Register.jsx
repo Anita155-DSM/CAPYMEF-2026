@@ -2,6 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { registrarSocio } from "../../services/authServices"; // Importamos el servicio
 import Logo from "../../assets/img/Logo.png";
+import { toast } from "sonner";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function Register() {
       // 3. Evaluamos la respuesta
       if (result.exito) {
         console.log(result);
-        alert("Registrado Correctamente. Queda pendiente de revisión.");
+        toast.success("Registrado Correctamente. Queda pendiente de revisión.");
         navigate("/login");
       } else {
         // Evaluamos si falló el validador estricto o si es un error general
@@ -41,14 +42,14 @@ export default function Register() {
           const listaDeErrores = result.errores
             .map((err) => `- ${err.mensaje}`)
             .join("\n");
-          alert("Revisá los siguientes campos:\n" + listaDeErrores);
+          toast.error("Revisá los siguientes campos:\n" + listaDeErrores);
         } else {
-          alert("Atención: " + result.mensaje);
+          toast.error("Atención: " + result.mensaje);
         }
       }
     } catch (error) {
       console.error(error);
-      alert(
+      toast.error(
         error.message ||
           "Error de red. Verificá que el servidor esté encendido.",
       );

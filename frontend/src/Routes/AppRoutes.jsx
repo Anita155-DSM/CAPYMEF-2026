@@ -35,7 +35,6 @@ export default function AppRoutes() {
         <Route path="/autoridades" element={<Autoridades />} />
         <Route path="/balance" element={<Balance />} />
         <Route path="/estatuto" element={<Estatuto />} />
-        <Route path="/noticias" element={<Noticias />} />
 
         {/*LOGUEADOS*/}
         <Route element={<PrivateRoutes />}>

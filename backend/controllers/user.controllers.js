@@ -1,7 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
+import crypto from 'crypto';
 import { User } from '../models/user.models.js';
+import { enviarMailRecuperacion } from '../config/mailer.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -227,6 +229,94 @@ export const actualizarPerfil = async (req, res) => {
     });
   } catch (error) {
     console.error('Error al actualizar perfil:', error.message);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
+  }
+};
+
+// ==========================================
+// 5. SOLICITAR RECUPERACIÓN DE CONTRASEÑA
+// ==========================================
+export const recuperarPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const usuario = await User.findOne({ where: { email } });
+
+    // Respuesta genérica SIEMPRE, exista o no el usuario — así no revelamos
+    // por este medio qué emails están registrados en el sistema.
+    const mensajeGenerico = 'Si el correo está registrado, vas a recibir un mail con instrucciones para restablecer tu contraseña.';
+
+    if (!usuario) {
+      return res.status(200).json({ exito: true, mensaje: mensajeGenerico });
+    }
+
+    // Generamos un token aleatorio: la versión plana va por mail (nunca se guarda),
+    // la versión hasheada (SHA-256) es la que se guarda en la base.
+    const tokenPlano = crypto.randomBytes(32).toString('hex');
+    const tokenHasheado = crypto.createHash('sha256').update(tokenPlano).digest('hex');
+
+    usuario.resetPasswordToken = tokenHasheado;
+    usuario.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // vence en 1 hora
+    await usuario.save();
+
+    // No bloqueamos la respuesta si el mail tarda o falla — el usuario ya recibió
+    // la confirmación, y un error de SMTP no debería tirar un 500 acá.
+    try {
+      await enviarMailRecuperacion(usuario.email, tokenPlano);
+    } catch (errorMail) {
+      console.error('Error al enviar mail de recuperación:', errorMail.message);
+    }
+
+    //auditoria
+    req.auditoriaMensaje = `Se solicitó recuperación de contraseña para ${usuario.email}`;
+    req.auditoriaCodigo = 'SOLICITUD_RECUPERACION_PASSWORD';
+
+    res.status(200).json({ exito: true, mensaje: mensajeGenerico });
+  } catch (error) {
+    console.error('Error al solicitar recuperación:', error.message);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
+  }
+};
+
+// ==========================================
+// 6. RESTABLECER CONTRASEÑA CON TOKEN
+// ==========================================
+export const restablecerPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ exito: false, mensaje: 'La contraseña debe tener al menos 6 caracteres.' });
+    }
+
+    // Hasheamos el token recibido para compararlo contra el que guardamos en la base
+    // (nunca guardamos el token en texto plano, así que comparamos hash contra hash).
+    const tokenHasheado = crypto.createHash('sha256').update(token).digest('hex');
+
+    const usuario = await User.findOne({
+      where: {
+        resetPasswordToken: tokenHasheado,
+        resetPasswordExpires: { [User.sequelize.Sequelize.Op.gt]: new Date() } // no vencido
+      }
+    });
+
+    if (!usuario) {
+      return res.status(400).json({ exito: false, mensaje: 'El link de recuperación es inválido o ya venció.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    usuario.password = await bcrypt.hash(password, salt);
+    usuario.resetPasswordToken = null;
+    usuario.resetPasswordExpires = null;
+    await usuario.save();
+
+    //auditoria
+    req.auditoriaMensaje = `El usuario ${usuario.email} restableció su contraseña`;
+    req.auditoriaCodigo = 'RESTABLECER_PASSWORD';
+
+    res.status(200).json({ exito: true, mensaje: 'Contraseña actualizada correctamente. Ya podés iniciar sesión.' });
+  } catch (error) {
+    console.error('Error al restablecer contraseña:', error.message);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
 };

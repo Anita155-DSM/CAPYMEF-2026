@@ -9,55 +9,52 @@ export default function Modal({ noticia, onClose }) {
   };
 
   return (
-    <div id="fondo-modal" onClick={handleClose} role="dialog" aria-modal="true" aria-labelledby="noticia-titulo" className="animacion-modal fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
+    <div id="fondo-modal" onClick={handleClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all cursor-pointer">
 
       {/* Contenedor principal del modal */}
-      <article className="relative flex max-h-[92vh] w-full max-w-5xl cursor-default flex-col overflow-hidden bg-white shadow-2xl">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative">
 
         {/* Botón flotante para cerrar */}
         <button
           onClick={onClose}
-          aria-label="Cerrar noticia"
-          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-2xl font-light text-gray-700 shadow-md transition-colors hover:bg-[#132A46] hover:text-white"
+          className="absolute top-4 right-4 bg-white text-gray-500 hover:text-red-500 rounded-full w-8 h-8 flex items-center justify-center shadow-md font-bold transition-colors z-10"
         >
-          &times;
+          X
         </button>
 
         {/* Contenido scrolleable */}
-        <div className="overflow-y-auto px-6 py-8 md:px-16 md:py-10">
+        <div className="overflow-y-auto p-6 md:p-8">
 
           {/* Imagen completa */}
           {noticia.imagenUrl && (
             <img
-              src={noticia.imagenUrl}
+              src={`${import.meta.env.VITE_API_URL_UPLOADS}/${noticia.imagenUrl}`}
               alt={noticia.titulo}
-              className="mx-auto mb-9 max-h-[420px] w-full object-contain"
+              className="w-full h-64 md:h-80 object-cover rounded-lg mb-6 shadow-sm"
             />
           )}
 
-          <div className="mb-4 flex flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-wider text-[#1D7BB6]">
-            <span>{noticia.tipo || noticia.categoria || "Institucional"}</span>
-            <span className="text-gray-300">&bull;</span>
+          <div className="text-sm font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2">
             {new Date(noticia.fechaPublicacion).toLocaleDateString('es-AR')}
           </div>
 
-          <h2 id="noticia-titulo" className="mb-7 max-w-4xl text-3xl font-bold leading-tight text-[#252525] md:text-5xl">
+          <h2 className="text-3xl font-bold text-[#132A46] mb-4">
             {noticia.titulo}
           </h2>
 
           {noticia.subtitulo && (
-            <h3 className="mb-7 max-w-3xl border-l-4 border-[#1D7BB6] pl-4 text-lg font-medium italic text-gray-500">
+            <h4 className="text-lg text-gray-500 font-medium italic mb-6 border-l-4 border-[#1D7BB6] pl-4">
               {noticia.subtitulo}
-            </h3>
+            </h4>
           )}
 
           {/* whitespace-pre-wrap respeta los "Enter" (párrafos) que hiciste en el textarea del admin */}
-          <p className="max-w-3xl whitespace-pre-wrap text-lg leading-8 text-gray-700">
+          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
             {noticia.contenido}
           </p>
 
         </div>
-      </article>
+      </div>
     </div>
   );
 }

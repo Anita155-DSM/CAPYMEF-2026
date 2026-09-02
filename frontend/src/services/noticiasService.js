@@ -1,6 +1,3 @@
-// src/services/noticiasService.js
-
-// 1. Llamamos a la variable global de Vite
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const publicarNuevaNoticia = async (formData) => {
@@ -13,15 +10,39 @@ export const publicarNuevaNoticia = async (formData) => {
       headers: {
         "Authorization": `Bearer ${token}`
       },
-      body: formData, 
+      body: formData,
     });
-    
+
     return await response.json();
   } catch (error) {
     console.error("Error al publicar la noticia:", error);
-    throw new Error("Error de conexión con el servidor");
+    throw new Error("Error de conexión con el servidor al Publicar");
   }
 };
+export async function actualizarNoticia(id, formData) {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/noticias/admin/${id}`, {
+
+      method: "PUT", // o PATCH según tu backend
+      body: formData, // FormData maneja tanto texto como archivos de imagen
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { exito: false, mensaje: data.mensaje || "Error al actualizar" };
+    }
+    return { exito: true, data };
+  } catch (error) {
+    console.error("Error en actualizarNoticia:", error);
+    return { exito: false, mensaje: "Error de conexión con el servidor al Actualizar" };
+  }
+}
 
 export const obtenerNoticiasPublicas = async () => {
   try {
@@ -30,6 +51,41 @@ export const obtenerNoticiasPublicas = async () => {
     return await response.json();
   } catch (error) {
     console.error("Error al obtener noticias públicas:", error);
-    throw new Error("Error de conexión con el servidor");
+    throw new Error("Error de conexión con el servidor al Obtener");
+  }
+};
+export const obtenerTodasLasNoticiasAdmin = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`${API_URL}/noticias/admin`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    // Devolvemos el JSON crudo del backend directamente
+    return await response.json();
+
+  } catch (error) {
+    console.error("Error al obtener noticias de admin:", error);
+    return { exito: false, mensaje: "Error de conexión con el servidor al Obtener" };
+  }
+};
+
+export const eliminarNoticia = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/noticias/admin/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) return { exito: false, mensaje: data.mensaje || "Error al eliminar" };
+    return { exito: true, data };
+  } catch (error) {
+    return { exito: false, mensaje: "Error de conexión con el servidor al Eliminar" };
   }
 };

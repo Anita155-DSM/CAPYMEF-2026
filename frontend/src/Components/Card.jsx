@@ -1,54 +1,62 @@
-import Logo from "../assets/img/Logo.png"
-export default function Card({ titulo, subtitulo, imagenUrl, fecha, tipo = "Institucional", onLeerMas }) {
-  return (
-    <article className="group h-full transform-gpu overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md transition-all duration-300 ease-out hover:z-10 hover:scale-[1.03] hover:shadow-2xl">
+import Logo from "../assets/img/logo.png"
+
+export default function Card({ titulo, subtitulo, imagenUrl, fecha, onLeerMas }) {
+  const obtenerImagenSrc = () => {
+    if (!imagenUrl) return null;
+    if (imagenUrl.startsWith("http://") || imagenUrl.startsWith("https://res.cloudinary.com/")) {
+      return imagenUrl;
+    }
+    return `${import.meta.env.VITE_API_URL_UPLOADS}/${imagenUrl}`;
+  };
+ return (
+    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-200 flex flex-col h-full">
 
       {/* IMAGEN DE LA TARJETA */}
       {imagenUrl ? (
         <img
-          src={imagenUrl}
+          src={obtenerImagenSrc()}
           alt={titulo}
-          className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-48 object-cover flex-shrink-0"
         />
       ) : (
-        <div className="flex h-48 w-full items-center justify-center bg-gradient-to-tr from-[#132A46] to-[#1D7BB6] p-6">
-          {/* El logo con un poco de opacidad para que parezca marca de agua */}
+        <div className="w-full h-48 bg-gradient-to-tr from-[#132A46] to-[#1D7BB6] flex items-center justify-center p-6 flex-shrink-0">
           <img src={Logo} alt="CAPYMEF" className="h-24 w-auto object-contain opacity-30" />
         </div>
       )}
 
-      <div className="flex min-h-[236px] flex-grow flex-col p-6">
+      <div className="p-6 flex flex-col flex-grow">
         {/* FECHA */}
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1D7BB6]">
-          {new Date(fecha).toLocaleDateString('es-AR')}
-          <span className="text-gray-300">&bull;</span>
-          <span>{tipo}</span>
+        <div className="text-xs font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2">
+          {fecha ? new Date(fecha).toLocaleDateString('es-AR') : ""}
         </div>
 
         {/* TÍTULO */}
-        <h3 className="mb-3 line-clamp-2 text-xl font-bold leading-tight text-[#132A46]">
+        <h3 className="text-xl font-bold text-[#132A46] mb-2 line-clamp-2">
           {titulo}
         </h3>
 
         {/* SUBTÍTULO */}
-        {subtitulo && (
-          <p className="mb-4 line-clamp-3 text-base leading-relaxed text-gray-600">
-            {subtitulo}
-          </p>
-        )}
+        <div className="mb-4 flex-grow">
+          {subtitulo ? (
+            <p className="text-gray-600 line-clamp-3 text-sm">
+              {subtitulo}
+            </p>
+          ) : (
+            <p className="text-transparent text-sm select-none" aria-hidden="true">
+              &nbsp;
+            </p>
+          )}
+        </div>
 
         {/* BOTÓN */}
-        <div className="mt-auto pt-5">
-          <button
-            type="button"
-            onClick={onLeerMas}
-            className="font-semibold text-[#1D7BB6] transition-colors duration-200 hover:text-[#1A4B76]"
-          >
-            Leer más &gt;&gt;
+        <div className="pt-2 mt-auto">
+          <button onClick={onLeerMas}
+            className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors text-sm">
+            Leer más
           </button>
         </div>
       </div>
 
-    </article>
+    </div>
   );
 }

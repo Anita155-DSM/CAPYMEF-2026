@@ -1,7 +1,4 @@
-// import dotenv from "dotenv"
-// dotenv.config()
-// const API_URL = process.env.API_URL
-const API_URL = "http://localhost:3000/api/admin"
+const API_URL = import.meta.env.VITE_API_URL_ADMIN;
 export const obtenerTodosLosUsuarios = async () => {
     try {
         const token = localStorage.getItem("token");
@@ -18,7 +15,7 @@ export const obtenerTodosLosUsuarios = async () => {
         return await response.json();
     } catch (error) {
         console.error("Error obteniendo usuarios:", error);
-        throw new Error("Error de conexión con el servidor");
+        throw new Error("Error de conexión con el servidor al Obtener");
     }
 };
 
