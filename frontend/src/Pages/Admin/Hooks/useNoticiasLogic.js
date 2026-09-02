@@ -18,19 +18,21 @@ export function useNoticiasLogic() {
     const [imagenPreview, setImagenPreview] = useState(null);
     const [imagenArchivo, setImagenArchivo] = useState(null);
 
-    const cargarNoticias = async () => {
+    // 1. Definida como "async function" arriba de todo (Hoisting)
+    async function cargarNoticias() {
         setCargando(true);
         try {
             const result = await obtenerTodasLasNoticiasAdmin();
             if (result.exito) {
-                setNoticias(result.data);
+                // Protección: aseguramos que siempre sea un array
+                setNoticias(Array.isArray(result.data) ? result.data : []);
             }
         } catch (error) {
             console.error("Error:", error);
         } finally {
             setCargando(false);
         }
-    };
+    }
 
     useEffect(() => {
         cargarNoticias();
@@ -66,6 +68,7 @@ export function useNoticiasLogic() {
                 setImagenPreview(null);
                 setImagenArchivo(null);
                 setVistaActual("lista");
+                // 2. Se llama a la función principal sin problemas
                 cargarNoticias();
             } else {
                 toast.error("Error al publicar: " + result.mensaje);
@@ -76,28 +79,14 @@ export function useNoticiasLogic() {
         } finally {
             setEstaPublicando(false);
         }
-        const cargarNoticias = async () => {
-            setCargando(true);
-            try {
-                const result = await obtenerTodasLasNoticiasAdmin();
-                if (result.exito) {
-                    // Si por algún motivo result.data no es un array, le pasamos un array vacío []
-                    setNoticias(Array.isArray(result.data) ? result.data : []);
-                }
-            } catch (error) {
-                console.error("Error:", error);
-            } finally {
-                setCargando(false);
-            }
-        };
     };
-
 
     const noticiasFiltradas = useMemo(() => {
         return noticias.filter((n) =>
             n.titulo?.toLowerCase().includes(busqueda.toLowerCase())
         );
     }, [noticias, busqueda]);
+
     return {
         vistaActual, setVistaActual,
         busqueda, setBusqueda,
