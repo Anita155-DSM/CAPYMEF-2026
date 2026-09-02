@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import MainLayout from "../layouts/MainLayout.jsx";
 import {
   EventosAdmin,
@@ -24,9 +25,20 @@ import { Autoridades, Balance, Estatuto } from "../Pages/PublicPages/index.js";
 import AdminRoutes from "./AdminRoutes.jsx";
 import PrivateRoutes from "./PrivateRoutes";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 export default function AppRoutes() {
   return (
     <>
+      <ScrollToTop />
       <Routes>
         {/*NO LOGUEADOS */}
         <Route path="/" element={<Home />} />
