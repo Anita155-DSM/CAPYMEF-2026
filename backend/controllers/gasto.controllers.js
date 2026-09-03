@@ -1,12 +1,5 @@
-import fs from 'fs';
 import { Gasto } from '../models/gasto.models.js';
-
-// Función auxiliar para limpiar archivos si la base de datos falla
-const eliminarArchivo = (filePath) => {
-  if (filePath && fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
-};
+import { eliminarImagenCloudinary } from '../services/cloudinary.service.js';
 
 // ==========================================
 // 1. REGISTRAR UN NUEVO GASTO (Egreso)
@@ -35,7 +28,7 @@ export const registrarGasto = async (req, res) => {
       data: nuevoGasto,
     });
   } catch (error) {
-    if (comprobanteFile) eliminarArchivo(comprobanteFile.path);
+    if (comprobanteFile) eliminarImagenCloudinary(comprobanteFile.filename);
     console.error('Error al registrar gasto:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -47,7 +40,7 @@ export const registrarGasto = async (req, res) => {
 export const obtenerGastos = async (req, res) => {
   try {
     const gastos = await Gasto.findAll({
-      order: [['fecha', 'DESC'], ['createdAt', 'DESC']], // Los más recientes primero
+      order: [['fecha', 'DESC'], ['createdAt', 'DESC']],
     });
 
     res.status(200).json({ exito: true, data: gastos });
@@ -68,6 +61,9 @@ export const eliminarGasto = async (req, res) => {
     if (!gasto) {
       return res.status(404).json({ exito: false, mensaje: 'Gasto no encontrado.' });
     }
+
+    const conceptoEliminado = gasto.concepto;
+    const montoEliminado = gasto.monto;
 
     await gasto.destroy(); // Soft delete gracias a paranoid: true
 

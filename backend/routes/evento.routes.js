@@ -16,7 +16,7 @@ import {
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 import { uploadEvento } from '../middlewares/multer/multerEventos.js';
-import { validacionEvento } from '../middlewares/validator/evento.validator.js';
+import { validacionEvento, validacionActualizarEvento } from '../middlewares/validator/evento.validator.js';
 
 const router = Router();
 
@@ -39,7 +39,7 @@ router.get('/:id/certificado', verificarToken, descargarMiCertificado);
 // Rutas Administrativas
 // ==========================================
 router.post('/admin', verificarToken, verificarAdmin, uploadEvento.single('imagen'), validacionEvento, crearEvento);
-router.put('/admin/:id', verificarToken, verificarAdmin, uploadEvento.single('imagen'), validacionEvento, actualizarEvento);
+router.put('/admin/:id', verificarToken, verificarAdmin, uploadEvento.single('imagen'), validacionActualizarEvento, actualizarEvento);
 router.delete('/admin/:id', verificarToken, verificarAdmin, eliminarEvento);
 router.get('/admin/:id/inscriptos', verificarToken, verificarAdmin, obtenerInscriptos);
 router.put('/admin/:eventoId/inscriptos/:inscripcionId/asistencia', verificarToken, verificarAdmin, marcarAsistencia);

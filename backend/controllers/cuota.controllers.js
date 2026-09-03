@@ -2,6 +2,8 @@ import { generarCuotasDelMes } from '../services/cuota.service.js';
 import { Cuota } from '../models/cuota.models.js';
 import { User } from '../models/user.models.js';
 import { Pago } from '../models/pago.models.js';
+import { generarComprobantePago } from '../services/comprobante.service.js';
+import { enviarMailComprobantePago } from '../config/mailer.js';
 
 // ==========================================
 // 1. EJECUCIÓN MANUAL (Para Pruebas y Admin)
@@ -13,7 +15,7 @@ export const ejecutarGeneracionCuotas = async (req, res) => {
     //auditoria
     req.auditoriaMensaje = `Se ejecutó la generación masiva de cuotas. Creadas: ${resultado.creadas} cuotas para el periodo ${resultado.periodo}`;
     req.auditoriaCodigo = 'GENERAR_CUOTAS_MASIVO';
-    
+
     res.status(200).json({
       exito: true,
       mensaje: `Proceso finalizado. Se generaron ${resultado.creadas} cuotas para el periodo ${resultado.periodo}.`,
@@ -76,7 +78,9 @@ export const registrarPagoManual = async (req, res) => {
     const { id } = req.params; // ID de la Cuota
     const { metodoPago, nroComprobante, observaciones } = req.body;
 
-    const cuota = await Cuota.findByPk(id);
+    const cuota = await Cuota.findByPk(id, {
+      include: [{ model: User, as: 'socio', attributes: ['id', 'razonSocial', 'cuit', 'email'] }],
+    });
 
     if (!cuota) {
       return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
@@ -100,8 +104,27 @@ export const registrarPagoManual = async (req, res) => {
     cuota.estado = 'pagada';
     await cuota.save();
 
+    // 3. Generamos el comprobante en PDF y lo mandamos por mail.
+    // No bloqueamos la respuesta al admin si el mail falla — el pago ya quedó
+    // impactado en la base, que es lo importante; el mail es un plus.
+    try {
+      const pdfBuffer = await generarComprobantePago({
+        socio: cuota.socio,
+        cuota: { mes_anio: cuota.mes_anio },
+        pago: nuevoPago,
+      });
+
+      await enviarMailComprobantePago(
+        cuota.socio.email,
+        { razonSocial: cuota.socio.razonSocial, mesAnio: cuota.mes_anio, monto: nuevoPago.montoAbonado },
+        pdfBuffer
+      );
+    } catch (errorComprobante) {
+      console.error('Error al generar/enviar el comprobante de pago:', errorComprobante.message);
+    }
+
     //auditoria
-    req.auditoriaMensaje = `Se registró el pago manual de $${montoAbonado || cuota.monto} para la cuota #${cuota.id} del socio ${cuota.socio?.razonSocial || cuota.usuarioId}`;
+    req.auditoriaMensaje = `Se registró el pago manual de $${cuota.monto} para la cuota #${cuota.id} del socio ${cuota.socio?.razonSocial || cuota.usuario_id}`;
     req.auditoriaCodigo = 'REGISTRAR_PAGO_MANUAL';
 
     res.status(200).json({
@@ -137,5 +160,42 @@ export const obtenerResumenFinanciero = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener resumen financiero:', error);
     res.status(500).json({ exito: false, mensaje: 'Error al generar resumen financiero.' });
+  }
+};
+
+// ==========================================
+// 4. REDESCARGAR UN COMPROBANTE YA EMITIDO
+// ==========================================
+export const descargarComprobante = async (req, res) => {
+  try {
+    const { id } = req.params; // ID de la Cuota
+
+    const cuota = await Cuota.findByPk(id, {
+      include: [
+        { model: User, as: 'socio', attributes: ['razonSocial', 'cuit'] },
+        { model: Pago, as: 'pago' },
+      ],
+    });
+
+    if (!cuota) {
+      return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
+    }
+
+    if (cuota.estado !== 'pagada' || !cuota.pago) {
+      return res.status(400).json({ exito: false, mensaje: 'Esta cuota todavía no tiene un pago registrado.' });
+    }
+
+    const pdfBuffer = await generarComprobantePago({
+      socio: cuota.socio,
+      cuota: { mes_anio: cuota.mes_anio },
+      pago: cuota.pago,
+    });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="comprobante-${cuota.mes_anio}.pdf"`);
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('Error al redescargar el comprobante:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al generar el comprobante.' });
   }
 };

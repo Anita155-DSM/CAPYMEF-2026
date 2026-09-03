@@ -1,13 +1,6 @@
-import fs from 'fs';
 import { Op } from 'sequelize';
 import { Noticia } from '../models/noticia.models.js';
-
-// Función auxiliar para eliminar archivos
-const eliminarArchivo = (filePath) => {
-  if (filePath && fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
-};
+import { eliminarImagenCloudinary, extraerPublicIdDeUrl } from '../services/cloudinary.service.js';
 
 // ==========================================
 // 1. OBTENER NOTICIAS PARA LA LANDING (Públicas)
@@ -48,12 +41,12 @@ export const obtenerNoticiasSocios = async (req, res) => {
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
 };
+
 // ==========================================
 // 3. OBTENER NOTICIAS PARA ADMINS (ocultos y publicos)
 // ==========================================
 export const obtenerTodasLasNoticiasAdmin = async (req, res) => {
   try {
-    // Volvemos a forzar el ordenamiento por la fecha original de publicación
     const noticias = await Noticia.findAll({
       order: [['fechaPublicacion', 'DESC']]
     });
@@ -70,6 +63,7 @@ export const obtenerTodasLasNoticiasAdmin = async (req, res) => {
     });
   }
 };
+
 // ==========================================
 // 4. OBTENER UNA NOTICIA POR ID
 // ==========================================
@@ -117,7 +111,7 @@ export const crearNoticia = async (req, res) => {
       data: nuevaNoticia,
     });
   } catch (error) {
-    if (imagenFile) eliminarArchivo(imagenFile.path);
+    if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
     console.error('Error al crear noticia:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -136,7 +130,7 @@ export const actualizarNoticia = async (req, res) => {
     const noticia = await Noticia.findByPk(id);
 
     if (!noticia) {
-      if (imagenFile) eliminarArchivo(imagenFile.path);
+      if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
       return res.status(404).json({ exito: false, mensaje: 'Noticia no encontrada.' });
     }
 
@@ -147,9 +141,12 @@ export const actualizarNoticia = async (req, res) => {
     if (visibilidad) noticia.visibilidad = visibilidad;
     if (estado) noticia.estado = estado;
 
-    // Si subieron una nueva imagen, eliminamos la anterior y guardamos la nueva
+    // Si subieron una nueva imagen, eliminamos la anterior de Cloudinary y guardamos la nueva
     if (imagenFile) {
-      if (noticia.imagenUrl) eliminarArchivo(noticia.imagenUrl);
+      if (noticia.imagenUrl) {
+        const publicIdAnterior = extraerPublicIdDeUrl(noticia.imagenUrl);
+        eliminarImagenCloudinary(publicIdAnterior);
+      }
       noticia.imagenUrl = imagenFile.path;
     }
 
@@ -165,7 +162,7 @@ export const actualizarNoticia = async (req, res) => {
       data: noticia,
     });
   } catch (error) {
-    if (imagenFile) eliminarArchivo(imagenFile.path);
+    if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
     console.error('Error al actualizar noticia:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -183,7 +180,10 @@ export const eliminarNoticia = async (req, res) => {
       return res.status(404).json({ exito: false, mensaje: 'Noticia no encontrada.' });
     }
 
+    const tituloBorrado = noticia.titulo; // capturamos antes de destruir
+
     await noticia.destroy(); // Soft delete por el 'paranoid: true'
+
     //auditoria
     req.auditoriaMensaje = `Se eliminó la noticia #${id}: "${tituloBorrado}"`;
     req.auditoriaCodigo = 'DELETE_NOTICIA';
