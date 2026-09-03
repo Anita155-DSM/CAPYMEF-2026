@@ -138,8 +138,8 @@ export const gestionarSolicitud = async (req, res) => {
     await usuario.save();
 
     //auditoria
-    req.auditoriaMensaje = `Se ${estado === 'aprobado' ? 'aprobó' : 'rechazó'} la solicitud de registro del socio: ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
-    req.auditoriaCodigo = `SOLICITUD_${estado.toUpperCase()}`;
+    req.auditoriaMensaje = `Se ${nuevoEstado === 'aprobado' ? 'aprobó' : 'rechazó'} la solicitud de registro del socio: ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
+    req.auditoriaCodigo = `SOLICITUD_${nuevoEstado.toUpperCase()}`;
 
     res.status(200).json({
       exito: true,
@@ -175,6 +175,70 @@ export const darDeBajaSocio = async (req, res) => {
     });
   } catch (error) {
     console.error("Error al dar de baja al socio:", error);
+    res.status(500).json({ exito: false, mensaje: "Error interno del servidor." });
+  }
+};
+
+// ==========================================
+// ACTUALIZAR DATOS DE UN SOCIO (uso administrativo)
+// ==========================================
+export const actualizarSocio = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const usuario = await User.findByPk(id);
+
+    if (!usuario) {
+      return res.status(404).json({ exito: false, mensaje: "Usuario no encontrado." });
+    }
+
+    // Campos editables por el admin. Deliberadamente excluimos "password" y "cuit"
+    // de esta lista: la contraseña tiene su propio flujo (reset), y el CUIT es un
+    // dato de identificación fiscal que no debería cambiarse desde una edición común.
+    const camposEditables = [
+      "razonSocial", "email", "telefono", "localidad",
+      "categoria", "rubro", "actividad", "tamano_empresa", "estado"
+    ];
+
+    camposEditables.forEach((campo) => {
+      if (req.body[campo] !== undefined) {
+        usuario[campo] = req.body[campo];
+      }
+    });
+
+    await usuario.save();
+
+    //auditoria
+    req.auditoriaMensaje = `Se actualizaron los datos del socio ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
+    req.auditoriaCodigo = 'SOCIO_ACTUALIZADO';
+
+    res.status(200).json({
+      exito: true,
+      mensaje: `Los datos de ${usuario.razonSocial} se actualizaron correctamente.`,
+      data: {
+        id: usuario.id,
+        razonSocial: usuario.razonSocial,
+        email: usuario.email,
+        telefono: usuario.telefono,
+        localidad: usuario.localidad,
+        categoria: usuario.categoria,
+        rubro: usuario.rubro,
+        actividad: usuario.actividad,
+        tamano_empresa: usuario.tamano_empresa,
+        estado: usuario.estado,
+      },
+    });
+  } catch (error) {
+    console.error("Error al actualizar socio:", error);
+
+    // Si es un error de validación de Sequelize (ej: email duplicado, ENUM inválido),
+    // devolvemos 400 en vez de 500, porque es un error del cliente, no del servidor.
+    if (error.name === "SequelizeValidationError" || error.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({
+        exito: false,
+        mensaje: "Datos inválidos o email ya registrado por otro socio.",
+      });
+    }
+
     res.status(500).json({ exito: false, mensaje: "Error interno del servidor." });
   }
 };
