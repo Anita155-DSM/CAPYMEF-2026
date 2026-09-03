@@ -34,8 +34,10 @@ export default function Modal({ noticia, onClose }) {
             />
           )}
 
-          <div className="text-sm font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2">
+          <div className="text-sm font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2 flex items-center gap-2">
             {new Date(noticia.fechaPublicacion).toLocaleDateString('es-AR')}
+            <span className="w-1 h-1 rounded-full bg-[#1D7BB6]" aria-hidden="true"></span>
+            <span>{noticia.categoria || "Institucional"}</span>
           </div>
 
           <h2 className="text-3xl font-bold text-[#132A46] mb-4">

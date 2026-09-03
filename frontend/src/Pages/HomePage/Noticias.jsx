@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Modal, Navbar } from "../../Components";
+import { Card, Footer, Modal, NavbarPublico } from "../../Components";
 import { obtenerNoticiasPublicas } from "../../services/noticiasService";
 
 export default function NoticiasPublicas() {
@@ -36,15 +36,15 @@ export default function NoticiasPublicas() {
 
   return (<>
 
-    <Navbar />
-    <div className="bg-gray-50 min-h-screen py-12 mt-8 px-4 sm:px-6 lg:px-8 font-sans animacion-modal">
+    <NavbarPublico />
+    <main className="bg-white min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 font-sans animacion-modal">
       <div className="max-w-7xl mx-auto">
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-[#132A46] sm:text-5xl">
-            Últimas Noticias
+        <div className="text-center mb-16">
+          <h1 className="text-3xl font-extrabold text-[#1A4B76] sm:text-4xl">
+            Noticias
           </h1>
-          <p className="mt-4 text-xl text-gray-500">
+          <p className="mt-4 text-lg text-gray-600">
             Mantenete informado con las novedades de CAPYMEF.
           </p>
         </div>
@@ -62,6 +62,7 @@ export default function NoticiasPublicas() {
                 subtitulo={noticia.subtitulo}
                 imagenUrl={noticia.imagenUrl}
                 fecha={noticia.fechaPublicacion}
+                categoria={noticia.categoria}
                 // 3. LE PASAMOS TODA LA NOTICIA AL ESTADO AL HACER CLIC
                 onLeerMas={() => setNoticiaSeleccionada(noticia)}
               />
@@ -79,7 +80,10 @@ export default function NoticiasPublicas() {
         />
       )}
 
-    </div>
+    </main>
+    <footer className="bg-[#1b4f7a] pt-5">
+      <Footer />
+    </footer>
   </>
   );
 }
