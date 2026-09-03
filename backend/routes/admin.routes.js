@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { obtenerSolicitudesPendientes, gestionarSolicitud, obtenerAuditorias } from '../controllers/admin.controllers.js';
+import { obtenerSolicitudesPendientes, gestionarSolicitud, obtenerAuditorias, actualizarSocio } from '../controllers/admin.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { darDeBajaSocio, obtenerTodosLosUsuarios } from '../controllers/admin.controllers.js';
 import { obtenerDistribucionPorLocalidad, obtenerDistribucionPorRubro } from '../controllers/admin.controllers.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
+import { validacionActualizarSocio } from '../middlewares/validator/user.validator.js';
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.use(verificarAdmin);
 router.get('/solicitudes', obtenerSolicitudesPendientes);
 router.put('/solicitudes/:id', gestionarSolicitud);
 router.put('/socios/:id/baja', darDeBajaSocio);
+router.put('/socios/:id', validacionActualizarSocio, actualizarSocio);
 router.get("/usuarios", obtenerTodosLosUsuarios);
 
 // Endpoint de Reporte (Geolocalización / Rubros)
