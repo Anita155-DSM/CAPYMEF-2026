@@ -72,3 +72,47 @@ export const validacionLogin = [
 
   validarResultado
 ];
+
+// ==========================================
+// Reglas para Actualización de Socio (uso administrativo)
+// ==========================================
+export const validacionActualizarSocio = [
+  body('razonSocial')
+    .optional()
+    .trim()
+    .isLength({ min: 3, max: 150 }).withMessage('La Razón Social debe tener entre 3 y 150 caracteres.'),
+
+  body('email')
+    .optional()
+    .trim()
+    .isEmail().withMessage('Debe proporcionar un correo electrónico válido.')
+    .normalizeEmail(),
+
+  body('telefono')
+    .optional()
+    .trim()
+    .notEmpty().withMessage('El teléfono no puede quedar vacío.'),
+
+  body('localidad')
+    .optional()
+    .trim()
+    .notEmpty().withMessage('La localidad no puede quedar vacía.'),
+
+  body('categoria')
+    .optional()
+    .isIn(['activo', 'adherente', 'padrino']).withMessage('La categoría no es válida.'),
+
+  body('rubro')
+    .optional()
+    .isIn(['Comercio', 'Industria', 'Servicios', 'Agropecuario', 'Otro']).withMessage('El rubro no es válido.'),
+
+  body('tamano_empresa')
+    .optional()
+    .isIn(['Micro', 'Pequena', 'Mediana', 'Grande']).withMessage('El tamaño de empresa no es válido.'),
+
+  body('estado')
+    .optional()
+    .isIn(['pendiente', 'aprobado', 'rechazado', 'inactivo']).withMessage('El estado no es válido.'),
+
+  validarResultado
+];

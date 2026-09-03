@@ -10,7 +10,7 @@ export default function Login() {
 
   // Ya no hace falta que handleLogin sea async, porque la asincronía ocurre adentro de la Promesa
   const handleLogin = (data) => {
-    
+
     // 2. Creamos la Promesa que envuelve tu lógica original
     const loginPromise = new Promise(async (resolve, reject) => {
       try {
@@ -42,10 +42,15 @@ export default function Login() {
       success: (result) => {
         // Esperamos 1 segundo después del cartel verde para redirigir, así el usuario lo llega a leer
         setTimeout(() => {
-          navigate("/");
+          if (result.usuario.rol === "admin") {
+            navigate("/admin/inicio"); 
+          } else {
+            navigate("/"); // Ruta normal para los socios
+          }
         }, 1000);
-        
-        return result.mensaje || "¡Sesión iniciada correctamente!";
+
+        return result.mensaje || `"¡Sesión iniciada correctamente!";`
+
       },
       error: (err) => {
         return err.message;

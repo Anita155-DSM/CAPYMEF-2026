@@ -108,7 +108,7 @@ export default function Home() {
                       <div className="flex flex-col lg:flex-row gap-5">
                         <ul className="space-y-3 flex-1">
                           <li>📍 Dirección: Maipú 651, Formosa, Argentina, 3600.</li>
-                          <li>📱 Tel: 370-123-4567, 0370 446-2508</li>
+                          <li>📱 Tel: 0370 446-2508</li>
                           <li>✉️ Correo: info@capymef.ar</li>
                         </ul>
                         <iframe className="w-full lg:w-[570px] max-w-full h-44 sm:h-48" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" allowFullScreen loading="lazy" referrerPolicy="strict-origin-when-cross-origin"></iframe>
@@ -247,20 +247,11 @@ export default function Home() {
           <div className="relative flex flex-col md:flex-row items-center justify-center mb-12">
             {/* Título centrado */}
             <div className="flex flex-col items-center">
-              <h2 className="text-4xl font-serif font-bold">
+              <h2 className="text-4xl font-sans font-light uppercase tracking-wide">
                 Últimas noticias
               </h2>
-              {/* Subrayado celeste */}
-              <div className="w-24 h-1 bg-[#1D7BB6] mt-2"></div>
             </div>
 
-            {/* Enlace a la derecha */}
-            <Link
-              to="/noticias"
-              className="md:absolute right-0 mt-6 md:mt-0 text-sm font-bold hover:underline transition-all"
-            >
-              Ver todas las noticias &gt;
-            </Link>
           </div>
 
           {/* Contenedor Grid para las 3 Tarjetas */}
@@ -281,11 +272,22 @@ export default function Home() {
                   subtitulo={noticia.subtitulo}
                   imagenUrl={noticia.imagenUrl}
                   fecha={noticia.fechaPublicacion}
+                  categoria={noticia.categoria}
                   onLeerMas={() => setNoticiaSeleccionada(noticia)}
                 />
               ))}
             </div>
           )}
+
+          <div className="flex justify-end mt-10">
+            <Link
+              to="/noticias"
+              className="text-sm font-bold hover:underline transition-all"
+            >
+              Ver todas las noticias &gt;
+            </Link>
+          </div>
+
           {noticiaSeleccionada && (
             <Modal
               noticia={noticiaSeleccionada}

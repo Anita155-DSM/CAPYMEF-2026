@@ -1,15 +1,15 @@
 import Logo from "../assets/img/logo.png"
 
-export default function Card({ titulo, subtitulo, imagenUrl, fecha, onLeerMas }) {
+export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, onLeerMas }) {
   const obtenerImagenSrc = () => {
     if (!imagenUrl) return null;
-    if (imagenUrl.startsWith("http://") || imagenUrl.startsWith("https://res.cloudinary.com/")) {
+    if (imagenUrl.startsWith("https://") || imagenUrl.startsWith("https://res.cloudinary.com/")) {
       return imagenUrl;
     }
     return `${import.meta.env.VITE_API_URL_UPLOADS}/${imagenUrl}`;
   };
  return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-200 flex flex-col h-full">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 border border-gray-200 flex flex-col h-full">
 
       {/* IMAGEN DE LA TARJETA */}
       {imagenUrl ? (
@@ -26,8 +26,10 @@ export default function Card({ titulo, subtitulo, imagenUrl, fecha, onLeerMas })
 
       <div className="p-6 flex flex-col flex-grow">
         {/* FECHA */}
-        <div className="text-xs font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2">
+        <div className="text-xs font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2 flex items-center gap-2">
           {fecha ? new Date(fecha).toLocaleDateString('es-AR') : ""}
+          <span className="w-1 h-1 rounded-full bg-[#1D7BB6]" aria-hidden="true"></span>
+          <span>{categoria || "Institucional"}</span>
         </div>
 
         {/* TÍTULO */}

@@ -44,7 +44,7 @@ export const User = sequelize.define('User', {
   // 4. Control de Administración y Accesos
   // ==========================================
   estado: { 
-    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado'), 
+    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado', 'inactivo'), 
     defaultValue: 'pendiente' 
   },
   rol: { 

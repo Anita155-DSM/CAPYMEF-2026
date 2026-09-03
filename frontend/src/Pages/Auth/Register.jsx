@@ -20,7 +20,7 @@ export default function Register() {
       formData.append("telefono", data.telefono);
       formData.append("localidad", data.localidad);
       formData.append("categoria", data.categoria);
-      formData.append("tamanoEmpresa", data.tamanoEmpresa);
+      formData.append("tamano_empresa", data.tamano_empresa);
       formData.append("rubro", data.rubro);
       formData.append("actividad", data.actividad);
 
@@ -280,16 +280,16 @@ export default function Register() {
               <div className="w-full my-3">
                 <label
                   className="block text-lg font-bold mb-1"
-                  htmlFor="tamanoEmpresa"
+                  htmlFor="tamano_empresa"
                 >
                     Tamaño de la Empresa
                 </label>
                 <div className="relative w-full">
                   <select
-                    id="tamanoEmpresa"
+                    id="tamano_empresa"
                     className="w-full h-11 appearance-none rounded-md border border-white/30 bg-white px-4 pr-12 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
                     defaultValue=""
-                    {...register("tamanoEmpresa", { required: true })}
+                    {...register("tamano_empresa", { required: true })}
                   >
                   <option value="" disabled>
                     Seleccioná una opcion

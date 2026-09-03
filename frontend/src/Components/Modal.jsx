@@ -12,7 +12,7 @@ export default function Modal({ noticia, onClose }) {
     <div id="fondo-modal" onClick={handleClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all cursor-pointer">
 
       {/* Contenedor principal del modal */}
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden relative animacion-modal">
 
         {/* Botón flotante para cerrar */}
         <button
@@ -34,8 +34,10 @@ export default function Modal({ noticia, onClose }) {
             />
           )}
 
-          <div className="text-sm font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2">
+          <div className="text-sm font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2 flex items-center gap-2">
             {new Date(noticia.fechaPublicacion).toLocaleDateString('es-AR')}
+            <span className="w-1 h-1 rounded-full bg-[#1D7BB6]" aria-hidden="true"></span>
+            <span>{noticia.categoria || "Institucional"}</span>
           </div>
 
           <h2 className="text-3xl font-bold text-[#132A46] mb-4">
