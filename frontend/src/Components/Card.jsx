@@ -16,7 +16,7 @@ export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, o
         <img
           src={obtenerImagenSrc()}
           alt={titulo}
-          className="w-full h-48 object-cover flex-shrink-0"
+          className="w-full h-48 object-cover shrink-0"
         />
       ) : (
         <div className="w-full h-48 bg-gradient-to-tr from-[#132A46] to-[#1D7BB6] flex items-center justify-center p-6 flex-shrink-0">
@@ -33,14 +33,14 @@ export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, o
         </div>
 
         {/* TÍTULO */}
-        <h3 className="text-xl font-bold text-[#132A46] mb-2 line-clamp-2">
+        <h3 className="text-xl font-bold text-[#132A46] my-5 line-clamp-2">
           {titulo}
         </h3>
 
         {/* SUBTÍTULO */}
-        <div className="mb-4 flex-grow">
+        <div className="my-4 grow">
           {subtitulo ? (
-            <p className="text-gray-600 line-clamp-3 text-sm">
+            <p className="text-gray-600 line-clamp-3 text-md">
               {subtitulo}
             </p>
           ) : (
@@ -51,7 +51,7 @@ export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, o
         </div>
 
         {/* BOTÓN */}
-        <div className="pt-2 mt-auto">
+        <div className="pt-10 mt-auto">
           <button onClick={onLeerMas}
             className="text-[#1D7BB6] font-semibold hover:text-[#132A46] transition-colors text-sm">
             Leer más

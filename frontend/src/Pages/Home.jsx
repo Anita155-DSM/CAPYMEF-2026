@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FaGem, FaHandshake, FaStar, FaUser } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import fondoHome from "../assets/img/FondoCapymef.png";
-import { Card, Footer, Navbar, NavbarPublico,Modal } from "../Components/index.js";
+import { Card, Footer, Navbar, NavbarPublico, Modal } from "../Components/index.js";
 import { obtenerNoticiasPublicas } from "../services/noticiasService.js";
 //asdad
 export default function Home() {
@@ -13,7 +13,7 @@ export default function Home() {
   const [noticias, setNoticias] = useState([]);
   const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
   const [cargando, setCargando] = useState(true);
-  
+
 
   // 2. TRAEMOS LAS NOTICIAS AL CARGAR LA PÁGINA
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function Home() {
                           <li>📱 Tel: 0370 446-2508</li>
                           <li>✉️ Correo: info@capymef.ar</li>
                         </ul>
-                        <iframe className="w-full lg:w-[570px] max-w-full h-44 sm:h-48" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" allowFullScreen loading="lazy" referrerPolicy="strict-origin-when-cross-origin"></iframe>
+                        <iframe className="w-full lg:w-142.5 max-w-full h-44 sm:h-48" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" allowFullScreen loading="lazy" referrerPolicy="strict-origin-when-cross-origin"></iframe>
                       </div>
                     </div>
 
@@ -132,7 +132,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- Sobre Nosotros --- */}
+        {/*La vista N2*/}
         <section className="w-full bg-white px-6 md:px-24 py-20 font-sans">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
 
@@ -168,7 +168,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/*La Vista N2 */}
+        {/*La Vista N3 */}
         <section className="w-full bg-[#F4F8FB] px-6 md:px-24 py-20 font-sans">
 
           {/* Título de la sección */}
@@ -193,7 +193,7 @@ export default function Home() {
                   Padrino
                 </h3>
 
-                <ul className="list-disc text-lg text-dark space-y-4 w-full max-w-[280px] text-left">
+                <ul className="list-disc text-lg text-dark space-y-4 w-full max-w-70 text-left">
                   <li>Acceso gratuito o con bonificación especial a eventos tarifados</li>
                   <li>Reconocimiento por su respaldo institucional</li>
                   <li>Misma información y transparencia que el resto de los socios</li>
@@ -213,7 +213,7 @@ export default function Home() {
                   Activo
                 </h3>
 
-                <ul className="list-disc text-lg text-dark space-y-4 w-full max-w-[280px] text-left">
+                <ul className="list-disc text-lg text-dark space-y-4 w-full max-w-70 text-left">
                   <li>Bonificaciones máximas en eventos y capacitaciones</li>
                   <li>Participación plena en la vida institucional</li>
                   <li>Cuota mensual con ventana de pago del 1 al 10</li>
@@ -231,7 +231,7 @@ export default function Home() {
                   Adherente
                 </h3>
 
-                <ul className="list-disc text-lg text-dark space-y-5 w-full max-w-[280px] text-left">
+                <ul className="list-disc text-lg text-dark space-y-5 w-full max-w-70 text-left">
                   <li>Acceso a eventos con arancel</li>
                   <li>Becas o descuentos especiales según disponibilidad</li>
                   <li>Puerta de entrada natural a la comunidad CAPyMEF</li>
@@ -241,7 +241,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        {/*La vista N3*/}
+        {/*La vista N4*/}
         <section className="w-full bg-[#1b4f7a] px-10 md:px-24 pt-16 font-sans text-white pb-7">
           {/* Encabezado de la sección */}
           <div className="relative flex flex-col md:flex-row items-center justify-center mb-12">
@@ -296,6 +296,7 @@ export default function Home() {
           )}
         </section>
       </main>
+      
       {/*Footer */}
       <footer className="bg-[#1b4f7a] pt-5">
         <Footer />

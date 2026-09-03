@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { Card, Modal, Navbar } from "../../Components";
+import { Card, Modal, Navbar, NavbarPublico } from "../../Components";
 import { obtenerNoticiasPublicas } from "../../services/noticiasService";
 
 export default function NoticiasPublicas() {
   const [noticias, setNoticias] = useState([]);
   const [cargando, setCargando] = useState(true);
-
-  // 2. ESTADO PARA CONTROLAR EL MODAL
   const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
+
+  const token = localStorage.getItem("token");
+  const estaLogueado = !!token;
 
   useEffect(() => {
     const cargarNoticias = async () => {
@@ -36,7 +37,7 @@ export default function NoticiasPublicas() {
 
   return (<>
 
-    <Navbar />
+    {estaLogueado ? <Navbar /> : <NavbarPublico />}
     <div className="bg-gray-50 min-h-screen py-12 mt-8 px-4 sm:px-6 lg:px-8 font-sans animacion-modal">
       <div className="max-w-7xl mx-auto">
 
