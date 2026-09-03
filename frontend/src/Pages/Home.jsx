@@ -252,13 +252,6 @@ export default function Home() {
               </h2>
             </div>
 
-            {/* Enlace a la derecha */}
-            <Link
-              to="/noticias"
-              className="md:absolute right-0 mt-6 md:mt-0 text-sm font-bold hover:underline transition-all"
-            >
-              Ver todas las noticias &gt;
-            </Link>
           </div>
 
           {/* Contenedor Grid para las 3 Tarjetas */}
@@ -285,6 +278,16 @@ export default function Home() {
               ))}
             </div>
           )}
+
+          <div className="flex justify-end mt-10">
+            <Link
+              to="/noticias"
+              className="text-sm font-bold hover:underline transition-all"
+            >
+              Ver todas las noticias &gt;
+            </Link>
+          </div>
+
           {noticiaSeleccionada && (
             <Modal
               noticia={noticiaSeleccionada}

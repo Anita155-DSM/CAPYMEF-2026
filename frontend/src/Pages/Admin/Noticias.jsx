@@ -62,7 +62,6 @@ export default function NoticiasAdmin() {
                   subtitulo={noticia.subtitulo}
                   imagenUrl={noticia.imagenUrl}
                   fecha={noticia.fechaPublicacion}
-                  categoria={noticia.categoria}
                   onLeerMas={() => setNoticiaSeleccionada(noticia)}
                 />
 

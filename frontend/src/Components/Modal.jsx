@@ -12,7 +12,7 @@ export default function Modal({ noticia, onClose }) {
     <div id="fondo-modal" onClick={handleClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all cursor-pointer">
 
       {/* Contenedor principal del modal */}
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden relative animacion-modal">
 
         {/* Botón flotante para cerrar */}
         <button

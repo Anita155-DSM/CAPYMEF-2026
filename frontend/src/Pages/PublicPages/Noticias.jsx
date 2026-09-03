@@ -37,7 +37,7 @@ export default function NoticiasPublicas() {
   return (<>
 
     <NavbarPublico />
-    <main className="bg-white min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 font-sans animacion-modal">
+    <main className="bg-white min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-7xl mx-auto">
 
         <div className="text-center mb-16">
