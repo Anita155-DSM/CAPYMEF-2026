@@ -3,7 +3,7 @@ import Logo from "../assets/img/logo.png"
 export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, onLeerMas }) {
   const obtenerImagenSrc = () => {
     if (!imagenUrl) return null;
-    if (imagenUrl.startsWith("http://") || imagenUrl.startsWith("https://res.cloudinary.com/")) {
+    if (imagenUrl.startsWith("https://") || imagenUrl.startsWith("https://res.cloudinary.com/")) {
       return imagenUrl;
     }
     return `${import.meta.env.VITE_API_URL_UPLOADS}/${imagenUrl}`;
