@@ -42,7 +42,7 @@ export default function Login() {
       success: (result) => {
         // Esperamos 1 segundo después del cartel verde para redirigir, así el usuario lo llega a leer
         setTimeout(() => {
-          navigate("/");
+          navigate(result.usuario?.rol === "admin" ? "/admin/inicio" : "/socios");
         }, 1000);
         
         return result.mensaje || "¡Sesión iniciada correctamente!";

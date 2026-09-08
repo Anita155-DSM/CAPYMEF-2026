@@ -11,7 +11,7 @@ import {
 import { verificarToken } from '../middlewares/authMiddleware.js';
 //import { uploadNoticia } from '../middlewares/multerNoticias.js';
 import { uploadNoticia } from '../middlewares/multer/multerNoticias.js';
-import { validacionNoticia } from '../middlewares/validator/noticia.validator.js';
+import { validacionNoticia, validacionActualizarNoticia } from '../middlewares/validator/noticia.validator.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 
 const router = Router();
@@ -27,7 +27,7 @@ router.get('/socios', verificarToken, obtenerNoticiasSocios);
 // ==========================================
 router.get('/admin', verificarToken, verificarAdmin, obtenerTodasLasNoticiasAdmin);
 router.post('/admin', verificarToken, verificarAdmin, uploadNoticia.single('imagen'), validacionNoticia, crearNoticia);
-router.put('/admin/:id', verificarToken, verificarAdmin, uploadNoticia.single('imagen'), validacionNoticia, actualizarNoticia);
+router.put('/admin/:id', verificarToken, verificarAdmin, uploadNoticia.single('imagen'), validacionActualizarNoticia, actualizarNoticia);
 router.delete('/admin/:id', verificarToken, verificarAdmin, eliminarNoticia);
 
 // ==========================================

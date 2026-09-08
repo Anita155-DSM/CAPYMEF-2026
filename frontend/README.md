@@ -80,6 +80,7 @@ frontend/
 └── vite.config.js
 --------------------------------------------------
     git checkout origin/develop-ana -- backend/
+    git checkout origin/develop-kiara -- frontend/
 --------------------------------------------------
     Comando para copiar la rama:
     git fetch

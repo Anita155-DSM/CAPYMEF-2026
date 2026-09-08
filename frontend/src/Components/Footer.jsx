@@ -1,5 +1,5 @@
 import { default as Logo } from "../assets/img/logo.png"
-import { FaPhone, FaFacebook, FaInstagram, FaXTwitter } from "react-icons/fa6"
+import { FaPhone, FaFacebook, FaXTwitter } from "react-icons/fa6"
 import { AiFillHome } from "react-icons/ai"
 import { MdEmail } from "react-icons/md"
 import { Link } from "react-router-dom"
@@ -37,9 +37,10 @@ export default function Footer() {
                             <div className="w-12 h-1 bg-[#1D7BB6] mt-2"></div>
                             <ul className="mt-6 space-y-4">
                                 <li><Link to="/" className="hover:text-blue-300 transition-colors">Inicio</Link></li>
-                                <li><Link to="/Autoridades" className="hover:text-blue-300 transition-colors">Autoridades</Link></li>
-                                <li><Link to="/Estatuto" className="hover:text-blue-300 transition-colors">Estatuto</Link></li>
-                                <li><Link to="/Balance" className="hover:text-blue-300 transition-colors">Balance</Link></li>
+                                <li><Link to="/autoridades" className="hover:text-blue-300 transition-colors">Autoridades</Link></li>
+                                <li><Link to="/noticias" className="hover:text-blue-300 transition-colors">Noticias</Link></li>
+                                <li><Link to="/estatuto" className="hover:text-blue-300 transition-colors">Estatuto</Link></li>
+                                <li><Link to="/balance" className="hover:text-blue-300 transition-colors">Balance</Link></li>
                             </ul>
                         </div>
 
@@ -64,16 +65,10 @@ export default function Footer() {
                         <div>
                             <p className="text-sm font-bold tracking-widest text-white uppercase">Redes Sociales</p>
                             <div className="w-12 h-1 bg-[#1D7BB6] mt-2"></div>
-                            {/* Cambié a flex-row para que los íconos queden uno al lado del otro (se ve más moderno) */}
-                            <ul className="mt-6 space-x-5 flex flex-col ml-12 space-y-4">
+                            <ul className="mt-6 flex flex-col items-start space-y-4">
                                 <li>
                                     <a href="https://www.facebook.com/camara.capymef/" target="_blank" rel="noreferrer" className="hover:text-[#1D7BB6] transition-colors">
                                         <FaFacebook className="w-7 h-7" />
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="https://www.instagram.com/capymef/" target="_blank" rel="noreferrer" className="hover:text-[#1D7BB6] transition-colors">
-                                        <FaInstagram className="w-7 h-7" />
                                     </a>
                                 </li>
                                 <li>
