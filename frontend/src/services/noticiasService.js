@@ -54,6 +54,20 @@ export const obtenerNoticiasPublicas = async () => {
     throw new Error("Error de conexión con el servidor al Obtener");
   }
 };
+
+export const obtenerNoticiasSocios = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${API_URL}/noticias/socios`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error al obtener noticias para socios:", error);
+    throw new Error("Error de conexión con el servidor al Obtener");
+  }
+};
+
 export const obtenerTodasLasNoticiasAdmin = async () => {
   try {
     const token = localStorage.getItem("token");

@@ -26,6 +26,7 @@ import {
 import { Link } from "react-router-dom";
 import logo from "../../assets/img/Logo.png";
 import { obtenerPerfil } from "../../services/authServices";
+import { obtenerNoticiasSocios } from "../../services/noticiasService";
 import EventosSocio from "./EventosSocio";
 import NoticiasSocio from "./NoticiasSocio";
 
@@ -43,18 +44,14 @@ const movimientos = [
     { periodo: "Julio de 2026", estado: "Pagada", tipo: "pagada" },
 ];
 
-const novedades = [
-    { fecha: "20/08/2026", texto: "Nuevo convenio con CAME para créditos a tasa subsidiada" },
-    { fecha: "14/08/2026", texto: "Actualización del valor de la cuota societaria" },
-    { fecha: "05/08/2026", texto: "Convocatoria a asamblea ordinaria de socios" },
-];
-
 export default function Socios() {
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [seccionActiva, setSeccionActiva] = useState("Inicio");
     const [solicitudAbierta, setSolicitudAbierta] = useState(null);
     const [detalleSolicitud, setDetalleSolicitud] = useState("");
     const [solicitudEnviada, setSolicitudEnviada] = useState(false);
+    const [proximoEvento, setProximoEvento] = useState(null);
+    const [ultimasNoticias, setUltimasNoticias] = useState([]);
     const [usuario, setUsuario] = useState(() => {
         const usuarioGuardado = localStorage.getItem("usuario");
         return usuarioGuardado ? JSON.parse(usuarioGuardado) : {};
@@ -74,6 +71,37 @@ export default function Socios() {
         };
 
         cargarPerfil();
+    }, []);
+
+    useEffect(() => {
+        const cargarResumen = async () => {
+            const token = localStorage.getItem("token");
+            const ahora = new Date();
+
+            try {
+                const [respuestaEventos, respuestaNoticias] = await Promise.all([
+                    fetch(`${import.meta.env.VITE_API_URL}/eventos/socios`, { headers: { Authorization: `Bearer ${token}` } }),
+                    obtenerNoticiasSocios(),
+                ]);
+                const resultadoEventos = await respuestaEventos.json();
+
+                if (respuestaEventos.ok && resultadoEventos.exito) {
+                    const eventosFuturos = (resultadoEventos.data || [])
+                        .filter((evento) => evento.estado !== "cancelado" && evento.fecha)
+                        .filter((evento) => new Date(`${evento.fecha}T${evento.horaInicio || "00:00"}`) >= ahora)
+                        .sort((a, b) => new Date(`${a.fecha}T${a.horaInicio || "00:00"}`) - new Date(`${b.fecha}T${b.horaInicio || "00:00"}`));
+                    setProximoEvento(eventosFuturos[0] || null);
+                }
+
+                if (respuestaNoticias.exito) {
+                    setUltimasNoticias((respuestaNoticias.data || []).slice(0, 3));
+                }
+            } catch (error) {
+                console.error("No se pudo cargar el resumen del socio:", error);
+            }
+        };
+
+        cargarResumen();
     }, []);
 
     const nombreEmpresa = usuario.razonSocial || "Tu empresa";
@@ -267,21 +295,21 @@ export default function Socios() {
                             <section className="border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
                                 <div className="mb-4 flex items-center justify-between">
                                     <h2 className="text-lg font-medium uppercase text-gray-600">Próximo evento</h2>
-                                    <button className="flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">Ver todos <FaArrowRight /></button>
+                                    <button onClick={() => cambiarSeccion("Eventos")} className="flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">Ver todos <FaArrowRight /></button>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="rounded-lg bg-[#168bc4] px-3 py-2 text-center font-bold text-white"><span className="block text-xs">SEP</span><span className="text-xl">02</span></div>
-                                    <div><h3 className="font-bold">Educación Financiera</h3><p className="text-sm text-gray-600">◉ Sede CAPYMEF</p><p className="text-sm text-gray-600">♟ 20 Cupos disponibles</p></div>
-                                </div>
+                                {proximoEvento ? <div className="flex items-center gap-4">
+                                    <div className="rounded-lg bg-[#168bc4] px-3 py-2 text-center font-bold text-white"><span className="block text-xs">{new Date(`${proximoEvento.fecha}T00:00:00`).toLocaleDateString("es-AR", { month: "short" }).replace(".", "").toUpperCase()}</span><span className="text-xl">{new Date(`${proximoEvento.fecha}T00:00:00`).getDate()}</span></div>
+                                    <div><h3 className="font-bold">{proximoEvento.titulo}</h3><p className="text-sm text-gray-600">◉ {proximoEvento.lugar || proximoEvento.modalidad || "Lugar a confirmar"}</p><p className="text-sm text-gray-600">♟ {proximoEvento.cupoMaximo ? `${proximoEvento.cupoMaximo} cupos disponibles` : "Cupo abierto"}</p></div>
+                                </div> : <p className="text-sm text-gray-600">No hay próximos eventos publicados.</p>}
                             </section>
                         </div>
 
                         <section className="border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
                             <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3"><h2 className="text-lg font-medium uppercase text-gray-600">Novedades</h2><FaChartLine className="text-[#1D7BB6]" /></div>
                             <div className="divide-y divide-gray-200">
-                                {novedades.map((novedad) => <article key={novedad.fecha} className="py-3 first:pt-0"><p className="mb-1 text-sm font-medium">{novedad.fecha}</p><p className="text-sm leading-snug text-gray-800">{novedad.texto}</p></article>)}
+                                {ultimasNoticias.length ? ultimasNoticias.map((noticia) => <article key={noticia.id} className="py-3 first:pt-0"><p className="mb-1 text-sm font-medium">{new Date(noticia.fechaPublicacion).toLocaleDateString("es-AR")}</p><p className="text-sm leading-snug text-gray-800">{noticia.titulo}</p></article>) : <p className="py-3 text-sm text-gray-600">No hay noticias publicadas.</p>}
                             </div>
-                            <button className="mt-5 flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">Ver todas las noticias <FaChevronRight /></button>
+                            <button onClick={() => cambiarSeccion("Noticias")} className="mt-5 flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">Ver todas las noticias <FaChevronRight /></button>
                         </section>
                     </div>
                     )}

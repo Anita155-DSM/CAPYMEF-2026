@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, Modal } from "../../Components";
-import { obtenerNoticiasPublicas } from "../../services/noticiasService";
+import { obtenerNoticiasSocios } from "../../services/noticiasService";
 
 export default function NoticiasSocio() {
     const [noticias, setNoticias] = useState([]);
@@ -11,7 +11,7 @@ export default function NoticiasSocio() {
     useEffect(() => {
         const cargarNoticias = async () => {
             try {
-                const resultado = await obtenerNoticiasPublicas();
+                const resultado = await obtenerNoticiasSocios();
                 if (!resultado.exito) throw new Error(resultado.mensaje || "No se pudieron cargar las noticias");
                 setNoticias(Array.isArray(resultado.data) ? resultado.data : []);
             } catch (errorCarga) {
