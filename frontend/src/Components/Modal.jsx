@@ -1,6 +1,25 @@
 
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+
 export default function Modal({ noticia, onClose }) {
+  useEffect(() => {
+    if (!noticia) return undefined;
+
+    const overflowOriginal = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = overflowOriginal;
+    };
+  }, [noticia]);
+
   if (!noticia) return null
+  const obtenerImagenSrc = () => {
+    if (!noticia.imagenUrl) return null;
+    if (noticia.imagenUrl.startsWith("https://")) return noticia.imagenUrl;
+    return `${import.meta.env.VITE_API_URL_UPLOADS}/${noticia.imagenUrl}`;
+  };
   {/*Funcion para poder cerrar el modal si presionas fuera de el */ }
   const handleClose = (e) => {
     if (e.target.id === "fondo-modal") {
@@ -8,7 +27,7 @@ export default function Modal({ noticia, onClose }) {
     }
   };
 
-  return (
+  return createPortal(
     <div id="fondo-modal" onClick={handleClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all cursor-pointer">
 
       {/* Contenedor principal del modal */}
@@ -28,7 +47,7 @@ export default function Modal({ noticia, onClose }) {
           {/* Imagen completa */}
           {noticia.imagenUrl && (
             <img
-              src={`${import.meta.env.VITE_API_URL_UPLOADS}/${noticia.imagenUrl}`}
+              src={obtenerImagenSrc()}
               alt={noticia.titulo}
               className="w-full h-64 md:h-80 object-cover rounded-lg mb-6 shadow-sm"
             />
@@ -57,6 +76,7 @@ export default function Modal({ noticia, onClose }) {
 
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

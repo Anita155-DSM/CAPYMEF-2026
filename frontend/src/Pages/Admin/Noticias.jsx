@@ -2,7 +2,7 @@ import { FaSearch, FaPlus, FaArrowLeft } from "react-icons/fa";
 
 import Loading from "../../Components/Loading";
 import { Card } from "../../Components";
-import ModalAdmin from "./Components/Modals/ModalAdmin.jsx"; // <-- Importamos nuestro modal exclusivo de admin
+import ModalAdmin from "./Components/ModalAdmin"; // <-- Importamos nuestro modal exclusivo de admin
 import { useNoticiasLogic } from "./Hooks/useNoticiasLogic.js";
 import { useState } from "react";
 
@@ -76,8 +76,8 @@ export default function NoticiasAdmin() {
 
                   <span
                     className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider shadow-sm ${noticia.estado === 'publicado'
-                      ? 'bg-[#00B859] text-white'
-                      : 'bg-[#FFC107] text-[#132A46]'
+                        ? 'bg-[#00B859] text-white'
+                        : 'bg-[#FFC107] text-[#132A46]'
                       }`}
                   >
                     {noticia.estado === 'publicado' ? 'Visible' : 'Oculto'}
