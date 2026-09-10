@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaRegSave, FaUserSlash } from "react-icons/fa";
 import { toast } from "sonner";
-import { actualizarDatosSocio } from "../../../services/adminServices.js"; 
+import { actualizarDatosSocio } from "../../../../services/adminServices.js"; 
 
 export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
     if (!socio) return null;

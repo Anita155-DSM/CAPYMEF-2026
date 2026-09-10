@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaRegSave, FaRegTrashAlt, FaExclamationTriangle } from "react-icons/fa";
-import { actualizarNoticia, eliminarNoticia } from "../../../services/noticiasService.js";
-import Logo from "../../../assets/img/logo.png";
+import { actualizarNoticia, eliminarNoticia } from "../../../../services/noticiasService.js";
+import Logo from "../../../../assets/img/logo.png";
 import { toast } from "sonner";
 
 export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
@@ -76,7 +76,7 @@ export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
         </div>
 
         {ui.confirmando ? (
-          <div className="p-8 flex flex-col items-center text-center flex-grow gap-4">
+          <div className="p-8 flex flex-col items-center text-center grow gap-4">
             <FaExclamationTriangle className="text-red-500 text-5xl mb-2" />
             <h3 className="text-xl font-bold text-[#132A46]">¿Ocultar esta noticia?</h3>
             <p className="text-gray-500">Pasará a estado borrador (baja lógica).</p>
@@ -86,18 +86,18 @@ export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex flex-col gap-4 flex-grow">
+          <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex flex-col gap-4 grow">
             <div className="flex flex-col gap-2">
               <label className="font-bold text-gray-700 text-sm">Imagen de portada</label>
               <div className="flex items-center gap-4">
-                {imagen.preview ? <img src={imagen.preview} className="w-32 h-24 object-cover rounded-lg border shadow-sm" /> : <div className="w-32 h-24 bg-gradient-to-tr from-[#132A46] to-[#1D7BB6] flex items-center justify-center rounded-lg"><img src={Logo} className="h-10 opacity-30" /></div>}
+                {imagen.preview ? <img src={imagen.preview} className="w-32 h-24 object-cover rounded-lg border shadow-sm" /> : <div className="w-32 h-24 bg-gradient-to from-[#132A46] to-[#1D7BB6] flex items-center justify-center rounded-lg"><img src={Logo} className="h-10 opacity-30" /></div>}
                 <input type="file" accept="image/*" onChange={handleImagen} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#1D7BB6] file:text-white cursor-pointer" />
               </div>
             </div>
 
             <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Título *</label><input type="text" name="titulo" value={form.titulo} onChange={handleChange} required className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm" /></div>
             <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Subtítulo</label><textarea rows="2" name="subtitulo" value={form.subtitulo} onChange={handleChange} className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm resize-none" /></div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Visibilidad *</label><select name="visibilidad" value={form.visibilidad} onChange={handleChange} className="p-2.5 border rounded-md text-sm"><option value="todos">Todos</option><option value="publico">Solo Público</option><option value="socios">Solo Socios</option></select></div>
               <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Estado *</label><select name="estado" value={form.estado} onChange={handleChange} className="p-2.5 border rounded-md text-sm"><option value="publicado">Publicado</option><option value="borrador">Borrador</option></select></div>
