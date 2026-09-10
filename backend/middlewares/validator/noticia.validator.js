@@ -37,3 +37,30 @@ export const validacionNoticia = [
 
   validarResultado
 ];
+
+export const validacionActualizarNoticia = [
+  body('titulo')
+    .optional()
+    .trim()
+    .isLength({ min: 5, max: 200 }).withMessage('El título debe tener entre 5 y 200 caracteres.'),
+
+  body('subtitulo')
+    .optional()
+    .trim()
+    .isLength({ max: 300 }).withMessage('El subtítulo no puede superar los 300 caracteres.'),
+
+  body('contenido')
+    .optional()
+    .trim()
+    .notEmpty().withMessage('El contenido no puede quedar vacío.'),
+
+  body('visibilidad')
+    .optional()
+    .isIn(['publico', 'socios', 'todos']).withMessage('La visibilidad debe ser "publico", "socios" o "todos".'),
+
+  body('estado')
+    .optional()
+    .isIn(['borrador', 'publicado']).withMessage('El estado debe ser "borrador" o "publicado".'),
+
+  validarResultado
+];

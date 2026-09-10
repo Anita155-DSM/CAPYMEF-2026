@@ -45,7 +45,7 @@ export default function Login() {
           if (result.usuario.rol === "admin") {
             navigate("/admin/inicio"); 
           } else {
-            navigate("/"); // Ruta normal para los socios
+            navigate("/socios"); // Ruta normal para los socios
           }
         }, 1000);
 

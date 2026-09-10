@@ -17,8 +17,8 @@ import {
   Contacto,
   Eventos,
   Nosotros,
-  Socios,
 } from "../Pages/HomePage/index.js";
+import Socios from "../Pages/Socios/Inicio.jsx";
 import Profile from "../Pages/Profile";
 import { Autoridades, Balance, Estatuto, Noticias } from "../Pages/PublicPages/index.js";
 import AdminRoutes from "./AdminRoutes.jsx";
