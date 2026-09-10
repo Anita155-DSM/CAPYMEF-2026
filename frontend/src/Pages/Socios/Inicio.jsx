@@ -27,6 +27,7 @@ import { Link } from "react-router-dom";
 import logo from "../../assets/img/Logo.png";
 import { obtenerPerfil } from "../../services/authServices";
 import EventosSocio from "./EventosSocio";
+import NoticiasSocio from "./NoticiasSocio";
 
 function App() {
     return (
@@ -158,7 +159,7 @@ export default function Socios() {
                 </header>
 
                 <main className="mx-auto max-w-[1400px] p-5 sm:p-8">
-                    {seccionActiva !== "Mi empresa" && seccionActiva !== "Eventos" && <section className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    {seccionActiva !== "Mi empresa" && seccionActiva !== "Eventos" && seccionActiva !== "Noticias" && <section className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                         <div>
                             <p className="mb-1 text-sm font-semibold text-[#1D7BB6]">PANEL DE SOCIO</p>
                             <h1 className="text-2xl font-bold uppercase tracking-tight text-[#132A46] sm:text-3xl">Hola, {nombreEmpresa}</h1>
@@ -167,7 +168,7 @@ export default function Socios() {
                         <span className="w-fit rounded-sm bg-[#00bf68] px-4 py-2 text-sm font-bold text-white">Estás al día!</span>
                     </section>}
 
-                    {seccionActiva !== "Mi empresa" && seccionActiva !== "Eventos" && <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+                    {seccionActiva !== "Mi empresa" && seccionActiva !== "Eventos" && seccionActiva !== "Noticias" && <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
                         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
                             <div>
                                 <p className="text-sm font-medium uppercase text-gray-600">Cuota de septiembre de 2026</p>
@@ -185,6 +186,8 @@ export default function Socios() {
 
                     {seccionActiva === "Eventos" ? (
                         <EventosSocio />
+                    ) : seccionActiva === "Noticias" ? (
+                        <NoticiasSocio />
                     ) : seccionActiva === "Mi empresa" ? (
                         <section className="min-h-[calc(100vh-9rem)] bg-[#edf7fd] px-1 py-2 sm:px-3 sm:py-5">
                             <div className="mb-3 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">

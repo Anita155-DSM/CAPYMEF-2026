@@ -39,7 +39,7 @@ export default function Home() {
       <header>
         {token ? <Navbar /> : <NavbarPublico />}
       </header>
-      <main className="w-full overflow-x-hidden overflow-y-hidden">
+      <main className="w-full overflow-x-hidden">
         {/*La Vista N1 */}
         <section className="w-full font-sans">
           <div
