@@ -4,6 +4,7 @@ import { User } from '../models/user.models.js';
 import { Pago } from '../models/pago.models.js';
 import { generarComprobantePago } from '../services/comprobante.service.js';
 import { enviarMailComprobantePago } from '../config/mailer.js';
+import { subirPDFCloudinary } from '../services/cloudinary.service.js';
 
 // ==========================================
 // 1. EJECUCIÓN MANUAL (Para Pruebas y Admin)
@@ -104,9 +105,11 @@ export const registrarPagoManual = async (req, res) => {
     cuota.estado = 'pagada';
     await cuota.save();
 
-    // 3. Generamos el comprobante en PDF y lo mandamos por mail.
-    // No bloqueamos la respuesta al admin si el mail falla — el pago ya quedó
-    // impactado en la base, que es lo importante; el mail es un plus.
+
+    // 3. Generamos el comprobante en PDF, lo mandamos por mail y lo subimos a
+    // Cloudinary para dejarlo guardado como snapshot histórico del pago.
+    // Cada paso es independiente: si uno falla, no bloquea a los demás ni la
+    // respuesta al admin — el pago ya quedó impactado, que es lo importante.
     try {
       const pdfBuffer = await generarComprobantePago({
         socio: cuota.socio,
@@ -114,13 +117,28 @@ export const registrarPagoManual = async (req, res) => {
         pago: nuevoPago,
       });
 
-      await enviarMailComprobantePago(
-        cuota.socio.email,
-        { razonSocial: cuota.socio.razonSocial, mesAnio: cuota.mes_anio, monto: nuevoPago.montoAbonado },
-        pdfBuffer
-      );
+      try {
+        await enviarMailComprobantePago(
+          cuota.socio.email,
+          { razonSocial: cuota.socio.razonSocial, mesAnio: cuota.mes_anio, monto: nuevoPago.montoAbonado },
+          pdfBuffer
+        );
+      } catch (errorMail) {
+        console.error('Error al enviar el mail de comprobante:', errorMail.message);
+      }
+
+      try {
+        const resultadoCloudinary = await subirPDFCloudinary(pdfBuffer, {
+          folder: 'capymef_comprobantes_pago',
+          public_id: `comprobante-${nuevoPago.id}`,
+        });
+        nuevoPago.urlComprobante = resultadoCloudinary.secure_url;
+        await nuevoPago.save();
+      } catch (errorCloudinary) {
+        console.error('Error al subir el comprobante a Cloudinary:', errorCloudinary.message);
+      }
     } catch (errorComprobante) {
-      console.error('Error al generar/enviar el comprobante de pago:', errorComprobante.message);
+      console.error('Error al generar el comprobante de pago:', errorComprobante.message);
     }
 
     //auditoria
@@ -168,7 +186,7 @@ export const obtenerResumenFinanciero = async (req, res) => {
 // ==========================================
 export const descargarComprobante = async (req, res) => {
   try {
-    const { id } = req.params; // ID de la Cuota
+    const { id } = req.params;
 
     const cuota = await Cuota.findByPk(id, {
       include: [
@@ -185,6 +203,14 @@ export const descargarComprobante = async (req, res) => {
       return res.status(400).json({ exito: false, mensaje: 'Esta cuota todavía no tiene un pago registrado.' });
     }
 
+    // Si ya tenemos el comprobante guardado en Cloudinary, redirigimos directo:
+    // es un snapshot fiel del momento del pago, y más rápido que regenerarlo.
+    if (cuota.pago.urlComprobante) {
+      return res.redirect(cuota.pago.urlComprobante);
+    }
+
+    // Fallback: pagos registrados ANTES de este cambio no tienen la URL guardada.
+    // Para esos, seguimos regenerando el PDF al vuelo como antes.
     const pdfBuffer = await generarComprobantePago({
       socio: cuota.socio,
       cuota: { mes_anio: cuota.mes_anio },

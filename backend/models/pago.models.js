@@ -30,6 +30,10 @@ export const Pago = sequelize.define('Pago', {
   observaciones: {
     type: DataTypes.STRING(255),
     allowNull: true,
+  },
+  urlComprobante: {
+    type: DataTypes.STRING,
+    allowNull: true, // Se completa después de generar y subir el PDF a Cloudinary
   }
 }, {
   timestamps: true,
