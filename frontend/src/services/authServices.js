@@ -67,6 +67,18 @@ export const restablecerPassword = async (token, password) => {
   }
 };
 
+export const obtenerPerfil = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/perfil`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return await response.json();
+};
+
 export const cerrarSesion = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("usuario");

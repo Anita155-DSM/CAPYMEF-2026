@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     FaArrowRight,
     FaBell,
     FaBuilding,
+    FaChartBar,
     FaCalendarCheck,
     FaChartLine,
     FaChevronRight,
@@ -11,6 +12,12 @@ import {
     FaDownload,
     FaGear,
     FaHouse,
+    FaIdCard,
+    FaLocationDot,
+    FaPhone,
+    FaEnvelope,
+    FaUsers,
+    FaGears,
     FaMoneyBillWave,
     FaNewspaper,
     FaBars,
@@ -18,9 +25,14 @@ import {
 } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import logo from "../../assets/img/Logo.png";
+import { obtenerPerfil } from "../../services/authServices";
 
 function App() {
-  return <img src={logo} alt="Logo" />;
+    return (
+        <div className="flex h-full w-full items-center justify-start overflow-hidden">
+            <img src={logo} alt="CAPYMEF" className="max-h-16 w-30 object-contain" />
+        </div>
+    );
 }   
 
 const movimientos = [
@@ -38,10 +50,36 @@ const novedades = [
 export default function Socios() {
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [seccionActiva, setSeccionActiva] = useState("Inicio");
-    const usuarioGuardado = localStorage.getItem("usuario");
-    const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : {};
+    const [solicitudAbierta, setSolicitudAbierta] = useState(null);
+    const [detalleSolicitud, setDetalleSolicitud] = useState("");
+    const [solicitudEnviada, setSolicitudEnviada] = useState(false);
+    const [usuario, setUsuario] = useState(() => {
+        const usuarioGuardado = localStorage.getItem("usuario");
+        return usuarioGuardado ? JSON.parse(usuarioGuardado) : {};
+    });
+
+    useEffect(() => {
+        const cargarPerfil = async () => {
+            try {
+                const resultado = await obtenerPerfil();
+                if (resultado.exito) {
+                    setUsuario(resultado.data);
+                    localStorage.setItem("usuario", JSON.stringify(resultado.data));
+                }
+            } catch (error) {
+                console.error("No se pudo cargar el perfil del socio:", error);
+            }
+        };
+
+        cargarPerfil();
+    }, []);
+
     const nombreEmpresa = usuario.razonSocial || "Tu empresa";
-    const categoria = usuario.categoria || "Socio activo";
+    const categoria = usuario.categoria ? usuario.categoria.replace(/^./, (letra) => letra.toUpperCase()) : "Socio";
+    const rubro = usuario.rubro || "Rubro no informado";
+    const localidad = usuario.localidad || "Localidad no informada";
+    const actividad = usuario.actividad || "Actividad no informada";
+    const tamanoEmpresa = usuario.tamano_empresa === "Pequena" ? "Pequeña" : (usuario.tamano_empresa || "Tamaño no informado");
 
     const menu = [
         { nombre: "Inicio", icono: FaHouse },
@@ -56,10 +94,29 @@ export default function Socios() {
         setMenuAbierto(false);
     };
 
+    const abrirSolicitud = (tipo) => {
+        setSolicitudAbierta(tipo);
+        setDetalleSolicitud("");
+        setSolicitudEnviada(false);
+    };
+
+    const cerrarSolicitud = () => {
+        setSolicitudAbierta(null);
+        setDetalleSolicitud("");
+        setSolicitudEnviada(false);
+    };
+
+    const enviarSolicitud = (evento) => {
+        evento.preventDefault();
+        if (detalleSolicitud.trim()) {
+            setSolicitudEnviada(true);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#eef6fb] text-[#132A46] font-sans">
             <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1b527d] text-white transition-transform duration-300 lg:translate-x-0 ${menuAbierto ? "translate-x-0" : "-translate-x-full"}`}>
-                <div className="flex h-20 items-center justify-between border-b border-white/10 px-6">
+                <div className="flex h-20 items-center justify-between border-b border-white/10 px-3">
                     <App />
                     <button className="lg:hidden text-2xl" onClick={() => setMenuAbierto(false)} aria-label="Cerrar menú">
                         <FaXmark />
@@ -100,16 +157,16 @@ export default function Socios() {
                 </header>
 
                 <main className="mx-auto max-w-[1400px] p-5 sm:p-8">
-                    <section className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    {seccionActiva !== "Mi empresa" && <section className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                         <div>
                             <p className="mb-1 text-sm font-semibold text-[#1D7BB6]">PANEL DE SOCIO</p>
                             <h1 className="text-2xl font-bold uppercase tracking-tight text-[#132A46] sm:text-3xl">Hola, {nombreEmpresa}</h1>
-                            <p className="mt-2 text-sm text-gray-600">Socio N° 0042 <span className="mx-2">•</span> Servicios gráficos <span className="mx-2">•</span> Formosa Capital</p>
+                            <p className="mt-2 text-sm text-gray-600">Socio N° {usuario.id || "-"} <span className="mx-2">•</span> {rubro} <span className="mx-2">•</span> {localidad}</p>
                         </div>
                         <span className="w-fit rounded-sm bg-[#00bf68] px-4 py-2 text-sm font-bold text-white">Estás al día!</span>
-                    </section>
+                    </section>}
 
-                    <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+                    {seccionActiva !== "Mi empresa" && <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
                         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
                             <div>
                                 <p className="text-sm font-medium uppercase text-gray-600">Cuota de septiembre de 2026</p>
@@ -121,8 +178,69 @@ export default function Socios() {
                                 <button className="inline-flex items-center gap-2 bg-[#2693bf] px-4 py-2 text-sm font-bold text-white hover:bg-[#1b789f]">Pagar cuota <FaCreditCard /></button>
                             </div>
                         </div>
-                    </section>
+                    </section>}
 
+     {/*ACA ESTA LA SECCION DE MI EMPRESA */}               
+
+                    {seccionActiva === "Mi empresa" ? (
+                        <section className="min-h-[calc(100vh-9rem)] bg-[#edf7fd] px-1 py-2 sm:px-3 sm:py-5">
+                            <div className="mb-3 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                                <div>
+                                    <h1 className="text-2xl font-normal uppercase text-[#073d6f] sm:text-[25px]">Mi empresa</h1>
+                                    <p className="text-sm text-[#6b7884]">Ficha de {nombreEmpresa}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid items-start gap-9 lg:grid-cols-[minmax(0,1.15fr)_minmax(400px,1fr)]">
+                                <div className="rounded-[25px] border border-[#d9d9d9] bg-white px-3 py-5 sm:px-4 sm:py-5">
+                                    <div className="mb-2 flex items-center justify-between gap-3">
+                                        <h2 className="text-lg font-bold uppercase text-[#34414c]">Datos institucionales</h2>
+                                        <button type="button" onClick={() => abrirSolicitud("Datos institucionales")} className="border border-[#d7e0e5] bg-[#f4f9fc] px-2 py-2 text-sm text-[#17384f] hover:bg-[#e7f2f8]">Solicitar modificación</button>
+                                    </div>
+                                    <div className="space-y-0">
+                                        {[
+                                            [FaBuilding, "Empresa", usuario.razonSocial],
+                                            [FaIdCard, "CUIT", usuario.cuit],
+                                            [FaUsers, "Categoría", categoria],
+                                            [FaGears, "Rubro", rubro],
+                                            [FaChartLine, "Actividad", actividad],
+                                            [FaChartBar, "Tamaño de la empresa", tamanoEmpresa],
+                                            [FaLocationDot, "Localidad", localidad],
+                                        ].map(([Icono, etiqueta, valor]) => (
+                                            <div key={etiqueta} className="grid grid-cols-[30px_1fr] items-end border-b border-[#d8d8d8] py-2 last:border-0">
+                                                <Icono className="mb-0.5 text-lg text-[#006ab4]" />
+                                                <div>
+                                                    <p className="text-base uppercase text-[#66727d]">{etiqueta}</p>
+                                                    <p className="text-base text-[#3a4147]">{valor || "No informado"}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="border border-[#e0e0e0] bg-white px-3 py-5 sm:px-3">
+                                    <div className="mb-2 flex items-center justify-between gap-3">
+                                        <h2 className="text-lg font-bold uppercase text-[#34414c]">Contacto</h2>
+                                        <button type="button" onClick={() => abrirSolicitud("Contacto")} className="border border-[#d7e0e5] bg-[#f4f9fc] px-2 py-2 text-sm text-[#17384f] hover:bg-[#e7f2f8]">Solicitar modificación</button>
+                                    </div>
+                                    <div>
+                                        {[
+                                            [FaPhone, "Teléfono", usuario.telefono],
+                                            [FaEnvelope, "Correo electrónico", usuario.email],
+                                        ].map(([Icono, etiqueta, valor]) => (
+                                            <div key={etiqueta} className="grid grid-cols-[30px_1fr] items-end border-b border-[#d8d8d8] py-2 last:border-0">
+                                                <Icono className="mb-0.5 text-base text-[#006ab4]" />
+                                                <div>
+                                                    <p className="text-base uppercase text-[#66727d]">{etiqueta}</p>
+                                                    <p className="text-base text-[#3a4147]">{valor || "No informado"}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    ) : (
                     <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
                         <div className="space-y-6">
                             <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
@@ -160,8 +278,39 @@ export default function Socios() {
                             <button className="mt-5 flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">Ver todas las noticias <FaChevronRight /></button>
                         </section>
                     </div>
+                    )}
                 </main>
             </div>
+
+            {solicitudAbierta && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#132A46]/50 px-4" onMouseDown={(evento) => evento.target === evento.currentTarget && cerrarSolicitud()}>
+                    <div className="w-full max-w-lg border border-[#d7e0e5] bg-white p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="titulo-solicitud">
+                        {solicitudEnviada ? (
+                            <div className="text-center">
+                                <h2 id="titulo-solicitud" className="text-xl font-bold text-[#132A46]">Solicitud registrada</h2>
+                                <p className="mt-3 text-sm text-gray-600">Tu pedido de modificación de {solicitudAbierta.toLowerCase()} quedó preparado para ser revisado por CAPYMEF.</p>
+                                <button type="button" onClick={cerrarSolicitud} className="mt-6 bg-[#1b527d] px-5 py-2 text-sm font-bold text-white hover:bg-[#164568]">Cerrar</button>
+                            </div>
+                        ) : (
+                            <form onSubmit={enviarSolicitud}>
+                                <div className="flex items-start justify-between gap-4">
+                                    <div>
+                                        <p className="text-xs font-semibold uppercase text-[#1D7BB6]">Mi empresa</p>
+                                        <h2 id="titulo-solicitud" className="mt-1 text-xl font-bold text-[#132A46]">Modificar {solicitudAbierta.toLowerCase()}</h2>
+                                    </div>
+                                    <button type="button" onClick={cerrarSolicitud} className="text-2xl leading-none text-gray-500 hover:text-[#132A46]" aria-label="Cerrar">&times;</button>
+                                </div>
+                                <p className="mt-4 text-sm text-gray-600">Contanos qué dato necesitás corregir y cuál debería ser el valor correcto.</p>
+                                <textarea value={detalleSolicitud} onChange={(evento) => setDetalleSolicitud(evento.target.value)} required rows="5" placeholder="Ej.: Solicito actualizar el teléfono a..." className="mt-4 w-full resize-none border border-[#cfdbe3] p-3 text-sm text-[#132A46] outline-none focus:border-[#1D7BB6]" />
+                                <div className="mt-5 flex justify-end gap-3">
+                                    <button type="button" onClick={cerrarSolicitud} className="border border-[#d7e0e5] px-4 py-2 text-sm text-[#17384f] hover:bg-[#f4f9fc]">Cancelar</button>
+                                    <button type="submit" className="bg-[#1b527d] px-4 py-2 text-sm font-bold text-white hover:bg-[#164568]">Enviar solicitud</button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
