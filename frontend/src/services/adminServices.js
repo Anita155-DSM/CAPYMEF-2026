@@ -81,15 +81,24 @@ export const crearNuevoEvento = async (formData) => {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`
-                // NO ponemos Content-Type acá, fetch lo calcula solo por el FormData
             },
             body: formData
         });
 
-        return await response.json();
+        // 1. Leemos la respuesta como texto bruto primero
+        const textResponse = await response.text();
+
+        try {
+            // 2. Intentamos parsearlo a JSON
+            return JSON.parse(textResponse);
+        } catch (parseError) {
+            // 3. Si falla, es porque el backend devolvió HTML o texto (Error del servidor)
+            console.error("Error por parte del servidor.");
+            return { exito: false, mensaje: "Error del servidor" };
+        }
     } catch (error) {
-        console.error("Error al crear evento:", error);
-        return { exito: false, mensaje: "Error de conexión con el servidor al crear" };
+        console.error("Error de conexión al crear evento:", error);
+        return { exito: false, mensaje: "Error de conexión con el servidor" };
     }
 };
 
@@ -99,7 +108,9 @@ export const crearNuevoEvento = async (formData) => {
 export const obtenerTodosLosEventos = async () => {
     try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`${API_URL_EVENTOS}/socios`, {
+        
+        // Cambiamos /admin por /socios
+        const response = await fetch(`${API_URL_EVENTOS}/socios`, { 
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
