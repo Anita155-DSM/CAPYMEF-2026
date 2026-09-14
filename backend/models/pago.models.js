@@ -34,6 +34,16 @@ export const Pago = sequelize.define('Pago', {
   urlComprobante: {
     type: DataTypes.STRING,
     allowNull: true, // Se completa después de generar y subir el PDF a Cloudinary
+  },
+  origenPago: {
+    type: DataTypes.ENUM('manual', 'pasarela'),
+    allowNull: false,
+    defaultValue: 'manual',
+  },
+  idTransaccionExterna: {  // ID que da la pasarela (Mercado Pago hoy) a esa transacción puntual.
+    // Sirve para 2 cosas: (1) evitar procesar el mismo pago dos veces si el webhook llega duplicado (algo que las pasarelas hacen a propósito, por seguridad), y (2) tener trazabilidad hacia la transacción real del lado de Mercado Pago.
+    type: DataTypes.STRING,
+    allowNull: true,
   }
 }, {
   timestamps: true,
