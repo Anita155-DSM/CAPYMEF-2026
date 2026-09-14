@@ -3,7 +3,7 @@ import { Auditoria } from '../models/auditoria.models.js';
 export const interceptorAuditoria = (req, res, next) => {
   // Solo interceptamos operaciones que modifican datos (POST, PUT, DELETE)
   if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
-    
+
     // Escuchamos el evento cuando la respuesta termina de enviarse al usuario
     res.on('finish', async () => {
       // Solo guardamos si la respuesta del controlador fue exitosa (código 200 al 299)
@@ -23,9 +23,9 @@ export const interceptorAuditoria = (req, res, next) => {
 
           // 4. Guardar en PostgreSQL
           await Auditoria.create({
-            usuarioId: req.user?.id || null,
-            usuarioNombre: req.user ? `${req.user.nombre || req.user.razonSocial || 'Usuario'}` : 'Sistema',
-            usuarioRol: req.user?.rol || req.user?.categoria || 'ADMIN',
+            usuarioId: req.usuario?.id || null,
+            usuarioNombre: req.usuario ? `${req.usuario.razonSocial || req.usuario.email || 'Usuario'}` : 'Sistema',
+            usuarioRol: req.usuario?.rol || req.usuario?.categoria || 'ADMIN',
             modulo,
             accionTipo,
             codigoTecnico,

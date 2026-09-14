@@ -25,6 +25,7 @@ import adminRoutes from './routes/admin.routes.js';
 import gastoRoutes from './routes/gasto.routes.js'
 import cuotaRoutes from './routes/cuota.routes.js'
 import eventoRoutes from './routes/evento.routes.js'
+import pagoRoutes from './routes/pago.routes.js';
 import { iniciarCronJobs } from './config/cron.js';//automatizados de cuotas
 
 
@@ -91,6 +92,7 @@ app.use('/api/noticias', noticiaRoutes);
 app.use('/api/cuotas', cuotaRoutes) //pago de cuptas
 app.use('/api/gastos', gastoRoutes)
 app.use('/api/eventos', eventoRoutes)
+app.use('/api/pagos', pagoRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
