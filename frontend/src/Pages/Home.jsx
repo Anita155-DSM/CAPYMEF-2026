@@ -7,7 +7,36 @@ import { obtenerNoticiasPublicas } from "../services/noticiasService.js";
 //asdad
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
+  const [imagenActiva, setImagenActiva] = useState(0);
+  const [opacidadImagen, setOpacidadImagen] = useState(1);
   const token = localStorage.getItem("token")
+  const imagenesHero = [
+    fondoHome,
+    "/dist/assets/image.webp",
+    "/dist/assets/image (3).webp",
+    "/dist/assets/image (4).webp",
+    "/dist/assets/image (5).webp",
+  ];
+  const posicionesHero = [
+    "center 56px",
+    "center center",
+    "center center",
+    "center center",
+    "center center",
+  ];
+
+  useEffect(() => {
+    const intervalo = window.setInterval(() => {
+      setOpacidadImagen(0);
+
+      window.setTimeout(() => {
+        setImagenActiva((imagenActual) => (imagenActual + 1) % imagenesHero.length);
+        setOpacidadImagen(1);
+      }, 700);
+    }, 5700);
+
+    return () => window.clearInterval(intervalo);
+  }, [imagenesHero.length]);
 
   // 1. ESTADOS PARA LAS NOTICIAS
   const [noticias, setNoticias] = useState([]);
@@ -43,15 +72,18 @@ export default function Home() {
         {/*La Vista N1 */}
         <section className="w-full font-sans">
           <div
-            className="min-h-screen w-full bg-cover bg-no-repeat justify-center items-start flex flex-col"
-            style={{
-              backgroundImage: `url(${fondoHome})`,
-              backgroundPosition: "center 56px",
-              backgroundColor: "#f3f3f3",
-            }}
+            className="relative flex min-h-screen w-full flex-col items-start justify-center overflow-hidden bg-[#f3f3f3]"
           >
+            <div
+              className="pointer-events-none absolute inset-0 bg-cover bg-no-repeat transition-opacity duration-700 ease-in-out"
+              style={{
+                backgroundImage: `url("${imagenesHero[imagenActiva]}")`,
+                backgroundPosition: posicionesHero[imagenActiva],
+                opacity: opacidadImagen,
+              }}
+            />
             {/* Contenedor del texto central */}
-            <div className="px-4 py-4 line-clamp-3">
+            <div className="relative z-10 px-4 py-4 line-clamp-3">
               <h1 className="text-3xl sm:text-4xl md:text-7xl text-white font-serif font-semibold px-1 sm:px-4 py-3 sm:py-4 inline-block leading-tight max-w-full">
                 Cámara de Pequeñas y Medianas Empresas de Formosa
               </h1>
@@ -63,7 +95,7 @@ export default function Home() {
             </div>
 
             {/* Boton que abre el MODAL */}
-            <div className="mt-5 ml-6">
+            <div className="relative z-10 mt-5 ml-6">
               <button
                 className="mt-8 bg-[#1D7BB6] hover:bg-[#156091] text-[18px] text-white font-black py-3 px-3 rounded-lg transition-colors shadow-lg"
                 onClick={() => setIsOpen(true)}
