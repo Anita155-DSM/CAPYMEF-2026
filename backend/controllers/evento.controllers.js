@@ -49,7 +49,8 @@ const parsearLogosExternos = (valor) => {
 export const obtenerEventosPublicos = async (req, res) => {
   try {
     const eventos = await Evento.findAll({
-      where: { estado: { [Op.ne]: 'cancelado' } },
+      paranoid:false,
+      // where: { estado: { [Op.ne]: 'cancelado' } },
       order: [['fecha', 'ASC']],
     });
 
