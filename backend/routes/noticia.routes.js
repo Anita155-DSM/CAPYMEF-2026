@@ -8,7 +8,7 @@ import {
   eliminarNoticia,
   obtenerTodasLasNoticiasAdmin
 } from '../controllers/noticia.controllers.js';
-import { verificarToken } from '../middlewares/authMiddleware.js';
+import { verificarToken, verificarTokenOpcional } from '../middlewares/authMiddleware.js';
 //import { uploadNoticia } from '../middlewares/multerNoticias.js';
 import { uploadNoticia } from '../middlewares/multer/multerNoticias.js';
 import { validacionNoticia, validacionActualizarNoticia } from '../middlewares/validator/noticia.validator.js';
@@ -33,6 +33,6 @@ router.delete('/admin/:id', verificarToken, verificarAdmin, eliminarNoticia);
 // ==========================================
 // 3. Rutas Dinámicas (Siempre al final)
 // ==========================================
-router.get('/:id', obtenerNoticiaPorId);
+router.get('/:id', verificarTokenOpcional, obtenerNoticiaPorId);
 
 export default router;

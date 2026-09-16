@@ -66,7 +66,8 @@ export const obtenerEventosPublicos = async (req, res) => {
 export const obtenerEventosSocios = async (req, res) => {
   try {
     const eventos = await Evento.findAll({
-      where: { estado: { [Op.ne]: 'cancelado' } },
+      paranoid:false,
+      // where: { estado: { [Op.ne]: 'cancelado' } },
       order: [['fecha', 'ASC']],
     });
 

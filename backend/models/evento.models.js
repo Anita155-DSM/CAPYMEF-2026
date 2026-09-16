@@ -52,7 +52,7 @@ export const Evento = sequelize.define('Evento', {
     defaultValue: [],
   },
   estado: {
-    type: DataTypes.ENUM('programado', 'finalizado', 'cancelado'),
+    type: DataTypes.ENUM('programado', 'finalizado', 'cancelado'), //agregamos un nuevo estado suspendido , 'suspendido'
     allowNull: false,
     defaultValue: 'programado',
   },
