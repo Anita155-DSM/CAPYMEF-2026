@@ -125,22 +125,20 @@ export default function EventosAdmin() {
 
                         let clasesColor = "text-[#132A46] bg-white border border-gray-200 hover:bg-gray-100";
 
-                        if (eventoDelDia) {
-                            if (eventoDelDia.estado === "cancelado") {
+                       if (eventoDelDia) {
+                            const estadoEvento = eventoDelDia.estado ? eventoDelDia.estado.toLowerCase().trim() : "";
+
+                            if (estadoEvento === "cancelado") {
                                 clasesColor = "bg-gray-400 text-white shadow-md";
                             } else if (esHoy) {
-                                clasesColor = "bg-green-500 text-white shadow-md";
-                            } else if (eventoDelDia.estado === "programado") {
+                                clasesColor = "bg-green-500 text-white shadow-md"; 
+                            } else if (estadoEvento === "programado") {
                                 clasesColor = "bg-yellow-400 text-white shadow-md";
-                            } else if (eventoDelDia.estado === "finalizado") {
+                            } else if (estadoEvento === "finalizado") {
                                 clasesColor = "bg-red-500 text-white shadow-md";
                             }
                         } else if (esHoy) {
                             clasesColor = "bg-[#1D7BB6] text-white shadow-md";
-                        }
-
-                        if (esSeleccionado) {
-                            clasesColor += " ring-4 ring-offset-2 ring-[#132A46]";
                         }
 
                         return (

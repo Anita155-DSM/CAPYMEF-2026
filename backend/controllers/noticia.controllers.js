@@ -76,13 +76,23 @@ export const obtenerNoticiaPorId = async (req, res) => {
       return res.status(404).json({ exito: false, mensaje: 'Noticia no encontrada.' });
     }
 
+    // Si hay un admin autenticado, mostramos la noticia tal cual (necesario para
+    // que el panel de administración pueda precargar/editar borradores).
+    const esAdmin = req.usuario?.rol === 'admin';
+
+    if (!esAdmin) {
+      // Visitante público o socio común: solo noticias publicadas y no exclusivas de socios.
+      if (noticia.estado !== 'publicado' || noticia.visibilidad === 'socios') {
+        return res.status(404).json({ exito: false, mensaje: 'Noticia no encontrada.' });
+      }
+    }
+
     res.status(200).json({ exito: true, data: noticia });
   } catch (error) {
     console.error('Error al obtener la noticia:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
 };
-
 // ==========================================
 // 5. CREAR NOTICIA (Admin)
 // ==========================================

@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { Readable } from 'stream';
 
 // ==========================================
 // Helpers compartidos para manejo de imágenes/archivos en Cloudinary
@@ -36,4 +37,25 @@ export const extraerPublicIdDeUrl = (url) => {
   const sinVersion = despuesDeUpload.replace(/^v\d+\//, '');
   const sinExtension = sinVersion.replace(/\.[^/.]+$/, '');
   return sinExtension;
+};
+
+/**
+ * Sube un PDF que ya está en memoria (Buffer) directo a Cloudinary, sin pasar por disco.
+ * Usado para comprobantes de pago, que se generan al vuelo con pdfkit.
+ *
+ * @param {Buffer} buffer - el PDF ya generado
+ * @param {Object} opciones - { folder, public_id }
+ * @returns {Promise<Object>} el resultado de Cloudinary (incluye .secure_url)
+ */
+export const subirPDFCloudinary = (buffer, { folder, public_id }) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder, public_id, resource_type: 'auto', format: 'pdf' },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    Readable.from(buffer).pipe(uploadStream);
+  });
 };
