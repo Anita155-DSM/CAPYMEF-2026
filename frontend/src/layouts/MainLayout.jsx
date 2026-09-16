@@ -18,6 +18,7 @@ const OPCIONES_MENU = [
   { nombre: "Finanzas", ruta: "/admin/finanzas", Icono: FaDollarSign },
   { nombre: "Registros", ruta: "/admin/registros", Icono: FaClipboardList },
   { nombre: "Socios", ruta: "/admin/socios", Icono: FaUserFriends },
+  { nombre: "VISTA SOCIO (TEST)", ruta: "/socios", Icono: FaUserFriends },
 ];
 
 export default function MainLayout() {
