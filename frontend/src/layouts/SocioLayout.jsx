@@ -60,12 +60,8 @@ export default function SocioLayout() {
       >
         <div className="flex h-20 items-center justify-between border-b border-white/10 px-3">
           <div className="flex justify-center ml-10">
-            <Link to="/">
-              <img
-                src="../src/assets/img/Logo.png"
-                alt="Logo CAPYMEF"
-                className="w-30 opacity-90 cursor-pointer hover:opacity-100 transition-opacity"
-              />
+            <Link to="/socios" aria-label="Ir al inicio del panel de socio">
+              <img src={logo} alt="Logo CAPYMEF" className="w-30 opacity-90" />
             </Link>
           </div>
           <button

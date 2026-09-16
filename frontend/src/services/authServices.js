@@ -83,5 +83,5 @@ export const cerrarSesion = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("usuario");
   // Redirigir al inicio
-  window.location.href = "/login";
+  window.location.href = "/";
 };

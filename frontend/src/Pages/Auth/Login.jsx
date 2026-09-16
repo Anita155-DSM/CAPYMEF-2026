@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { iniciarSesion } from "../../services/authServices";
 import { toast } from "sonner"; // 1. Importamos el toast de sonner
@@ -7,6 +8,18 @@ import Logo from "../../assets/img/Logo.png";
 export default function Login() {
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const usuarioString = localStorage.getItem("usuario");
+
+    if (!token || !usuarioString) return;
+
+    const usuario = JSON.parse(usuarioString);
+    navigate(usuario.rol === "admin" ? "/admin/inicio" : "/socios", {
+      replace: true,
+    });
+  }, [navigate]);
 
   // Ya no hace falta que handleLogin sea async, porque la asincronía ocurre adentro de la Promesa
   const handleLogin = (data) => {
