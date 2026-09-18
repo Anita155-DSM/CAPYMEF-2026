@@ -16,7 +16,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm font-sans border-b border-gray-200">
+    <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm font-sans border-b-4 border-[#1D7BB6]">
       <div className="flex items-center justify-between gap-2 px-3 sm:px-6 lg:px-8 py-2">
         <div className="flex-shrink-0">
           <Link to="/" aria-label="Ir al inicio">

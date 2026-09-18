@@ -1,6 +1,6 @@
 import Logo from "../assets/img/logo.png"
 
-export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, onLeerMas }) {
+export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, onLeerMas, className = "" }) {
   const obtenerImagenSrc = () => {
     if (!imagenUrl) return null;
     if (imagenUrl.startsWith("https://") || imagenUrl.startsWith("https://res.cloudinary.com/")) {
@@ -9,7 +9,7 @@ export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, o
     return `${import.meta.env.VITE_API_URL_UPLOADS}/${imagenUrl}`;
   };
  return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 border border-gray-200 flex flex-col h-full">
+    <div className={`${className} bg-white rounded-xl shadow-md overflow-hidden hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 border border-gray-200 flex flex-col h-full`}>
 
       {/* IMAGEN DE LA TARJETA */}
       {imagenUrl ? (

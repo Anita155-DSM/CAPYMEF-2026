@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Modal, Navbar, NavbarPublico } from "../../Components";
+import { Card, Footer, Modal, Navbar, NavbarPublico } from "../../Components";
 import { obtenerNoticiasPublicas } from "../../services/noticiasService";
 
 export default function NoticiasPublicas() {
@@ -27,6 +27,27 @@ export default function NoticiasPublicas() {
     cargarNoticias();
   }, []);
 
+  useEffect(() => {
+    if (cargando) return undefined;
+
+    const elementos = document.querySelectorAll(".noticia-reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    elementos.forEach((elemento) => observer.observe(elemento));
+
+    return () => observer.disconnect();
+  }, [cargando, noticias]);
+
   if (cargando) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -38,10 +59,10 @@ export default function NoticiasPublicas() {
   return (<>
 
     {estaLogueado ? <Navbar /> : <NavbarPublico />}
-    <div className="bg-gray-50 min-h-screen py-12 mt-8 px-4 sm:px-6 lg:px-8 font-sans animacion-modal">
+    <main className="bg-gray-50 min-h-screen py-12 mt-8 px-4 sm:px-6 lg:px-8 font-sans animacion-modal">
       <div className="max-w-7xl mx-auto">
 
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 noticia-reveal">
           <h1 className="text-4xl font-extrabold text-[#132A46] sm:text-5xl">
             Últimas Noticias
           </h1>
@@ -51,18 +72,19 @@ export default function NoticiasPublicas() {
         </div>
 
         {noticias.length === 0 ? (
-          <div className="text-center text-gray-500 py-10">
+          <div className="text-center text-gray-500 py-10 noticia-reveal">
             <p>Todavía no hay noticias publicadas.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {noticias.map((noticia) => (
+            {noticias.map((noticia, index) => (
               <Card
                 key={noticia.id}
                 titulo={noticia.titulo}
                 subtitulo={noticia.subtitulo}
                 imagenUrl={noticia.imagenUrl}
                 fecha={noticia.fechaPublicacion}
+                className={`noticia-reveal noticia-reveal-delay-${(index % 3) + 1}`}
                 // 3. LE PASAMOS TODA LA NOTICIA AL ESTADO AL HACER CLIC
                 onLeerMas={() => setNoticiaSeleccionada(noticia)}
               />
@@ -80,7 +102,9 @@ export default function NoticiasPublicas() {
         />
       )}
 
-    </div>
+    </main>
+
+    <Footer />
   </>
   );
 }

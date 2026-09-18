@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavbarPublico } from "../../Components";
 import { Footer } from "../../Components";
 
@@ -16,6 +16,21 @@ const autoridadesData = [
 ];
 
 export default function Autoridades() {
+  useEffect(() => {
+    const elementos = document.querySelectorAll(".public-reveal");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    elementos.forEach((elemento) => observer.observe(elemento));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <NavbarPublico />
@@ -23,7 +38,7 @@ export default function Autoridades() {
       <main className="pt-32 pb-12 bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
    
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 public-reveal">
             <h2 className="text-3xl font-extrabold text-[#1A4B76] sm:text-4xl">
               Autoridades de la Cámara
             </h2>
@@ -37,7 +52,7 @@ export default function Autoridades() {
               <div 
                 key={autoridad.id} 
             
-                className="bg-white rounded-lg shadow-sm p-6 flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl border-t-4 border-[#1F81B2]"
+                className={`bg-white rounded-lg shadow-sm p-6 flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl border-t-4 border-[#1F81B2] public-reveal public-reveal-delay-${(autoridad.id - 1) % 3 + 1}`}
               >
                 <div className="w-20 h-20 bg-gray-100 rounded-full mb-4 flex items-center justify-center text-gray-400">
                   <span className="text-2xl font-bold">{autoridad.nombre.charAt(0)}</span>

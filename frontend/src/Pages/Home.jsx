@@ -61,6 +61,26 @@ export default function Home() {
 
     cargarNoticias();
   }, []);
+
+  useEffect(() => {
+    const elementos = document.querySelectorAll(".inicio-reveal");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    elementos.forEach((elemento) => observer.observe(elemento));
+
+    return () => observer.disconnect();
+  }, [cargando, noticias]);
+
   return (
     <>
       {/* Se coloca dentro del main para poder hacer que ocupe la pantalla completa con el w-full */}
@@ -71,9 +91,7 @@ export default function Home() {
       <main className="w-full overflow-x-hidden">
         {/*La Vista N1 */}
         <section className="w-full font-sans">
-          <div
-            className="relative flex min-h-screen w-full flex-col items-start justify-center overflow-hidden bg-[#f3f3f3]"
-          >
+          <div className="relative flex min-h-screen w-full flex-col items-start justify-center overflow-hidden bg-[#f3f3f3] inicio-reveal inicio-reveal-hero">
             <div
               className="pointer-events-none absolute inset-0 bg-cover bg-no-repeat transition-opacity duration-700 ease-in-out"
               style={{
@@ -165,7 +183,7 @@ export default function Home() {
         </section>
 
         {/*La vista N2*/}
-        <section className="w-full bg-white px-6 md:px-24 py-20 font-sans">
+        <section className="w-full bg-white px-6 md:px-24 py-20 font-sans inicio-reveal">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
 
             <h2 className="text-3xl md:text-5xl font-light text-[#1D7BB6] uppercase tracking-wide mb-4">
@@ -201,7 +219,7 @@ export default function Home() {
         </section>
 
         {/*La Vista N3 */}
-        <section className="w-full bg-[#F4F8FB] px-6 md:px-24 py-20 font-sans">
+        <section className="w-full bg-[#F4F8FB] px-6 md:px-24 py-20 font-sans inicio-reveal">
 
           {/* Título de la sección */}
           <div className="flex flex-col items-center mb-16">
@@ -215,7 +233,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-y-12">
 
               {/* --- COLUMNA 1: Padrino --- */}
-              <div className="group flex flex-col items-center px-6 md:border-r border-gray-300 hover:-translate-y-1 transition-transform duration-300">
+              <div className="group flex flex-col items-center px-6 md:border-r border-gray-300 hover:-translate-y-1 transition-transform duration-300 inicio-reveal inicio-reveal-delay-1">
                 {/* Ícono */}
                 <div className="text-[#1D7BB6] mb-6 h-24 flex items-center justify-center">
                   <FaGem className="text-7xl" />
@@ -233,7 +251,7 @@ export default function Home() {
               </div>
 
               {/* --- COLUMNA 2: Activo --- */}
-              <div className="group flex flex-col items-center px-6 md:border-r border-gray-300 hover:-translate-y-1 transition-transform duration-300">
+              <div className="group flex flex-col items-center px-6 md:border-r border-gray-300 hover:-translate-y-1 transition-transform duration-300 inicio-reveal inicio-reveal-delay-2">
                 {/* Ícono (Usuario con estrellita simulada) */}
                 <div className="text-[#1D7BB6] mb-6 h-24 flex items-center justify-center relative">
                   <FaUser className="text-7xl" />
@@ -253,7 +271,7 @@ export default function Home() {
               </div>
 
               {/* --- COLUMNA 3: Adherente --- */}
-              <div className=" group flex flex-col items-center px-6 hover:-translate-y-1 transition-transform duration-300">
+              <div className="group flex flex-col items-center px-6 hover:-translate-y-1 transition-transform duration-300 inicio-reveal inicio-reveal-delay-3">
                 {/* Ícono */}
                 <div className="text-[#1D7BB6] mb-6 h-24 flex items-center justify-center">
                   <FaHandshake className="text-[5.5rem]" />
@@ -274,7 +292,7 @@ export default function Home() {
           </div>
         </section>
         {/*La vista N4*/}
-        <section className="w-full bg-[#1b4f7a] px-10 md:px-24 pt-16 font-sans text-white pb-7">
+        <section className="w-full bg-[#1b4f7a] px-10 md:px-24 pt-16 font-sans text-white pb-7 inicio-reveal">
           {/* Encabezado de la sección */}
           <div className="relative flex flex-col md:flex-row items-center justify-center mb-12">
             {/* Título centrado */}
