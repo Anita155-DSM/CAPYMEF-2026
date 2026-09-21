@@ -59,16 +59,30 @@ export default function NoticiasPublicas() {
   return (<>
 
     {estaLogueado ? <Navbar /> : <NavbarPublico />}
-    <main className="bg-gray-50 min-h-screen py-12 mt-8 px-4 sm:px-6 lg:px-8 font-sans animacion-modal">
-      <div className="max-w-7xl mx-auto">
+    <main className="bg-[#F8F9FF] min-h-screen pt-20 font-sans animacion-modal">
+      <section className="w-full bg-[#EFF4FF] py-14 md:py-16">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 noticia-reveal">
+          <div className="flex flex-col gap-2 max-w-3xl">
+            <span className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-[#1D7BB6]">
+              <span className="w-2 h-2 rounded-full bg-[#1D7BB6]" aria-hidden="true"></span>
+              Actualidad y comunicados
+            </span>
+            <h1 className="text-4xl font-extrabold tracking-tight text-[#132A46] sm:text-5xl">
+              Últimas noticias
+            </h1>
+            <p className="mt-2 text-lg text-gray-600 md:text-xl">
+              Mantenete informado con las novedades, actividades y comunicados de CAPYMEF.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <div className="text-center mb-12 noticia-reveal">
-          <h1 className="text-4xl font-extrabold text-[#132A46] sm:text-5xl">
-            Últimas Noticias
-          </h1>
-          <p className="mt-4 text-xl text-gray-500">
-            Mantenete informado con las novedades de CAPYMEF.
-          </p>
+      <section className="max-w-7xl mx-auto w-full px-6 lg:px-12 py-12 md:py-16">
+        <div className="flex items-center justify-between gap-4 mb-8 noticia-reveal">
+          <h2 className="flex items-center gap-3 text-xl font-bold text-[#132A46] sm:text-2xl">
+            <span className="w-1.5 h-7 rounded-full bg-[#1D7BB6]" aria-hidden="true"></span>
+            Novedades e informes
+          </h2>
         </div>
 
         {noticias.length === 0 ? (
@@ -84,6 +98,8 @@ export default function NoticiasPublicas() {
                 subtitulo={noticia.subtitulo}
                 imagenUrl={noticia.imagenUrl}
                 fecha={noticia.fechaPublicacion}
+                categoria={noticia.categoria}
+                estiloNoticias
                 className={`noticia-reveal noticia-reveal-delay-${(index % 3) + 1}`}
                 // 3. LE PASAMOS TODA LA NOTICIA AL ESTADO AL HACER CLIC
                 onLeerMas={() => setNoticiaSeleccionada(noticia)}
@@ -91,8 +107,6 @@ export default function NoticiasPublicas() {
             ))}
           </div>
         )}
-
-      </div>
 
       {/* 4. RENDERIZAMOS EL MODAL SOLO SI HAY UNA NOTICIA SELECCIONADA */}
       {noticiaSeleccionada && (
@@ -102,6 +116,7 @@ export default function NoticiasPublicas() {
         />
       )}
 
+      </section>
     </main>
 
     <Footer />
