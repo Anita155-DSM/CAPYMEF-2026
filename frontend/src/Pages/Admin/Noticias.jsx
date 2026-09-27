@@ -62,6 +62,7 @@ export default function NoticiasAdmin() {
                   subtitulo={noticia.subtitulo}
                   imagenUrl={noticia.imagenUrl}
                   fecha={noticia.fechaPublicacion}
+                  categoria={noticia.categoria}
                   onLeerMas={() => setNoticiaSeleccionada(noticia)}
                 />
 
@@ -143,6 +144,16 @@ export default function NoticiasAdmin() {
               rows="2"
               className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] focus:ring-1 focus:ring-[#1D7BB6] resize-none"
               {...register("subtitulo")}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="font-bold text-gray-700">Categoría *</label>
+            <input
+              type="text"
+              placeholder="Ej: Institucional"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] focus:ring-1 focus:ring-[#1D7BB6]"
+              {...register("categoria", { required: true, maxLength: 100 })}
             />
           </div>
 

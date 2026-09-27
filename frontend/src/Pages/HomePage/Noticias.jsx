@@ -2,20 +2,33 @@ import { useEffect, useState } from "react";
 import { Footer, Modal, Navbar, NavbarPublico } from "../../Components";
 import { obtenerNoticiasPublicas } from "../../services/noticiasService";
 
+const NOTICIAS_POR_PAGINA = 6;
+
+const formatearFecha = (fecha) => (
+  fecha ? new Date(fecha).toLocaleDateString("es-AR") : "Fecha no disponible"
+);
+
 export default function NoticiasPublicas() {
   const [noticias, setNoticias] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
+  const [paginaActual, setPaginaActual] = useState(1);
 
   const token = localStorage.getItem("token");
   const estaLogueado = !!token;
+  const totalPaginas = Math.max(1, Math.ceil(noticias.length / NOTICIAS_POR_PAGINA));
+  const noticiasVisibles = noticias.slice(
+    (paginaActual - 1) * NOTICIAS_POR_PAGINA,
+    paginaActual * NOTICIAS_POR_PAGINA
+  );
 
   useEffect(() => {
     const cargarNoticias = async () => {
       try {
         const result = await obtenerNoticiasPublicas();
         if (result.exito) {
-          setNoticias(result.data);
+          setNoticias(Array.isArray(result.data) ? result.data : []);
+          setPaginaActual(1);
         }
       } catch (error) {
         console.error("Error cargando la vista de noticias:", error);
@@ -47,7 +60,11 @@ export default function NoticiasPublicas() {
     elementos.forEach((elemento) => observer.observe(elemento));
 
     return () => observer.disconnect();
-  }, [cargando, noticias]);
+  }, [cargando, noticias, paginaActual]);
+
+  useEffect(() => {
+    if (paginaActual > totalPaginas) setPaginaActual(totalPaginas);
+  }, [paginaActual, totalPaginas]);
 
   if (cargando) {
     return (
@@ -88,7 +105,7 @@ export default function NoticiasPublicas() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {noticias.map((noticia, index) => (
+              {noticiasVisibles.map((noticia, index) => (
                 <article
                   key={noticia.id}
                   onClick={() => setNoticiaSeleccionada(noticia)}
@@ -98,7 +115,7 @@ export default function NoticiasPublicas() {
                   <div className="h-56 relative overflow-hidden bg-gray-100">
                     <span className="absolute top-4 left-4 bg-[#F4F8FB] text-[#1b4f7a] text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                      {noticia.categoria || 'Novedades'}
+                      {noticia.categoria || 'Institucional'}
                     </span>
                     <img
                       src={noticia.imagenUrl || 'https://via.placeholder.com/600x400?text=Sin+Imagen'}
@@ -112,7 +129,7 @@ export default function NoticiasPublicas() {
                     <div className="flex items-center gap-2 mb-3 text-[#1b4f7a]">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                       <span className="text-[11px] font-semibold uppercase tracking-wider">
-                        {noticia.fechaPublicacion}
+                        {formatearFecha(noticia.fechaPublicacion)}
                       </span>
                     </div>
                     
@@ -132,6 +149,30 @@ export default function NoticiasPublicas() {
                 </article>
               ))}
             </div>
+          )}
+
+          {noticias.length > 0 && (
+            <nav className="mt-12 flex items-center justify-center gap-3" aria-label="Paginación de noticias">
+              <button
+                type="button"
+                onClick={() => setPaginaActual((pagina) => Math.max(1, pagina - 1))}
+                disabled={paginaActual === 1}
+                className="rounded-lg bg-[#F4F8FB] px-4 py-2 text-sm font-bold text-[#1b4f7a] transition-colors hover:bg-[#1b4f7a] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[#F4F8FB] disabled:hover:text-[#1b4f7a]"
+              >
+                Anterior
+              </button>
+              <span className="rounded-lg bg-[#F4F8FB] px-4 py-2 text-sm font-bold text-[#1b4f7a]">
+                Página {paginaActual} de {totalPaginas}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPaginaActual((pagina) => Math.min(totalPaginas, pagina + 1))}
+                disabled={paginaActual === totalPaginas}
+                className="rounded-lg bg-[#F4F8FB] px-4 py-2 text-sm font-bold text-[#1b4f7a] transition-colors hover:bg-[#1b4f7a] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[#F4F8FB] disabled:hover:text-[#1b4f7a]"
+              >
+                Siguiente
+              </button>
+            </nav>
           )}
 
         </div>

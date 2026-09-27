@@ -12,6 +12,7 @@ export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
     titulo: noticia.titulo || "",
     subtitulo: noticia.subtitulo || "",
     contenido: noticia.contenido || "",
+    categoria: noticia.categoria || "Institucional",
     visibilidad: noticia.visibilidad || "todos",
     estado: noticia.estado || "publicado",
   });
@@ -97,6 +98,8 @@ export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
 
             <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Título *</label><input type="text" name="titulo" value={form.titulo} onChange={handleChange} required className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm" /></div>
             <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Subtítulo</label><textarea rows="2" name="subtitulo" value={form.subtitulo} onChange={handleChange} className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm resize-none" /></div>
+
+            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Categoría *</label><input type="text" name="categoria" value={form.categoria} onChange={handleChange} required maxLength="100" className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm" /></div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Visibilidad *</label><select name="visibilidad" value={form.visibilidad} onChange={handleChange} className="p-2.5 border rounded-md text-sm"><option value="todos">Todos</option><option value="publico">Solo Público</option><option value="socios">Solo Socios</option></select></div>

@@ -13,6 +13,10 @@ import hero5 from "../assets/img/image5.webp";
 import { Card, Footer, Navbar, NavbarPublico, Modal } from "../Components/index.js";
 import { obtenerNoticiasPublicas } from "../services/noticiasService.js";
 
+const formatearFecha = (fecha) => (
+  fecha ? new Date(fecha).toLocaleDateString("es-AR") : "Fecha no disponible"
+);
+
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [imagenActiva, setImagenActiva] = useState(0);
@@ -63,7 +67,7 @@ export default function Home() {
       try {
         const result = await obtenerNoticiasPublicas();
         if (result.exito) {
-          setNoticias(result.data.slice(0, 3));
+          setNoticias(Array.isArray(result.data) ? result.data : []);
         }
       } catch (error) {
         console.error("Error cargando noticias en el Home:", error);
@@ -227,7 +231,7 @@ export default function Home() {
             </div>
           ) : (
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-              {noticias.map((noticia) => (
+              {noticias.slice(0, 3).map((noticia) => (
                 <article
                   key={noticia.id}
                   onClick={() => setNoticiaSeleccionada(noticia)}
@@ -237,7 +241,7 @@ export default function Home() {
                   <div className="h-56 relative overflow-hidden bg-gray-100">
                     <span className="absolute top-4 left-4 bg-[#F4F8FB] text-[#1b4f7a] text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                      {noticia.categoria || 'Novedades'}
+                      {noticia.categoria || 'Institucional'}
                     </span>
                     <img
                       src={noticia.imagenUrl || 'https://via.placeholder.com/600x400?text=Sin+Imagen'}
@@ -252,7 +256,7 @@ export default function Home() {
                     <div className="flex items-center gap-2 mb-3 text-[#1b4f7a]">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                       <span className="text-[11px] font-semibold uppercase tracking-wider">
-                        {noticia.fechaPublicacion}
+                        {formatearFecha(noticia.fechaPublicacion)}
                       </span>
                     </div>
                     
