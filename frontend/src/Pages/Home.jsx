@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { FaGem, FaHandshake, FaStar, FaUser } from "react-icons/fa6";
 import { Link } from "react-router-dom";
+import { FaGem, FaHandshake, FaStar, FaUser, FaUserTie, FaPenClip, FaCoins, FaUsers, FaMagnifyingGlassChart } from "react-icons/fa6";
 
 // IMPORTACIONES DE IMÁGENES CORRECTAS (desde src/assets/img/)
 import fondoHome from "../assets/img/FondoCapymef.png";
@@ -287,39 +287,166 @@ export default function Home() {
           )}
         </section>
 
-        {/*La vista N2*/}
-        <section id="nosotros" className="w-full bg-white px-6 md:px-24 py-20 font-sans inicio-reveal">
-          <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
+{/*Sobre Nosotros + Autoridades*/}
+        <section id="nosotros" className="w-full bg-[#E5F1F8] px-6 sm:px-10 md:px-24 py-20 font-sans inicio-reveal">
+          <div className="max-w-7xl mx-auto flex flex-col gap-20">
 
-            <h2 className="text-3xl md:text-5xl font-light text-[#1D7BB6] uppercase tracking-wide mb-4">
-              Sobre CAPyMEF
-            </h2>
-            <div className="w-24 h-1 bg-[#1D7BB6] mb-10"></div>
+            {/* --- BLOQUE 1: Historia Institucional --- */}
+            <div className="w-full flex flex-col items-start">
+              <h2 className="text-3xl md:text-[40px] font-extrabold text-[#153448] mb-8 leading-tight tracking-tight">
+                Sobre CAPyMEF
+              </h2>
 
-            <div className="space-y-6 text-lg text-gray-700 leading-relaxed text-justify md:text-center">
-              <p>
-                Esta institución fue creada promediando la década de los ´40 en una incipiente Formosa comercial con el nombre de Cámara de Almaceneros Minoristas y Afines de Formosa. Actualmente es una de las asociaciones empresarias más representativas de la provincia. Si bien su sede está en la Ciudad de Formosa, hace poco tiempo inició un política de acercamiento a micro, pequeños y medianos empresarios del interior provincial concentrando sus esfuerzos en las localidades de Clorinda, El Colorado y Pirané.
-              </p>
-              <p>
-                Su estructura interna contempla la conformación de la Comisión de Mujeres PyME y la Comisión de Jóvenes Empresarios; éstos últimos han logrado posicionar a jóvenes empresarios formoseños en lugares destacados en la última edición del Premio Nacional al Joven Empresario PyMe. La Cámara, a su vez, es miembro de la Confederación Argentina de la Mediana Empresa (CAME) donde ocupa, por segundo período consecutivo, la Vicepresidencia Región NEA.
-              </p>
-              <p>
-                La CAPYMEF es la entidad gremial empresaria más representativa del empresariado Mipyme de Formosa, cuenta con más de un centenar de asociados de diversos rubros y sectores económicos.
-              </p>
-              <p>
-                Se inició una política de acercamiento a otras entidades locales, provinciales y regionales con el objetivo central de potenciar el trabajo cooperativo y complementario en temas como diseño, elaboración y formulación de proyectos de inversión y puesta en marcha de un observatorio de desempeño de las Mipymes locales denominado Monitor PyME del NEA. Se acordó aportar recursos humanos e infraestructura disponible por cada entidad y gestión de vínculos ante otros actores públicos y privados.
-              </p>
+              {/* Cambio aplicado: Quitamos max-w-5xl y agregamos w-full */}
+              <div className="w-full space-y-5 text-lg text-[#2c4c5e] leading-relaxed">
+                <p>
+                  Esta institución fue creada promediando la década de los ´40 en una incipiente Formosa comercial con el nombre de Cámara de Almaceneros Minoristas y Afines de Formosa. Actualmente es una de las asociaciones empresarias más representativas de la provincia. Si bien su sede está en la Ciudad de Formosa, hace poco tiempo inició un política de acercamiento a micro, pequeños y medianos empresarios del interior provincial concentrando sus esfuerzos en las localidades de Clorinda, El Colorado y Pirané.
+                </p>
+                <p>
+                  Su estructura interna contempla la conformación de la Comisión de Mujeres PyME y la Comisión de Jóvenes Empresarios; éstos últimos han logrado posicionar a jóvenes empresarios formoseños en lugares destacados en la última edición del Premio Nacional al Joven Empresario PyMe. La Cámara, a su vez, es miembro de la Confederación Argentina de la Mediana Empresa (CAME) donde ocupa, por segundo período consecutivo, la Vicepresidencia Región NEA.
+                </p>
+                <p>
+                  La CAPYMEF es la entidad gremial empresaria más representativa del empresariado Mipyme de Formosa, cuenta con más de un centenar de asociados de diversos rubros y sectores económicos.
+                </p>
+                <p>
+                  Se inició una política de acercamiento a otras entidades locales, provinciales y regionales con el objetivo central de potenciar el trabajo cooperativo y complementario en temas como diseño, elaboración y formulación de proyectos de inversión y puesta en marcha de un observatorio de desempeño de las Mipymes locales denominado Monitor PyME del NEA. Se acordó aportar recursos humanos e infraestructura disponible por cada entidad y gestión de vínculos ante otros actores públicos y privados.
+                </p>
+              </div>
             </div>
 
-            <div className="mt-12">
-              <Link
-                to="/autoridades"
-                className="inline-block px-8 py-3 bg-[#1A4B76] hover:bg-[#1F81B2] text-white font-bold rounded-md transition-colors shadow-md"
-              >
-                Conocé a la Comisión Directiva
-              </Link>
-            </div>
+            {/* --- BLOQUE 2: Comisión Directiva  --- */}
+            <div className="w-full">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-[#153448] mb-2 tracking-tight">
+                Autoridades de la Cámara 
+              </h2>
+              <p className="text-lg text-[#2c4c5e] mb-12">
+                Conocé a la Comisión Directiva que impulsa el crecimiento de las PyMEs.
+              </p>
 
+              {/* Grupo 1: MESA EJECUTIVA */}
+              <div className="mb-10">
+                <div className="flex items-center gap-4 mb-6">
+                  <h3 className="text-xs font-bold text-[#1E8C93] uppercase tracking-[0.2em] shrink-0">Mesa Ejecutiva</h3>
+                  <div className="w-full h-px bg-gray-300/60"></div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-14 h-14 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaUserTie size={22} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Presidente</span>
+                      <span className="text-[#153448] text-lg font-bold leading-tight">Carlos A. Werlen</span>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-14 h-14 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaPenClip size={22} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Secretario</span>
+                      <span className="text-[#153448] text-lg font-bold leading-tight">Antonio F. Hryniewicz</span>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-14 h-14 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaCoins size={22} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Tesorero</span>
+                      <span className="text-[#153448] text-lg font-bold leading-tight">Mónica G. Lozano</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grupo 2: VOCALES TITULARES */}
+              <div className="mb-10">
+                <div className="flex items-center gap-4 mb-6">
+                  <h3 className="text-xs font-bold text-[#1E8C93] uppercase tracking-[0.2em] shrink-0">Vocales Titulares</h3>
+                  <div className="w-full h-px bg-gray-300/60"></div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-14 h-14 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaUsers size={22} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Vocal 1° Titular</span>
+                      <span className="text-[#153448] text-lg font-bold leading-tight">Federico J. Domínguez</span>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-14 h-14 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaUsers size={22} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Vocal 2° Titular</span>
+                      <span className="text-[#153448] text-lg font-bold leading-tight">Walter Ramón Arauz</span>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-5 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-14 h-14 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaUsers size={22} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Vocal 3° Titular</span>
+                      <span className="text-[#153448] text-lg font-bold leading-tight">Marcelo Enrique Zanín</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Grupo 3: SUPLENTES Y REVISORES */}
+              <div>
+                <div className="flex items-center gap-4 mb-6">
+                  <h3 className="text-xs font-bold text-[#1E8C93] uppercase tracking-[0.2em] shrink-0">Suplentes y Revisores</h3>
+                  <div className="w-full h-px bg-gray-300/60"></div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-12 h-12 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaUser size={18} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Vocal 1° Suplente</span>
+                      <span className="text-[#153448] text-[15px] font-bold leading-tight">Jorge Ernesto Miani</span>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-12 h-12 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaUser size={18} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Vocal 2° Suplente</span>
+                      <span className="text-[#153448] text-[15px] font-bold leading-tight">Ramón O. Centurión</span>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-12 h-12 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaMagnifyingGlassChart size={18} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Rev. Cuentas Titular</span>
+                      <span className="text-[#153448] text-[15px] font-bold leading-tight">Sergio Eduardo Alloi</span>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex items-center gap-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                    <div className="w-12 h-12 shrink-0 bg-[#E8F4F8] rounded-xl flex items-center justify-center text-[#1E8C93]">
+                      <FaMagnifyingGlassChart size={18} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#1E8C93] text-[10px] font-extrabold uppercase tracking-widest mb-1">Rev. Cuentas Supl.</span>
+                      <span className="text-[#153448] text-[15px] font-bold leading-tight">Augusto E. Boggiano</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </section>
 
