@@ -450,59 +450,75 @@ export default function Home() {
           </div>
         </section>
 
-        {/*La Vista N3 */}
+{/*La Vista N3 - Formas de ser socio */}
         <section id="beneficios" className="w-full bg-[#F4F8FB] px-6 md:px-24 py-20 font-sans inicio-reveal">
 
-          <div className="flex flex-col items-center mb-16">
-            <h2 className="text-3xl md:text-5xl my-6.5 font-light text-[#1D7BB6] uppercase tracking-wide">
+          <div className="flex flex-col items-center mb-16 text-center">
+            <h2 className=" text-3xl md:text-[40px] font-extrabold text-[#153448] tracking-tight">
               Formas de ser socio
             </h2>
           </div>
 
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-y-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
 
-              <div className="group flex flex-col items-center px-6 md:border-r border-gray-300 hover:-translate-y-1 transition-transform duration-300 inicio-reveal inicio-reveal-delay-1">
-                <div className="text-[#1D7BB6] mb-6 h-24 flex items-center justify-center">
-                  <FaGem className="text-7xl" />
+              {/* --- Tarjeta 1: Padrino --- */}
+              <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col group border border-gray-100">
+                {/* Ícono centrado */}
+                <div className="relative z-10 text-[#1b4f7a] mb-6 h-16 w-16 bg-[#E5F1F8] rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300 mx-auto">
+                  <FaGem className="text-3xl" />
                 </div>
-                <h3 className="text-xl font-medium text-gray-800 mb-6 titulo-animado">
-                  Padrino
-                </h3>
-                <ul className="list-disc text-lg text-dark space-y-4 w-full max-w-70 text-left">
-                  <li>Acceso gratuito o con bonificación especial a eventos tarifados</li>
-                  <li>Reconocimiento por su respaldo institucional</li>
-                  <li>Misma información y transparencia que el resto de los socios</li>
-                </ul>
+                
+                {/* Título y línea separadora */}
+                <div className="relative z-10 w-full text-center">
+                  <h3 className="text-2xl font-extrabold text-[#153448] mb-4">
+                    Padrino
+                  </h3>
+                  <div className="w-16 h-[2px] bg-[#E5F1F8] mx-auto mb-6"></div>
+                </div>
+
+                <p className="relative z-10 text-gray-500 text-[15px] leading-relaxed text-center">
+                  Acceso gratuito o con bonificación especial a eventos tarifados. Disfrutá de un reconocimiento destacado por tu respaldo institucional, manteniendo la misma información y transparencia que el resto de los socios.
+                </p>
               </div>
 
-              <div className="group flex flex-col items-center px-6 md:border-r border-gray-300 hover:-translate-y-1 transition-transform duration-300 inicio-reveal inicio-reveal-delay-2">
-                <div className="text-[#1D7BB6] mb-6 h-24 flex items-center justify-center relative">
-                  <FaUser className="text-7xl" />
-                  <FaStar className="text-3xl absolute -bottom-2 -right-3 text-[#1D7BB6] bg-[#F4F8FB] rounded-full border-4 border-[#F4F8FB]" />
+              {/* --- Tarjeta 2: Activo --- */}
+              <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col group border border-gray-100">
+                <div className="relative z-10 text-[#1b4f7a] mb-6 h-16 w-16 bg-[#E5F1F8] rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300 mx-auto">
+                  <div className="relative">
+                    <FaUser className="text-3xl" />
+                    <FaStar className="text-[14px] absolute -bottom-1 -right-2 text-[#1b4f7a] bg-[#E5F1F8] rounded-full border border-[#E5F1F8]" />
+                  </div>
                 </div>
-                <h3 className="text-xl font-medium text-gray-800 mb-6 titulo-animado">
-                  Activo
-                </h3>
-                <ul className="list-disc text-lg text-dark space-y-4 w-full max-w-70 text-left">
-                  <li>Bonificaciones máximas en eventos y capacitaciones</li>
-                  <li>Participación plena en la vida institucional</li>
-                  <li>Cuota mensual con ventana de pago del 1 al 10</li>
-                </ul>
+                
+                <div className="relative z-10 w-full text-center">
+                  <h3 className="text-2xl font-extrabold text-[#153448] mb-4">
+                    Activo
+                  </h3>
+                  <div className="w-16 h-[2px] bg-[#E5F1F8] mx-auto mb-6"></div>
+                </div>
+
+                <p className="relative z-10 text-gray-500 text-[15px] leading-relaxed text-center">
+                  Abonando una cuota mensual con ventana de pago del 1 al 10, accedés a bonificaciones máximas en eventos y capacitaciones, logrando una participación plena y activa en toda la vida institucional de la Cámara.
+                </p>
               </div>
 
-              <div className="group flex flex-col items-center px-6 hover:-translate-y-1 transition-transform duration-300 inicio-reveal inicio-reveal-delay-3">
-                <div className="text-[#1D7BB6] mb-6 h-24 flex items-center justify-center">
-                  <FaHandshake className="text-[5.5rem]" />
+              {/* --- Tarjeta 3: Adherente --- */}
+              <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col group border border-gray-100">
+                <div className="relative z-10 text-[#1b4f7a] mb-6 h-16 w-16 bg-[#E5F1F8] rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-300 mx-auto">
+                  <FaHandshake className="text-4xl" />
                 </div>
-                <h3 className="text-xl font-medium text-gray-800 mb-6 titulo-animado">
-                  Adherente
-                </h3>
-                <ul className="list-disc text-lg text-dark space-y-5 w-full max-w-70 text-left">
-                  <li>Acceso a eventos con arancel</li>
-                  <li>Becas o descuentos especiales según disponibilidad</li>
-                  <li>Puerta de entrada natural a la comunidad CAPyMEF</li>
-                </ul>
+                
+                <div className="relative z-10 w-full text-center">
+                  <h3 className="text-2xl font-extrabold text-[#153448] mb-4">
+                    Adherente
+                  </h3>
+                  <div className="w-16 h-[2px] bg-[#E5F1F8] mx-auto mb-6"></div>
+                </div>
+
+                <p className="relative z-10 text-gray-500 text-[15px] leading-relaxed text-center">
+                  La puerta de entrada natural a la comunidad CAPyMEF. Participá de eventos con arancel y solicitá acceso a becas o descuentos especiales sujetos a disponibilidad para impulsar tu crecimiento profesional.
+                </p>
               </div>
 
             </div>
