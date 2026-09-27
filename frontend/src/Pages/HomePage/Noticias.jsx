@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Footer, Modal, Navbar, NavbarPublico } from "../../Components";
+import { Footer, Modal, Navbar, NavbarPublico } from "../../Components";
 import { obtenerNoticiasPublicas } from "../../services/noticiasService";
 
 export default function NoticiasPublicas() {
@@ -27,6 +27,7 @@ export default function NoticiasPublicas() {
     cargarNoticias();
   }, []);
 
+  // Animaciones de scroll
   useEffect(() => {
     if (cargando) return undefined;
 
@@ -50,65 +51,93 @@ export default function NoticiasPublicas() {
 
   if (cargando) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
-        <p className="text-xl font-bold text-[#1D7BB6]">Cargando noticias...</p>
+      <div className="min-h-screen flex justify-center items-center bg-[#F4F8FB]">
+        <div className="w-12 h-12 border-4 border-[#1b4f7a] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  return (<>
+  return (
+    <>
+      <header>
+        {estaLogueado ? <Navbar /> : <NavbarPublico />}
+      </header>
 
-    {estaLogueado ? <Navbar /> : <NavbarPublico />}
-    <main className="bg-[#F8F9FF] min-h-screen pt-20 font-sans animacion-modal">
-      <section className="w-full bg-[#EFF4FF] py-14 md:py-16">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 noticia-reveal">
-          <div className="flex flex-col gap-2 max-w-3xl">
-            <span className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-[#1D7BB6]">
-              <span className="w-2 h-2 rounded-full bg-[#1D7BB6]" aria-hidden="true"></span>
-              Actualidad y comunicados
-            </span>
-            <h1 className="text-4xl font-extrabold tracking-tight text-[#132A46] sm:text-5xl">
-              Últimas noticias
-            </h1>
-            <p className="mt-2 text-lg text-gray-600 md:text-xl">
-              Mantenete informado con las novedades, actividades y comunicados de CAPYMEF.
-            </p>
+      <main className="bg-[#F4F8FB] min-h-screen pt-28 pb-16 px-6 sm:px-10 md:px-24 font-sans animacion-modal">
+        <div className="max-w-7xl mx-auto">
+          
+          {/* HEADER DE LA SECCIÓN DE NOTICIAS */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6 noticia-reveal">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-[2px] bg-[#1E8C93]"></div>
+                <span className="text-[#1E8C93] font-bold tracking-widest text-xs uppercase">
+                  Publicaciones
+                </span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-extrabold text-[#153448] tracking-tight font-sans">
+                Todas las noticias
+              </h1>
+            </div>
           </div>
+
+          {/* LISTADO DE TARJETAS (Idéntico a las del Home) */}
+          {noticias.length === 0 ? (
+            <div className="text-center text-gray-500 py-20 bg-white rounded-2xl shadow-sm border border-gray-200 noticia-reveal max-w-3xl mx-auto">
+              <p className="text-lg">Todavía no hay noticias publicadas.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {noticias.map((noticia, index) => (
+                <article
+                  key={noticia.id}
+                  onClick={() => setNoticiaSeleccionada(noticia)}
+                  className={`noticia-reveal noticia-reveal-delay-${(index % 3) + 1} bg-white rounded-2xl overflow-hidden flex flex-col shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer group`}
+                >
+                  {/* Imagen y Etiqueta */}
+                  <div className="h-56 relative overflow-hidden bg-gray-100">
+                    <span className="absolute top-4 left-4 bg-[#F4F8FB] text-[#1b4f7a] text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      {noticia.categoria || 'Novedades'}
+                    </span>
+                    <img
+                      src={noticia.imagenUrl || 'https://via.placeholder.com/600x400?text=Sin+Imagen'}
+                      alt={noticia.titulo}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  
+                  {/* Cuerpo de la Tarjeta */}
+                  <div className="p-6 md:p-8 flex flex-col flex-1 bg-white">
+                    <div className="flex items-center gap-2 mb-3 text-[#1b4f7a]">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider">
+                        {noticia.fechaPublicacion}
+                      </span>
+                    </div>
+                    
+                    <h3 className="text-lg font-bold mb-4 leading-snug text-[#153448] group-hover:text-[#1b4f7a] transition-colors line-clamp-2">
+                      {noticia.titulo}
+                    </h3>
+                    
+                    <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed line-clamp-3">
+                      {noticia.subtitulo || noticia.resumen}
+                    </p>
+                    
+                    {/* Botón sutil con "Leer más" */}
+                    <div className="mt-auto flex items-center text-[#1b4f7a] font-bold text-sm bg-[#F4F8FB] w-max px-4 py-2 rounded-lg transition-colors group-hover:bg-[#1b4f7a] group-hover:text-white">
+                      Leer más <span className="ml-2 transform transition-transform group-hover:translate-x-1">&rarr;</span>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
         </div>
-      </section>
+      </main>
 
-      <section className="max-w-7xl mx-auto w-full px-6 lg:px-12 py-12 md:py-16">
-        <div className="flex items-center justify-between gap-4 mb-8 noticia-reveal">
-          <h2 className="flex items-center gap-3 text-xl font-bold text-[#132A46] sm:text-2xl">
-            <span className="w-1.5 h-7 rounded-full bg-[#1D7BB6]" aria-hidden="true"></span>
-            Novedades e informes
-          </h2>
-        </div>
-
-        {noticias.length === 0 ? (
-          <div className="text-center text-gray-500 py-10 noticia-reveal">
-            <p>Todavía no hay noticias publicadas.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {noticias.map((noticia, index) => (
-              <Card
-                key={noticia.id}
-                titulo={noticia.titulo}
-                subtitulo={noticia.subtitulo}
-                imagenUrl={noticia.imagenUrl}
-                fecha={noticia.fechaPublicacion}
-                categoria={noticia.categoria}
-                estiloNoticias
-                className={`noticia-reveal noticia-reveal-delay-${(index % 3) + 1}`}
-                // 3. LE PASAMOS TODA LA NOTICIA AL ESTADO AL HACER CLIC
-                onLeerMas={() => setNoticiaSeleccionada(noticia)}
-              />
-            ))}
-          </div>
-        )}
-
-      {/* 4. RENDERIZAMOS EL MODAL SOLO SI HAY UNA NOTICIA SELECCIONADA */}
+      {/* RENDERIZAMOS EL MODAL */}
       {noticiaSeleccionada && (
         <Modal
           noticia={noticiaSeleccionada}
@@ -116,10 +145,7 @@ export default function NoticiasPublicas() {
         />
       )}
 
-      </section>
-    </main>
-
-    <Footer />
-  </>
+      <Footer />
+    </>
   );
 }

@@ -197,23 +197,20 @@ export default function Home() {
         </section>
 
                 {/*NOVEDADES*/}
-<section id="novedades" className="w-full bg-[#E5F1F8] px-6 sm:px-10 md:px-24 pt-20 pb-20 font-sans inicio-reveal">
+<section id="novedades" className="w-full bg-[#F4F8FB] px-6 sm:px-10 md:px-24 pt-20 pb-20 font-sans inicio-reveal">
           
-          <div className="relative flex flex-col md:flex-row items-center justify-between mb-16 max-w-7xl mx-auto">
-            {/* Título limpio alineado a la izquierda (como en la referencia) */}
+          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between mb-16 max-w-7xl mx-auto">
+            {/* Título alineado a la izquierda, sin subtítulo y con la fuente Sans bien gruesa */}
             <div className="flex flex-col items-start w-full">
-              <h2 className="text-3xl md:text-5xl font-bold text-[#1b4f7a] tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Actividades y noticias de la Cámara
+              <h2 className="text-3xl md:text-4xl font-extrabold text-[#1b4f7a] tracking-tight font-sans">
+                Novedades de la Cámara
               </h2>
-              <p className="mt-4 text-gray-600 text-lg max-w-3xl">
-                Conoce las últimas actividades, jornadas, convenios y experiencias que forman parte de la vida institucional de CAPYMEF.
-              </p>
             </div>
             
-            {/* Botón Ver Todas tipo píldora oscura (referencia) */}
+            {/* Botón Ver Todas: A la izquierda en celular (self-start), a la derecha en PC */}
             <Link
               to="/noticias"
-              className="mt-8 md:mt-0 flex-shrink-0 bg-[#153448] text-white text-sm font-semibold rounded-full px-6 py-3 transition-colors hover:bg-[#1b4f7a] shadow-md flex items-center gap-2"
+              className="mt-6 md:mt-0 self-start md:self-auto flex-shrink-0 bg-[#153448] text-white text-sm font-semibold rounded-full px-6 py-3 transition-colors hover:bg-[#1b4f7a] shadow-md flex items-center gap-2"
             >
               Ver todas &rarr;
             </Link>
@@ -229,7 +226,7 @@ export default function Home() {
               <p className="text-gray-600 text-lg">Todavía no hay noticias publicadas.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {noticias.map((noticia) => (
                 <article
                   key={noticia.id}
@@ -238,7 +235,7 @@ export default function Home() {
                 >
                   {/* Imagen y Etiqueta */}
                   <div className="h-56 relative overflow-hidden bg-gray-100">
-                    <span className="absolute top-4 left-4 bg-[#E5F1F8] text-[#1b4f7a] text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
+                    <span className="absolute top-4 left-4 bg-[#F4F8FB] text-[#1b4f7a] text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                       {noticia.categoria || 'Novedades'}
                     </span>
@@ -251,14 +248,16 @@ export default function Home() {
                   
                   {/* Cuerpo de la Tarjeta */}
                   <div className="p-6 md:p-8 flex flex-col flex-1 bg-white">
-                    <div className="flex items-center gap-2 mb-3">
-                      <svg className="w-4 h-4 text-[#55b6e8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                      <span className="text-[#55b6e8] text-xs font-bold uppercase tracking-wider">
+                    {/* Fecha e ícono en azul oscuro (mismo color que el botón) */}
+                    <div className="flex items-center gap-2 mb-3 text-[#1b4f7a]">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider">
                         {noticia.fechaPublicacion}
                       </span>
                     </div>
                     
-                    <h3 className="text-xl font-bold mb-4 leading-tight text-[#153448] group-hover:text-[#1b4f7a] transition-colors line-clamp-2">
+                    {/* Título más chico (text-lg en lugar de text-xl) */}
+                    <h3 className="text-lg font-bold mb-4 leading-snug text-[#153448] group-hover:text-[#1b4f7a] transition-colors line-clamp-2">
                       {noticia.titulo}
                     </h3>
                     
@@ -266,9 +265,9 @@ export default function Home() {
                       {noticia.subtitulo || noticia.resumen}
                     </p>
                     
-                    {/* Botón sutil integrado "Leer artículo" */}
-                    <div className="mt-auto flex items-center text-[#1b4f7a] font-bold text-sm bg-[#E5F1F8] w-max px-4 py-2 rounded-lg transition-colors group-hover:bg-[#1b4f7a] group-hover:text-white">
-                      Leer artículo <span className="ml-2 transform transition-transform group-hover:translate-x-1">↗</span>
+                    {/* Botón sutil con "Leer más" y flechita horizontal */}
+                    <div className="mt-auto flex items-center text-[#1b4f7a] font-bold text-sm bg-[#F4F8FB] w-max px-4 py-2 rounded-lg transition-colors group-hover:bg-[#1b4f7a] group-hover:text-white">
+                      Leer más <span className="ml-2 transform transition-transform group-hover:translate-x-1">&rarr;</span>
                     </div>
                   </div>
                 </article>

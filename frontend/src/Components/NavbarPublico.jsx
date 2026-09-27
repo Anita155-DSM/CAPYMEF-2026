@@ -83,7 +83,8 @@ export default function NavbarPublico() {
                 {/* ENLACES CENTRALES */}
                 <div className="hidden lg:flex flex-grow justify-center items-center gap-2 xl:gap-5 text-sm">
                     {enlaces.map((enlace) => {
-                        const activo = seccionActiva === enlace.id && location.pathname === '/';
+                        const activo = (seccionActiva === enlace.id && location.pathname === '/')
+                            || (enlace.id === 'novedades' && location.pathname === '/noticias');
                         return (
                             <a
                                 key={enlace.id}
