@@ -9,6 +9,9 @@ import hero2 from "../assets/img/image.webp";
 import hero3 from "../assets/img/image3.webp";
 import hero4 from "../assets/img/image4.webp";
 import hero5 from "../assets/img/image5.webp";
+import logoCAME from "../assets/img/Came.png";
+import logoDGR from "../assets/img/dgr.png";
+import logoAFIP from "../assets/img/afip.png";
 
 import { Card, Footer, Navbar, NavbarPublico, Modal } from "../Components/index.js";
 import { obtenerNoticiasPublicas } from "../services/noticiasService.js";
@@ -613,6 +616,68 @@ export default function Home() {
                   Descargar Balance
                 </a>
               </div>
+
+            </div>
+          </div>
+        </section>
+{/* --- VISTA N6: Vinculación Institucional --- */}
+        <section id="vinculacion" className="w-full bg-gradient-to-r from-[#F4F8FB] to-[#E5F1F8] px-6 md:px-24 py-20 font-sans inicio-reveal">
+          
+          {/* Título y bajada centrados */}
+          <div className="flex flex-col items-center mb-16 text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-[40px] font-extrabold text-[#153448] tracking-tight leading-tight">
+              Vinculación Institucional
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Trabajamos en conjunto con organismos y entidades clave para potenciar el desarrollo de nuestras PyMEs, brindando respaldo y agilizando gestiones.
+            </p>
+          </div>
+
+          {/* Grilla de Aliados (CAME, ATP, ARCA) */}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+              
+              {/* Aliado: CAME */}
+              <a 
+                href="https://www.redcame.org.ar/" 
+                target="_blank" 
+                rel="noreferrer"
+                className="bg-white h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-gray-100 group p-6"
+              >
+                <img 
+                  src={logoCAME} 
+                  alt="CAME" 
+                  className="max-h-full max-w-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300" 
+                />
+              </a>
+
+              {/* Aliado: DGR / ATP */}
+              <a 
+                href="https://www.atpformosa.gob.ar/" 
+                target="_blank" 
+                rel="noreferrer"
+                className="bg-white h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-gray-100 group p-6"
+              >
+                <img 
+                  src={logoDGR} 
+                  alt="ATP Formosa" 
+                  className="max-h-full max-w-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300" 
+                />
+              </a>
+
+              {/* Aliado: AFIP / ARCA */}
+              <a 
+                href="https://www.afip.gob.ar/" 
+                target="_blank" 
+                rel="noreferrer"
+                className="bg-[#153448] h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-[#153448] group p-6"
+              >
+                <img 
+                  src={logoAFIP} 
+                  alt="ARCA" 
+                  className="max-h-full max-w-full object-contain opacity-100 transition-opacity duration-300" 
+                />
+              </a>
 
             </div>
           </div>
