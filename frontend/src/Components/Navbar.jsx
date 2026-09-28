@@ -9,10 +9,7 @@ export default function Navbar() {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const enlaces = [
     ["Inicio", "/"],
-    ["Autoridades", "/autoridades"],
     ["Noticias", "/noticias"],
-    ["Estatuto", "/estatuto"],
-    ["Balance", "/balance"],
   ];
 
   return (

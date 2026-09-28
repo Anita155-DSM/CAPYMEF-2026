@@ -12,19 +12,8 @@ import Inicio from "../Pages/Admin/Inicio.jsx";
 import { ForgotPassword, Login, Register } from "../Pages/Auth/index.js";
 import ResetPassword from "../Pages/Auth/ResetPassword.jsx";
 import Home from "../Pages/Home";
-import {
-  Capacitacion,
-  Contacto,
-  Eventos,
-  Nosotros,
-} from "../Pages/HomePage/index.js";
+import { Noticias } from "../Pages/HomePage/index.js";
 import Profile from "../Pages/Profile";
-import {
-  Autoridades,
-  Balance,
-  Estatuto,
-  Noticias,
-} from "../Pages/PublicPages/index.js";
 import Socios from "../Pages/Socios/InicioSocio.jsx";
 import AdminRoutes from "./AdminRoutes.jsx";
 import PrivateRoutes from "./PrivateRoutes";
@@ -56,9 +45,6 @@ export default function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/autoridades" element={<Autoridades />} />
-        <Route path="/balance" element={<Balance />} />
-        <Route path="/estatuto" element={<Estatuto />} />
         <Route path="/noticias" element={<Noticias />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
@@ -66,10 +52,6 @@ export default function AppRoutes() {
         {/*LOGUEADOS*/}
         <Route element={<PrivateRoutes />}>
           <Route path="/profile" element={<Profile />} />
-          <Route path="/capacitacion" element={<Capacitacion />} />
-          <Route path="/contactos" element={<Contacto />} />
-          <Route path="/eventos" element={<Eventos />} />
-          <Route path="/nosotros" element={<Nosotros />} />
         </Route>
 
         {/*SOCIOS */}

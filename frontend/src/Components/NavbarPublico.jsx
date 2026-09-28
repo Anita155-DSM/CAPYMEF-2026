@@ -23,13 +23,24 @@ export default function NavbarPublico() {
 
         const manejarScroll = () => {
             const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+
             if (scrollY < 100) {
                 setSeccionActiva("inicio");
                 return;
             }
 
+            // Lógica clave: Si llegamos al final de la página, activa "Contacto"
+            if (windowHeight + scrollY >= documentHeight - 50) {
+                setSeccionActiva("contacto");
+                return;
+            }
+
             let actual = "inicio";
             for (const enlace of enlaces) {
+                if (enlace.id === "contacto") continue; // Ya lo validamos arriba
+                
                 const elemento = document.getElementById(enlace.id);
                 if (elemento) {
                     const rect = elemento.getBoundingClientRect();
@@ -52,6 +63,16 @@ export default function NavbarPublico() {
         
         if (location.pathname !== '/') {
             window.location.href = `/#${id}`;
+            return;
+        }
+
+        // Si toca "Contacto", lo mandamos al fondo de la página directamente
+        if (id === "contacto") {
+            window.scrollTo({
+                top: document.documentElement.scrollHeight,
+                behavior: "smooth"
+            });
+            setMenuAbierto(false);
             return;
         }
 
@@ -92,7 +113,7 @@ export default function NavbarPublico() {
                                 onClick={(e) => hacerScrollSuave(e, enlace.id)}
                                 className={`font-semibold px-4 py-1.5 transition-all duration-300 ${
                                     activo
-                                        ? "text-[#1D7BB6] bg-[#E5F1F8] rounded-full" // <-- CAMBIO: rounded-full sin borde inferior
+                                        ? "text-[#1D7BB6] bg-[#E5F1F8] rounded-full"
                                         : "text-gray-600 hover:text-[#1D7BB6] hover:bg-gray-50 rounded-full"
                                 }`}
                             >
