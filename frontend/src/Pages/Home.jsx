@@ -636,14 +636,14 @@ export default function Home() {
 
           {/* Grilla de Aliados (CAME, ATP, ARCA) */}
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+            <div className="flex md:grid md:grid-cols-3 gap-8 lg:gap-10 overflow-x-auto pb-4 snap-x snap-mandatory md:overflow-visible md:pb-0">
               
               {/* Aliado: CAME */}
               <a 
                 href="https://www.redcame.org.ar/" 
                 target="_blank" 
                 rel="noreferrer"
-                className="bg-white h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-gray-100 group p-6"
+                className="min-w-[calc(100vw-3rem)] md:min-w-0 snap-start bg-white h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-gray-100 group p-6"
               >
                 <img 
                   src={logoCAME} 
@@ -657,7 +657,7 @@ export default function Home() {
                 href="https://www.atpformosa.gob.ar/" 
                 target="_blank" 
                 rel="noreferrer"
-                className="bg-white h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-gray-100 group p-6"
+                className="min-w-[calc(100vw-3rem)] md:min-w-0 snap-start bg-white h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-gray-100 group p-6"
               >
                 <img 
                   src={logoDGR} 
@@ -671,7 +671,7 @@ export default function Home() {
                 href="https://www.afip.gob.ar/" 
                 target="_blank" 
                 rel="noreferrer"
-                className="bg-[#153448] h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-[#153448] group p-6"
+                className="min-w-[calc(100vw-3rem)] md:min-w-0 snap-start bg-[#153448] h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-[#153448] group p-6"
               >
                 <img 
                   src={logoAFIP} 
