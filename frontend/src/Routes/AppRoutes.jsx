@@ -16,15 +16,10 @@ import {
   Capacitacion,
   Contacto,
   Eventos,
+  Noticias,
   Nosotros,
 } from "../Pages/HomePage/index.js";
 import Profile from "../Pages/Profile";
-import {
-  Autoridades,
-  Balance,
-  Estatuto,
-  Noticias,
-} from "../Pages/PublicPages/index.js";
 import Socios from "../Pages/Socios/InicioSocio.jsx";
 import AdminRoutes from "./AdminRoutes.jsx";
 import PrivateRoutes from "./PrivateRoutes";
@@ -56,9 +51,6 @@ export default function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/autoridades" element={<Autoridades />} />
-        <Route path="/balance" element={<Balance />} />
-        <Route path="/estatuto" element={<Estatuto />} />
         <Route path="/noticias" element={<Noticias />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
