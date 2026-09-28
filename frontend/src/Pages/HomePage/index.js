@@ -1,5 +1,1 @@
-export { default as Capacitacion } from "./Capacitacion.jsx"
-export { default as Contacto } from "./Contacto.jsx"
-export { default as Eventos } from "./Eventos.jsx"
-export { default as Nosotros } from "./Nosotros.jsx"
 export { default as Noticias } from "./Noticias.jsx"

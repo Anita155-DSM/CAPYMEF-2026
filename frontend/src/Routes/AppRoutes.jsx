@@ -12,13 +12,7 @@ import Inicio from "../Pages/Admin/Inicio.jsx";
 import { ForgotPassword, Login, Register } from "../Pages/Auth/index.js";
 import ResetPassword from "../Pages/Auth/ResetPassword.jsx";
 import Home from "../Pages/Home";
-import {
-  Capacitacion,
-  Contacto,
-  Eventos,
-  Noticias,
-  Nosotros,
-} from "../Pages/HomePage/index.js";
+import { Noticias } from "../Pages/HomePage/index.js";
 import Profile from "../Pages/Profile";
 import Socios from "../Pages/Socios/InicioSocio.jsx";
 import AdminRoutes from "./AdminRoutes.jsx";
@@ -58,10 +52,6 @@ export default function AppRoutes() {
         {/*LOGUEADOS*/}
         <Route element={<PrivateRoutes />}>
           <Route path="/profile" element={<Profile />} />
-          <Route path="/capacitacion" element={<Capacitacion />} />
-          <Route path="/contactos" element={<Contacto />} />
-          <Route path="/eventos" element={<Eventos />} />
-          <Route path="/nosotros" element={<Nosotros />} />
         </Route>
 
         {/*SOCIOS */}
