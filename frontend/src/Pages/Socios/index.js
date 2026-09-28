@@ -1,0 +1,5 @@
+export {default as InicioSocio} from "./InicioSocio"
+export {default as EventosSocio} from "./EventosSocio"
+export {default as NoticiasSocio} from "./NoticiasSocio"
+export {default as PagosSocio} from "./PagosSocio"
+export {default as EmpresaSocio} from "./EmpresaSocio"

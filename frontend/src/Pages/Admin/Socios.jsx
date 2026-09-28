@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { obtenerTodosLosUsuarios } from "../../services/adminServices.js";
 import Loading from "../../Components/Loading";
-import Search, { useBuscador } from "./Components/Search"; 
+import Search, { useBuscador } from "./Components/Search";
 import { toast } from "sonner";
 import { FaEdit, FaUserSlash, FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx"; // Importamos la librería de Excel
-import ModalEditarSocio from "./Components/ModalEditarSocio.jsx";
+import ModalEditarSocio from "./Components/Modals/ModalEditarSocio.jsx";
 
 export default function Socios() {
     const [socios, setSocios] = useState([]);
     const [cargando, setCargando] = useState(true);
-    
+
     // Estado para controlar el modal de edición (que crearemos después)
     const [socioAEditar, setSocioAEditar] = useState(null);
 
@@ -54,7 +54,7 @@ export default function Socios() {
         const worksheet = XLSX.utils.json_to_sheet(datosParaExcel);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Padrón Socios");
-        
+
         // Descargamos el archivo
         XLSX.writeFile(workbook, "Padron_Socios_CAPYMEF.xlsx");
         toast.success("¡Archivo Excel descargado con éxito!");
@@ -68,7 +68,7 @@ export default function Socios() {
         try {
             // ACA DEBES LLAMAR A TU SERVICIO DEL BACKEND
             // Ejemplo: await cambiarEstadoSocio(id, 'inactivo');
-            
+
             // Por ahora hacemos la actualización visual en el frontend:
             setSocios(prev => prev.map(s => s.id === id ? { ...s, estado: 'inactivo' } : s));
             toast.success(`El socio ${razonSocial} fue marcado como inactivo.`);
@@ -81,19 +81,19 @@ export default function Socios() {
 
     return (
         <div className="px-4 w-full font-sans relative">
-            
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
-                <div className="flex-grow w-full">
-                    <Search 
-                        titulo="Padrón de Socios" 
-                        filtros={filtros} 
-                        dispatch={dispatch} 
-                        opciones={opciones} 
+                <div className="grow w-full">
+                    <Search
+                        titulo="Padrón de Socios"
+                        filtros={filtros}
+                        dispatch={dispatch}
+                        opciones={opciones}
                     />
                 </div>
-                
+
                 {/* Botón de Excel */}
-                <button 
+                <button
                     onClick={exportarExcel}
                     className="flex items-center gap-2 bg-[#107c41] hover:bg-[#0c5e31] text-white font-bold py-2.5 px-5 rounded-lg shadow-md transition-colors shrink-0"
                 >
@@ -120,7 +120,7 @@ export default function Socios() {
                         {filtrados.length === 0 ? (
                             <tr>
                                 <td colSpan="8" className="py-6 text-center text-gray-500 font-medium">
-                                    {socios.length === 0 
+                                    {socios.length === 0
                                         ? "No hay usuarios registrados en la base de datos."
                                         : "No se encontraron coincidencias con los filtros aplicados."}
                                 </td>
@@ -135,18 +135,17 @@ export default function Socios() {
                                     <td className="py-3 px-4 text-gray-600">{socio.rubro}</td>
                                     <td className="py-3 px-4 text-gray-600">{socio.localidad}</td>
                                     <td className="py-3 px-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-bold capitalize shadow-sm ${
-                                            socio.estado === 'aprobado' ? 'bg-green-100 text-green-700' : 
-                                            socio.estado === 'inactivo' ? 'bg-red-100 text-red-700' : 
-                                            'bg-yellow-100 text-yellow-700'
-                                        }`}>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-bold capitalize shadow-sm ${socio.estado === 'aprobado' ? 'bg-green-100 text-green-700' :
+                                            socio.estado === 'inactivo' ? 'bg-red-100 text-red-700' :
+                                                'bg-yellow-100 text-red-700'
+                                            }`}>
                                             {socio.estado}
                                         </span>
                                     </td>
                                     <td className="py-3 px-4 text-center">
                                         <div className="flex justify-center gap-2">
                                             {/* Botón Editar */}
-                                            <button 
+                                            <button
                                                 onClick={() => setSocioAEditar(socio)}
                                                 className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded transition-colors shadow-sm"
                                                 title="Editar datos del socio"
@@ -162,11 +161,11 @@ export default function Socios() {
                 </table>
             </div>
 
-           <ModalEditarSocio
-           socio={socioAEditar}
-           onClose={()=>setSocioAEditar(null)}
-           onActualizado={cargarUsuarios}
-           />
+            <ModalEditarSocio
+                socio={socioAEditar}
+                onClose={() => setSocioAEditar(null)}
+                onActualizado={cargarUsuarios}
+            />
         </div>
     );
 }

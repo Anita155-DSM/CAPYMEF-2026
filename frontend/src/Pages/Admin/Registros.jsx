@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Loading from "../../Components/Loading";
 import { gestionarEstadoSolicitud, obtenerTodosLosUsuarios } from "../../services/adminServices";
-import ModalRevision from "./Components/ModalRevision.jsx";
+import ModalRevision from "./Components/Modals/ModalRevision.jsx";
 import Search, { useBuscador } from "./Components/Search";
 
 export default function RegistrosAdmin() {

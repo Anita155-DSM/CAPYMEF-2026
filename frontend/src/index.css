@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
   font-synthesis: none;
@@ -58,4 +59,98 @@ body,
 
 .group:hover .titulo-animado {
   color: #1D7BB6; /* El texto se vuelve azul */
+}
+
+/* Revela el contenido al entrar en la ventana durante el desplazamiento. */
+.noticia-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.noticia-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.noticia-reveal-delay-1 {
+  transition-delay: 0.05s;
+}
+
+.noticia-reveal-delay-2 {
+  transition-delay: 0.12s;
+}
+
+.noticia-reveal-delay-3 {
+  transition-delay: 0.19s;
+}
+
+.inicio-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.inicio-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.inicio-reveal-hero {
+  transform: translateY(0) scale(0.985);
+}
+
+.inicio-reveal-hero.is-visible {
+  transform: translateY(0) scale(1);
+}
+
+.inicio-reveal-delay-1 {
+  transition-delay: 0.06s;
+}
+
+.inicio-reveal-delay-2 {
+  transition-delay: 0.12s;
+}
+
+.inicio-reveal-delay-3 {
+  transition-delay: 0.18s;
+}
+
+.public-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.public-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.public-reveal-delay-1 {
+  transition-delay: 0.05s;
+}
+
+.public-reveal-delay-2 {
+  transition-delay: 0.11s;
+}
+
+.public-reveal-delay-3 {
+  transition-delay: 0.17s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noticia-reveal,
+  .inicio-reveal,
+  .inicio-reveal-hero {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .public-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

@@ -1,7 +1,23 @@
+import { useEffect } from "react";
 import { NavbarPublico } from "../../Components";
 import { Footer } from "../../Components";
 
 export default function Balance() {
+  useEffect(() => {
+    const elementos = document.querySelectorAll(".public-reveal");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    elementos.forEach((elemento) => observer.observe(elemento));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <NavbarPublico />
@@ -9,7 +25,7 @@ export default function Balance() {
       <main className="pt-32 pb-16 bg-white min-h-screen">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 public-reveal">
             <h2 className="text-3xl font-extrabold text-[#1A4B76] sm:text-4xl">
               Transparencia Financiera
             </h2>
@@ -18,7 +34,7 @@ export default function Balance() {
             </p>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center public-reveal public-reveal-delay-1">
             <a 
               href="/Balance2011-2025_compressed.pdf" 
               download="BALANCE.pdf"

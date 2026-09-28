@@ -4,8 +4,6 @@ import {
   FaExclamationTriangle,
   FaChalkboardTeacher,
 } from "react-icons/fa";
-import MainLayout from "../../layouts/MainLayout";
-import Navbar from "../../Components/Navbar";
 // Importamos tu servicio
 import { obtenerTodosLosUsuarios } from "../../services/adminServices";
 

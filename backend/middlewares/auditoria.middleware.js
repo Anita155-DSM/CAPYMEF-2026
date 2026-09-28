@@ -25,7 +25,7 @@ export const interceptorAuditoria = (req, res, next) => {
           await Auditoria.create({
             usuarioId: req.usuario?.id || null,
             usuarioNombre: req.usuario ? `${req.usuario.razonSocial || req.usuario.email || 'Usuario'}` : 'Sistema',
-            usuarioRol: req.usuario?.rol || req.usuario?.categoria || 'ADMIN',
+            usuarioRol: req.usuario?.rol || req.usuario?.categoria || 'ANONIMO',
             modulo,
             accionTipo,
             codigoTecnico,

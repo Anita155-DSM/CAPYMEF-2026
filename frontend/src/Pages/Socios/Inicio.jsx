@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     FaArrowRight,
     FaBell,
     FaBuilding,
+    FaChartBar,
     FaCalendarCheck,
     FaChartLine,
     FaChevronRight,
@@ -11,6 +12,12 @@ import {
     FaDownload,
     FaGear,
     FaHouse,
+    FaIdCard,
+    FaLocationDot,
+    FaPhone,
+    FaEnvelope,
+    FaUsers,
+    FaGears,
     FaMoneyBillWave,
     FaNewspaper,
     FaBars,
@@ -18,9 +25,17 @@ import {
 } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import logo from "../../assets/img/Logo.png";
+import { obtenerPerfil } from "../../services/authServices";
+import { obtenerNoticiasSocios } from "../../services/noticiasService";
+import EventosSocio from "./EventosSocio";
+import NoticiasSocio from "./NoticiasSocio";
 
 function App() {
-  return <img src={logo} alt="Logo" />;
+    return (
+        <div className="flex h-full w-full items-center justify-start overflow-hidden">
+            <img src={logo} alt="CAPYMEF" className="max-h-16 w-30 object-contain" />
+        </div>
+    );
 }   
 
 const movimientos = [
@@ -29,19 +44,72 @@ const movimientos = [
     { periodo: "Julio de 2026", estado: "Pagada", tipo: "pagada" },
 ];
 
-const novedades = [
-    { fecha: "20/08/2026", texto: "Nuevo convenio con CAME para créditos a tasa subsidiada" },
-    { fecha: "14/08/2026", texto: "Actualización del valor de la cuota societaria" },
-    { fecha: "05/08/2026", texto: "Convocatoria a asamblea ordinaria de socios" },
-];
-
 export default function Socios() {
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [seccionActiva, setSeccionActiva] = useState("Inicio");
-    const usuarioGuardado = localStorage.getItem("usuario");
-    const usuario = usuarioGuardado ? JSON.parse(usuarioGuardado) : {};
+    const [solicitudAbierta, setSolicitudAbierta] = useState(null);
+    const [detalleSolicitud, setDetalleSolicitud] = useState("");
+    const [solicitudEnviada, setSolicitudEnviada] = useState(false);
+    const [proximoEvento, setProximoEvento] = useState(null);
+    const [ultimasNoticias, setUltimasNoticias] = useState([]);
+    const [usuario, setUsuario] = useState(() => {
+        const usuarioGuardado = localStorage.getItem("usuario");
+        return usuarioGuardado ? JSON.parse(usuarioGuardado) : {};
+    });
+
+    useEffect(() => {
+        const cargarPerfil = async () => {
+            try {
+                const resultado = await obtenerPerfil();
+                if (resultado.exito) {
+                    setUsuario(resultado.data);
+                    localStorage.setItem("usuario", JSON.stringify(resultado.data));
+                }
+            } catch (error) {
+                console.error("No se pudo cargar el perfil del socio:", error);
+            }
+        };
+
+        cargarPerfil();
+    }, []);
+
+    useEffect(() => {
+        const cargarResumen = async () => {
+            const token = localStorage.getItem("token");
+            const ahora = new Date();
+
+            try {
+                const [respuestaEventos, respuestaNoticias] = await Promise.all([
+                    fetch(`${import.meta.env.VITE_API_URL}/eventos/socios`, { headers: { Authorization: `Bearer ${token}` } }),
+                    obtenerNoticiasSocios(),
+                ]);
+                const resultadoEventos = await respuestaEventos.json();
+
+                if (respuestaEventos.ok && resultadoEventos.exito) {
+                    const eventosFuturos = (resultadoEventos.data || [])
+                        .filter((evento) => evento.estado !== "cancelado" && evento.fecha)
+                        .filter((evento) => new Date(`${evento.fecha}T${evento.horaInicio || "00:00"}`) >= ahora)
+                        .sort((a, b) => new Date(`${a.fecha}T${a.horaInicio || "00:00"}`) - new Date(`${b.fecha}T${b.horaInicio || "00:00"}`));
+                    setProximoEvento(eventosFuturos[0] || null);
+                }
+
+                if (respuestaNoticias.exito) {
+                    setUltimasNoticias((respuestaNoticias.data || []).slice(0, 3));
+                }
+            } catch (error) {
+                console.error("No se pudo cargar el resumen del socio:", error);
+            }
+        };
+
+        cargarResumen();
+    }, []);
+
     const nombreEmpresa = usuario.razonSocial || "Tu empresa";
-    const categoria = usuario.categoria || "Socio activo";
+    const categoria = usuario.categoria ? usuario.categoria.replace(/^./, (letra) => letra.toUpperCase()) : "Socio";
+    const rubro = usuario.rubro || "Rubro no informado";
+    const localidad = usuario.localidad || "Localidad no informada";
+    const actividad = usuario.actividad || "Actividad no informada";
+    const tamanoEmpresa = usuario.tamano_empresa === "Pequena" ? "Pequeña" : (usuario.tamano_empresa || "Tamaño no informado");
 
     const menu = [
         { nombre: "Inicio", icono: FaHouse },
@@ -56,10 +124,29 @@ export default function Socios() {
         setMenuAbierto(false);
     };
 
+    const abrirSolicitud = (tipo) => {
+        setSolicitudAbierta(tipo);
+        setDetalleSolicitud("");
+        setSolicitudEnviada(false);
+    };
+
+    const cerrarSolicitud = () => {
+        setSolicitudAbierta(null);
+        setDetalleSolicitud("");
+        setSolicitudEnviada(false);
+    };
+
+    const enviarSolicitud = (evento) => {
+        evento.preventDefault();
+        if (detalleSolicitud.trim()) {
+            setSolicitudEnviada(true);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#eef6fb] text-[#132A46] font-sans">
             <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1b527d] text-white transition-transform duration-300 lg:translate-x-0 ${menuAbierto ? "translate-x-0" : "-translate-x-full"}`}>
-                <div className="flex h-20 items-center justify-between border-b border-white/10 px-6">
+                <div className="flex h-20 items-center justify-between border-b border-white/10 px-3">
                     <App />
                     <button className="lg:hidden text-2xl" onClick={() => setMenuAbierto(false)} aria-label="Cerrar menú">
                         <FaXmark />
@@ -100,16 +187,16 @@ export default function Socios() {
                 </header>
 
                 <main className="mx-auto max-w-[1400px] p-5 sm:p-8">
-                    <section className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    {seccionActiva !== "Mi empresa" && seccionActiva !== "Eventos" && seccionActiva !== "Noticias" && <section className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                         <div>
                             <p className="mb-1 text-sm font-semibold text-[#1D7BB6]">PANEL DE SOCIO</p>
                             <h1 className="text-2xl font-bold uppercase tracking-tight text-[#132A46] sm:text-3xl">Hola, {nombreEmpresa}</h1>
-                            <p className="mt-2 text-sm text-gray-600">Socio N° 0042 <span className="mx-2">•</span> Servicios gráficos <span className="mx-2">•</span> Formosa Capital</p>
+                            <p className="mt-2 text-sm text-gray-600">Socio N° {usuario.id || "-"} <span className="mx-2">•</span> {rubro} <span className="mx-2">•</span> {localidad}</p>
                         </div>
                         <span className="w-fit rounded-sm bg-[#00bf68] px-4 py-2 text-sm font-bold text-white">Estás al día!</span>
-                    </section>
+                    </section>}
 
-                    <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+                    {seccionActiva !== "Mi empresa" && seccionActiva !== "Eventos" && seccionActiva !== "Noticias" && <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
                         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
                             <div>
                                 <p className="text-sm font-medium uppercase text-gray-600">Cuota de septiembre de 2026</p>
@@ -121,8 +208,73 @@ export default function Socios() {
                                 <button className="inline-flex items-center gap-2 bg-[#2693bf] px-4 py-2 text-sm font-bold text-white hover:bg-[#1b789f]">Pagar cuota <FaCreditCard /></button>
                             </div>
                         </div>
-                    </section>
+                    </section>}
 
+     {/*ACA ESTA LA SECCION DE MI EMPRESA */}               
+
+                    {seccionActiva === "Eventos" ? (
+                        <EventosSocio />
+                    ) : seccionActiva === "Noticias" ? (
+                        <NoticiasSocio />
+                    ) : seccionActiva === "Mi empresa" ? (
+                        <section className="min-h-[calc(100vh-9rem)] bg-[#edf7fd] px-1 py-2 sm:px-3 sm:py-5">
+                            <div className="mb-3 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                                <div>
+                                    <h1 className="text-2xl font-normal uppercase text-[#073d6f] sm:text-[25px]">Mi empresa</h1>
+                                    <p className="text-sm text-[#6b7884]">Ficha de {nombreEmpresa}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid items-start gap-9 lg:grid-cols-[minmax(0,1.15fr)_minmax(400px,1fr)]">
+                                <div className="rounded-[25px] border border-[#d9d9d9] bg-white px-3 py-5 sm:px-4 sm:py-5">
+                                    <div className="mb-2 flex items-center justify-between gap-3">
+                                        <h2 className="text-lg font-bold uppercase text-[#34414c]">Datos institucionales</h2>
+                                        <button type="button" onClick={() => abrirSolicitud("Datos institucionales")} className="border border-[#d7e0e5] bg-[#f4f9fc] px-2 py-2 text-sm text-[#17384f] hover:bg-[#e7f2f8]">Solicitar modificación</button>
+                                    </div>
+                                    <div className="space-y-0">
+                                        {[
+                                            [FaBuilding, "Empresa", usuario.razonSocial],
+                                            [FaIdCard, "CUIT", usuario.cuit],
+                                            [FaUsers, "Categoría", categoria],
+                                            [FaGears, "Rubro", rubro],
+                                            [FaChartLine, "Actividad", actividad],
+                                            [FaChartBar, "Tamaño de la empresa", tamanoEmpresa],
+                                            [FaLocationDot, "Localidad", localidad],
+                                        ].map(([Icono, etiqueta, valor]) => (
+                                            <div key={etiqueta} className="grid grid-cols-[30px_1fr] items-end border-b border-[#d8d8d8] py-2 last:border-0">
+                                                <Icono className="mb-0.5 text-lg text-[#006ab4]" />
+                                                <div>
+                                                    <p className="text-base uppercase text-[#66727d]">{etiqueta}</p>
+                                                    <p className="text-base text-[#3a4147]">{valor || "No informado"}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="border border-[#e0e0e0] bg-white px-3 py-5 sm:px-3">
+                                    <div className="mb-2 flex items-center justify-between gap-3">
+                                        <h2 className="text-lg font-bold uppercase text-[#34414c]">Contacto</h2>
+                                        <button type="button" onClick={() => abrirSolicitud("Contacto")} className="border border-[#d7e0e5] bg-[#f4f9fc] px-2 py-2 text-sm text-[#17384f] hover:bg-[#e7f2f8]">Solicitar modificación</button>
+                                    </div>
+                                    <div>
+                                        {[
+                                            [FaPhone, "Teléfono", usuario.telefono],
+                                            [FaEnvelope, "Correo electrónico", usuario.email],
+                                        ].map(([Icono, etiqueta, valor]) => (
+                                            <div key={etiqueta} className="grid grid-cols-[30px_1fr] items-end border-b border-[#d8d8d8] py-2 last:border-0">
+                                                <Icono className="mb-0.5 text-base text-[#006ab4]" />
+                                                <div>
+                                                    <p className="text-base uppercase text-[#66727d]">{etiqueta}</p>
+                                                    <p className="text-base text-[#3a4147]">{valor || "No informado"}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    ) : (
                     <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
                         <div className="space-y-6">
                             <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
@@ -143,25 +295,56 @@ export default function Socios() {
                             <section className="border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
                                 <div className="mb-4 flex items-center justify-between">
                                     <h2 className="text-lg font-medium uppercase text-gray-600">Próximo evento</h2>
-                                    <button className="flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">Ver todos <FaArrowRight /></button>
+                                    <button onClick={() => cambiarSeccion("Eventos")} className="flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">Ver todos <FaArrowRight /></button>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="rounded-lg bg-[#168bc4] px-3 py-2 text-center font-bold text-white"><span className="block text-xs">SEP</span><span className="text-xl">02</span></div>
-                                    <div><h3 className="font-bold">Educación Financiera</h3><p className="text-sm text-gray-600">◉ Sede CAPYMEF</p><p className="text-sm text-gray-600">♟ 20 Cupos disponibles</p></div>
-                                </div>
+                                {proximoEvento ? <div className="flex items-center gap-4">
+                                    <div className="rounded-lg bg-[#168bc4] px-3 py-2 text-center font-bold text-white"><span className="block text-xs">{new Date(`${proximoEvento.fecha}T00:00:00`).toLocaleDateString("es-AR", { month: "short" }).replace(".", "").toUpperCase()}</span><span className="text-xl">{new Date(`${proximoEvento.fecha}T00:00:00`).getDate()}</span></div>
+                                    <div><h3 className="font-bold">{proximoEvento.titulo}</h3><p className="text-sm text-gray-600">◉ {proximoEvento.lugar || proximoEvento.modalidad || "Lugar a confirmar"}</p><p className="text-sm text-gray-600">♟ {proximoEvento.cupoMaximo ? `${proximoEvento.cupoMaximo} cupos disponibles` : "Cupo abierto"}</p></div>
+                                </div> : <p className="text-sm text-gray-600">No hay próximos eventos publicados.</p>}
                             </section>
                         </div>
 
                         <section className="border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
                             <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3"><h2 className="text-lg font-medium uppercase text-gray-600">Novedades</h2><FaChartLine className="text-[#1D7BB6]" /></div>
                             <div className="divide-y divide-gray-200">
-                                {novedades.map((novedad) => <article key={novedad.fecha} className="py-3 first:pt-0"><p className="mb-1 text-sm font-medium">{novedad.fecha}</p><p className="text-sm leading-snug text-gray-800">{novedad.texto}</p></article>)}
+                                {ultimasNoticias.length ? ultimasNoticias.map((noticia) => <article key={noticia.id} className="py-3 first:pt-0"><p className="mb-1 text-sm font-medium">{new Date(noticia.fechaPublicacion).toLocaleDateString("es-AR")}</p><p className="text-sm leading-snug text-gray-800">{noticia.titulo}</p></article>) : <p className="py-3 text-sm text-gray-600">No hay noticias publicadas.</p>}
                             </div>
-                            <button className="mt-5 flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">Ver todas las noticias <FaChevronRight /></button>
+                            <button onClick={() => cambiarSeccion("Noticias")} className="mt-5 flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">Ver todas las noticias <FaChevronRight /></button>
                         </section>
                     </div>
+                    )}
                 </main>
             </div>
+
+            {solicitudAbierta && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#132A46]/50 px-4" onMouseDown={(evento) => evento.target === evento.currentTarget && cerrarSolicitud()}>
+                    <div className="w-full max-w-lg border border-[#d7e0e5] bg-white p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="titulo-solicitud">
+                        {solicitudEnviada ? (
+                            <div className="text-center">
+                                <h2 id="titulo-solicitud" className="text-xl font-bold text-[#132A46]">Solicitud registrada</h2>
+                                <p className="mt-3 text-sm text-gray-600">Tu pedido de modificación de {solicitudAbierta.toLowerCase()} quedó preparado para ser revisado por CAPYMEF.</p>
+                                <button type="button" onClick={cerrarSolicitud} className="mt-6 bg-[#1b527d] px-5 py-2 text-sm font-bold text-white hover:bg-[#164568]">Cerrar</button>
+                            </div>
+                        ) : (
+                            <form onSubmit={enviarSolicitud}>
+                                <div className="flex items-start justify-between gap-4">
+                                    <div>
+                                        <p className="text-xs font-semibold uppercase text-[#1D7BB6]">Mi empresa</p>
+                                        <h2 id="titulo-solicitud" className="mt-1 text-xl font-bold text-[#132A46]">Modificar {solicitudAbierta.toLowerCase()}</h2>
+                                    </div>
+                                    <button type="button" onClick={cerrarSolicitud} className="text-2xl leading-none text-gray-500 hover:text-[#132A46]" aria-label="Cerrar">&times;</button>
+                                </div>
+                                <p className="mt-4 text-sm text-gray-600">Contanos qué dato necesitás corregir y cuál debería ser el valor correcto.</p>
+                                <textarea value={detalleSolicitud} onChange={(evento) => setDetalleSolicitud(evento.target.value)} required rows="5" placeholder="Ej.: Solicito actualizar el teléfono a..." className="mt-4 w-full resize-none border border-[#cfdbe3] p-3 text-sm text-[#132A46] outline-none focus:border-[#1D7BB6]" />
+                                <div className="mt-5 flex justify-end gap-3">
+                                    <button type="button" onClick={cerrarSolicitud} className="border border-[#d7e0e5] px-4 py-2 text-sm text-[#17384f] hover:bg-[#f4f9fc]">Cancelar</button>
+                                    <button type="submit" className="bg-[#1b527d] px-4 py-2 text-sm font-bold text-white hover:bg-[#164568]">Enviar solicitud</button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

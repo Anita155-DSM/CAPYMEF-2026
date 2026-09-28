@@ -2,7 +2,7 @@ import { FaSearch, FaPlus, FaArrowLeft } from "react-icons/fa";
 
 import Loading from "../../Components/Loading";
 import { Card } from "../../Components";
-import ModalAdmin from "./Components/ModalAdmin"; // <-- Importamos nuestro modal exclusivo de admin
+import ModalAdmin from "./Components/Modals/ModalAdmin.jsx"; // <-- Importamos nuestro modal exclusivo de admin
 import { useNoticiasLogic } from "./Hooks/useNoticiasLogic.js";
 import { useState } from "react";
 
@@ -62,6 +62,7 @@ export default function NoticiasAdmin() {
                   subtitulo={noticia.subtitulo}
                   imagenUrl={noticia.imagenUrl}
                   fecha={noticia.fechaPublicacion}
+                  categoria={noticia.categoria}
                   onLeerMas={() => setNoticiaSeleccionada(noticia)}
                 />
 
@@ -76,8 +77,8 @@ export default function NoticiasAdmin() {
 
                   <span
                     className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider shadow-sm ${noticia.estado === 'publicado'
-                        ? 'bg-[#00B859] text-white'
-                        : 'bg-[#FFC107] text-[#132A46]'
+                      ? 'bg-[#00B859] text-white'
+                      : 'bg-[#FFC107] text-[#132A46]'
                       }`}
                   >
                     {noticia.estado === 'publicado' ? 'Visible' : 'Oculto'}
@@ -143,6 +144,16 @@ export default function NoticiasAdmin() {
               rows="2"
               className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] focus:ring-1 focus:ring-[#1D7BB6] resize-none"
               {...register("subtitulo")}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="font-bold text-gray-700">Categoría *</label>
+            <input
+              type="text"
+              placeholder="Ej: Institucional"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] focus:ring-1 focus:ring-[#1D7BB6]"
+              {...register("categoria", { required: true, maxLength: 100 })}
             />
           </div>
 

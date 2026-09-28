@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import Navbar from "../Components/Navbar.jsx";
-import Loading from "../Components/Loading.jsx";
+import { cerrarSesion } from "../services/authServices";
 
 export default function Profile() {
   const [usuario, setUsuario] = useState(null)
@@ -15,18 +14,12 @@ export default function Profile() {
 
   if (!usuario) {
     return <div className="mt-32 text-center text-xl">Cargando perfil...</div>;
-    <Loading />
   }
 
 
   return (
     <main className="min-h-screen bg-gray-100 font-sans pb-12">
-      <Navbar />
-
-      {/* 
-        Contenedor general con padding-top para que el Navbar fijo no lo tape 
-      */}
-      <div className="pt-24 px-6 md:px-12 max-w-5xl mx-auto">
+      <div className="pt-12 px-6 md:px-12 max-w-5xl mx-auto">
 
         {/* Tarjeta principal del perfil */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -41,6 +34,16 @@ export default function Profile() {
           {/* 2. CABECERA DEL PERFIL (Foto + Info base) */}
           {/* ========================================= */}
           <div className="px-8 pb-8 relative">
+
+            <div className="flex justify-end pt-6">
+              <button
+                type="button"
+                onClick={cerrarSesion}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm"
+              >
+                Cerrar sesión
+              </button>
+            </div>
 
             {/* Foto de perfil con margen negativo para subirse al banner */}
             <div className="flex justify-between items-end -mt-16 md:-mt-20 mb-4">

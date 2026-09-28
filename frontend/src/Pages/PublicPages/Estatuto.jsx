@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavbarPublico } from "../../Components";
 import { Footer } from "../../Components";
 
@@ -73,6 +73,21 @@ const estatutoData = [
 export default function Estatuto() {
   const [openId, setOpenId] = useState(null);
 
+  useEffect(() => {
+    const elementos = document.querySelectorAll(".public-reveal");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    elementos.forEach((elemento) => observer.observe(elemento));
+    return () => observer.disconnect();
+  }, []);
+
   const toggleAccordion = (id) => {
     setOpenId(openId === id ? null : id);
   };
@@ -84,7 +99,7 @@ export default function Estatuto() {
       <main className="pt-32 pb-16 bg-white min-h-screen">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center mb-10">
+          <div className="text-center mb-10 public-reveal">
             <h2 className="text-3xl font-extrabold text-[#1A4B76] sm:text-4xl">
               Estatuto Social
             </h2>
@@ -93,7 +108,7 @@ export default function Estatuto() {
             </p>
           </div>
 
-          <div className="flex justify-center mb-12">
+          <div className="flex justify-center mb-12 public-reveal public-reveal-delay-1">
           
             <a 
               href="/ESTATUTO.pdf" 
@@ -112,7 +127,7 @@ export default function Estatuto() {
             {estatutoData.map((item) => (
               <div 
                 key={item.id} 
-                className="border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300"
+                className={`border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 public-reveal public-reveal-delay-${(item.id - 1) % 3 + 1}`}
               >
                 <button
                   onClick={() => toggleAccordion(item.id)}

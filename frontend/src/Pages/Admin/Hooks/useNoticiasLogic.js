@@ -54,7 +54,8 @@ export function useNoticiasLogic() {
             const formData = new FormData();
             formData.append("titulo", data.titulo);
             formData.append("contenido", data.contenido);
-            formData.append("visibilidad", data.visibilidad);
+                formData.append("categoria", data.categoria);
+                formData.append("visibilidad", data.visibilidad);
             formData.append("estado", data.estado);
 
             if (data.subtitulo) formData.append("subtitulo", data.subtitulo);

@@ -1,5 +1,5 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout.jsx";
 import {
   EventosAdmin,
@@ -18,11 +18,24 @@ import {
   Eventos,
   Nosotros,
 } from "../Pages/HomePage/index.js";
-import Socios from "../Pages/Socios/Inicio.jsx";
 import Profile from "../Pages/Profile";
-import { Autoridades, Balance, Estatuto, Noticias } from "../Pages/PublicPages/index.js";
+import {
+  Autoridades,
+  Balance,
+  Estatuto,
+  Noticias,
+} from "../Pages/PublicPages/index.js";
+import Socios from "../Pages/Socios/InicioSocio.jsx";
 import AdminRoutes from "./AdminRoutes.jsx";
 import PrivateRoutes from "./PrivateRoutes";
+import {
+  InicioSocio,
+  EventosSocio,
+  NoticiasSocio,
+  EmpresaSocio,
+  PagosSocio,
+} from "../Pages/Socios/index.js";
+import SocioLayout from "../layouts/SocioLayout.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -52,14 +65,20 @@ export default function AppRoutes() {
 
         {/*LOGUEADOS*/}
         <Route element={<PrivateRoutes />}>
-
           <Route path="/profile" element={<Profile />} />
           <Route path="/capacitacion" element={<Capacitacion />} />
           <Route path="/contactos" element={<Contacto />} />
           <Route path="/eventos" element={<Eventos />} />
           <Route path="/nosotros" element={<Nosotros />} />
-          <Route path="/socios" element={<Socios />} />
+        </Route>
 
+        {/*SOCIOS */}
+        <Route path="/socios" element={<SocioLayout />}>
+          <Route index element={<InicioSocio />} />{" "}
+          <Route path="eventos" element={<EventosSocio />} />
+          <Route path="noticias" element={<NoticiasSocio />} />
+          <Route path="empresa" element={<EmpresaSocio />} />
+          <Route path="pagos" element={<PagosSocio />} />
         </Route>
 
         {/* ADMINS*/}

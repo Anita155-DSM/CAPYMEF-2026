@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa';
 import { GiAcousticMegaphone } from 'react-icons/gi';
 import { Link, Outlet } from 'react-router-dom';
+import Logo from '../assets/img/Logo.png';
 
 // 1. MODULARIZACIÓN DE DATOS:
 const OPCIONES_MENU = [
@@ -17,6 +18,7 @@ const OPCIONES_MENU = [
   { nombre: "Finanzas", ruta: "/admin/finanzas", Icono: FaDollarSign },
   { nombre: "Registros", ruta: "/admin/registros", Icono: FaClipboardList },
   { nombre: "Socios", ruta: "/admin/socios", Icono: FaUserFriends },
+  { nombre: "VISTA SOCIO (TEST)", ruta: "/socios", Icono: FaUserFriends },
 ];
 
 export default function MainLayout() {
@@ -28,12 +30,8 @@ export default function MainLayout() {
 
         {/* IMAGEN DE CAPYMEF */}
         <div className="flex justify-center mt-8 mb-10">
-          <Link to="/">
-            <img
-              src="../src/assets/img/Logo.png"
-              alt="Logo CAPYMEF"
-              className="w-40 opacity-90 cursor-pointer hover:opacity-100 transition-opacity"
-            />
+          <Link to="/admin/inicio" aria-label="Ir al inicio del panel de administración">
+            <img src={Logo} alt="Logo CAPYMEF" className="w-40 opacity-90" />
           </Link>
         </div>
 
