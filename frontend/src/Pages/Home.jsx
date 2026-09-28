@@ -541,9 +541,10 @@ export default function Home() {
             </div>
           </div>
         </section>
+      
 
         {/* --- VISTA N5: Información Institucional --- */}
-        <section id="informacion" className="w-full bg-[#F4F8FB] px-6 md:px-24 py-20 font-sans inicio-reveal">
+        <section id="informacion" className="w-full bg-gradient-to-r from-[#E5F1F8] to-[#F4F8FB] px-6 md:px-24 py-20 font-sans inicio-reveal">
           
           <div className="flex flex-col items-center mb-16 text-center">
             <h2 className="text-3xl md:text-[40px] font-extrabold text-[#153448] tracking-tight">
