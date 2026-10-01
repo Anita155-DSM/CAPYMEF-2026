@@ -1,21 +1,18 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { descargarComprobanteCuota, pagarCuotaOnline } from "../../../services/socioServices";
+import { descargarComprobanteCuota } from "../../../services/socioServices";
 
 // Acciones sobre una cuota (pagar / descargar comprobante), compartidas entre Inicio y Pagos: evitan doble click y muestran el error del backend.
 export default function useAccionesCuota() {
   const [procesando, setProcesando] = useState(null);
+  const [cuotaAPagar, setCuotaAPagar] = useState(null); // abre el ModalPagoCuota
 
-  const pagar = async (cuota) => {
-    if (procesando) return;
-    setProcesando(`pagar-${cuota.id}`);
-    try {
-      await pagarCuotaOnline(cuota.id); // redirige a Mercado Pago
-    } catch (error) {
-      toast.error(error.message);
-      setProcesando(null);
-    }
+  const pagar = (cuota) => {
+    if (procesando || cuota.estado === "pagada") return;
+    setCuotaAPagar(cuota);
   };
+
+  const cerrarPago = useCallback(() => setCuotaAPagar(null), []);
 
   const descargar = async (cuota) => {
     if (procesando) return;
@@ -29,5 +26,5 @@ export default function useAccionesCuota() {
     }
   };
 
-  return { procesando, pagar, descargar };
+  return { procesando, pagar, descargar, cuotaAPagar, cerrarPago };
 }

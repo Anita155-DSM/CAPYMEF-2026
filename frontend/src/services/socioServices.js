@@ -149,13 +149,21 @@ export const obtenerMisCuotas = async () => {
   }
 };
 
-// Pide al backend la orden de Mercado Pago y redirige al checkout.
-export const pagarCuotaOnline = async (cuotaId) => {
+// Pide al backend la orden de Mercado Pago (preferencia). Devuelve el link de checkout ya
+// validado y el id de preferencia (viene como "pref_id" dentro del link) para el Wallet Brick.
+export const crearOrdenPagoCuota = async (cuotaId) => {
   if (!idValido(cuotaId)) throw new ErrorApi("Cuota inválida.", 400);
   const resultado = await peticion(`/pagos/${encodeURIComponent(cuotaId)}/iniciar`, { method: "POST" });
   const destino = urlSegura(resultado?.data?.linkPago, DOMINIO_MERCADOPAGO);
   if (!destino) throw new ErrorApi("El enlace de pago recibido no es válido. Contactá a la administración.", 0);
-  window.location.assign(destino.href);
+  const preferenceId = destino.searchParams.get("pref_id");
+  return { linkPago: destino.href, preferenceId: /^[\w-]{1,100}$/.test(preferenceId || "") ? preferenceId : null };
+};
+
+// Plan B si el Wallet Brick no carga: redirige directo al checkout de Mercado Pago.
+export const irAlCheckout = (linkPago) => {
+  const destino = urlSegura(linkPago, DOMINIO_MERCADOPAGO);
+  if (destino) window.location.assign(destino.href);
 };
 
 export const descargarComprobanteCuota = async (cuota) => {

@@ -1,6 +1,7 @@
 import { FaCreditCard, FaDownload } from "react-icons/fa6";
 import { formatearFecha, formatearMonto, formatearPeriodo } from "../../../services/socioServices";
 import useAccionesCuota from "../Hooks/useAccionesCuota";
+import ModalPagoCuota from "./ModalPagoCuota";
 
 export function AvisoCuotasNoDisponibles() {
   return (
@@ -12,7 +13,7 @@ export function AvisoCuotasNoDisponibles() {
 }
 
 export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
-  const { procesando, pagar, descargar } = useAccionesCuota();
+  const { procesando, pagar, descargar, cuotaAPagar, cerrarPago } = useAccionesCuota();
 
   let contenido;
   if (cuotas === undefined) {
@@ -52,7 +53,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
               onClick={() => pagar(cuota)}
               className="inline-flex items-center gap-2 bg-[#2693bf] px-4 py-2 text-sm font-bold text-white hover:bg-[#1b789f] disabled:opacity-60"
             >
-              {procesando === `pagar-${cuota.id}` ? "Redirigiendo..." : "Pagar cuota"} <FaCreditCard />
+              "Pagar cuota" <FaCreditCard />
             </button>
           )}
         </div>
@@ -63,6 +64,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
       {contenido}
+      {cuotaAPagar && <ModalPagoCuota cuota={cuotaAPagar} onClose={cerrarPago} />}
     </section>
   );
 }

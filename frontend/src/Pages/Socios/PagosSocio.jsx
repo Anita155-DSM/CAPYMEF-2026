@@ -10,6 +10,7 @@ import {
 } from "../../services/socioServices";
 import TarjetaCuota, { AvisoCuotasNoDisponibles } from "./Components/TarjetaCuota";
 import useAccionesCuota from "./Hooks/useAccionesCuota";
+import ModalPagoCuota from "./Components/ModalPagoCuota";
 
 const FILTROS = [
   { valor: "todas", texto: "Todas" },
@@ -19,7 +20,7 @@ const FILTROS = [
 
 export default function PagosSocio() {
   const { cuotas, errorCuotas, recargarCuotas } = useOutletContext();
-  const { procesando, pagar, descargar } = useAccionesCuota();
+  const { procesando, pagar, descargar, cuotaAPagar, cerrarPago } = useAccionesCuota();
   const [filtro, setFiltro] = useState("todas");
   const [actualizando, setActualizando] = useState(false);
 
@@ -138,7 +139,7 @@ export default function PagosSocio() {
                               onClick={() => pagar(cuota)}
                               className="inline-flex items-center gap-2 bg-[#2693bf] px-3 py-1.5 text-sm font-bold text-white hover:bg-[#1b789f] disabled:opacity-60"
                             >
-                              {procesando === `pagar-${cuota.id}` ? "Redirigiendo..." : "Pagar"} <FaCreditCard />
+                              "Pagar" <FaCreditCard />
                             </button>
                           )}
                         </td>
@@ -151,6 +152,8 @@ export default function PagosSocio() {
           )}
         </section>
       </div>
+
+      {cuotaAPagar && <ModalPagoCuota cuota={cuotaAPagar} onClose={cerrarPago} />}
     </section>
   );
 }
