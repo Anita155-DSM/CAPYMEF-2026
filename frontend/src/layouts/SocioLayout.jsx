@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaBell,
   FaBuilding,
@@ -11,47 +11,86 @@ import {
   FaNewspaper,
   FaBars,
   FaXmark,
+  FaRightFromBracket,
 } from "react-icons/fa6";
 import logo from "../assets/img/Logo.png";
-import { obtenerPerfil } from "../services/authServices";
+import {
+  leerUsuarioGuardado,
+  limpiarSesion,
+  obtenerMiPerfil,
+  obtenerMisCuotas,
+} from "../services/socioServices";
+
+// Mapeamos las rutas reales
+const MENU = [
+  { nombre: "Inicio", icono: FaHouse, ruta: "/socios" },
+  { nombre: "Mi empresa", icono: FaBuilding, ruta: "/socios/empresa" },
+  { nombre: "Pagos", icono: FaMoneyBillWave, ruta: "/socios/pagos" },
+  { nombre: "Eventos", icono: FaCalendarCheck, ruta: "/socios/eventos" },
+  { nombre: "Noticias", icono: FaNewspaper, ruta: "/socios/noticias" },
+];
 
 export default function SocioLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false);
-  const [usuario, setUsuario] = useState(() => {
-    const usuarioGuardado = localStorage.getItem("usuario");
-    return usuarioGuardado ? JSON.parse(usuarioGuardado) : {};
-  });
+  const [usuario, setUsuario] = useState(() => leerUsuarioGuardado() || {});
+  // undefined = cargando, null = el backend no expone las cuotas del socio, [] = sin cuotas
+  const [cuotas, setCuotas] = useState(undefined);
+  const [errorCuotas, setErrorCuotas] = useState("");
 
   const location = useLocation(); // Para saber en qué ruta estamos y marcar el menú activo
+  const navigate = useNavigate();
+
+  const actualizarUsuario = useCallback((datos) => {
+    setUsuario((actual) => {
+      const nuevo = { ...actual, ...datos };
+      localStorage.setItem("usuario", JSON.stringify(nuevo));
+      return nuevo;
+    });
+  }, []);
+
+  const recargarCuotas = useCallback(async () => {
+    try {
+      const datos = await obtenerMisCuotas();
+      setErrorCuotas("");
+      setCuotas(datos);
+    } catch (error) {
+      setErrorCuotas(error.message);
+      setCuotas([]);
+    }
+  }, []);
 
   useEffect(() => {
-    const cargarPerfil = async () => {
-      try {
-        const resultado = await obtenerPerfil();
-        if (resultado.exito) {
-          setUsuario(resultado.data);
-          localStorage.setItem("usuario", JSON.stringify(resultado.data));
-        }
-      } catch (error) {
-        console.error("No se pudo cargar el perfil del socio:", error);
+    let activo = true; // evita setState si el layout se desmonta antes de que respondan
+    const cargarDatos = async () => {
+      const [perfil, misCuotas] = await Promise.allSettled([obtenerMiPerfil(), obtenerMisCuotas()]);
+      if (!activo) return;
+
+      if (perfil.status === "fulfilled" && perfil.value) actualizarUsuario(perfil.value);
+      else if (perfil.status === "rejected") console.error("No se pudo cargar el perfil del socio:", perfil.reason?.message);
+
+      if (misCuotas.status === "fulfilled") {
+        setCuotas(misCuotas.value);
+      } else {
+        setErrorCuotas(misCuotas.reason?.message || "No se pudieron cargar tus cuotas.");
+        setCuotas([]);
       }
     };
-    cargarPerfil();
-  }, []);
+    cargarDatos();
+    return () => {
+      activo = false;
+    };
+  }, [actualizarUsuario]);
+
+  const salir = () => {
+    limpiarSesion();
+    navigate("/login", { replace: true });
+  };
 
   const nombreEmpresa = usuario.razonSocial || "Tu empresa";
   const categoria = usuario.categoria
     ? usuario.categoria.replace(/^./, letra => letra.toUpperCase())
     : "Socio";
-
-  // Mapeamos las rutas reales
-  const menu = [
-    { nombre: "Inicio", icono: FaHouse, ruta: "/socios" },
-    { nombre: "Mi empresa", icono: FaBuilding, ruta: "/socios/empresa" },
-    { nombre: "Pagos", icono: FaMoneyBillWave, ruta: "/socios/pagos" },
-    { nombre: "Eventos", icono: FaCalendarCheck, ruta: "/socios/eventos" },
-    { nombre: "Noticias", icono: FaNewspaper, ruta: "/socios/noticias" },
-  ];
+  const tieneDeuda = Array.isArray(cuotas) && cuotas.some((cuota) => cuota.estado !== "pagada");
 
   return (
     <div className="min-h-screen bg-[#eef6fb] text-[#132A46] font-sans">
@@ -73,7 +112,7 @@ export default function SocioLayout() {
           </button>
         </div>
         <nav className="space-y-2 px-3 py-7">
-          {menu.map(({ nombre, icono: Icono, ruta }) => (
+          {MENU.map(({ nombre, icono: Icono, ruta }) => (
             <Link
               key={nombre}
               to={ruta}
@@ -85,9 +124,22 @@ export default function SocioLayout() {
             </Link>
           ))}
         </nav>
-        <button className="absolute bottom-7 left-7 flex items-center gap-4 text-sm font-bold text-white/90 hover:text-white">
-          <FaGear className="text-xl" /> Configuración
-        </button>
+        <div className="absolute bottom-7 left-7 space-y-5">
+          <Link
+            to="/socios/configuracion"
+            onClick={() => setMenuAbierto(false)}
+            className={`flex items-center gap-4 text-sm font-bold hover:text-white ${location.pathname === "/socios/configuracion" ? "text-white" : "text-white/90"}`}
+          >
+            <FaGear className="text-xl" /> Configuración
+          </Link>
+          <button
+            type="button"
+            onClick={salir}
+            className="flex items-center gap-4 text-sm font-bold text-white/90 hover:text-white"
+          >
+            <FaRightFromBracket className="text-xl" /> Cerrar sesión
+          </button>
+        </div>
       </aside>
 
       {menuAbierto && (
@@ -109,26 +161,30 @@ export default function SocioLayout() {
           </button>
           <div className="hidden text-sm text-gray-500 sm:block"></div>
           <div className="ml-auto flex items-center gap-4 sm:gap-6">
-            <button
+            <Link
+              to="/socios/pagos"
               className="relative text-xl text-[#1D7BB6]"
-              aria-label="Notificaciones"
+              aria-label={tieneDeuda ? "Notificaciones: tenés cuotas por pagar" : "Notificaciones"}
+              title={tieneDeuda ? "Tenés cuotas por pagar" : "Sin novedades"}
             >
               <FaBell />
-              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#e66d4a]" />
-            </button>
+              {tieneDeuda && <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#e66d4a]" />}
+            </Link>
             <div className="hidden text-right sm:block">
               <p className="text-sm font-bold text-[#132A46]">
                 {nombreEmpresa}
               </p>
               <p className="text-xs text-gray-500">{categoria}</p>
             </div>
-            <FaCircleUser className="text-4xl text-[#1D7BB6]" />
+            <Link to="/socios/configuracion" aria-label="Mi cuenta">
+              <FaCircleUser className="text-4xl text-[#1D7BB6]" />
+            </Link>
           </div>
         </header>
 
         <main className="mx-auto max-w-[1400px] p-5 sm:p-8">
           {/* ACÁ SE RENDERIZAN LAS PÁGINAS HIJAS SIN RECARGAR EL LAYOUT */}
-          <Outlet context={{ usuario }} />
+          <Outlet context={{ usuario, actualizarUsuario, cuotas, errorCuotas, recargarCuotas }} />
         </main>
       </div>
     </div>

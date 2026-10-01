@@ -14,7 +14,6 @@ import ResetPassword from "../Pages/Auth/ResetPassword.jsx";
 import Home from "../Pages/Home";
 import { Noticias } from "../Pages/HomePage/index.js";
 import Profile from "../Pages/Profile";
-import Socios from "../Pages/Socios/InicioSocio.jsx";
 import AdminRoutes from "./AdminRoutes.jsx";
 import PrivateRoutes from "./PrivateRoutes";
 import {
@@ -23,8 +22,11 @@ import {
   NoticiasSocio,
   EmpresaSocio,
   PagosSocio,
+  ConfiguracionSocio,
+  ResultadoPago,
 } from "../Pages/Socios/index.js";
 import SocioLayout from "../layouts/SocioLayout.jsx";
+import SocioRoutes from "./SocioRoutes.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -55,12 +57,21 @@ export default function AppRoutes() {
         </Route>
 
         {/*SOCIOS */}
-        <Route path="/socios" element={<SocioLayout />}>
-          <Route index element={<InicioSocio />} />{" "}
-          <Route path="eventos" element={<EventosSocio />} />
-          <Route path="noticias" element={<NoticiasSocio />} />
-          <Route path="empresa" element={<EmpresaSocio />} />
-          <Route path="pagos" element={<PagosSocio />} />
+        <Route element={<SocioRoutes />}>
+          <Route element={<SocioLayout />}>
+            <Route path="/socios">
+              <Route index element={<InicioSocio />} />
+              <Route path="eventos" element={<EventosSocio />} />
+              <Route path="noticias" element={<NoticiasSocio />} />
+              <Route path="empresa" element={<EmpresaSocio />} />
+              <Route path="pagos" element={<PagosSocio />} />
+              <Route path="configuracion" element={<ConfiguracionSocio />} />
+            </Route>
+            {/* Vuelta desde Mercado Pago (back_urls del backend) */}
+            <Route path="/pago-exitoso" element={<ResultadoPago tipo="exitoso" />} />
+            <Route path="/pago-fallido" element={<ResultadoPago tipo="fallido" />} />
+            <Route path="/pago-pendiente" element={<ResultadoPago tipo="pendiente" />} />
+          </Route>
         </Route>
 
         {/* ADMINS*/}
