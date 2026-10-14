@@ -51,7 +51,7 @@ export const generarCertificadoAsistencia = async ({ socio, evento }) => {
     // ===== Borde decorativo =====
     doc
       .lineWidth(2)
-      .strokeColor('-primary')
+      .strokeColor('#1D7BB6')
       .rect(20, 20, anchoPagina - 40, doc.page.height - 40)
       .stroke();
 
@@ -59,11 +59,11 @@ export const generarCertificadoAsistencia = async ({ socio, evento }) => {
     doc.moveDown(2);
     doc
       .fontSize(22)
-      .fillColor('-navy')
+      .fillColor('#132A46')
       .text('CAPYMEF', { align: 'center' });
     doc
       .fontSize(11)
-      .fillColor('-primary')
+      .fillColor('#1D7BB6')
       .text('Cámara de Pequeñas y Medianas Empresas de Formosa', { align: 'center' });
 
     doc.moveDown(2);
@@ -88,7 +88,7 @@ export const generarCertificadoAsistencia = async ({ socio, evento }) => {
     doc
       .fontSize(20)
       .font('Helvetica-Bold')
-      .fillColor('-primary')
+      .fillColor('#1D7BB6')
       .text(socio.razonSocial, { align: 'center' });
 
     doc.moveDown(0.5);
@@ -102,7 +102,7 @@ export const generarCertificadoAsistencia = async ({ socio, evento }) => {
     doc
       .fontSize(16)
       .font('Helvetica-Bold')
-      .fillColor('-navy')
+      .fillColor('#132A46')
       .text(`"${evento.titulo}"`, { align: 'center' });
 
     doc.moveDown(0.5);

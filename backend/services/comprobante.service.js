@@ -24,11 +24,11 @@ export const generarComprobantePago = ({ socio, cuota, pago }) => {
     // ===== Encabezado =====
     doc
       .fontSize(20)
-      .fillColor('-navy')
+      .fillColor('#132A46')
       .text('CAPYMEF', { align: 'center' });
     doc
       .fontSize(11)
-      .fillColor('-primary')
+      .fillColor('#1D7BB6')
       .text('Cámara de Pequeñas y Medianas Empresas de Formosa', { align: 'center' });
 
     doc.moveDown(1.5);

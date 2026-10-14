@@ -31,11 +31,11 @@ export const enviarMailRecuperacion = async (destinatario, tokenSinHashear) => {
     subject: 'Recuperación de contraseña - CAPYMEF',
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: -navy;">Recuperación de contraseña</h2>
+        <h2 style="color: #132A46;">Recuperación de contraseña</h2>
         <p>Recibimos una solicitud para restablecer tu contraseña en CAPYMEF.</p>
         <p>Hacé click en el siguiente botón para elegir una nueva contraseña. Este link vence en <strong>1 hora</strong>.</p>
         <p style="text-align: center; margin: 30px 0;">
-          <a href="${link}" style="background-color: -primary; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+          <a href="${link}" style="background-color: #1D7BB6; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
             Restablecer contraseña
           </a>
         </p>
@@ -62,7 +62,7 @@ export const enviarMailComprobantePago = async (destinatario, { razonSocial, mes
     subject: `Comprobante de pago - Cuota ${mesAnio} - CAPYMEF`,
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: -navy;">¡Gracias por tu pago, ${razonSocial}!</h2>
+        <h2 style="color: #132A46;">¡Gracias por tu pago, ${razonSocial}!</h2>
         <p>Registramos correctamente el pago de tu cuota correspondiente a <strong>${mesAnio}</strong> por un monto de <strong>$${montoFormateado}</strong>.</p>
         <p>Te adjuntamos tu comprobante de pago en formato PDF.</p>
       </div>

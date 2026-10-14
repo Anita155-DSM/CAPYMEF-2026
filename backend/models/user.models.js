@@ -22,7 +22,7 @@ export const User = sequelize.define('User', {
   // ==========================================
   categoria: { 
     // Crucial para saber a quién cobrarle y cuánto (Épica 2)
-    type: DataTypes.ENUM('activo', 'adherente', 'padrino'), 
+    type: DataTypes.ENUM('activo', 'adherente', 'padrino', 'honorario'), 
     allowNull: false,
     defaultValue: 'adherente' 
   },
