@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaRegSave, FaUserSlash } from "react-icons/fa";
 import { toast } from "sonner";
-import { actualizarDatosSocio } from "../../../../services/adminServices.js"; 
+import { actualizarDatosSocio, darDeBajaSocio } from "../../../../services/adminServices.js";
 
 export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
     if (!socio) return null;
@@ -36,8 +36,8 @@ export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
             const result = await actualizarDatosSocio(socio.id, form);
             if (result.exito) {
                 toast.success("Datos del socio actualizados correctamente.");
-                onActualizado(); 
-                onClose();       
+                onActualizado();
+                onClose();
             } else {
                 toast.error("Error: " + result.mensaje);
             }
@@ -55,7 +55,7 @@ export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
         setProcesando(true);
         try {
             // Mandamos los mismos datos, pero forzamos el estado a 'inactivo'
-            const result = await actualizarDatosSocio(socio.id, { ...form, estado: "inactivo" });
+            const result = await darDeBajaSocio(socio.id);
             if (result.exito) {
                 toast.success(`El socio ${socio.razonSocial} ha sido inactivado.`);
                 onActualizado();
@@ -73,14 +73,14 @@ export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden relative">
-                
+
                 <div className="bg-[#132A46] p-4 text-white flex justify-between items-center shrink-0">
                     <h3 className="text-lg font-bold">Editar Socio: {socio.razonSocial}</h3>
                     <button onClick={onClose} className="text-gray-300 hover:text-white text-2xl font-bold">&times;</button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex flex-col gap-6">
-                    
+
                     {/* Tarjeta de información (Solo Lectura) */}
                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <p className="text-sm text-gray-500 mb-1">Información de contacto (No editable)</p>
@@ -130,9 +130,9 @@ export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
                     {/* Footer con botones */}
                     <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
                         {form.estado !== "inactivo" ? (
-                            <button 
-                                type="button" 
-                                onClick={handleInactivar} 
+                            <button
+                                type="button"
+                                onClick={handleInactivar}
                                 disabled={procesando}
                                 className="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-600 hover:text-white font-semibold rounded-md flex items-center gap-2 text-sm transition-colors"
                             >

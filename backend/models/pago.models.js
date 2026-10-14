@@ -44,6 +44,14 @@ export const Pago = sequelize.define('Pago', {
     // Sirve para 2 cosas: (1) evitar procesar el mismo pago dos veces si el webhook llega duplicado (algo que las pasarelas hacen a propósito, por seguridad), y (2) tener trazabilidad hacia la transacción real del lado de Mercado Pago.
     type: DataTypes.STRING,
     allowNull: true,
+  },
+    confirmadoPor: {
+    type: DataTypes.INTEGER,
+    allowNull: true, // id del admin/Tesorero que verificó el pago contra el extracto bancario
+  },
+  confirmadoAt: {
+    type: DataTypes.DATE,
+    allowNull: true, // null = pago sin confirmar todavía por Tesorería
   }
 }, {
   timestamps: true,

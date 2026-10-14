@@ -1,12 +1,19 @@
 import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { registrarSocio } from "../../services/authServices"; // Importamos el servicio
 import Logo from "../../assets/img/Logo.png";
 import { toast } from "sonner";
+import { FiArrowRight, FiEye, FiEyeOff, FiFileText } from "react-icons/fi";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
+  const [nombreArchivo, setNombreArchivo] = useState("");
+  const password = watch("password");
+  const constanciaField = register("constancia", { required: true });
 
   const handleRegister = async (data) => {
     try {
@@ -54,6 +61,10 @@ export default function Register() {
           "Error de red. Verificá que el servidor esté encendido.",
       );
     }
+  };
+
+  const handleInvalidRegister = () => {
+    toast.error("Completá todos los campos obligatorios antes de registrarte.");
   };
 
   const localidadesPorDepartamento = [
@@ -150,23 +161,29 @@ export default function Register() {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#132A46] flex flex-col items-center justify-center relative text-white font-sans py-10">
-      <div className="w-full px-10 flex flex-col items-center">
-        <h1 className="text-4xl font-[Trebuchet_MS,sans-serif] font-bold text-center mb-2 mt-10">
-            Registro de socio
+    <div
+      className="relative flex min-h-screen w-full items-center justify-center bg-[#0d3150] px-4 py-8 font-sans text-[#162b3d] sm:px-6"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle at 20% 15%, rgba(70, 139, 181, 0.14) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(70, 139, 181, 0.1) 1px, transparent 1px)",
+        backgroundSize: "34px 34px, 46px 46px",
+      }}
+    >
+      <main className="w-full max-w-[860px] rounded-[9px] border-t-[4px] border-[#2084b6] bg-[#f5f7f9] px-6 py-8 shadow-[0_12px_35px_rgba(2,18,32,0.28)] sm:px-10 sm:py-10">
+        <h1 className="text-center text-[27px] font-bold tracking-[-0.03em] sm:text-[29px]">
+          Crear cuenta de socio
         </h1>
-        <p className="text-center text-sm font-medium mb-12">
-            Completá tus datos comerciales. El equipo administrativo revisará tu
-          solicitud.
+        <p className="mx-auto mt-2 max-w-[560px] text-center text-[13px] leading-[1.55] text-[#68727b]">
+          Completá tus datos comerciales. El equipo administrativo revisará tu solicitud.
         </p>
 
         <form
-          onSubmit={handleSubmit(handleRegister)}
-          className="flex flex-col items-center w-full max-w-4xl"
+          onSubmit={handleSubmit(handleRegister, handleInvalidRegister)}
+          className="mt-7 flex w-full flex-col text-[#162b3d]"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-2 w-full justify-items-center">
+          <div className="grid w-full grid-cols-1 gap-x-8 gap-y-1 md:grid-cols-2">
             {/* Columna Izquierda */}
-            <div className="w-full flex flex-col items-end md:items-start max-w-[320px]">
+            <div className="flex w-full flex-col">
               <div className="w-full my-3">
                 <label className="block text-lg font-bold mb-1" htmlFor="email">
                     Correo electrónico
@@ -186,13 +203,55 @@ export default function Register() {
                 >
                     Contraseña
                 </label>
-                <input
-                  type="password"
-                  id="password"
+                <div className="relative">
+                  <input
+                    type={mostrarPassword ? "text" : "password"}
+                    id="password"
                     placeholder="Ingresá una contraseña"
-                  className="w-full h-11 rounded-md border border-white/30 px-4 pr-10 text-base text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                  {...register("password", { required: true })}
-                />
+                    className="w-full h-11 rounded-md border border-white/30 bg-white px-4 pr-12 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
+                    {...register("password", { required: true })}
+                  />
+                  <button
+                    type="button"
+                    aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    title={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    onClick={() => setMostrarPassword((visible) => !visible)}
+                    className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-[#2084b6]"
+                  >
+                    {mostrarPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
+              </div>
+              <div className="w-full my-3">
+                <label className="block text-lg font-bold mb-1" htmlFor="confirmarPassword">
+                  Confirmar contraseña
+                </label>
+                <div className="relative">
+                  <input
+                    type={mostrarConfirmacion ? "text" : "password"}
+                    id="confirmarPassword"
+                    placeholder="Repetí tu contraseña"
+                    className="w-full h-11 rounded-md border border-white/30 bg-white px-4 pr-12 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
+                    {...register("confirmarPassword", {
+                      required: true,
+                      validate: (valor) => valor === password || "Las contraseñas no coinciden",
+                    })}
+                  />
+                  <button
+                    type="button"
+                    aria-label={mostrarConfirmacion ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
+                    title={mostrarConfirmacion ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
+                    onClick={() => setMostrarConfirmacion((visible) => !visible)}
+                    className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-[#2084b6]"
+                  >
+                    {mostrarConfirmacion ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
+                {errors.confirmarPassword && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {errors.confirmarPassword.message || "Confirmá tu contraseña."}
+                  </p>
+                )}
               </div>
               <div className="w-full my-3">
                 <label className="block text-lg font-bold mb-1" htmlFor="cuit">
@@ -211,7 +270,7 @@ export default function Register() {
                   className="block text-lg font-bold mb-1"
                   htmlFor="razonSocial"
                 >
-                    Razón Social
+                  Razón Social
                 </label>
                 <input
                   type="text"
@@ -226,7 +285,7 @@ export default function Register() {
                   className="block text-lg font-bold mb-1"
                   htmlFor="telefono"
                 >
-                    Teléfono
+                  Teléfono
                 </label>
                 <input
                   type="text"
@@ -239,13 +298,13 @@ export default function Register() {
             </div>
 
             {/* Columna Derecha */}
-            <div className="w-full flex flex-col items-start max-w-[320px]">
+            <div className="flex w-full flex-col">
               <div className="w-full my-3">
                 <label
                   className="block text-lg font-bold mb-1"
                   htmlFor="localidad"
                 >
-                    Localidad
+                  Localidad
                 </label>
                 <div className="relative w-full">
                   <select
@@ -282,7 +341,7 @@ export default function Register() {
                   className="block text-lg font-bold mb-1"
                   htmlFor="tamano_empresa"
                 >
-                    Tamaño de la Empresa
+                  Tamaño de la Empresa
                 </label>
                 <div className="relative w-full">
                   <select
@@ -307,7 +366,7 @@ export default function Register() {
               </div>
               <div className="w-full my-3">
                 <label className="block text-lg font-bold mb-1" htmlFor="rubro">
-                    Rubro
+                  Rubro
                 </label>
                 <div className="relative w-full">
                   <select
@@ -337,7 +396,7 @@ export default function Register() {
                   className="block text-lg font-bold mb-1"
                   htmlFor="actividad"
                 >
-                    Actividad
+                  Actividad
                 </label>
                 <input
                   type="text"
@@ -352,7 +411,7 @@ export default function Register() {
                   className="block text-lg font-bold mb-1"
                   htmlFor="categoria"
                 >
-                    Categoría
+                  Categoría
                 </label>
                 <div className="relative w-full">
                   <select
@@ -378,9 +437,10 @@ export default function Register() {
             </div>
           </div>
 
-          <div className="mt-8 mb-8">
-            <label className="flex items-center justify-center gap-2 bg-[#E2E8F0] text-[#132A46] py-2 px-4 cursor-pointer hover:bg-[#cbd5e1] transition-colors border border-transparent">
-              <span className="font-semibold text-sm">
+          <div className="mt-7 mb-7">
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-[3px] border border-dashed border-[#9bb4c3] bg-[#edf2fc] px-4 py-3 text-[#2784ae] transition-colors hover:bg-[#e4edf9]">
+              <FiFileText size={18} />
+              <span className="text-[13px] font-bold">
                 Subir constancia de AFIP/DGR
               </span>
               <svg
@@ -389,7 +449,7 @@ export default function Register() {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5"
+                className="h-5 w-5"
               >
                 <path
                   strokeLinecap="round"
@@ -401,28 +461,54 @@ export default function Register() {
                 type="file"
                 className="hidden"
                 accept=".pdf,.jpg,.jpeg,.png"
-                {...register("constancia", { required: true })}
+                {...constanciaField}
+                onChange={(event) => {
+                  constanciaField.onChange(event);
+                  setNombreArchivo(event.target.files?.[0]?.name || "");
+                }}
               />
             </label>
+            <div className="mt-2 flex items-center justify-center gap-1 text-center text-xs text-[#68727b]">
+              <FiFileText size={14} className={nombreArchivo ? "text-[#248354]" : "text-[#9aa5ae]"} />
+              <span>{nombreArchivo || "Todavía no seleccionaste ningún archivo"}</span>
+            </div>
+            {errors.constancia && (
+              <p className="mt-1 text-center text-xs text-red-600">La constancia es obligatoria.</p>
+            )}
           </div>
 
-          <div className="flex justify-center mb-8">
+          <label className="mb-7 flex cursor-pointer items-start gap-2 text-sm text-[#4a5966]">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[#0877a8]"
+              {...register("consentimiento", { required: true })}
+            />
+            <span>
+              Acepto los Términos y Condiciones y el tratamiento de mis datos
+            </span>
+          </label>
+          {errors.consentimiento && (
+            <p className="-mt-5 mb-5 text-xs text-red-600">Debés aceptar el consentimiento para continuar.</p>
+          )}
+
+          <div className="flex justify-center">
             <button
               type="submit"
-              className="bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold py-2 px-10 rounded-full text-lg transition-colors"
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-[9px] bg-[#0877a8] px-5 text-[15px] font-bold text-white shadow-[0_3px_5px_rgba(2,74,106,0.25)] transition-colors hover:bg-[#05648f] sm:max-w-[360px]"
             >
               Enviar solicitud
+              <FiArrowRight size={19} strokeWidth={2.5} />
             </button>
           </div>
 
-          <div className="text-center text-sm pb-10">
-            <span>¿Ya tienes una cuenta? </span>
-            <Link to="/login" className="text-[#3b82f6] hover:underline">
+          <div className="mt-7 text-center text-[12px] text-[#68727b]">
+            <span>¿Ya tenés una cuenta? </span>
+            <Link to="/login" className="font-bold text-[#2784ae] hover:underline">
               Inicia sesión aquí
             </Link>
           </div>
         </form>
-      </div>
+      </main>
       <Link to="/" className="absolute bottom-6 left-6">
         <img src={Logo} alt="LogoCAPYMEF" className="h-16 w-auto object-contain" />
       </Link>

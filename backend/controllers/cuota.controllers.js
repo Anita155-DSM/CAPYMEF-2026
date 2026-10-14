@@ -1,4 +1,5 @@
-import { generarCuotasDelMes } from '../services/cuota.service.js';
+import { Op } from 'sequelize';
+import { generarCuotasDelMes, marcarCuotasVencidas } from '../services/cuota.service.js';
 import { Cuota } from '../models/cuota.models.js';
 import { User } from '../models/user.models.js';
 import { Pago } from '../models/pago.models.js';
@@ -55,7 +56,7 @@ export const obtenerCuotas = async (req, res) => {
 export const obtenerCuotasPendientes = async (req, res) => {
   try {
     const pendientes = await Cuota.findAll({
-      where: { estado: 'pendiente' },
+      where: { estado: { [Op.in]: ['pendiente', 'vencida'] } },
       include: [{
         model: User,
         as: 'socio',
@@ -164,6 +165,7 @@ export const obtenerResumenFinanciero = async (req, res) => {
   try {
     const totalPendientes = await Cuota.count({ where: { estado: 'pendiente' } });
     const totalPagadas = await Cuota.count({ where: { estado: 'pagada' } });
+    const totalVencidas = await Cuota.count({ where: { estado: 'vencida' } });
 
     const recaudacionTotal = await Pago.sum('montoAbonado') || 0;
 
@@ -172,6 +174,7 @@ export const obtenerResumenFinanciero = async (req, res) => {
       data: {
         cuotasPendientesCount: totalPendientes,
         cuotasPagadasCount: totalPagadas,
+        cuotasVencidasCount: totalVencidas,
         totalRecaudado: recaudacionTotal
       }
     });
@@ -223,5 +226,94 @@ export const descargarComprobante = async (req, res) => {
   } catch (error) {
     console.error('Error al redescargar el comprobante:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al generar el comprobante.' });
+  }
+};
+
+// ==========================================
+// 5. CERRAR LA VENTANA DE PAGO A MANO (Admin)
+// ==========================================
+// Hace lo mismo que el cron diario. Sirve para probar y como respaldo
+// si el servidor estuvo apagado a la hora del cron.
+export const ejecutarMarcadoVencidas = async (req, res) => {
+  try {
+    const resultado = await marcarCuotasVencidas();
+
+    //auditoria
+    req.auditoriaMensaje = `Se ejecutó el cierre de la ventana de pago. Cuotas marcadas como vencidas: ${resultado.marcadas}`;
+    req.auditoriaCodigo = 'MARCAR_CUOTAS_VENCIDAS';
+
+    res.status(200).json({
+      exito: true,
+      mensaje: `Proceso finalizado. ${resultado.marcadas} cuotas pasaron a vencidas.`,
+      data: resultado,
+    });
+  } catch (error) {
+    console.error('Error al marcar cuotas vencidas:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error al marcar las cuotas vencidas.' });
+  }
+};
+
+// ==========================================
+// 6. LISTAR PAGOS SIN CONFIRMAR (Tesorería)
+// ==========================================
+export const obtenerPagosSinConfirmar = async (req, res) => {
+  try {
+    const pagos = await Pago.findAll({
+      where: { confirmadoAt: null },
+      include: [{ model: User, as: 'socio', attributes: ['id', 'razonSocial', 'cuit', 'email'] }],
+      order: [['fechaPago', 'ASC']],
+    });
+
+    res.status(200).json({ exito: true, total: pagos.length, data: pagos });
+  } catch (error) {
+    console.error('Error al obtener pagos sin confirmar:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error al consultar los pagos sin confirmar.' });
+  }
+};
+
+// ==========================================
+// 7. CONFIRMAR PAGOS (Tesorería) — uno o varios a la vez
+// ==========================================
+// Se usa tanto para confirmar de a uno como en un cierre mensual, verificando
+// contra el extracto bancario de BBVA. No vuelve a tocar la Cuota (ya quedó
+// "pagada" al registrarse el pago): solo dejamos constancia de que Tesorería
+// lo revisó y coincide con lo acreditado en el banco.
+export const confirmarPagos = async (req, res) => {
+  try {
+    const { pagoIds } = req.body; // array de UUIDs de Pago
+
+    if (!Array.isArray(pagoIds) || pagoIds.length === 0) {
+      return res.status(400).json({ exito: false, mensaje: 'Debe enviar al menos un ID de pago en "pagoIds".' });
+    }
+
+    const pagos = await Pago.findAll({ where: { id: pagoIds } });
+
+    if (pagos.length === 0) {
+      return res.status(404).json({ exito: false, mensaje: 'No se encontró ninguno de los pagos indicados.' });
+    }
+
+    const yaConfirmados = pagos.filter((p) => p.confirmadoAt !== null).map((p) => p.id);
+    const aConfirmar = pagos.filter((p) => p.confirmadoAt === null);
+
+    for (const pago of aConfirmar) {
+      pago.confirmadoPor = req.usuario.id;
+      pago.confirmadoAt = new Date();
+      await pago.save();
+    }
+
+    //auditoria
+    req.auditoriaMensaje = `Se confirmaron ${aConfirmar.length} pago(s) por Tesorería${yaConfirmados.length ? ` (${yaConfirmados.length} ya estaban confirmados)` : ''}`;
+    req.auditoriaCodigo = 'CONFIRMAR_PAGOS_TESORERIA';
+
+    res.status(200).json({
+      exito: true,
+      mensaje: `${aConfirmar.length} pago(s) confirmado(s) correctamente.`,
+      confirmados: aConfirmar.map((p) => p.id),
+      yaEstabanConfirmados: yaConfirmados,
+      idsNoEncontrados: pagoIds.filter((id) => !pagos.some((p) => p.id === id)),
+    });
+  } catch (error) {
+    console.error('Error al confirmar pagos:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al confirmar los pagos.' });
   }
 };

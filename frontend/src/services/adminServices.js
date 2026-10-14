@@ -69,6 +69,17 @@ export const actualizarDatosSocio = async (id, datosActualizados) => {
         return { exito: false, mensaje: "Error de conexión con el servidor al actualizar" };
     }
 };
+// ==========================================
+// DAR DE BAJA SOCIO (BAJA REAL)
+// ==========================================
+export const darDeBajaSocio = async (id) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_URL}/socios/${id}/baja`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json();
+};
 
 // ==========================================
 // CREAR EVENTOS (CALENDARIO ADMIN)
@@ -108,9 +119,9 @@ export const crearNuevoEvento = async (formData) => {
 export const obtenerTodosLosEventos = async () => {
     try {
         const token = localStorage.getItem("token");
-        
+
         // Cambiamos /admin por /socios
-        const response = await fetch(`${API_URL_EVENTOS}/socios`, { 
+        const response = await fetch(`${API_URL_EVENTOS}/socios`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`

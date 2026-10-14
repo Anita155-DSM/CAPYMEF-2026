@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import { obtenerTodosLosUsuarios } from "../../services/adminServices.js";
-import Loading from "../../Components/Loading";
-import Search, { useBuscador } from "./Components/Search";
+import { useEffect, useState } from "react";
+import { FaEdit, FaFileExcel } from "react-icons/fa";
 import { toast } from "sonner";
-import { FaEdit, FaUserSlash, FaFileExcel } from "react-icons/fa";
 import * as XLSX from "xlsx"; // Importamos la librería de Excel
+import Loading from "../../Components/Loading";
+import { obtenerTodosLosUsuarios } from "../../services/adminServices.js";
 import ModalEditarSocio from "./Components/Modals/ModalEditarSocio.jsx";
+import Search, { useBuscador } from "./Components/Search";
 
 export default function Socios() {
     const [socios, setSocios] = useState([]);
@@ -58,23 +58,6 @@ export default function Socios() {
         // Descargamos el archivo
         XLSX.writeFile(workbook, "Padron_Socios_CAPYMEF.xlsx");
         toast.success("¡Archivo Excel descargado con éxito!");
-    };
-
-    // Función para suspender (borrado lógico a 'inactivo')
-    const handleSuspender = async (id, razonSocial) => {
-        const confirmar = window.confirm(`¿Estás seguro que deseas inactivar a ${razonSocial}? Dejará de tener acceso como socio activo.`);
-        if (!confirmar) return;
-
-        try {
-            // ACA DEBES LLAMAR A TU SERVICIO DEL BACKEND
-            // Ejemplo: await cambiarEstadoSocio(id, 'inactivo');
-
-            // Por ahora hacemos la actualización visual en el frontend:
-            setSocios(prev => prev.map(s => s.id === id ? { ...s, estado: 'inactivo' } : s));
-            toast.success(`El socio ${razonSocial} fue marcado como inactivo.`);
-        } catch (error) {
-            toast.error("Error al intentar inactivar al socio.");
-        }
     };
 
     if (cargando) return <div className="p-10"><Loading /></div>;
