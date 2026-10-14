@@ -101,7 +101,7 @@ export const validacionActualizarSocio = [
 
   body('categoria')
     .optional()
-    .isIn(['activo', 'adherente', 'padrino']).withMessage('La categoría no es válida.'),
+    .isIn(['activo', 'adherente', 'padrino', 'honorario']).withMessage('La categoría no es válida.'),
 
   body('rubro')
     .optional()

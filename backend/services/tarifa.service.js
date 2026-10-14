@@ -3,7 +3,7 @@ import { User } from '../models/user.models.js';
 
 // Montos simulados que ya usaba el sistema antes de tener tarifas editables.
 // Solo se usan para sembrar la tabla la primera vez; después manda lo que cargue el admin.
-const MONTOS_INICIALES = { activo: 15000, adherente: 10000, padrino: 25000 };
+const MONTOS_INICIALES = { activo: 10000, adherente: 0, padrino: 0, honorario: 0 };
 
 // Las categorías válidas salen del modelo User, así no hay dos listas que desincronizar.
 export const categoriasValidas = () => User.rawAttributes.categoria.values;
