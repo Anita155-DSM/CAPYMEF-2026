@@ -5,7 +5,7 @@ import "dayjs/locale/es";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import ModalGestionEvento from "./Components/Modals/ModalGestionEvento.jsx";
-import { obtenerTodosLosEventos } from "../../services/adminServices.js";
+import { obtenerEventosPublicos } from "../../services/eventosService.js";
 
 dayjs.locale("es");
 

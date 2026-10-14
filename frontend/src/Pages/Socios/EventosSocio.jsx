@@ -3,19 +3,25 @@ import { FaCalendarCheck, FaChevronLeft, FaChevronRight, FaClock, FaLocationDot,
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import "dayjs/locale/es";
+import {
+    obtenerEventosSocios,
+    obtenerEventosPublicos,
+    inscribirseEvento,
+    cancelarInscripcion,
+} from "../../services/eventosService.js";
 
 // Configuración de dayjs
 dayjs.extend(isSameOrAfter);
 dayjs.locale("es");
 
-const API_URL = import.meta.env.VITE_API_URL;
+
 const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
 export default function EventosSocio() {
     // Usamos dayjs nativamente para el estado del calendario
     const hoy = dayjs();
     const [mesVisible, setMesVisible] = useState(hoy.startOf("month"));
-    
+
     const [eventos, setEventos] = useState([]);
     const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
     const [cargando, setCargando] = useState(true);
@@ -25,22 +31,18 @@ export default function EventosSocio() {
     useEffect(() => {
         const cargarEventos = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const res = await fetch(`${API_URL}/eventos/socios`, { headers: { Authorization: `Bearer ${token}` } });
-                const resultado = await res.json();
-                
-                if (!res.ok || !resultado.exito) throw new Error(resultado.mensaje || "Error al cargar los eventos");
+                const resultado = await obtenerEventosSocios();
+                if (!resultado.exito) throw new Error(resultado.mensaje || "Error al cargar los eventos");
 
                 let evts = (resultado.data || []).filter(e => e.estado !== "cancelado");
-                
+
                 if (!evts.length) {
-                    const resPub = await fetch(`${API_URL}/eventos/publicos`);
-                    const resultPub = await resPub.json();
-                    if (resPub.ok && resultPub.exito) evts = (resultPub.data || []).filter(e => e.estado !== "cancelado");
+                    const resultPub = await obtenerEventosPublicos();
+                    if (resultPub.exito) evts = (resultPub.data || []).filter(e => e.estado !== "cancelado");
                 }
 
                 setEventos(evts);
-                
+
                 // Centrar calendario en el primer evento futuro
                 const primerFuturo = evts.find(e => dayjs(e.fecha).isSameOrAfter(hoy, "day"));
                 if (primerFuturo) setMesVisible(dayjs(primerFuturo.fecha).startOf("month"));
@@ -62,7 +64,7 @@ export default function EventosSocio() {
 
     // 2. Calcular grilla con dayjs (Adiós a Date manual)
     const celdasCalendario = useMemo(() => {
-        const espaciosVacios = (mesVisible.day() + 6) % 7; 
+        const espaciosVacios = (mesVisible.day() + 6) % 7;
         return [
             ...Array(espaciosVacios).fill(null),
             ...Array.from({ length: mesVisible.daysInMonth() }, (_, i) => i + 1)
@@ -79,11 +81,11 @@ export default function EventosSocio() {
         if (!eventoSeleccionado) return;
         setProcesando(true);
         try {
-            const token = localStorage.getItem("token");
-            const metodo = eventoSeleccionado.yaInscripto ? "DELETE" : "POST";
-            const res = await fetch(`${API_URL}/eventos/${eventoSeleccionado.id}/inscribirse`, { method: metodo, headers: { Authorization: `Bearer ${token}` } });
-            if (!res.ok) throw new Error("No se pudo actualizar la inscripción");
-            
+            const resultado = eventoSeleccionado.yaInscripto
+                ? await cancelarInscripcion(eventoSeleccionado.id)
+                : await inscribirseEvento(eventoSeleccionado.id);
+            if (!resultado.exito) throw new Error(resultado.mensaje || "No se pudo actualizar la inscripción");
+
             setEventos(act => act.map(e => e.id === eventoSeleccionado.id ? { ...e, yaInscripto: !e.yaInscripto } : e));
             setEventoSeleccionado(act => ({ ...act, yaInscripto: !act.yaInscripto }));
         } catch (err) {
@@ -115,7 +117,7 @@ export default function EventosSocio() {
             </div>
 
             {error && <div className="mb-4 border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
-            
+
             {cargando ? <p className="py-12 text-center text-sm text-gray-600">Cargando eventos...</p> : (
                 <div className="mx-auto max-w-5xl">
                     <div className="flex items-center justify-between border-b-4 border-[#0875b1] pb-2 text-[#0875b1]">
@@ -123,20 +125,20 @@ export default function EventosSocio() {
                         <h2 className="text-2xl uppercase">{mesVisible.format("MMMM")}</h2>
                         <div className="flex items-center gap-4"><span className="text-2xl">{mesVisible.format("YYYY")}</span><button type="button" onClick={() => setMesVisible(mesVisible.add(1, "month"))} className="p-2 hover:bg-white"><FaChevronRight /></button></div>
                     </div>
-                    
+
                     <div className="grid grid-cols-7 pt-5 text-center text-sm font-bold text-[#0063a7]">
                         {diasSemana.map((dia) => <span key={dia}>{dia}</span>)}
                     </div>
-                    
+
                     <div className="grid grid-cols-7 border-b-4 border-[#0875b1] pb-7 pt-3">
                         {celdasCalendario.map((dia, indice) => {
                             const evtDia = eventosDelDia(dia);
                             return (
-                                <button 
-                                    type="button" 
-                                    key={`${dia || "vacio"}-${indice}`} 
-                                    disabled={!dia} 
-                                    onClick={() => evtDia[0] && setEventoSeleccionado(evtDia[0])} 
+                                <button
+                                    type="button"
+                                    key={`${dia || "vacio"}-${indice}`}
+                                    disabled={!dia}
+                                    onClick={() => evtDia[0] && setEventoSeleccionado(evtDia[0])}
                                     className={`flex flex-col min-h-[100px] items-center justify-start pt-2 px-1 text-sm ${dia ? "hover:bg-white/60 transition-colors" : "cursor-default"}`}
                                 >
                                     <span className={evtDia.length ? "flex h-8 w-8 items-center justify-center rounded-full bg-[#5aa8d5] font-bold text-white shrink-0" : "flex h-8 items-center text-[#073d6f] shrink-0"}>
@@ -149,7 +151,7 @@ export default function EventosSocio() {
                             );
                         })}
                     </div>
-                    
+
                     {!eventos.length && <p className="py-8 text-center text-sm text-gray-600">No hay eventos publicados.</p>}
                 </div>
             )}
@@ -162,16 +164,16 @@ export default function EventosSocio() {
                             <div><p className="text-xs font-bold uppercase text-[#1D7BB6]">Evento para socios</p><h2 className="mt-1 text-2xl font-bold text-[#132A46]">{eventoSeleccionado.titulo}</h2></div>
                             <button type="button" onClick={() => setEventoSeleccionado(null)} className="text-xl text-gray-500 hover:text-black"><FaXmark /></button>
                         </div>
-                        
+
                         <p className="mt-4 text-sm text-gray-700 max-h-32 overflow-y-auto">{eventoSeleccionado.descripcion || "Sin descripción disponible."}</p>
-                        
+
                         <div className="mt-5 space-y-3 border-y border-gray-200 py-4 text-sm text-gray-700">
                             <p><FaCalendarCheck className="mr-2 inline text-[#0875b1]" />{dayjs(eventoSeleccionado.fecha).format("dddd D [de] MMMM, YYYY")}</p>
                             <p><FaClock className="mr-2 inline text-[#0875b1]" />{eventoSeleccionado.horaInicio || "Horario a confirmar"}{eventoSeleccionado.horaFin ? ` a ${eventoSeleccionado.horaFin}` : ""}</p>
                             <p><FaLocationDot className="mr-2 inline text-[#0875b1]" />{eventoSeleccionado.lugar || eventoSeleccionado.modalidad || "Lugar a confirmar"}</p>
                             <p><FaUsers className="mr-2 inline text-[#0875b1]" />{eventoSeleccionado.cupoMaximo ? `${eventoSeleccionado.cupoMaximo} cupos` : "Cupo abierto"}</p>
                         </div>
-                        
+
                         <div className="mt-5 flex justify-end gap-3">
                             <button type="button" onClick={() => setEventoSeleccionado(null)} className="border border-gray-300 px-4 py-2 text-sm">Cerrar</button>
                             <button type="button" disabled={procesando} onClick={gestionarInscripcion} className="bg-[#1b527d] px-4 py-2 text-sm font-bold text-white hover:bg-[#164568] disabled:opacity-60 transition-colors">

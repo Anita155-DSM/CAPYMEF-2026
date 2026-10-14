@@ -1,7 +1,9 @@
+
 import { useEffect, useState } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import { FaArrowRight, FaChartLine, FaChevronRight, FaCreditCard, FaDownload } from "react-icons/fa6";
 import { obtenerNoticiasSocios } from "../../services/noticiasService";
+import { obtenerEventosSocios } from "../../services/eventosService.js";
 
 const movimientos = [
     { periodo: "Septiembre de 2026", estado: "Pendiente", tipo: "pendiente" },
@@ -16,17 +18,15 @@ export default function InicioSocio() {
 
     useEffect(() => {
         const cargarResumen = async () => {
-            const token = localStorage.getItem("token");
             const ahora = new Date();
 
             try {
-                const [respuestaEventos, respuestaNoticias] = await Promise.all([
-                    fetch(`${import.meta.env.VITE_API_URL}/eventos/socios`, { headers: { Authorization: `Bearer ${token}` } }),
+                const [resultadoEventos, respuestaNoticias] = await Promise.all([
+                    obtenerEventosSocios(),
                     obtenerNoticiasSocios(),
                 ]);
-                const resultadoEventos = await respuestaEventos.json();
 
-                if (respuestaEventos.ok && resultadoEventos.exito) {
+                if (resultadoEventos.exito) {
                     const eventosFuturos = (resultadoEventos.data || [])
                         .filter((evento) => evento.estado !== "cancelado" && evento.fecha)
                         .filter((evento) => new Date(`${evento.fecha}T${evento.horaInicio || "00:00"}`) >= ahora)

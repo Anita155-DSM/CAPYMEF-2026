@@ -1,87 +1,22 @@
-// Centralizamos la URL para no repetirla
-const API_URL = import.meta.env.VITE_API_URL_AUTH;
+import { api } from "@/api/client";
 
-export const iniciarSesion = async (credenciales) => {
-  try {
-    const response = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      body: JSON.stringify(credenciales),
-      headers: {
-        "Content-type": "application/json",
-      },
-    });
+export const iniciarSesion = (credenciales) =>
+  api("/auth/login", { method: "POST", body: credenciales });
 
-    // Retornamos lo que responda el backend
-    return await response.json();
-  } catch (error) {
-    console.error("Error en el servicio de login:", error);
-    throw new Error("Error de conexión con el servidor");
-  }
-};
+export const registrarSocio = (formData) =>
+  api("/auth/registro", { method: "POST", body: formData });
 
-export const registrarSocio = async (formData) => {
-  try {
-    const response = await fetch(`${API_URL}/registro`, {
-      method: "POST",
-      body: formData,
-    });
+export const recuperarPassword = (email) =>
+  api("/auth/recuperar-password", { method: "POST", body: { email } });
 
-    return await response.json();
-  } catch (error) {
-    console.error("Error en el servicio de registro:", error);
-    throw new Error("Error de conexión con el servidor");
-  }
-};
+export const restablecerPassword = (token, password) =>
+  api(`/auth/restablecer-password/${token}`, { method: "PUT", body: { password } });
 
-export const recuperarPassword = async (email) => {
-  try {
-    const response = await fetch(`${API_URL}/recuperar-password`, {
-      method: "POST",
-      body: JSON.stringify({ email }),
-      headers: {
-        "Content-type": "application/json",
-      },
-    });
+export const obtenerPerfil = () => api("/auth/perfil");
 
-    return await response.json();
-  } catch (error) {
-    console.error("Error en el servicio de recuperación de contraseña:", error);
-    throw new Error("Error de conexión con el servidor");
-  }
-};
-
-export const restablecerPassword = async (token, password) => {
-  try {
-    const response = await fetch(`${API_URL}/restablecer-password/${token}`, {
-      method: "PUT",
-      body: JSON.stringify({ password }),
-      headers: {
-        "Content-type": "application/json",
-      },
-    });
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error en el servicio de restablecimiento de contraseña:", error);
-    throw new Error("Error de conexión con el servidor");
-  }
-};
-
-export const obtenerPerfil = async () => {
-  const token = localStorage.getItem("token");
-
-  const response = await fetch(`${API_URL}/perfil`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return await response.json();
-};
-
+// ⚠️ Temporal: se borra en el paso 5 (lo reemplaza logout() de useAuth)
 export const cerrarSesion = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("usuario");
-  // Redirigir al inicio
   window.location.href = "/";
 };

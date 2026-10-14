@@ -4,7 +4,7 @@ import { FaRegSave, FaTimes, FaInfoCircle, FaTrashAlt } from "react-icons/fa";
 import { toast } from "sonner";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
-import { crearNuevoEvento, actualizarEvento, eliminarEvento } from "../../../../services/adminServices.js"; 
+import { crearNuevoEvento, actualizarEvento, eliminarEvento } from "../../../../services/eventosService.js"; 
 import ModalConfirmacion from "./ModalConfirmacion.jsx"; // <-- Importamos nuestro nuevo componente
 
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
