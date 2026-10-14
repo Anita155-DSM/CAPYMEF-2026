@@ -1,10 +1,10 @@
-import { FaArrowLeft, FaPlus, FaSearch } from "react-icons/fa";
+import { FaSearch, FaPlus, FaArrowLeft } from "react-icons/fa";
 
-import { useState } from "react";
-import { Card } from "../../Components";
-import Loading from "../../Components/Loading";
-import ModalAdmin from "./Components/Modals/ModalAdmin.jsx"; // <-- Importamos nuestro modal exclusivo de admin
+import Loading from "@/shared/ui/Loading";
+import NoticiaCard from "@/features/noticias/components/NoticiaCard";
+import EditarNoticiaModal from "@/features/noticias/components/EditarNoticiaModal";
 import { useNoticiasLogic } from "./Hooks/useNoticiasLogic.js";
+import { useState } from "react";
 
 export default function NoticiasAdmin() {
   const {
@@ -13,7 +13,8 @@ export default function NoticiasAdmin() {
     noticiasFiltradas, cargando,
     register, handleSubmit,
     imagenPreview, handleImagen,
-    onSubmit, estaPublicando
+    onSubmit, estaPublicando,
+    recargarNoticias
   } = useNoticiasLogic();
 
   const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
@@ -57,7 +58,7 @@ export default function NoticiasAdmin() {
               <div key={noticia.id} className="flex flex-col">
 
                 {/* Tu Card original */}
-                <Card
+                <NoticiaCard
                   titulo={noticia.titulo}
                   subtitulo={noticia.subtitulo}
                   imagenUrl={noticia.imagenUrl}
@@ -202,11 +203,12 @@ export default function NoticiasAdmin() {
     <div className="p-8 w-full font-sans relative min-h-screen bg-gray-100">
       {vistaActual === "lista" ? renderLista() : renderFormulario()}
 
-      {/* Renderizamos el nuevo Modal del Administrador */}
       {noticiaSeleccionada && (
-        <ModalAdmin
+        <EditarNoticiaModal
+          key={noticiaSeleccionada.id}
           noticia={noticiaSeleccionada}
           onClose={() => setNoticiaSeleccionada(null)}
+          onNoticiaActualizada={recargarNoticias}
         />
       )}
     </div>

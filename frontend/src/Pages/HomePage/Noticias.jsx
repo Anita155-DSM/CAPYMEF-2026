@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { Footer, Modal, Navbar, NavbarPublico } from "../../Components";
+import Footer from "@/layouts/components/Footer";
+import Navbar from "@/layouts/components/Navbar";
+import NavbarPublico from "@/layouts/components/NavbarPublico";
+import NoticiaModal from "@/features/noticias/components/NoticiaModal";
+import { formatearFecha } from "@/shared/utils/fechas";
 import { obtenerNoticiasPublicas } from "../../services/noticiasService";
 import { useAuth } from "@/app/providers/AuthContext";
 import logo from "@/assets/img/logo.png";
 import { urlImagen } from "@/shared/utils/imagenes";
 
 const NOTICIAS_POR_PAGINA = 6;
-
-const formatearFecha = (fecha) => (
-  fecha ? new Date(fecha).toLocaleDateString("es-AR") : "Fecha no disponible"
-);
 
 export default function NoticiasPublicas() {
   const [noticias, setNoticias] = useState([]);
@@ -182,7 +182,7 @@ export default function NoticiasPublicas() {
 
       {/* RENDERIZAMOS EL MODAL */}
       {noticiaSeleccionada && (
-        <Modal
+        <NoticiaModal
           noticia={noticiaSeleccionada}
           onClose={() => setNoticiaSeleccionada(null)}
         />

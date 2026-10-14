@@ -4,8 +4,7 @@ import dayjs from "@/shared/utils/fechas";
 import { cn } from "@/shared/utils/cn";
 import Button from "@/shared/ui/Button";
 import { obtenerEventosSocios } from "@/services/eventosService";
-import ModalGestionEvento from "./Components/Modals/ModalGestionEvento.jsx";
-
+import EventoFormModal from "@/features/eventos/components/EventoFormModal";
 
 // 2. SUB-COMPONENTE: Extraemos la celda del calendario para no ensuciar el componente principal
 const CeldaDia = ({ dia, eventoDelDia, esHoy, esSeleccionado, alSeleccionar }) => {
@@ -129,7 +128,7 @@ export default function EventosAdmin() {
             </div>
 
             {modalAbierto && (
-                <ModalGestionEvento onClose={() => setModalAbierto(false)} modo={modoModal} fechaPredefinida={fechaSeleccionada} eventoExistente={eventoSeleccionado} onActualizado={cargarEventos} />
+                <EventoFormModal onClose={() => setModalAbierto(false)} modo={modoModal} fechaPredefinida={fechaSeleccionada} eventoExistente={eventoSeleccionado} onActualizado={cargarEventos} />
             )}
         </div>
     );

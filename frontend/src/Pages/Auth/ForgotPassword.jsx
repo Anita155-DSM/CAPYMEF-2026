@@ -49,7 +49,7 @@ export default function ForgotPassword() {
           </span>
         </div>
 
-        <h1 className="mt-5 text-center text-[25px] font-bold tracking-0.03em sm:text-[26px]">
+        <h1 className="mt-5 text-center text-[25px] font-bold tracking-[-0.03em] sm:text-[26px]">
           Recuperar contraseña
         </h1>
         <p className="mx-auto mt-1.5 max-w-[390px] text-center text-[13px] leading-[1.55] text-[#68727b]">

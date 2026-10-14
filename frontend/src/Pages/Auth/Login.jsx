@@ -50,7 +50,7 @@ export default function Login() {
       }}
     >
       <main className="w-full max-w-[506px] overflow-hidden rounded-[9px] border-t-[4px] border-[#2084b6] bg-[#f5f7f9] px-7 pt-8 shadow-[0_12px_35px_rgba(2,18,32,0.28)] sm:px-[42px] sm:pt-[42px]">
-        <h1 className="text-center text-[27px] font-bold tracking-0.03em sm:text-[29px]">
+        <h1 className="text-center text-[27px] font-bold tracking-[-0.03em] sm:text-[29px]">
           Bienvenido de vuelta
         </h1>
 

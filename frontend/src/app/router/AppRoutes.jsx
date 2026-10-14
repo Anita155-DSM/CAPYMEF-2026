@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import RequireAuth from "./RequiteAuth.jsx";
+import RequireAuth from "./RequireAuth.jsx";
 
 import MainLayout from "@/layouts/MainLayout.jsx";
 import SocioLayout from "@/layouts/SocioLayout.jsx";
 
-import Home from "@/Pages/Home.jsx";
+import Home from "@/features/landing/pages/LandingPage";
 import Profile from "@/Pages/Profile.jsx";
 import { Noticias } from "@/Pages/HomePage/index.js";
 import { ForgotPassword, Login, Register, ResetPassword } from "@/Pages/Auth/index.js";
