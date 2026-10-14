@@ -1,4 +1,4 @@
-import Logo from "../assets/img/logo.png"
+import logo from "../assets/img/logo.png"
 import { FaCalendarDays, FaChevronRight, FaShareNodes } from "react-icons/fa6";
 
 export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, onLeerMas, className = "", estiloNoticias = false }) {
@@ -22,7 +22,7 @@ export default function Card({ titulo, subtitulo, imagenUrl, fecha, categoria, o
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[#132A46] to-[#1D7BB6] flex items-center justify-center p-6">
-            <img src={Logo} alt="CAPYMEF" className="max-h-20 max-w-[70%] object-contain opacity-80 drop-shadow-md" />
+            <img src={logo} alt="CAPYMEF" className="max-h-20 max-w-[70%] object-contain opacity-80 drop-shadow-md" />
           </div>
         )}
         {estiloNoticias && (

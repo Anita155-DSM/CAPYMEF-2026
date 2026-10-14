@@ -1,30 +1,29 @@
 import { useEffect, useState } from "react";
 import {
     FaArrowRight,
+    FaBars,
     FaBell,
     FaBuilding,
-    FaChartBar,
     FaCalendarCheck,
+    FaChartBar,
     FaChartLine,
     FaChevronRight,
     FaCircleUser,
     FaCreditCard,
     FaDownload,
+    FaEnvelope,
     FaGear,
+    FaGears,
     FaHouse,
     FaIdCard,
     FaLocationDot,
-    FaPhone,
-    FaEnvelope,
-    FaUsers,
-    FaGears,
     FaMoneyBillWave,
     FaNewspaper,
-    FaBars,
+    FaPhone,
+    FaUsers,
     FaXmark,
 } from "react-icons/fa6";
-import { Link } from "react-router-dom";
-import logo from "../../assets/img/Logo.png";
+import logo from "../../assets/img/logo.png";
 import { obtenerPerfil } from "../../services/authServices";
 import { obtenerNoticiasSocios } from "../../services/noticiasService";
 import EventosSocio from "./EventosSocio";

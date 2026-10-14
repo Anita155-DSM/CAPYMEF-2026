@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { recuperarPassword } from "@/services/authServices";
 import { FiArrowLeft, FiArrowRight, FiLock, FiMail, FiShield } from "react-icons/fi";
-import Logo from "../../assets/img/Logo.png";
+import logo from "../../assets/img/logo.png";
 
 export default function ForgotPassword() {
   const { register, handleSubmit, reset } = useForm();
@@ -100,7 +100,7 @@ export default function ForgotPassword() {
         </div>
       </main>
       <Link to="/" className="absolute bottom-6 left-6">
-        <img src={Logo} alt="LogoCAPYMEF" className="h-16 w-auto object-contain" />
+        <img src={logo} alt="logoCAPYMEF" className="h-16 w-auto object-contain" />
       </Link>
     </div>
   );

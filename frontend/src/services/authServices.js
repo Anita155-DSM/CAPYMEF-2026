@@ -13,10 +13,3 @@ export const restablecerPassword = (token, password) =>
   api(`/auth/restablecer-password/${token}`, { method: "PUT", body: { password } });
 
 export const obtenerPerfil = () => api("/auth/perfil");
-
-// ⚠️ Temporal: se borra en el paso 5 (lo reemplaza logout() de useAuth)
-export const cerrarSesion = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("usuario");
-  window.location.href = "/";
-};

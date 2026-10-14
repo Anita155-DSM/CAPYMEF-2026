@@ -12,32 +12,22 @@ import {
   FaBars,
   FaXmark,
 } from "react-icons/fa6";
-import logo from "../assets/img/Logo.png";
-import { obtenerPerfil } from "../services/authServices";
+import logo from "../assets/img/logo.png";
+import { obtenerPerfil } from "../services/authServices.js";
+import { useAuth } from "@/app/providers/AuthContext";
 
 export default function SocioLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false);
-  const [usuario, setUsuario] = useState(() => {
-    const usuarioGuardado = localStorage.getItem("usuario");
-    return usuarioGuardado ? JSON.parse(usuarioGuardado) : {};
-  });
+  const { usuario, actualizarUsuario } = useAuth();
 
-  const location = useLocation(); // Para saber en qué ruta estamos y marcar el menú activo
+  const location = useLocation();
 
+  // Traemos el perfil fresco del backend y lo guardamos en el contexto
   useEffect(() => {
-    const cargarPerfil = async () => {
-      try {
-        const resultado = await obtenerPerfil();
-        if (resultado.exito) {
-          setUsuario(resultado.data);
-          localStorage.setItem("usuario", JSON.stringify(resultado.data));
-        }
-      } catch (error) {
-        console.error("No se pudo cargar el perfil del socio:", error);
-      }
-    };
-    cargarPerfil();
-  }, []);
+    obtenerPerfil().then((resultado) => {
+      if (resultado.exito) actualizarUsuario(resultado.data);
+    });
+  }, [actualizarUsuario]);
 
   const nombreEmpresa = usuario.razonSocial || "Tu empresa";
   const categoria = usuario.categoria
@@ -61,7 +51,7 @@ export default function SocioLayout() {
         <div className="flex h-20 items-center justify-between border-b border-white/10 px-3">
           <div className="flex justify-center ml-10">
             <Link to="/socios" aria-label="Ir al inicio del panel de socio">
-              <img src={logo} alt="Logo CAPYMEF" className="w-30 opacity-90" />
+              <img src={logo} alt="logo CAPYMEF" className="w-30 opacity-90" />
             </Link>
           </div>
           <button

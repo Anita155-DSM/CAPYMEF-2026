@@ -1,16 +1,14 @@
-import { useState, useEffect } from "react";
-import { cerrarSesion } from "../services/authServices";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/app/providers/AuthContext";
 
 export default function Profile() {
-  const [usuario, setUsuario] = useState(null)
+  const { usuario, logout } = useAuth();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const usuarioString = localStorage.getItem("usuario")
-
-    if (usuarioString) {
-      setUsuario(JSON.parse(usuarioString))
-    }
-  }, [])
+  const cerrarSesion = () => {
+    logout();
+    navigate("/");
+  };
 
   if (!usuario) {
     return <div className="mt-32 text-center text-xl">Cargando perfil...</div>;

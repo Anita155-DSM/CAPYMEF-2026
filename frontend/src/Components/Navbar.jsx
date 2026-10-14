@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { FaBars, FaXmark } from "react-icons/fa6";
-import { Link, useLocation } from "react-router-dom";
-import Logo from "../assets/img/Logo.png";
-import { cerrarSesion } from "../services/authServices";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import logo from "@/assets/img/logo.png";
+import { useAuth } from "@/app/providers/AuthContext";
 
 export default function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [menuAbierto, setMenuAbierto] = useState(false);
+
+  const cerrarSesion = () => {
+    logout();
+    navigate("/");
+  };
   const enlaces = [
     ["Inicio", "/"],
     ["Noticias", "/noticias"],
@@ -17,7 +24,7 @@ export default function Navbar() {
       <div className="flex items-center justify-between gap-2 px-3 sm:px-6 lg:px-8 py-2">
         <div className="flex-shrink-0">
           <Link to="/" aria-label="Ir al inicio">
-            <img src={Logo} alt="Logo CAPYMEF" className="h-10 sm:h-12 w-auto object-contain" />
+            <img src={logo} alt="logo CAPYMEF" className="h-10 sm:h-12 w-auto object-contain" />
           </Link>
         </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Footer, Modal, Navbar, NavbarPublico } from "../../Components";
 import { obtenerNoticiasPublicas } from "../../services/noticiasService";
+import { useAuth } from "@/app/providers/AuthContext";
 
 const NOTICIAS_POR_PAGINA = 6;
 
@@ -14,8 +15,7 @@ export default function NoticiasPublicas() {
   const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
   const [paginaActual, setPaginaActual] = useState(1);
 
-  const token = localStorage.getItem("token");
-  const estaLogueado = !!token;
+  const { estaLogueado } = useAuth();
   const totalPaginas = Math.max(1, Math.ceil(noticias.length / NOTICIAS_POR_PAGINA));
   const noticiasVisibles = noticias.slice(
     (paginaActual - 1) * NOTICIAS_POR_PAGINA,
@@ -82,7 +82,7 @@ export default function NoticiasPublicas() {
 
       <main className="bg-[#F4F8FB] min-h-screen pt-28 pb-16 px-6 sm:px-10 md:px-24 font-sans animacion-modal">
         <div className="max-w-7xl mx-auto">
-          
+
           {/* HEADER DE LA SECCIÓN DE NOTICIAS */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6 noticia-reveal">
             <div className="flex flex-col">
@@ -123,7 +123,7 @@ export default function NoticiasPublicas() {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
-                  
+
                   {/* Cuerpo de la Tarjeta */}
                   <div className="p-6 md:p-8 flex flex-col flex-1 bg-white">
                     <div className="flex items-center gap-2 mb-3 text-[#1b4f7a]">
@@ -132,15 +132,15 @@ export default function NoticiasPublicas() {
                         {formatearFecha(noticia.fechaPublicacion)}
                       </span>
                     </div>
-                    
+
                     <h3 className="text-lg font-bold mb-4 leading-snug text-[#153448] group-hover:text-[#1b4f7a] transition-colors line-clamp-2">
                       {noticia.titulo}
                     </h3>
-                    
+
                     <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed line-clamp-3">
                       {noticia.subtitulo || noticia.resumen}
                     </p>
-                    
+
                     {/* Botón sutil con "Leer más" */}
                     <div className="mt-auto flex items-center text-[#1b4f7a] font-bold text-sm bg-[#F4F8FB] w-max px-4 py-2 rounded-lg transition-colors group-hover:bg-[#1b4f7a] group-hover:text-white">
                       Leer más <span className="ml-2 transform transition-transform group-hover:translate-x-1">&rarr;</span>

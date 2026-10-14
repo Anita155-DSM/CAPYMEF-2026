@@ -1,75 +1,39 @@
-import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { iniciarSesion } from "../../services/authServices";
-import { toast } from "sonner"; // 1. Importamos el toast de sonner
-import Logo from "../../assets/img/Logo.png";
 import { FiArrowRight, FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner"; // 1. Importamos el toast de sonner
+import logo from "../../assets/img/logo.png";
+import { iniciarSesion } from "../../services/authServices";
+import { useAuth } from "@/app/providers/AuthContext";
+
+
 
 export default function Login() {
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  const { usuario, login } = useAuth();
 
+  // Si ya hay sesión (o se acaba de iniciar), redirigimos según el rol
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const usuarioString = localStorage.getItem("usuario");
+    if (!usuario) return;
+    navigate(usuario.rol === "admin" ? "/admin/inicio" : "/socios", { replace: true });
+  }, [usuario, navigate]);
 
-    if (!token || !usuarioString) return;
-
-    const usuario = JSON.parse(usuarioString);
-    navigate(usuario.rol === "admin" ? "/admin/inicio" : "/socios", {
-      replace: true,
-    });
-  }, [navigate]);
-
-  // Ya no hace falta que handleLogin sea async, porque la asincronía ocurre adentro de la Promesa
   const handleLogin = (data) => {
-
-    // 2. Creamos la Promesa que envuelve tu lógica original
-    const loginPromise = new Promise(async (resolve, reject) => {
-      try {
-        // Retraso artificial de 1.5 segundos
-        const esperaMinima = new Promise((res) => setTimeout(res, 1500));
-
-        // Llamada real a tu backend
-        const result = await iniciarSesion(data);
-
-        // Obligamos al código a esperar que pase el tiempo mínimo
-        await esperaMinima;
-
-        // Evaluamos la respuesta de tu API
-        if (result.exito) {
-          localStorage.setItem("token", result.token);
-          localStorage.setItem("usuario", JSON.stringify(result.usuario));
-          resolve(result); // Todo salió bien
-        } else {
-          reject(new Error(result.mensaje || "Credenciales incorrectas")); // Falló el login
-        }
-      } catch (error) {
-        reject(new Error(error.message || "Error al conectar con el servidor"));
-      }
+    const loginPromise = iniciarSesion(data).then((result) => {
+      if (!result.exito) throw new Error(result.mensaje || "Credenciales incorrectas");
+      return result;
     });
 
-    // 3. Le pasamos la promesa a Sonner para que controle los carteles
     toast.promise(loginPromise, {
-      loading: 'Verificando credenciales...',
+      loading: "Verificando credenciales...",
       success: (result) => {
-        // Esperamos 1 segundo después del cartel verde para redirigir, así el usuario lo llega a leer
-        setTimeout(() => {
-          if (result.usuario.rol === "admin") {
-            navigate("/admin/inicio"); 
-          } else {
-            navigate("/socios"); // Ruta normal para los socios
-          }
-        }, 1000);
-
-        return result.mensaje || `"¡Sesión iniciada correctamente!";`
-
+        login(result); // guarda token + usuario → el useEffect de arriba redirige
+        return result.mensaje || "¡Sesión iniciada correctamente!";
       },
-      error: (err) => {
-        return err.message;
-      },
+      error: (err) => err.message,
     });
   };
 
@@ -153,7 +117,7 @@ export default function Login() {
         </div>
       </main>
       <Link to="/" className="absolute bottom-6 left-6">
-        <img src={Logo} alt="LogoCAPYMEF" className="h-16 w-auto object-contain" />
+        <img src={logo} alt="logoCAPYMEF" className="h-16 w-auto object-contain" />
       </Link>
     </div>
   );

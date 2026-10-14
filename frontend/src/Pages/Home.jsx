@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { FaGem, FaHandshake, FaStar, FaUser, FaUserTie, FaPenClip, FaCoins, FaUsers, FaMagnifyingGlassChart } from "react-icons/fa6";
+import { useAuth } from "@/app/providers/AuthContext";
 
 // IMPORTACIONES DE IMÁGENES CORRECTAS (desde src/assets/img/)
 import fondoHome from "../assets/img/FondoCapymef.png";
@@ -23,7 +24,7 @@ const formatearFecha = (fecha) => (
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [imagenActiva, setImagenActiva] = useState(0);
-  const token = localStorage.getItem("token");
+  const { estaLogueado } = useAuth();
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -44,7 +45,7 @@ export default function Home() {
     hero4,
     hero5
   ];
-  
+
   const posicionesHero = [
     "center 56px",
     "center center",
@@ -104,20 +105,19 @@ export default function Home() {
   return (
     <>
       <header>
-        {token ? <Navbar /> : <NavbarPublico />}
+        {estaLogueado ? <Navbar /> : <NavbarPublico />}
       </header>
       <main className="w-full overflow-x-hidden">
-        
+
         {/* --- Hero Section --- */}
         <section id="inicio" className="w-full font-sans">
           <div className="relative flex min-h-screen w-full flex-col items-start justify-center overflow-hidden bg-gray-900 inicio-reveal inicio-reveal-hero">
-            
+
             {imagenesHero.map((img, index) => (
               <div
                 key={index}
-                className={`absolute inset-0 bg-cover bg-no-repeat transition-opacity duration-1000 ease-in-out ${
-                  index === imagenActiva ? "opacity-100 z-0" : "opacity-0 -z-10"
-                }`}
+                className={`absolute inset-0 bg-cover bg-no-repeat transition-opacity duration-1000 ease-in-out ${index === imagenActiva ? "opacity-100 z-0" : "opacity-0 -z-10"
+                  }`}
                 style={{
                   backgroundImage: `url("${img}")`,
                   backgroundPosition: posicionesHero[index] || "center center",
@@ -128,7 +128,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-black/50 z-0"></div>
 
             <div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex flex-col items-start mt-16">
-              
+
               <span className="text-white/90 text-sm sm:text-base font-bold tracking-[0.2em] uppercase mb-4 drop-shadow-md">
                 Impulsando el desarrollo comercial
               </span>
@@ -156,46 +156,46 @@ export default function Home() {
               {/* --- MODAL --- */}
               {isOpen && createPortal(
                 (
-                <div
-                  onClick={() => setIsOpen(false)}
-                  className="rounded-sm fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-                >
                   <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="bg-[#F4F8FB] border border-gray-300 rounded-sm shadow-2xl p-4 sm:p-8 md:p-12 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative mx-2 sm:mx-4 animacion-modal"
+                    onClick={() => setIsOpen(false)}
+                    className="rounded-sm fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
                   >
-                    <h3 className="text-xl sm:text-2xl md:text-[26px] font-normal text-center text-[#1D7BB6] mb-5 sm:mb-8 font-sans tracking-wide">
-                      COMO SUMARSE A CAPYMEF
-                    </h3>
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="bg-[#F4F8FB] border border-gray-300 rounded-sm shadow-2xl p-4 sm:p-8 md:p-12 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative mx-2 sm:mx-4 animacion-modal"
+                    >
+                      <h3 className="text-xl sm:text-2xl md:text-[26px] font-normal text-center text-[#1D7BB6] mb-5 sm:mb-8 font-sans tracking-wide">
+                        COMO SUMARSE A CAPYMEF
+                      </h3>
 
-                    <div className="font-sans text-gray-900 text-sm sm:text-lg leading-relaxed space-y-2">
-                      <p>Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.</p>
-                      <p>¿Cómo ser socio?</p>
-                      <p>Contactanos: Escribinos o acercate a nuestras oficinas para conocer los requisitos formales y completar tu solicitud de ingreso oficial.</p>
-                      <p>Tu Alta: Tu solicitud será evaluada y aprobada por la Comisión Directiva para darte la bienvenida a la Cámara.</p>
-                      <p>Registro Digital: Una vez que tu alta sea aprobada, podrás volver a esta página web, crear tu cuenta y subir tu documentación para acceder a tu panel de autogestión, beneficios y pago de cuotas.</p>
+                      <div className="font-sans text-gray-900 text-sm sm:text-lg leading-relaxed space-y-2">
+                        <p>Para garantizar una atención personalizada y asignarte la categoría ideal para tu pyme, el proceso de alta inicial lo realizamos de forma directa.</p>
+                        <p>¿Cómo ser socio?</p>
+                        <p>Contactanos: Escribinos o acercate a nuestras oficinas para conocer los requisitos formales y completar tu solicitud de ingreso oficial.</p>
+                        <p>Tu Alta: Tu solicitud será evaluada y aprobada por la Comisión Directiva para darte la bienvenida a la Cámara.</p>
+                        <p>Registro Digital: Una vez que tu alta sea aprobada, podrás volver a esta página web, crear tu cuenta y subir tu documentación para acceder a tu panel de autogestión, beneficios y pago de cuotas.</p>
 
-                      <p className="pt-2">Nuestras vías de contacto:</p>
-                      <div className="flex flex-col lg:flex-row gap-5">
-                        <ul className="space-y-3 flex-1">
-                          <li>📍 Dirección: Maipú 651, Formosa, Argentina, 3600.</li>
-                          <li>📱 Tel: 0370 446-2508</li>
-                          <li>✉️ Correo: info@capymef.ar</li>
-                        </ul>
-                        <iframe className="w-full lg:w-142.5 max-w-full h-44 sm:h-48 rounded shadow" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                        <p className="pt-2">Nuestras vías de contacto:</p>
+                        <div className="flex flex-col lg:flex-row gap-5">
+                          <ul className="space-y-3 flex-1">
+                            <li>📍 Dirección: Maipú 651, Formosa, Argentina, 3600.</li>
+                            <li>📱 Tel: 0370 446-2508</li>
+                            <li>✉️ Correo: info@capymef.ar</li>
+                          </ul>
+                          <iframe className="w-full lg:w-142.5 max-w-full h-44 sm:h-48 rounded shadow" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d234.04766724362105!2d-58.1732974269762!3d-26.17999337323511!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945ca5ef58d8ecd9%3A0x7d600e7dfa9b965c!2sCamara%20De%20Pequenas%20Y%20Medianas%20Empresas%20De%20Formosa!5e0!3m2!1ses!2sus!4v1786555633335!5m2!1ses!2sus" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end mt-10 font-sans">
+                        <button
+                          onClick={() => setIsOpen(false)}
+                          className="px-8 py-2.5 bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold rounded-full transition-colors text-sm tracking-wide shadow-md"
+                        >
+                          ENTENDIDO
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex justify-end mt-10 font-sans">
-                      <button
-                        onClick={() => setIsOpen(false)}
-                        className="px-8 py-2.5 bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold rounded-full transition-colors text-sm tracking-wide shadow-md"
-                      >
-                        ENTENDIDO
-                      </button>
-                    </div>
                   </div>
-                </div>
                 ),
                 document.body
               )}
@@ -203,9 +203,9 @@ export default function Home() {
           </div>
         </section>
 
-                {/*NOVEDADES*/}
-<section id="novedades" className="w-full bg-[#F4F8FB] px-6 sm:px-10 md:px-24 pt-20 pb-20 font-sans inicio-reveal">
-          
+        {/*NOVEDADES*/}
+        <section id="novedades" className="w-full bg-[#F4F8FB] px-6 sm:px-10 md:px-24 pt-20 pb-20 font-sans inicio-reveal">
+
           <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between mb-16 max-w-7xl mx-auto">
             {/* Título alineado a la izquierda, sin subtítulo y con la fuente Sans bien gruesa */}
             <div className="flex flex-col items-start w-full">
@@ -213,7 +213,7 @@ export default function Home() {
                 Novedades de la Cámara
               </h2>
             </div>
-            
+
             {/* Botón Ver Todas: A la izquierda en celular (self-start), a la derecha en PC */}
             <Link
               to="/noticias"
@@ -233,7 +233,7 @@ export default function Home() {
               <p className="text-gray-600 text-lg">Todavía no hay noticias publicadas.</p>
             </div>
           ) : (
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {noticias.slice(0, 3).map((noticia) => (
                 <article
                   key={noticia.id}
@@ -252,7 +252,7 @@ export default function Home() {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
-                  
+
                   {/* Cuerpo de la Tarjeta */}
                   <div className="p-6 md:p-8 flex flex-col flex-1 bg-white">
                     {/* Fecha e ícono en azul oscuro (mismo color que el botón) */}
@@ -262,16 +262,16 @@ export default function Home() {
                         {formatearFecha(noticia.fechaPublicacion)}
                       </span>
                     </div>
-                    
+
                     {/* Título más chico (text-lg en lugar de text-xl) */}
                     <h3 className="text-lg font-bold mb-4 leading-snug text-[#153448] group-hover:text-[#1b4f7a] transition-colors line-clamp-2">
                       {noticia.titulo}
                     </h3>
-                    
+
                     <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed line-clamp-3">
                       {noticia.subtitulo || noticia.resumen}
                     </p>
-                    
+
                     {/* Botón sutil con "Leer más" y flechita horizontal */}
                     <div className="mt-auto flex items-center text-[#1b4f7a] font-bold text-sm bg-[#F4F8FB] w-max px-4 py-2 rounded-lg transition-colors group-hover:bg-[#1b4f7a] group-hover:text-white">
                       Leer más <span className="ml-2 transform transition-transform group-hover:translate-x-1">&rarr;</span>
@@ -290,7 +290,7 @@ export default function Home() {
           )}
         </section>
 
-{/*Sobre Nosotros + Autoridades*/}
+        {/*Sobre Nosotros + Autoridades*/}
         <section id="nosotros" className="w-full bg-gradient-to-r from-[#E5F1F8] to-[#F4F8FB] px-6 sm:px-10 md:px-24 py-20 font-sans inicio-reveal">
           <div className="max-w-7xl mx-auto flex flex-col gap-20">
 
@@ -319,7 +319,7 @@ export default function Home() {
             {/* --- BLOQUE 2: Comisión Directiva  --- */}
             <div className="w-full">
               <h2 className="text-3xl md:text-4xl font-extrabold text-[#153448] mb-2 tracking-tight">
-                Autoridades de la Cámara 
+                Autoridades de la Cámara
               </h2>
               <p className="text-lg text-[#2c4c5e] mb-12">
                 Conocé a la Comisión Directiva que impulsa el crecimiento de las PyMEs.
@@ -453,7 +453,7 @@ export default function Home() {
           </div>
         </section>
 
-{/*La Vista N3 - Formas de ser socio */}
+        {/*La Vista N3 - Formas de ser socio */}
         <section id="beneficios" className="w-full bg-gradient-to-r from-[#E5F1F8] to-[#F4F8FB] px-6 md:px-24 py-20 font-sans inicio-reveal">
 
           {/* Título Principal alineado a la izquierda */}
@@ -471,12 +471,12 @@ export default function Home() {
 
               {/* --- Tarjeta 1: Padrino --- */}
               <div className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col group border border-gray-100">
-                
+
                 {/* Ícono a la izquierda */}
                 <div className="w-16 h-16 bg-[#E8F4F8] rounded-2xl flex items-center justify-center text-[#187A8D] mb-8 shrink-0 transition-transform duration-300 group-hover:scale-110">
                   <FaGem className="text-2xl" />
                 </div>
-                
+
                 <h3 className="text-2xl font-extrabold text-[#153448] mb-4">
                   Padrino
                 </h3>
@@ -493,7 +493,7 @@ export default function Home() {
 
               {/* --- Tarjeta 2: Activo --- */}
               <div className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col group border border-gray-100">
-                
+
                 {/* Ícono a la izquierda */}
                 <div className="w-16 h-16 bg-[#E8F4F8] rounded-2xl flex items-center justify-center text-[#187A8D] mb-8 shrink-0 transition-transform duration-300 group-hover:scale-110">
                   <div className="relative">
@@ -501,7 +501,7 @@ export default function Home() {
                     <FaStar className="text-[10px] absolute -bottom-1 -right-2 text-[#187A8D] bg-[#E8F4F8] rounded-full border border-[#E8F4F8]" />
                   </div>
                 </div>
-                
+
                 <h3 className="text-2xl font-extrabold text-[#153448] mb-4">
                   Activo
                 </h3>
@@ -518,12 +518,12 @@ export default function Home() {
 
               {/* --- Tarjeta 3: Adherente --- */}
               <div className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col group border border-gray-100">
-                
+
                 {/* Ícono a la izquierda */}
                 <div className="w-16 h-16 bg-[#E8F4F8] rounded-2xl flex items-center justify-center text-[#187A8D] mb-8 shrink-0 transition-transform duration-300 group-hover:scale-110">
                   <FaHandshake className="text-3xl" />
                 </div>
-                
+
                 <h3 className="text-2xl font-extrabold text-[#153448] mb-4">
                   Adherente
                 </h3>
@@ -541,11 +541,11 @@ export default function Home() {
             </div>
           </div>
         </section>
-      
+
 
         {/* --- VISTA N5: Información Institucional --- */}
         <section id="informacion" className="w-full bg-gradient-to-r from-[#E5F1F8] to-[#F4F8FB] px-6 md:px-24 py-20 font-sans inicio-reveal">
-          
+
           <div className="flex flex-col items-center mb-16 text-center">
             <h2 className="text-3xl md:text-[40px] font-extrabold text-[#153448] tracking-tight">
               Información institucional
@@ -565,7 +565,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                   </svg>
                 </div>
-                
+
                 <h3 className="text-2xl font-extrabold text-[#153448] mb-4">
                   Estatuto Social
                 </h3>
@@ -576,8 +576,8 @@ export default function Home() {
                 </p>
 
                 {/* Botón de descarga del Estatuto */}
-                <a 
-                  href="/ESTATUTO.pdf" 
+                <a
+                  href="/ESTATUTO.pdf"
                   download="Estatuto_CAPYMEF.pdf"
                   className="mt-auto px-6 py-3 bg-[#153448] text-white text-sm font-semibold rounded-full transition-colors hover:bg-[#1b4f7a] shadow-md flex items-center gap-2"
                 >
@@ -595,7 +595,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                   </svg>
                 </div>
-                
+
                 <h3 className="text-2xl font-extrabold text-[#153448] mb-4">
                   Transparencia y Balances
                 </h3>
@@ -606,8 +606,8 @@ export default function Home() {
                 </p>
 
                 {/* Botón de descarga del Balance */}
-                <a 
-                  href="/Balance2011-2025_compressed.pdf" 
+                <a
+                  href="/Balance2011-2025_compressed.pdf"
                   download="Balances_Historicos_CAPYMEF.pdf"
                   className="mt-auto px-6 py-3 bg-[#153448] text-white text-sm font-semibold rounded-full transition-colors hover:bg-[#1b4f7a] shadow-md flex items-center gap-2"
                 >
@@ -621,9 +621,9 @@ export default function Home() {
             </div>
           </div>
         </section>
-{/* --- VISTA N6: Vinculación Institucional --- */}
+        {/* --- VISTA N6: Vinculación Institucional --- */}
         <section id="vinculacion" className="w-full bg-gradient-to-r from-[#F4F8FB] to-[#E5F1F8] px-6 md:px-24 py-20 font-sans inicio-reveal">
-          
+
           {/* Título y bajada centrados */}
           <div className="flex flex-col items-center mb-16 text-center max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-[40px] font-extrabold text-[#153448] tracking-tight leading-tight">
@@ -637,56 +637,56 @@ export default function Home() {
           {/* Grilla de Aliados (CAME, ATP, ARCA) */}
           <div className="max-w-6xl mx-auto">
             <div className="flex md:grid md:grid-cols-3 gap-8 lg:gap-10 overflow-x-auto pb-4 snap-x snap-mandatory md:overflow-visible md:pb-0">
-              
+
               {/* Aliado: CAME */}
-              <a 
-                href="https://www.redcame.org.ar/" 
-                target="_blank" 
+              <a
+                href="https://www.redcame.org.ar/"
+                target="_blank"
                 rel="noreferrer"
                 className="min-w-[calc(100vw-3rem)] md:min-w-0 snap-start bg-white h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-gray-100 group p-6"
               >
-                <img 
-                  src={logoCAME} 
-                  alt="CAME" 
-                  className="max-h-full max-w-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300" 
+                <img
+                  src={logoCAME}
+                  alt="CAME"
+                  className="max-h-full max-w-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300"
                 />
               </a>
 
               {/* Aliado: DGR / ATP */}
-              <a 
-                href="https://www.atpformosa.gob.ar/" 
-                target="_blank" 
+              <a
+                href="https://www.atpformosa.gob.ar/"
+                target="_blank"
                 rel="noreferrer"
                 className="min-w-[calc(100vw-3rem)] md:min-w-0 snap-start bg-white h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-gray-100 group p-6"
               >
-                <img 
-                  src={logoDGR} 
-                  alt="ATP Formosa" 
-                  className="max-h-full max-w-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300" 
+                <img
+                  src={logoDGR}
+                  alt="ATP Formosa"
+                  className="max-h-full max-w-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300"
                 />
               </a>
 
               {/* Aliado: AFIP / ARCA */}
-              <a 
-                href="https://www.afip.gob.ar/" 
-                target="_blank" 
+              <a
+                href="https://www.afip.gob.ar/"
+                target="_blank"
                 rel="noreferrer"
                 className="min-w-[calc(100vw-3rem)] md:min-w-0 snap-start bg-[#153448] h-32 rounded-3xl shadow-sm flex items-center justify-center transition-all duration-300 hover:shadow-md hover:-translate-y-1 border border-[#153448] group p-6"
               >
-                <img 
-                  src={logoAFIP} 
-                  alt="ARCA" 
-                  className="max-h-full max-w-full object-contain opacity-100 transition-opacity duration-300" 
+                <img
+                  src={logoAFIP}
+                  alt="ARCA"
+                  className="max-h-full max-w-full object-contain opacity-100 transition-opacity duration-300"
                 />
               </a>
 
             </div>
           </div>
         </section>
-        </main>
-        
+      </main>
 
-      
+
+
       {/*Footer */}
       <footer className="bg-[#1b4f7a] pt-5">
         <Footer />

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaRegSave, FaRegTrashAlt, FaExclamationTriangle } from "react-icons/fa";
 import { actualizarNoticia, eliminarNoticia } from "../../../../services/noticiasService.js";
-import Logo from "../../../../assets/img/logo.png";
+import logo from "../../../../assets/img/logo.png";
 import { toast } from "sonner";
 
 export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
@@ -91,7 +91,7 @@ export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
             <div className="flex flex-col gap-2">
               <label className="font-bold text-gray-700 text-sm">Imagen de portada</label>
               <div className="flex items-center gap-4">
-                {imagen.preview ? <img src={imagen.preview} className="w-32 h-24 object-cover rounded-lg border shadow-sm" /> : <div className="w-32 h-24 bg-gradient-to from-[#132A46] to-[#1D7BB6] flex items-center justify-center rounded-lg"><img src={Logo} className="h-10 opacity-30" /></div>}
+                {imagen.preview ? <img src={imagen.preview} className="w-32 h-24 object-cover rounded-lg border shadow-sm" /> : <div className="w-32 h-24 bg-gradient-to from-[#132A46] to-[#1D7BB6] flex items-center justify-center rounded-lg"><img src={logo} className="h-10 opacity-30" /></div>}
                 <input type="file" accept="image/*" onChange={handleImagen} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#1D7BB6] file:text-white cursor-pointer" />
               </div>
             </div>

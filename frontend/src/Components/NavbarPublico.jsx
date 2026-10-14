@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaBars, FaXmark } from "react-icons/fa6";
 import { Link, useLocation } from "react-router-dom";
-import Logo from "../assets/img/Logo.png";
+import logo from "../assets/img/logo.png";
 
 export default function NavbarPublico() {
     const location = useLocation();
@@ -94,10 +94,10 @@ export default function NavbarPublico() {
         <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm font-sans border-b border-gray-200">
             <div className="flex items-center justify-between gap-2 px-3 sm:px-6 lg:px-8 py-2">
 
-                {/* LOGO */}
+                {/* logo */}
                 <div className="flex-shrink-0">
                     <Link to="/" onClick={(e) => hacerScrollSuave(e, 'inicio')} aria-label="Ir al inicio">
-                        <img src={Logo} alt="Logo CAPYMEF" className="h-8 sm:h-10 w-auto object-contain" />
+                        <img src={logo} alt="logo CAPYMEF" className="h-8 sm:h-10 w-auto object-contain" />
                     </Link>
                 </div>
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { restablecerPassword } from "../../services/authServices";
-import Logo from "../../assets/img/Logo.png";
+import logo from "../../assets/img/logo.png";
 import { toast } from "sonner";
 
 export default function ResetPassword() {
@@ -106,7 +106,7 @@ export default function ResetPassword() {
       </div>
 
       <Link to="/" className="absolute bottom-6 left-6">
-        <img src={Logo} alt="LogoCAPYMEF" className="h-16 w-auto object-contain" />
+        <img src={logo} alt="logoCAPYMEF" className="h-16 w-auto object-contain" />
       </Link>
     </div>
   );
