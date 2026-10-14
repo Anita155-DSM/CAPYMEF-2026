@@ -1,0 +1,28 @@
+[33mcommit 4f7a576647848e8fabd5e4b527bccdcd7dd95faa[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevelop-ana[m[33m)[m
+Author: AnitaDSM-155 <anahiperezdsm@gmail.com>
+Date:   Thu Oct 1 12:54:19 2026 -0300
+
+    feat(pagos): el socio consulta y paga sus cuotas con Mercado Pago
+    
+    Backend (solo lectura, filtrado por el id del token):
+    - GET /api/pagos/mis-cuotas: cuotas del socio logueado con su pago (sin datos de Tesoreria)
+    - GET /api/pagos/mis-cuotas/:id/comprobante: regenera el PDF solo si la cuota es del socio
+    
+    Frontend:
+    - Wallet Brick de Mercado Pago (@mercadopago/sdk-react) con VITE_MP_PUBLIC_KEY
+    - Modal de pago: crea la preferencia al abrirse, toma el pref_id del init_point validado
+      y si el Brick falla ofrece ir al checkout directo
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ backend/controllers/pago.controllers.js            |  71 [32m++++++++++++[m[31m-[m
+ backend/routes/pago.routes.js                      |   6 [32m+[m[31m-[m
+ frontend/.env                                      |   3 [32m+[m[31m-[m
+ frontend/package-lock.json                         |  20 [32m++++[m
+ frontend/package.json                              |   1 [32m+[m
+ .../src/Pages/Socios/Components/ModalPagoCuota.jsx | 110 [32m+++++++++++++++++++++[m
+ .../src/Pages/Socios/Components/TarjetaCuota.jsx   |   6 [32m+[m[31m-[m
+ .../src/Pages/Socios/Hooks/useAccionesCuota.js     |  21 [32m++[m[31m--[m
+ frontend/src/Pages/Socios/PagosSocio.jsx           |   7 [32m+[m[31m-[m
+ frontend/src/services/socioServices.js             |  14 [32m++[m[31m-[m
+ 10 files changed, 237 insertions(+), 22 deletions(-)
