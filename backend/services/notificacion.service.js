@@ -1,5 +1,36 @@
+import { Op } from 'sequelize';
 import { Notificacion } from '../models/notificacion.models.js';
 import { User } from '../models/user.models.js';
+
+// ==========================================
+// Helpers de formato para armar los mensajes
+// ==========================================
+// Viven acá para que cuotas y pagos escriban los textos de la misma manera.
+
+// "2026-10-10" -> "10/10/2026"
+export const formatearFecha = (fechaISO) => {
+  const [anio, mes, dia] = String(fechaISO).split('-');
+  return `${dia}/${mes}/${anio}`;
+};
+
+// "2026-10" -> "10/2026"
+export const formatearPeriodo = (mesAnio) => {
+  const [anio, mes] = String(mesAnio).split('-');
+  return `${mes}/${anio}`;
+};
+
+// 10000 o "10000.00" -> "$10.000"
+export const formatearMonto = (monto) => `$${Number(monto).toLocaleString('es-AR')}`;
+
+// Días entre dos fechas "YYYY-MM-DD". Se calcula en UTC para que el horario de verano
+// o la zona del servidor no corran el resultado un día.
+export const diasEntre = (desdeISO, hastaISO) => {
+  const aMilisegundos = (iso) => {
+    const [anio, mes, dia] = iso.split('-').map(Number);
+    return Date.UTC(anio, mes - 1, dia);
+  };
+  return Math.round((aMilisegundos(hastaISO) - aMilisegundos(desdeISO)) / 86400000);
+};
 
 // Crea UNA notificación para un usuario. Devuelve true si se creó, false si ya existía
 // (misma referencia) o si falló.
@@ -30,12 +61,14 @@ export const crearNotificacion = async ({ usuarioId, tipo, titulo, mensaje, enla
 
 // Crea la misma notificación para cada admin activo (aprobado). Para avisos de gestión
 // (pagos por confirmar, cuotas vencidas, etc.). Devuelve cuántas se crearon.
-export const notificarAdmins = async ({ tipo, titulo, mensaje, enlace = null, referencia = null }) => {
+// excluirUsuarioId (opcional): no avisarle a ese admin, típicamente quien disparó la acción
+// y por eso ya está al tanto.
+export const notificarAdmins = async ({ tipo, titulo, mensaje, enlace = null, referencia = null, excluirUsuarioId = null }) => {
   try {
-    const admins = await User.findAll({
-      where: { rol: 'admin', estado: 'aprobado' },
-      attributes: ['id'],
-    });
+    const where = { rol: 'admin', estado: 'aprobado' };
+    if (excluirUsuarioId) where.id = { [Op.ne]: excluirUsuarioId };
+
+    const admins = await User.findAll({ where, attributes: ['id'] });
 
     let creadas = 0;
     for (const admin of admins) {

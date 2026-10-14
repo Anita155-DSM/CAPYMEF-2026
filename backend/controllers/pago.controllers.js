@@ -5,6 +5,12 @@ import { crearOrdenDePago, procesarNotificacionPago } from '../services/pasarela
 import { generarComprobantePago } from '../services/comprobante.service.js';
 import { enviarMailComprobantePago } from '../config/mailer.js';
 import { subirPDFCloudinary } from '../services/cloudinary.service.js';
+import {
+  crearNotificacion,
+  notificarAdmins,
+  formatearMonto,
+  formatearPeriodo,
+} from '../services/notificacion.service.js';
 
 // ==========================================
 // 1. INICIAR PAGO ONLINE (Socio logueado)
@@ -90,18 +96,50 @@ export const recibirWebhook = async (req, res) => {
       return res.status(200).json({ recibido: true });
     }
 
-    const nuevoPago = await Pago.create({
-      cuota_id: cuota.id,
-      usuario_id: cuota.usuario_id,
-      montoAbonado: montoPagado,
-      metodoPago: 'Otro', // Mercado Pago puede ser tarjeta, débito, etc. — no mapeamos 1 a 1 todavía
-      origenPago: 'pasarela',
-      idTransaccionExterna,
-      observaciones: 'Pago online vía Mercado Pago',
-    });
+    // Mercado Pago a veces manda el MISMO aviso dos veces casi al mismo tiempo. La verificación
+    // de arriba (findOne) no alcanza: los dos avisos pueden pasarla antes de que alguno escriba.
+    // La que de verdad lo impide es la restricción única de la base (cuota_id e
+    // idTransaccionExterna en la tabla pagos): el segundo create falla y lo tratamos como
+    // "ya procesado", sin repetir pago, alertas ni mail.
+    let nuevoPago;
+    try {
+      nuevoPago = await Pago.create({
+        cuota_id: cuota.id,
+        usuario_id: cuota.usuario_id,
+        montoAbonado: montoPagado,
+        metodoPago: 'Otro', // Mercado Pago puede ser tarjeta, débito, etc. — no mapeamos 1 a 1 todavía
+        origenPago: 'pasarela',
+        idTransaccionExterna,
+        observaciones: 'Pago online vía Mercado Pago',
+      });
+    } catch (errorCreacion) {
+      if (errorCreacion.name === 'SequelizeUniqueConstraintError') {
+        console.log(`Aviso duplicado de Mercado Pago ignorado (transacción ${idTransaccionExterna}): ya estaba procesada.`);
+        return res.status(200).json({ recibido: true });
+      }
+      throw errorCreacion; // cualquier otro error lo maneja el catch general de abajo
+    }
 
     cuota.estado = 'pagada';
     await cuota.save();
+
+    // Alertas internas. Van ANTES del comprobante (que puede tardar o fallar) y no pueden
+    // romper el webhook: crearNotificacion/notificarAdmins nunca lanzan error.
+    // Al socio: confirmación de que su pago ya figura.
+    await crearNotificacion({
+      usuarioId: cuota.usuario_id,
+      tipo: 'pago_registrado',
+      titulo: 'Recibimos tu pago',
+      mensaje: `Registramos tu pago de ${formatearMonto(nuevoPago.montoAbonado)} por la cuota de ${formatearPeriodo(cuota.mes_anio)}. Ya podés descargar tu comprobante desde la sección de pagos.`,
+      referencia: `pago-registrado:${nuevoPago.id}`,
+    });
+    // A los administradores: hay un pago online que Tesorería todavía debe verificar contra el banco.
+    await notificarAdmins({
+      tipo: 'pago_por_confirmar',
+      titulo: 'Pago online por confirmar',
+      mensaje: `${cuota.socio.razonSocial} pagó ${formatearMonto(nuevoPago.montoAbonado)} (cuota ${formatearPeriodo(cuota.mes_anio)}). Falta la confirmación de Tesorería.`,
+      referencia: `pago-por-confirmar:${nuevoPago.id}`,
+    });
 
     // Comprobante + mail + Cloudinary, mismo patrón que en el pago manual.
     try {
