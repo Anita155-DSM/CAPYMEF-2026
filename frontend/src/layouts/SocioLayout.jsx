@@ -44,7 +44,7 @@ export default function SocioLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#eef6fb] text-[#132A46] font-sans">
+    <div className="min-h-screen bg-[#eef6fb] text-[-navy] font-sans">
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1b527d] text-white transition-transform duration-300 lg:translate-x-0 ${menuAbierto ? "translate-x-0" : "-translate-x-full"}`}
       >
@@ -82,7 +82,7 @@ export default function SocioLayout() {
 
       {menuAbierto && (
         <button
-          className="fixed inset-0 z-30 bg-[#132A46]/50 lg:hidden"
+          className="fixed inset-0 z-30 bg-[-navy]/50 lg:hidden"
           onClick={() => setMenuAbierto(false)}
           aria-label="Cerrar menú"
         />
@@ -100,19 +100,19 @@ export default function SocioLayout() {
           <div className="hidden text-sm text-gray-500 sm:block"></div>
           <div className="ml-auto flex items-center gap-4 sm:gap-6">
             <button
-              className="relative text-xl text-[#1D7BB6]"
+              className="relative text-xl text-[-primary]"
               aria-label="Notificaciones"
             >
               <FaBell />
               <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#e66d4a]" />
             </button>
             <div className="hidden text-right sm:block">
-              <p className="text-sm font-bold text-[#132A46]">
+              <p className="text-sm font-bold text-[-navy]">
                 {nombreEmpresa}
               </p>
               <p className="text-xs text-gray-500">{categoria}</p>
             </div>
-            <FaCircleUser className="text-4xl text-[#1D7BB6]" />
+            <FaCircleUser className="text-4xl text-[-primary]" />
           </div>
         </header>
 

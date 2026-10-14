@@ -24,7 +24,7 @@ export default function ModalRevision({ socio, onClose, onDecision, procesando }
             }`}>
                 
                 {/* Cabecera Compacta */}
-                <div className="bg-[#132A46] px-6 py-3 text-white flex justify-between items-center shrink-0">
+                <div className="bg-[-navy] px-6 py-3 text-white flex justify-between items-center shrink-0">
                     <div className="flex items-baseline gap-4">
                         <h3 className="text-xl font-bold">{socio.razonSocial}</h3>
                         <span className="text-sm text-gray-300 bg-white/10 px-2 py-1 rounded">

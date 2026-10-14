@@ -9,10 +9,10 @@ export default function Loading() {
         - rounded-full: Lo hace completamente redondo.
         - border-4: Le da un grosor al borde.
         - border-gray-300: Pinta todo el círculo de un gris claro.
-        - border-t-[#1D7BB6]: Pinta SOLO el borde superior (top) con tu azul característico.
+        - border-t-[-primary]: Pinta SOLO el borde superior (top) con tu azul característico.
         - animate-spin: Hace que todo el elemento gire infinitamente.
       */}
-            <div className="w-16 h-16 rounded-full border-4 border-gray-300 border-t-[#1D7BB6] animate-spin"></div>
+            <div className="w-16 h-16 rounded-full border-4 border-gray-300 border-t-[-primary] animate-spin"></div>
 
         </div>
     );

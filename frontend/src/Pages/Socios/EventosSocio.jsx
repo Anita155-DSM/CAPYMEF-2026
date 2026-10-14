@@ -1,18 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { FaCalendarCheck, FaChevronLeft, FaChevronRight, FaClock, FaLocationDot, FaUsers, FaXmark } from "react-icons/fa6";
-import dayjs from "dayjs";
-import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import "dayjs/locale/es";
-import {
-    obtenerEventosSocios,
-    obtenerEventosPublicos,
-    inscribirseEvento,
-    cancelarInscripcion,
-} from "../../services/eventosService.js";
-
-// Configuración de dayjs
-dayjs.extend(isSameOrAfter);
-dayjs.locale("es");
+import dayjs from "@/shared/utils/fechas";
 
 
 const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -104,9 +92,9 @@ export default function EventosSocio() {
                 </div>
 
                 {proximoEvento && (
-                    <div className="bg-white border-l-4 border-[#1D7BB6] p-4 shadow-sm w-full lg:w-80 shrink-0 rounded-r">
-                        <p className="text-[11px] font-bold text-[#1D7BB6] uppercase mb-1 tracking-wider">Próximo evento</p>
-                        <p className="font-bold text-[#132A46] truncate" title={proximoEvento.titulo}>{proximoEvento.titulo}</p>
+                    <div className="bg-white border-l-4 border-[-primary] p-4 shadow-sm w-full lg:w-80 shrink-0 rounded-r">
+                        <p className="text-[11px] font-bold text-[-primary] uppercase mb-1 tracking-wider">Próximo evento</p>
+                        <p className="font-bold text-[-navy] truncate" title={proximoEvento.titulo}>{proximoEvento.titulo}</p>
                         <div className="mt-2 text-xs text-gray-600 space-y-1.5 font-medium">
                             <p><FaCalendarCheck className="inline mr-2 text-[#0875b1]" /> {dayjs(proximoEvento.fecha).format("D [de] MMMM, YYYY")}</p>
                             <p><FaClock className="inline mr-2 text-[#0875b1]" /> {proximoEvento.horaInicio || "A confirmar"} {proximoEvento.horaFin ? ` a ${proximoEvento.horaFin}` : ""}</p>
@@ -158,10 +146,10 @@ export default function EventosSocio() {
 
             {/* Modal de Detalle */}
             {eventoSeleccionado && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#132A46]/50 px-4" onMouseDown={(e) => e.target === e.currentTarget && setEventoSeleccionado(null)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[-navy]/50 px-4" onMouseDown={(e) => e.target === e.currentTarget && setEventoSeleccionado(null)}>
                     <div className="w-full max-w-lg border border-[#d7e0e5] bg-white p-6 shadow-2xl" role="dialog" aria-modal="true">
                         <div className="flex items-start justify-between gap-4">
-                            <div><p className="text-xs font-bold uppercase text-[#1D7BB6]">Evento para socios</p><h2 className="mt-1 text-2xl font-bold text-[#132A46]">{eventoSeleccionado.titulo}</h2></div>
+                            <div><p className="text-xs font-bold uppercase text-[-primary]">Evento para socios</p><h2 className="mt-1 text-2xl font-bold text-[-navy]">{eventoSeleccionado.titulo}</h2></div>
                             <button type="button" onClick={() => setEventoSeleccionado(null)} className="text-xl text-gray-500 hover:text-black"><FaXmark /></button>
                         </div>
 

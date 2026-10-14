@@ -3,6 +3,7 @@ import { FaRegSave, FaRegTrashAlt, FaExclamationTriangle } from "react-icons/fa"
 import { actualizarNoticia, eliminarNoticia } from "../../../../services/noticiasService.js";
 import logo from "../../../../assets/img/logo.png";
 import { toast } from "sonner";
+import { urlImagen } from "@/shared/utils/imagenes";
 
 export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
   if (!noticia) return null;
@@ -17,7 +18,7 @@ export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
     estado: noticia.estado || "publicado",
   });
 
-  const [imagen, setImagen] = useState({ archivo: null, preview: noticia.imagenUrl ? (noticia.imagenUrl.includes("res.cloudinary.com") || noticia.imagenUrl.startsWith("http") ? noticia.imagenUrl : `${import.meta.env.VITE_API_URL_UPLOADS}/${noticia.imagenUrl}`) : null });
+  const [imagen, setImagen] = useState({ archivo: null, preview: urlImagen(noticia.imagenUrl) });
   const [ui, setUi] = useState({ guardando: false, confirmando: false, eliminando: false });
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -71,7 +72,7 @@ export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative">
-        <div className="bg-[#132A46] p-4 text-white flex justify-between items-center shrink-0">
+        <div className="bg-[-navy] p-4 text-white flex justify-between items-center shrink-0">
           <h3 className="text-lg font-bold">Panel de Edición de Noticia</h3>
           <button onClick={onClose} className="text-gray-300 hover:text-white text-2xl font-bold">&times;</button>
         </div>
@@ -79,7 +80,7 @@ export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
         {ui.confirmando ? (
           <div className="p-8 flex flex-col items-center text-center grow gap-4">
             <FaExclamationTriangle className="text-red-500 text-5xl mb-2" />
-            <h3 className="text-xl font-bold text-[#132A46]">¿Ocultar esta noticia?</h3>
+            <h3 className="text-xl font-bold text-[-navy]">¿Ocultar esta noticia?</h3>
             <p className="text-gray-500">Pasará a estado borrador (baja lógica).</p>
             <div className="flex gap-4 mt-6">
               <button onClick={() => setUi({ ...ui, confirmando: false })} className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-md">Cancelar</button>
@@ -91,22 +92,22 @@ export default function ModalAdmin({ noticia, onClose, onNoticiaActualizada }) {
             <div className="flex flex-col gap-2">
               <label className="font-bold text-gray-700 text-sm">Imagen de portada</label>
               <div className="flex items-center gap-4">
-                {imagen.preview ? <img src={imagen.preview} className="w-32 h-24 object-cover rounded-lg border shadow-sm" /> : <div className="w-32 h-24 bg-gradient-to from-[#132A46] to-[#1D7BB6] flex items-center justify-center rounded-lg"><img src={logo} className="h-10 opacity-30" /></div>}
-                <input type="file" accept="image/*" onChange={handleImagen} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[#1D7BB6] file:text-white cursor-pointer" />
+                {imagen.preview ? <img src={imagen.preview} className="w-32 h-24 object-cover rounded-lg border shadow-sm" /> : <div className="w-32 h-24 bg-gradient-to from-[-navy] to-[-primary] flex items-center justify-center rounded-lg"><img src={logo} className="h-10 opacity-30" /></div>}
+                <input type="file" accept="image/*" onChange={handleImagen} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-[-primary] file:text-white cursor-pointer" />
               </div>
             </div>
 
-            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Título *</label><input type="text" name="titulo" value={form.titulo} onChange={handleChange} required className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm" /></div>
-            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Subtítulo</label><textarea rows="2" name="subtitulo" value={form.subtitulo} onChange={handleChange} className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm resize-none" /></div>
+            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Título *</label><input type="text" name="titulo" value={form.titulo} onChange={handleChange} required className="p-2.5 border rounded-md focus:border-[-primary] text-sm" /></div>
+            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Subtítulo</label><textarea rows="2" name="subtitulo" value={form.subtitulo} onChange={handleChange} className="p-2.5 border rounded-md focus:border-[-primary] text-sm resize-none" /></div>
 
-            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Categoría *</label><input type="text" name="categoria" value={form.categoria} onChange={handleChange} required maxLength="100" className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm" /></div>
+            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Categoría *</label><input type="text" name="categoria" value={form.categoria} onChange={handleChange} required maxLength="100" className="p-2.5 border rounded-md focus:border-[-primary] text-sm" /></div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Visibilidad *</label><select name="visibilidad" value={form.visibilidad} onChange={handleChange} className="p-2.5 border rounded-md text-sm"><option value="todos">Todos</option><option value="publico">Solo Público</option><option value="socios">Solo Socios</option></select></div>
               <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Estado *</label><select name="estado" value={form.estado} onChange={handleChange} className="p-2.5 border rounded-md text-sm"><option value="publicado">Publicado</option><option value="borrador">Borrador</option></select></div>
             </div>
 
-            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Contenido *</label><textarea rows="5" name="contenido" value={form.contenido} onChange={handleChange} required className="p-2.5 border rounded-md focus:border-[#1D7BB6] text-sm" /></div>
+            <div className="flex flex-col gap-1"><label className="font-bold text-gray-700 text-sm">Contenido *</label><textarea rows="5" name="contenido" value={form.contenido} onChange={handleChange} required className="p-2.5 border rounded-md focus:border-[-primary] text-sm" /></div>
 
             <div className="pt-4 border-t flex justify-between items-center">
               <button type="button" onClick={() => setUi({ ...ui, confirmando: true })} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md flex items-center gap-2 text-sm"><FaRegTrashAlt /> Eliminar</button>

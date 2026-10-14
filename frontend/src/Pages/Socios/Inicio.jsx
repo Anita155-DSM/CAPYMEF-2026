@@ -143,7 +143,7 @@ export default function Socios() {
     };
 
     return (
-        <div className="min-h-screen bg-[#eef6fb] text-[#132A46] font-sans">
+        <div className="min-h-screen bg-[#eef6fb] text-[-navy] font-sans">
             <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1b527d] text-white transition-transform duration-300 lg:translate-x-0 ${menuAbierto ? "translate-x-0" : "-translate-x-full"}`}>
                 <div className="flex h-20 items-center justify-between border-b border-white/10 px-3">
                     <App />
@@ -164,7 +164,7 @@ export default function Socios() {
                 </button>
             </aside>
 
-            {menuAbierto && <button className="fixed inset-0 z-30 bg-[#132A46]/50 lg:hidden" onClick={() => setMenuAbierto(false)} aria-label="Cerrar menú" />}
+            {menuAbierto && <button className="fixed inset-0 z-30 bg-[-navy]/50 lg:hidden" onClick={() => setMenuAbierto(false)} aria-label="Cerrar menú" />}
 
             <div className="lg:pl-64">
                 <header className="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-5 shadow-sm sm:px-8">
@@ -173,23 +173,23 @@ export default function Socios() {
                     </button>
                     <div className="hidden text-sm text-gray-500 sm:block"></div>
                     <div className="ml-auto flex items-center gap-4 sm:gap-6">
-                        <button className="relative text-xl text-[#1D7BB6]" aria-label="Notificaciones">
+                        <button className="relative text-xl text-[-primary]" aria-label="Notificaciones">
                             <FaBell />
                             <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#e66d4a]" />
                         </button>
                         <div className="hidden text-right sm:block">
-                            <p className="text-sm font-bold text-[#132A46]">{nombreEmpresa}</p>
+                            <p className="text-sm font-bold text-[-navy]">{nombreEmpresa}</p>
                             <p className="text-xs text-gray-500">{categoria}</p>
                         </div>
-                        <FaCircleUser className="text-4xl text-[#1D7BB6]" />
+                        <FaCircleUser className="text-4xl text-[-primary]" />
                     </div>
                 </header>
 
                 <main className="mx-auto max-w-[1400px] p-5 sm:p-8">
                     {seccionActiva !== "Mi empresa" && seccionActiva !== "Eventos" && seccionActiva !== "Noticias" && <section className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                         <div>
-                            <p className="mb-1 text-sm font-semibold text-[#1D7BB6]">PANEL DE SOCIO</p>
-                            <h1 className="text-2xl font-bold uppercase tracking-tight text-[#132A46] sm:text-3xl">Hola, {nombreEmpresa}</h1>
+                            <p className="mb-1 text-sm font-semibold text-[-primary]">PANEL DE SOCIO</p>
+                            <h1 className="text-2xl font-bold uppercase tracking-tight text-[-navy] sm:text-3xl">Hola, {nombreEmpresa}</h1>
                             <p className="mt-2 text-sm text-gray-600">Socio N° {usuario.id || "-"} <span className="mx-2">•</span> {rubro} <span className="mx-2">•</span> {localidad}</p>
                         </div>
                         <span className="w-fit rounded-sm bg-[#00bf68] px-4 py-2 text-sm font-bold text-white">Estás al día!</span>
@@ -304,7 +304,7 @@ export default function Socios() {
                         </div>
 
                         <section className="border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-                            <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3"><h2 className="text-lg font-medium uppercase text-gray-600">Novedades</h2><FaChartLine className="text-[#1D7BB6]" /></div>
+                            <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3"><h2 className="text-lg font-medium uppercase text-gray-600">Novedades</h2><FaChartLine className="text-[-primary]" /></div>
                             <div className="divide-y divide-gray-200">
                                 {ultimasNoticias.length ? ultimasNoticias.map((noticia) => <article key={noticia.id} className="py-3 first:pt-0"><p className="mb-1 text-sm font-medium">{new Date(noticia.fechaPublicacion).toLocaleDateString("es-AR")}</p><p className="text-sm leading-snug text-gray-800">{noticia.titulo}</p></article>) : <p className="py-3 text-sm text-gray-600">No hay noticias publicadas.</p>}
                             </div>
@@ -316,11 +316,11 @@ export default function Socios() {
             </div>
 
             {solicitudAbierta && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#132A46]/50 px-4" onMouseDown={(evento) => evento.target === evento.currentTarget && cerrarSolicitud()}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[-navy]/50 px-4" onMouseDown={(evento) => evento.target === evento.currentTarget && cerrarSolicitud()}>
                     <div className="w-full max-w-lg border border-[#d7e0e5] bg-white p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="titulo-solicitud">
                         {solicitudEnviada ? (
                             <div className="text-center">
-                                <h2 id="titulo-solicitud" className="text-xl font-bold text-[#132A46]">Solicitud registrada</h2>
+                                <h2 id="titulo-solicitud" className="text-xl font-bold text-[-navy]">Solicitud registrada</h2>
                                 <p className="mt-3 text-sm text-gray-600">Tu pedido de modificación de {solicitudAbierta.toLowerCase()} quedó preparado para ser revisado por CAPYMEF.</p>
                                 <button type="button" onClick={cerrarSolicitud} className="mt-6 bg-[#1b527d] px-5 py-2 text-sm font-bold text-white hover:bg-[#164568]">Cerrar</button>
                             </div>
@@ -328,13 +328,13 @@ export default function Socios() {
                             <form onSubmit={enviarSolicitud}>
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
-                                        <p className="text-xs font-semibold uppercase text-[#1D7BB6]">Mi empresa</p>
-                                        <h2 id="titulo-solicitud" className="mt-1 text-xl font-bold text-[#132A46]">Modificar {solicitudAbierta.toLowerCase()}</h2>
+                                        <p className="text-xs font-semibold uppercase text-[-primary]">Mi empresa</p>
+                                        <h2 id="titulo-solicitud" className="mt-1 text-xl font-bold text-[-navy]">Modificar {solicitudAbierta.toLowerCase()}</h2>
                                     </div>
-                                    <button type="button" onClick={cerrarSolicitud} className="text-2xl leading-none text-gray-500 hover:text-[#132A46]" aria-label="Cerrar">&times;</button>
+                                    <button type="button" onClick={cerrarSolicitud} className="text-2xl leading-none text-gray-500 hover:text-[-navy]" aria-label="Cerrar">&times;</button>
                                 </div>
                                 <p className="mt-4 text-sm text-gray-600">Contanos qué dato necesitás corregir y cuál debería ser el valor correcto.</p>
-                                <textarea value={detalleSolicitud} onChange={(evento) => setDetalleSolicitud(evento.target.value)} required rows="5" placeholder="Ej.: Solicito actualizar el teléfono a..." className="mt-4 w-full resize-none border border-[#cfdbe3] p-3 text-sm text-[#132A46] outline-none focus:border-[#1D7BB6]" />
+                                <textarea value={detalleSolicitud} onChange={(evento) => setDetalleSolicitud(evento.target.value)} required rows="5" placeholder="Ej.: Solicito actualizar el teléfono a..." className="mt-4 w-full resize-none border border-[#cfdbe3] p-3 text-sm text-[-navy] outline-none focus:border-[-primary]" />
                                 <div className="mt-5 flex justify-end gap-3">
                                     <button type="button" onClick={cerrarSolicitud} className="border border-[#d7e0e5] px-4 py-2 text-sm text-[#17384f] hover:bg-[#f4f9fc]">Cancelar</button>
                                     <button type="submit" className="bg-[#1b527d] px-4 py-2 text-sm font-bold text-white hover:bg-[#164568]">Enviar solicitud</button>

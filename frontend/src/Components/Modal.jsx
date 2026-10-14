@@ -15,11 +15,7 @@ export default function Modal({ noticia, onClose }) {
   }, [noticia]);
 
   if (!noticia) return null
-  const obtenerImagenSrc = () => {
-    if (!noticia.imagenUrl) return null;
-    if (noticia.imagenUrl.startsWith("https://")) return noticia.imagenUrl;
-    return `${import.meta.env.VITE_API_URL_UPLOADS}/${noticia.imagenUrl}`;
-  };
+
   {/*Funcion para poder cerrar el modal si presionas fuera de el */ }
   const handleClose = (e) => {
     if (e.target.id === "fondo-modal") {
@@ -47,22 +43,22 @@ export default function Modal({ noticia, onClose }) {
           {/* Imagen completa */}
           {noticia.imagenUrl && (
             <img
-              src={obtenerImagenSrc()}
+              src={urlImagen(noticia.imagenUrl)}
               alt={noticia.titulo}
               className="w-full h-64 md:h-80 object-cover rounded-lg mb-6 shadow-sm"
             />
           )}
 
-          <div className="text-sm font-semibold text-[#1D7BB6] uppercase tracking-wider mb-2 flex items-center gap-2">
+          <div className="text-sm font-semibold text-[-primary] uppercase tracking-wider mb-2 flex items-center gap-2">
             {new Date(noticia.fechaPublicacion).toLocaleDateString('es-AR')}
           </div>
 
-          <h2 className="text-3xl font-bold text-[#132A46] mb-4">
+          <h2 className="text-3xl font-bold text-[-navy] mb-4">
             {noticia.titulo}
           </h2>
 
           {noticia.subtitulo && (
-            <h4 className="text-lg text-gray-500 font-medium italic mb-6 border-l-4 border-[#1D7BB6] pl-4">
+            <h4 className="text-lg text-gray-500 font-medium italic mb-6 border-l-4 border-[-primary] pl-4">
               {noticia.subtitulo}
             </h4>
           )}

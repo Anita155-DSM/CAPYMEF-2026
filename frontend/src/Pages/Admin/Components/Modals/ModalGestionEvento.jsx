@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaRegSave, FaTimes, FaInfoCircle, FaTrashAlt } from "react-icons/fa";
 import { toast } from "sonner";
-import dayjs from "dayjs";
-import "dayjs/locale/es";
-import { crearNuevoEvento, actualizarEvento, eliminarEvento } from "../../../../services/eventosService.js"; 
+import dayjs from "@/shared/utils/fechas";
+import { crearNuevoEvento, actualizarEvento, eliminarEvento } from "../../../../services/eventosService.js";
 import ModalConfirmacion from "./ModalConfirmacion.jsx"; // <-- Importamos nuestro nuevo componente
 
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
@@ -36,7 +35,7 @@ dayjs.locale("es");
 
 export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, eventoExistente, onActualizado }) {
     const [procesando, setProcesando] = useState(false);
-    
+
     // Estado para controlar la visibilidad del modal de confirmación personalizado
     const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false);
 
@@ -74,13 +73,13 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
             formData.append("modalidad", data.modalidad);
             formData.append("estado", data.estado);
             formData.append("lugar", data.lugar);
-            
+
             if (data.horaInicio) formData.append("horaInicio", data.horaInicio);
             if (data.horaFin) formData.append("horaFin", data.horaFin);
             if (data.cupoMaximo) formData.append("cupoMaximo", data.cupoMaximo);
 
             if (data.imagen && data.imagen.length > 0) {
-                formData.append("imagen", data.imagen[0]); 
+                formData.append("imagen", data.imagen[0]);
             }
 
             let result;
@@ -92,7 +91,7 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
 
             if (result.exito) {
                 toast.success(modo === "crear" ? "¡Evento creado exitosamente!" : "¡Evento actualizado!");
-                if (onActualizado) onActualizado(); 
+                if (onActualizado) onActualizado();
                 onClose();
             } else {
                 toast.error(result.mensaje || "Ocurrió un error al guardar.");
@@ -127,7 +126,7 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
     const generarPrevisualizacion = () => {
         if (!fechaForm) return "Seleccioná una fecha para ver el resumen.";
         const diaInicio = dayjs(fechaForm);
-        let texto = diaInicio.format("dddd D"); 
+        let texto = diaInicio.format("dddd D");
 
         if (horaInicioForm) {
             const [hInicio, mInicio] = horaInicioForm.split(":");
@@ -155,8 +154,8 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animacion-modal">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl flex flex-col overflow-hidden relative max-h-[90vh]">
-                
-                <div className="bg-[#132A46] p-4 text-white flex justify-between items-center shrink-0">
+
+                <div className="bg-[-navy] p-4 text-white flex justify-between items-center shrink-0">
                     <h3 className="text-lg font-bold">
                         {modo === "crear" ? "Crear Nuevo Evento" : `Editar Evento`}
                     </h3>
@@ -166,33 +165,33 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="p-6 overflow-y-auto flex flex-col gap-5">
-                    
+
                     <div className="flex flex-col gap-1">
                         <label className="font-bold text-gray-700 text-sm">Título del Evento *</label>
-                        <input type="text" {...register("titulo", { required: true })} placeholder="Ej. Capacitación en Marketing Digital" className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#1D7BB6]" />
+                        <input type="text" {...register("titulo", { required: true })} placeholder="Ej. Capacitación en Marketing Digital" className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
                     </div>
 
                     <div className="flex flex-col gap-1">
                         <label className="font-bold text-gray-700 text-sm">Descripción *</label>
-                        <textarea {...register("descripcion", { required: true })} rows="3" placeholder="Detalles del evento..." className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#1D7BB6] resize-none"></textarea>
+                        <textarea {...register("descripcion", { required: true })} rows="3" placeholder="Detalles del evento..." className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary] resize-none"></textarea>
                     </div>
 
                     <div className="flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
                         <div className="grid grid-cols-3 gap-4">
                             <div className="flex flex-col gap-1">
                                 <label className="font-bold text-gray-700 text-sm">Fecha *</label>
-                                <input type="date" {...register("fecha", { required: true })} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#1D7BB6]" />
+                                <input type="date" {...register("fecha", { required: true })} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
                             </div>
                             <div className="flex flex-col gap-1">
                                 <label className="font-bold text-gray-700 text-sm">Hora Inicio</label>
-                                <input type="time" {...register("horaInicio")} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#1D7BB6]" />
+                                <input type="time" {...register("horaInicio")} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
                             </div>
                             <div className="flex flex-col gap-1">
                                 <label className="font-bold text-gray-700 text-sm">Hora Fin</label>
-                                <input type="time" {...register("horaFin")} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#1D7BB6]" />
+                                <input type="time" {...register("horaFin")} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
                             </div>
                         </div>
-                        <div className="text-sm font-medium text-[#1D7BB6] bg-blue-50 py-1.5 px-3 rounded-md inline-block self-start mt-1 shadow-sm">
+                        <div className="text-sm font-medium text-[-primary] bg-blue-50 py-1.5 px-3 rounded-md inline-block self-start mt-1 shadow-sm">
                             {generarPrevisualizacion()}
                         </div>
                     </div>
@@ -200,7 +199,7 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
                     <div className="grid grid-cols-3 gap-4">
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Modalidad</label>
-                            <select {...register("modalidad")} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-[#1D7BB6]">
+                            <select {...register("modalidad")} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-[-primary]">
                                 <option value="presencial">Presencial</option>
                                 <option value="virtual">Virtual</option>
                                 <option value="hibrido">Híbrido</option>
@@ -208,16 +207,16 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Cupo Máximo</label>
-                            <input type="number" {...register("cupoMaximo")} min="11" placeholder="Mínimo 11 (vacío = sin límite)" className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[#1D7BB6]" />
+                            <input type="number" {...register("cupoMaximo")} min="11" placeholder="Mínimo 11 (vacío = sin límite)" className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Estado</label>
                             {modo === "crear" ? (
                                 <div className="p-2 border border-gray-200 bg-gray-100 text-gray-600 rounded-md text-sm font-medium flex items-center gap-2 cursor-not-allowed h-full">
-                                    <FaInfoCircle className="text-[#1D7BB6]"/> Programado
+                                    <FaInfoCircle className="text-[-primary]" /> Programado
                                 </div>
                             ) : (
-                                <select {...register("estado")} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-[#1D7BB6] h-full">
+                                <select {...register("estado")} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-[-primary] h-full">
                                     <option value="programado">Programado</option>
                                     <option value="cancelado">Cancelado</option>
                                     <option value="finalizado">Finalizado</option>
@@ -234,7 +233,7 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
                         <p className="text-xs text-gray-500 -mt-1">
                             Hacé clic en el mapa para fijar el punto exacto, o pegá un enlace manualmente.
                         </p>
-                        
+
                         <div className="h-48 w-full rounded-md border border-gray-300 overflow-hidden relative z-0">
                             <MapContainer center={[-26.1848, -58.1731]} zoom={13} style={{ height: "100%", width: "100%" }}>
                                 <TileLayer
@@ -245,33 +244,33 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
                             </MapContainer>
                         </div>
 
-                        <input 
-                            type="text" 
-                            {...register("lugar", { required: true })} 
-                            placeholder="URL generada o dirección física..." 
-                            className={`p-2 border rounded-md text-sm focus:outline-none focus:border-[#1D7BB6] ${errors.lugar ? 'border-red-500 bg-red-50' : 'border-gray-300'}`} 
+                        <input
+                            type="text"
+                            {...register("lugar", { required: true })}
+                            placeholder="URL generada o dirección física..."
+                            className={`p-2 border rounded-md text-sm focus:outline-none focus:border-[-primary] ${errors.lugar ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                         />
                     </div>
 
                     <div className="flex flex-col gap-1 mt-2">
                         <label className="font-bold text-gray-700 text-sm">Banner / Imagen Promocional</label>
-                        <input type="file" {...register("imagen")} accept="image/*" className="p-2 border border-gray-300 rounded-md text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#1D7BB6] file:text-white hover:file:bg-[#156091] cursor-pointer" />
+                        <input type="file" {...register("imagen")} accept="image/*" className="p-2 border border-gray-300 rounded-md text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[-primary] file:text-white hover:file:bg-[-primary-dark] cursor-pointer" />
                     </div>
 
                     <div className="pt-4 mt-2 border-t border-gray-200 flex justify-between items-center gap-3">
                         {modo === "editar" ? (
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 onClick={() => setModalConfirmacionAbierto(true)} // <-- Abrimos nuestro modal custom
-                                disabled={procesando} 
+                                disabled={procesando}
                                 className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-md text-sm transition-colors flex items-center gap-2 border border-red-200"
                             >
                                 <FaTrashAlt /> Eliminar Evento
                             </button>
                         ) : (
-                            <div></div> 
+                            <div></div>
                         )}
-                        
+
                         <div className="flex gap-3">
                             <button type="button" onClick={onClose} disabled={procesando} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-md text-sm transition-colors">
                                 Cancelar
@@ -285,7 +284,7 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
             </div>
 
             {/* MODAL DE CONFIRMACIÓN CUSTOM */}
-            <ModalConfirmacion 
+            <ModalConfirmacion
                 isOpen={modalConfirmacionAbierto}
                 titulo="¿Estás seguro de eliminar este evento?"
                 mensaje={`Estás a punto de eliminar el evento '${eventoExistente?.titulo || ""}' programado para el ${dayjs(eventoExistente?.fecha).format("DD/MM/YYYY")}. Esta acción no se puede deshacer.`}

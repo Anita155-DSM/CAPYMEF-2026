@@ -13,7 +13,7 @@ export default function ModalConfirmacion({ isOpen, titulo, mensaje, onConfirmar
                 </div>
 
                 {/* Título */}
-                <h3 className="text-xl font-extrabold text-[#132A46] uppercase tracking-wide mb-2">
+                <h3 className="text-xl font-extrabold text-[-navy] uppercase tracking-wide mb-2">
                     {titulo || "¿Estás seguro?"}
                 </h3>
 
@@ -27,7 +27,7 @@ export default function ModalConfirmacion({ isOpen, titulo, mensaje, onConfirmar
                     <button 
                         type="button" 
                         onClick={onCancelar}
-                        className="flex-1 bg-[#1D7BB6] hover:bg-[#156091] text-white font-bold py-3 px-4 rounded-xl shadow transition-colors text-sm uppercase tracking-wider"
+                        className="flex-1 bg-[-primary] hover:bg-[-primary-dark] text-white font-bold py-3 px-4 rounded-xl shadow transition-colors text-sm uppercase tracking-wider"
                     >
                         Cancelar
                     </button>
