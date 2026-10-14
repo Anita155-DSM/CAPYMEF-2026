@@ -88,7 +88,7 @@ export default function Socios() {
             <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="bg-[-navy] text-white">
+                        <tr className="bg-navy text-white">
                             <th className="py-3 px-4 font-semibold text-sm">Razón Social</th>
                             <th className="py-3 px-4 font-semibold text-sm">CUIT</th>
                             <th className="py-3 px-4 font-semibold text-sm">Email</th>

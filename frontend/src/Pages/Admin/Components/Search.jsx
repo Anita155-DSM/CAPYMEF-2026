@@ -48,10 +48,10 @@ export function useBuscador(listaOriginal) {
 // ==========================================
 export default function Search({ titulo, filtros, dispatch, opciones }) {
     return (
-        <div className="bg-[#f0f5fa] p-6 rounded-xl border border-[-primary]/30 mb-8 flex flex-col gap-4 shadow-sm">
-            <div className="flex justify-between items-center border-b-2 border-[-primary] pb-2">
-                <h2 className="text-3xl font-bold text-[-navy] uppercase">{titulo}</h2>
-                <button onClick={() => dispatch({ tipo: "RESETEAR" })} className="text-sm text-[-primary] font-bold hover:underline">
+        <div className="bg-[#f0f5fa] p-6 rounded-xl border border-primary/30 mb-8 flex flex-col gap-4 shadow-sm">
+            <div className="flex justify-between items-center border-b-2 border-primary pb-2">
+                <h2 className="text-3xl font-bold text-navy uppercase">{titulo}</h2>
+                <button onClick={() => dispatch({ tipo: "RESETEAR" })} className="text-sm text-primary font-bold hover:underline">
                     Limpiar filtros
                 </button>
             </div>
@@ -69,7 +69,7 @@ export default function Search({ titulo, filtros, dispatch, opciones }) {
                             placeholder="Buscar por CUIT, Razón Social o Titular..."
                             value={filtros.busqueda}
                             onChange={(e) => dispatch({ tipo: "SET_BUSQUEDA", payload: e.target.value })}
-                            className="w-full pl-10 pr-4 py-2 border border-[#8da5b8] rounded text-sm focus:outline-none focus:border-[-navy] focus:ring-1 focus:ring-[-navy]"
+                            className="w-full pl-10 pr-4 py-2 border border-[#8da5b8] rounded text-sm focus:outline-none focus:border-navy focus:ring-1 focus:ring-navy"
                         />
                     </div>
                 </div>
@@ -79,7 +79,7 @@ export default function Search({ titulo, filtros, dispatch, opciones }) {
                     <select
                         value={filtros.categoria}
                         onChange={(e) => dispatch({ tipo: "SET_CATEGORIA", payload: e.target.value })}
-                        className="w-full border border-gray-300 rounded px-2 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:border-[-navy] cursor-pointer"
+                        className="w-full border border-gray-300 rounded px-2 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:border-navy cursor-pointer"
                     >
                         {opciones.categorias.map((cat, i) => <option key={i} value={cat} className="capitalize">{cat}</option>)}
                     </select>
@@ -90,7 +90,7 @@ export default function Search({ titulo, filtros, dispatch, opciones }) {
                     <select
                         value={filtros.rubro}
                         onChange={(e) => dispatch({ tipo: "SET_RUBRO", payload: e.target.value })}
-                        className="w-full border border-gray-300 rounded px-2 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:border-[-navy] cursor-pointer"
+                        className="w-full border border-gray-300 rounded px-2 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:border-navy cursor-pointer"
                     >
                         {opciones.rubros.map((rubro, i) => <option key={i} value={rubro}>{rubro}</option>)}
                     </select>
@@ -101,7 +101,7 @@ export default function Search({ titulo, filtros, dispatch, opciones }) {
                     <select
                         value={filtros.localidad}
                         onChange={(e) => dispatch({ tipo: "SET_LOCALIDAD", payload: e.target.value })}
-                        className="w-full border border-gray-300 rounded px-2 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:border-[-navy] cursor-pointer"
+                        className="w-full border border-gray-300 rounded px-2 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:border-navy cursor-pointer"
                     >
                         {opciones.localidades.map((loc, i) => <option key={i} value={loc}>{loc}</option>)}
                     </select>

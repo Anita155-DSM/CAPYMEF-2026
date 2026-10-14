@@ -1,6 +1,6 @@
-
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { urlImagen } from "@/shared/utils/imagenes";
 
 export default function Modal({ noticia, onClose }) {
   useEffect(() => {
@@ -49,16 +49,16 @@ export default function Modal({ noticia, onClose }) {
             />
           )}
 
-          <div className="text-sm font-semibold text-[-primary] uppercase tracking-wider mb-2 flex items-center gap-2">
+          <div className="text-sm font-semibold text-primary uppercase tracking-wider mb-2 flex items-center gap-2">
             {new Date(noticia.fechaPublicacion).toLocaleDateString('es-AR')}
           </div>
 
-          <h2 className="text-3xl font-bold text-[-navy] mb-4">
+          <h2 className="text-3xl font-bold text-navy mb-4">
             {noticia.titulo}
           </h2>
 
           {noticia.subtitulo && (
-            <h4 className="text-lg text-gray-500 font-medium italic mb-6 border-l-4 border-[-primary] pl-4">
+            <h4 className="text-lg text-gray-500 font-medium italic mb-6 border-l-4 border-primary pl-4">
               {noticia.subtitulo}
             </h4>
           )}

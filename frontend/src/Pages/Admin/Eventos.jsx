@@ -3,6 +3,9 @@ import { FaPlus, FaEdit } from "react-icons/fa";
 import dayjs from "@/shared/utils/fechas";
 import { cn } from "@/shared/utils/cn";
 import Button from "@/shared/ui/Button";
+import { obtenerEventosSocios } from "@/services/eventosService";
+import ModalGestionEvento from "./Components/Modals/ModalGestionEvento.jsx";
+
 
 // 2. SUB-COMPONENTE: Extraemos la celda del calendario para no ensuciar el componente principal
 const CeldaDia = ({ dia, eventoDelDia, esHoy, esSeleccionado, alSeleccionar }) => {
@@ -11,10 +14,10 @@ const CeldaDia = ({ dia, eventoDelDia, esHoy, esSeleccionado, alSeleccionar }) =
     const estado = eventoDelDia?.estado?.toLowerCase().trim() || "";
 
     // Lógica de colores reducida a un objeto o if/else limpios
-    let colorFondo = "text-[-navy] bg-white border border-gray-200 hover:bg-gray-100";
+    let colorFondo = "text-navy bg-white border border-gray-200 hover:bg-gray-100";
     if (estado === "cancelado") colorFondo = "bg-gray-400 text-white shadow-md";
     else if (esHoy && estado === "programado") colorFondo = "bg-green-500 text-white shadow-md"; // Hoy con evento
-    else if (esHoy && !eventoDelDia) colorFondo = "bg-[-primary] text-white shadow-md"; // Hoy sin evento
+    else if (esHoy && !eventoDelDia) colorFondo = "bg-primary text-white shadow-md"; // Hoy sin evento
     else if (estado === "programado") colorFondo = "bg-yellow-400 text-white shadow-md";
     else if (estado === "finalizado") colorFondo = "bg-red-500 text-white shadow-md";
 
@@ -26,7 +29,7 @@ const CeldaDia = ({ dia, eventoDelDia, esHoy, esSeleccionado, alSeleccionar }) =
                 className={cn(
                     "w-10 h-10 flex items-center justify-center text-sm font-medium rounded-full cursor-pointer transition-all transform hover:scale-110 shrink-0",
                     colorFondo,
-                    esSeleccionado && "ring-4 ring-[-primary] ring-offset-2 scale-110 z-10"
+                    esSeleccionado && "ring-4 ring-primary ring-offset-2 scale-110 z-10"
                 )}
                 title={eventoDelDia ? `${eventoDelDia.titulo} (${eventoDelDia.estado})` : "Día libre"}
             >
@@ -51,7 +54,7 @@ export default function EventosAdmin() {
     const [eventos, setEventos] = useState([]);
 
     const cargarEventos = async () => {
-        const result = await obtenerTodosLosEventos();
+        const result = await obtenerEventosSocios();
         if (result.exito) setEventos(result.data);
     };
 
@@ -77,7 +80,7 @@ export default function EventosAdmin() {
     return (
         <div className="p-8 w-full font-sans bg-[#F4F7F9] min-h-screen relative">
             <div className="flex justify-between items-center mb-10">
-                <h1 className="text-2xl font-semibold text-[-navy] uppercase tracking-wide">
+                <h1 className="text-2xl font-semibold text-navy uppercase tracking-wide">
                     Gestión de Eventos y Capacitaciones
                 </h1>
                 <div className="flex gap-3">
@@ -93,18 +96,18 @@ export default function EventosAdmin() {
             </div>
 
             <div className="max-w-5xl">
-                <div className="flex justify-between items-end border-b-2 border-[-primary] pb-2 mb-6">
-                    <h2 className="text-3xl font-light text-[-primary] capitalize">{fechaVisible.format("MMMM")}</h2>
-                    <span className="text-3xl font-light text-[-primary]">{fechaVisible.format("YYYY")}</span>
+                <div className="flex justify-between items-end border-b-2 border-primary pb-2 mb-6">
+                    <h2 className="text-3xl font-light text-primary capitalize">{fechaVisible.format("MMMM")}</h2>
+                    <span className="text-3xl font-light text-primary">{fechaVisible.format("YYYY")}</span>
                 </div>
 
                 <div className="grid grid-cols-7 gap-4 text-center mb-6">
                     {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((dia) => (
-                        <div key={dia} className="font-bold text-[-primary] text-sm">{dia}</div>
+                        <div key={dia} className="font-bold text-primary text-sm">{dia}</div>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-7 gap-y-8 gap-x-4 text-center border-b-2 border-[-primary] pb-12">
+                <div className="grid grid-cols-7 gap-y-8 gap-x-4 text-center border-b-2 border-primary pb-12">
                     {celdasCalendario.map((dia, index) => {
                         const esHoy = dia === hoy.date() && fechaVisible.isSame(hoy, 'month');
                         const esSeleccionado = dia && fechaSeleccionada && fechaSeleccionada.date() === dia && fechaVisible.isSame(fechaSeleccionada, 'month');

@@ -20,7 +20,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm font-sans border-b-4 border-[-primary]">
+    <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-sm font-sans border-b-4 border-primary">
       <div className="flex items-center justify-between gap-2 px-3 sm:px-6 lg:px-8 py-2">
         <div className="flex-shrink-0">
           <Link to="/" aria-label="Ir al inicio">
@@ -34,8 +34,8 @@ export default function Navbar() {
               key={ruta}
               to={ruta}
               className={`font-semibold transition-colors pb-1 ${location.pathname === ruta
-                ? "text-[-primary] border-b-2 border-[-primary]"
-                : "text-black hover:text-[-primary] hover:border-b-2 hover:border-[-primary]"
+                ? "text-primary border-b-2 border-primary"
+                : "text-black hover:text-primary hover:border-b-2 hover:border-primary"
                 }`}
             >
               {nombre}

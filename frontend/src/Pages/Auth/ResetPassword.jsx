@@ -34,7 +34,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[-navy] flex flex-col items-center justify-center relative px-6 text-white font-sans">
+    <div className="min-h-screen w-full bg-navy flex flex-col items-center justify-center relative px-6 text-white font-sans">
       <div className="w-full max-w-md">
         <h1 className="text-center text-4xl font-[Trebuchet_MS,sans-serif] font-bold tracking-tight">
           Elegí tu nueva contraseña
@@ -91,7 +91,7 @@ export default function ResetPassword() {
             type="submit"
             disabled={enviando}
             className={`mt-8 rounded-full px-10 py-2 text-lg font-bold text-white transition-colors ${
-              enviando ? "bg-gray-500 cursor-not-allowed" : "bg-[-primary] hover:bg-[-primary-dark]"
+              enviando ? "bg-gray-500 cursor-not-allowed" : "bg-primary hover:bg-primary-dark"
             }`}
           >
             {enviando ? "Guardando..." : "Restablecer contraseña"}

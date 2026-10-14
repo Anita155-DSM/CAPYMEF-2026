@@ -74,7 +74,7 @@ export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden relative">
 
-                <div className="bg-[-navy] p-4 text-white flex justify-between items-center shrink-0">
+                <div className="bg-navy p-4 text-white flex justify-between items-center shrink-0">
                     <h3 className="text-lg font-bold">Editar Socio: {socio.razonSocial}</h3>
                     <button onClick={onClose} className="text-gray-300 hover:text-white text-2xl font-bold">&times;</button>
                 </div>
@@ -95,7 +95,7 @@ export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Categoría</label>
-                            <select name="categoria" value={form.categoria} onChange={handleChange} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-[-primary]">
+                            <select name="categoria" value={form.categoria} onChange={handleChange} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-primary">
                                 <option value="activo">Activo</option>
                                 <option value="adherente">Adherente</option>
                                 <option value="padrino">Padrino</option>
@@ -104,7 +104,7 @@ export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
 
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Rubro</label>
-                            <select name="rubro" value={form.rubro} onChange={handleChange} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-[-primary]">
+                            <select name="rubro" value={form.rubro} onChange={handleChange} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-primary">
                                 <option value="Comercio">Comercio</option>
                                 <option value="Industria">Industria</option>
                                 <option value="Servicios">Servicios</option>
@@ -115,12 +115,12 @@ export default function ModalEditarSocio({ socio, onClose, onActualizado }) {
 
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Localidad</label>
-                            <input type="text" name="localidad" value={form.localidad} onChange={handleChange} required className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
+                            <input type="text" name="localidad" value={form.localidad} onChange={handleChange} required className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-primary" />
                         </div>
 
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Estado del Socio</label>
-                            <select name="estado" value={form.estado} onChange={handleChange} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-[-primary]">
+                            <select name="estado" value={form.estado} onChange={handleChange} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-primary">
                                 <option value="aprobado">Aprobado (Activo)</option>
                                 <option value="inactivo">Inactivo (Suspendido)</option>
                             </select>

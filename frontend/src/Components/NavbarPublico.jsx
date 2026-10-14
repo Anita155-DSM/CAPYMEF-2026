@@ -113,8 +113,8 @@ export default function NavbarPublico() {
                                 onClick={(e) => hacerScrollSuave(e, enlace.id)}
                                 className={`font-semibold px-4 py-1.5 transition-all duration-300 ${
                                     activo
-                                        ? "text-[-primary] bg-[#E5F1F8] rounded-full"
-                                        : "text-gray-600 hover:text-[-primary] hover:bg-gray-50 rounded-full"
+                                        ? "text-primary bg-[#E5F1F8] rounded-full"
+                                        : "text-gray-600 hover:text-primary hover:bg-gray-50 rounded-full"
                                 }`}
                             >
                                 {enlace.nombre}
@@ -127,7 +127,7 @@ export default function NavbarPublico() {
                 <div className="flex-shrink-0 flex items-center gap-2">
                     <Link
                         to="/login"
-                        className="bg-[-primary] hover:bg-[-primary-dark] text-white font-bold py-2 px-5 text-sm rounded-full transition-colors flex items-center whitespace-nowrap shadow-md"
+                        className="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-5 text-sm rounded-full transition-colors flex items-center whitespace-nowrap shadow-md"
                     >
                         Iniciar sesión
                     </Link>
@@ -155,8 +155,8 @@ export default function NavbarPublico() {
                                 onClick={(e) => hacerScrollSuave(e, enlace.id)}
                                 className={`block py-2 px-4 font-semibold transition-colors border-l-4 ${
                                     activo
-                                        ? "bg-[#E5F1F8] text-[-primary] border-[-primary] rounded-r-md"
-                                        : "text-gray-600 hover:bg-gray-50 hover:text-[-primary] border-transparent rounded-r-md"
+                                        ? "bg-[#E5F1F8] text-primary border-primary rounded-r-md"
+                                        : "text-gray-600 hover:bg-gray-50 hover:text-primary border-transparent rounded-r-md"
                                 }`}
                             >
                                 {enlace.nombre}

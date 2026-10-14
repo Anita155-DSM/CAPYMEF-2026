@@ -49,7 +49,7 @@ export default function RegistrosAdmin() {
         }
     };
 
-    if (cargando) return <div className="p-10 text-xl font-bold text-[-navy]"><Loading /></div>;
+    if (cargando) return <div className="p-10 text-xl font-bold text-navy"><Loading /></div>;
 
     return (
         <div className="px-4 w-full font-sans relative">
@@ -64,7 +64,7 @@ export default function RegistrosAdmin() {
             <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="bg-[-navy] text-white">
+                        <tr className="bg-navy text-white">
                             <th className="py-3 px-4 font-semibold text-sm">Razón Social</th>
                             <th className="py-3 px-4 font-semibold text-sm">CUIT</th>
                             <th className="py-3 px-4 font-semibold text-sm">Email</th>
@@ -94,14 +94,14 @@ export default function RegistrosAdmin() {
                                     <td className="py-3 px-4 text-gray-600">{socio.rubro}</td>
                                     <td className="py-3 px-4 text-gray-600">{socio.localidad}</td>
                                     <td className="py-3 px-4">
-                                        <p className="text-[-primary] hover:underline text-sm font-semibold cursor-pointer">
+                                        <p className="text-primary hover:underline text-sm font-semibold cursor-pointer">
                                             {socio.telefono}
                                         </p>
                                     </td>
                                     <td className="py-3 px-4 text-center">
                                         <button
                                             onClick={() => setSocioSeleccionado(socio)}
-                                            className="bg-[-primary] hover:bg-[-navy] text-white font-semibold py-1.5 px-4 rounded text-sm transition-colors shadow-sm"
+                                            className="bg-primary hover:bg-navy text-white font-semibold py-1.5 px-4 rounded text-sm transition-colors shadow-sm"
                                         >
                                             Revisar
                                         </button>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiArrowRight, FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner"; // 1. Importamos el toast de sonner
 import logo from "../../assets/img/logo.png";
 import { iniciarSesion } from "../../services/authServices";
@@ -14,12 +14,15 @@ export default function Login() {
   const { register, handleSubmit } = useForm();
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const { usuario, login } = useAuth();
+  const location = useLocation();
 
-  // Si ya hay sesión (o se acaba de iniciar), redirigimos según el rol
+  // Si ya hay sesión (o se acaba de iniciar), vamos a donde quería entrar
+  // (lo guarda RequireAuth en location.state.desde) o, si no hay, según el rol
   useEffect(() => {
     if (!usuario) return;
-    navigate(usuario.rol === "admin" ? "/admin/inicio" : "/socios", { replace: true });
-  }, [usuario, navigate]);
+    const porDefecto = usuario.rol === "admin" ? "/admin/inicio" : "/socios";
+    navigate(location.state?.desde ?? porDefecto, { replace: true });
+  }, [usuario, navigate, location.state]);
 
   const handleLogin = (data) => {
     const loginPromise = iniciarSesion(data).then((result) => {
@@ -47,7 +50,7 @@ export default function Login() {
       }}
     >
       <main className="w-full max-w-[506px] overflow-hidden rounded-[9px] border-t-[4px] border-[#2084b6] bg-[#f5f7f9] px-7 pt-8 shadow-[0_12px_35px_rgba(2,18,32,0.28)] sm:px-[42px] sm:pt-[42px]">
-        <h1 className="text-center text-[27px] font-bold tracking-[-0.03em] sm:text-[29px]">
+        <h1 className="text-center text-[27px] font-bold tracking-0.03em sm:text-[29px]">
           Bienvenido de vuelta
         </h1>
 

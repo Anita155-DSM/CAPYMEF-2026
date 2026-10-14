@@ -155,7 +155,7 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animacion-modal">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl flex flex-col overflow-hidden relative max-h-[90vh]">
 
-                <div className="bg-[-navy] p-4 text-white flex justify-between items-center shrink-0">
+                <div className="bg-navy p-4 text-white flex justify-between items-center shrink-0">
                     <h3 className="text-lg font-bold">
                         {modo === "crear" ? "Crear Nuevo Evento" : `Editar Evento`}
                     </h3>
@@ -168,30 +168,30 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
 
                     <div className="flex flex-col gap-1">
                         <label className="font-bold text-gray-700 text-sm">Título del Evento *</label>
-                        <input type="text" {...register("titulo", { required: true })} placeholder="Ej. Capacitación en Marketing Digital" className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
+                        <input type="text" {...register("titulo", { required: true })} placeholder="Ej. Capacitación en Marketing Digital" className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-primary" />
                     </div>
 
                     <div className="flex flex-col gap-1">
                         <label className="font-bold text-gray-700 text-sm">Descripción *</label>
-                        <textarea {...register("descripcion", { required: true })} rows="3" placeholder="Detalles del evento..." className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary] resize-none"></textarea>
+                        <textarea {...register("descripcion", { required: true })} rows="3" placeholder="Detalles del evento..." className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-primary resize-none"></textarea>
                     </div>
 
                     <div className="flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
                         <div className="grid grid-cols-3 gap-4">
                             <div className="flex flex-col gap-1">
                                 <label className="font-bold text-gray-700 text-sm">Fecha *</label>
-                                <input type="date" {...register("fecha", { required: true })} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
+                                <input type="date" {...register("fecha", { required: true })} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-primary" />
                             </div>
                             <div className="flex flex-col gap-1">
                                 <label className="font-bold text-gray-700 text-sm">Hora Inicio</label>
-                                <input type="time" {...register("horaInicio")} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
+                                <input type="time" {...register("horaInicio")} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-primary" />
                             </div>
                             <div className="flex flex-col gap-1">
                                 <label className="font-bold text-gray-700 text-sm">Hora Fin</label>
-                                <input type="time" {...register("horaFin")} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
+                                <input type="time" {...register("horaFin")} className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-primary" />
                             </div>
                         </div>
-                        <div className="text-sm font-medium text-[-primary] bg-blue-50 py-1.5 px-3 rounded-md inline-block self-start mt-1 shadow-sm">
+                        <div className="text-sm font-medium text-primary bg-blue-50 py-1.5 px-3 rounded-md inline-block self-start mt-1 shadow-sm">
                             {generarPrevisualizacion()}
                         </div>
                     </div>
@@ -199,7 +199,7 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
                     <div className="grid grid-cols-3 gap-4">
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Modalidad</label>
-                            <select {...register("modalidad")} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-[-primary]">
+                            <select {...register("modalidad")} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-primary">
                                 <option value="presencial">Presencial</option>
                                 <option value="virtual">Virtual</option>
                                 <option value="hibrido">Híbrido</option>
@@ -207,16 +207,16 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Cupo Máximo</label>
-                            <input type="number" {...register("cupoMaximo")} min="11" placeholder="Mínimo 11 (vacío = sin límite)" className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[-primary]" />
+                            <input type="number" {...register("cupoMaximo")} min="11" placeholder="Mínimo 11 (vacío = sin límite)" className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-primary" />
                         </div>
                         <div className="flex flex-col gap-1">
                             <label className="font-bold text-gray-700 text-sm">Estado</label>
                             {modo === "crear" ? (
                                 <div className="p-2 border border-gray-200 bg-gray-100 text-gray-600 rounded-md text-sm font-medium flex items-center gap-2 cursor-not-allowed h-full">
-                                    <FaInfoCircle className="text-[-primary]" /> Programado
+                                    <FaInfoCircle className="text-primary" /> Programado
                                 </div>
                             ) : (
-                                <select {...register("estado")} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-[-primary] h-full">
+                                <select {...register("estado")} className="p-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-primary h-full">
                                     <option value="programado">Programado</option>
                                     <option value="cancelado">Cancelado</option>
                                     <option value="finalizado">Finalizado</option>
@@ -248,13 +248,13 @@ export default function ModalGestionEvento({ onClose, modo, fechaPredefinida, ev
                             type="text"
                             {...register("lugar", { required: true })}
                             placeholder="URL generada o dirección física..."
-                            className={`p-2 border rounded-md text-sm focus:outline-none focus:border-[-primary] ${errors.lugar ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                            className={`p-2 border rounded-md text-sm focus:outline-none focus:border-primary ${errors.lugar ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
                         />
                     </div>
 
                     <div className="flex flex-col gap-1 mt-2">
                         <label className="font-bold text-gray-700 text-sm">Banner / Imagen Promocional</label>
-                        <input type="file" {...register("imagen")} accept="image/*" className="p-2 border border-gray-300 rounded-md text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[-primary] file:text-white hover:file:bg-[-primary-dark] cursor-pointer" />
+                        <input type="file" {...register("imagen")} accept="image/*" className="p-2 border border-gray-300 rounded-md text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark cursor-pointer" />
                     </div>
 
                     <div className="pt-4 mt-2 border-t border-gray-200 flex justify-between items-center gap-3">

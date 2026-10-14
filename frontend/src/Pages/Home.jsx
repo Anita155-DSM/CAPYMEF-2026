@@ -1,21 +1,21 @@
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
-import { FaGem, FaHandshake, FaStar, FaUser, FaUserTie, FaPenClip, FaCoins, FaUsers, FaMagnifyingGlassChart } from "react-icons/fa6";
 import { useAuth } from "@/app/providers/AuthContext";
 import { formatearFecha } from "@/shared/utils/fechas";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { FaCoins, FaGem, FaHandshake, FaMagnifyingGlassChart, FaPenClip, FaStar, FaUser, FaUsers, FaUserTie } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 
 // IMPORTACIONES DE IMÁGENES CORRECTAS (desde src/assets/img/)
+import logoAFIP from "../assets/img/afip.png";
+import logoCAME from "../assets/img/Came.png";
+import logoDGR from "../assets/img/dgr.png";
 import fondoHome from "../assets/img/FondoCapymef.png";
 import hero2 from "../assets/img/image.webp";
 import hero3 from "../assets/img/image3.webp";
 import hero4 from "../assets/img/image4.webp";
 import hero5 from "../assets/img/image5.webp";
-import logoCAME from "../assets/img/Came.png";
-import logoDGR from "../assets/img/dgr.png";
-import logoAFIP from "../assets/img/afip.png";
 
-import { Card, Footer, Navbar, NavbarPublico, Modal } from "../Components/index.js";
+import { Footer, Modal, Navbar, NavbarPublico } from "../Components/index.js";
 import { obtenerNoticiasPublicas } from "../services/noticiasService.js";
 
 
@@ -138,7 +138,7 @@ export default function Home() {
                 de Formosa
               </h1>
 
-              <div className="mt-8 border-l-4 border-[-primary] pl-5">
+              <div className="mt-8 border-l-4 border-primary pl-5">
                 <p className="text-base sm:text-lg md:text-xl text-white/90 font-medium max-w-2xl leading-relaxed drop-shadow-md">
                   Sumate a CAPYMEF. Accedé a beneficios exclusivos, capacitaciones
                   y herramientas digitales para hacer crecer tu negocio.
@@ -146,7 +146,7 @@ export default function Home() {
               </div>
 
               <button
-                className="mt-10 bg-[-primary] hover:bg-[-primary-dark] text-white text-[15px] sm:text-[17px] font-bold py-3.5 px-8 rounded-full transition-all duration-300 flex items-center gap-3 shadow-xl hover:-translate-y-1"
+                className="mt-10 bg-primary hover:bg-primary-dark text-white text-[15px] sm:text-[17px] font-bold py-3.5 px-8 rounded-full transition-all duration-300 flex items-center gap-3 shadow-xl hover:-translate-y-1"
                 onClick={() => setIsOpen(true)}
               >
                 Quiero asociarme
@@ -161,9 +161,9 @@ export default function Home() {
                   >
                     <div
                       onClick={(e) => e.stopPropagation()}
-                      className="bg-[-surface] border border-gray-300 rounded-sm shadow-2xl p-4 sm:p-8 md:p-12 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative mx-2 sm:mx-4 animacion-modal"
+                      className="bg-surface border border-gray-300 rounded-sm shadow-2xl p-4 sm:p-8 md:p-12 w-full max-w-4xl max-h-[90vh] overflow-y-auto relative mx-2 sm:mx-4 animacion-modal"
                     >
-                      <h3 className="text-xl sm:text-2xl md:text-[26px] font-normal text-center text-[-primary] mb-5 sm:mb-8 font-sans tracking-wide">
+                      <h3 className="text-xl sm:text-2xl md:text-[26px] font-normal text-center text-primary mb-5 sm:mb-8 font-sans tracking-wide">
                         COMO SUMARSE A CAPYMEF
                       </h3>
 
@@ -188,7 +188,7 @@ export default function Home() {
                       <div className="flex justify-end mt-10 font-sans">
                         <button
                           onClick={() => setIsOpen(false)}
-                          className="px-8 py-2.5 bg-[-primary] hover:bg-[-primary-dark] text-white font-bold rounded-full transition-colors text-sm tracking-wide shadow-md"
+                          className="px-8 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold rounded-full transition-colors text-sm tracking-wide shadow-md"
                         >
                           ENTENDIDO
                         </button>
@@ -203,7 +203,7 @@ export default function Home() {
         </section>
 
         {/*NOVEDADES*/}
-        <section id="novedades" className="w-full bg-[-surface] px-6 sm:px-10 md:px-24 pt-20 pb-20 font-sans inicio-reveal">
+        <section id="novedades" className="w-full bg-surface px-6 sm:px-10 md:px-24 pt-20 pb-20 font-sans inicio-reveal">
 
           <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between mb-16 max-w-7xl mx-auto">
             {/* Título alineado a la izquierda, sin subtítulo y con la fuente Sans bien gruesa */}
@@ -241,7 +241,7 @@ export default function Home() {
                 >
                   {/* Imagen y Etiqueta */}
                   <div className="h-56 relative overflow-hidden bg-gray-100">
-                    <span className="absolute top-4 left-4 bg-[-surface] text-[#1b4f7a] text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
+                    <span className="absolute top-4 left-4 bg-surface text-[#1b4f7a] text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                       {noticia.categoria || 'Institucional'}
                     </span>
@@ -272,7 +272,7 @@ export default function Home() {
                     </p>
 
                     {/* Botón sutil con "Leer más" y flechita horizontal */}
-                    <div className="mt-auto flex items-center text-[#1b4f7a] font-bold text-sm bg-[-surface] w-max px-4 py-2 rounded-lg transition-colors group-hover:bg-[#1b4f7a] group-hover:text-white">
+                    <div className="mt-auto flex items-center text-[#1b4f7a] font-bold text-sm bg-surface w-max px-4 py-2 rounded-lg transition-colors group-hover:bg-[#1b4f7a] group-hover:text-white">
                       Leer más <span className="ml-2 transform transition-transform group-hover:translate-x-1">&rarr;</span>
                     </div>
                   </div>
@@ -290,7 +290,7 @@ export default function Home() {
         </section>
 
         {/*Sobre Nosotros + Autoridades*/}
-        <section id="nosotros" className="w-full bg-gradient-to-r from-[#E5F1F8] to-[-surface] px-6 sm:px-10 md:px-24 py-20 font-sans inicio-reveal">
+        <section id="nosotros" className="w-full bg-gradient-to-r from-[#E5F1F8] to-surface px-6 sm:px-10 md:px-24 py-20 font-sans inicio-reveal">
           <div className="max-w-7xl mx-auto flex flex-col gap-20">
 
             {/* --- BLOQUE 1: Historia Institucional --- */}
@@ -453,7 +453,7 @@ export default function Home() {
         </section>
 
         {/*La Vista N3 - Formas de ser socio */}
-        <section id="beneficios" className="w-full bg-gradient-to-r from-[#E5F1F8] to-[-surface] px-6 md:px-24 py-20 font-sans inicio-reveal">
+        <section id="beneficios" className="w-full bg-gradient-to-r from-[#E5F1F8] to-surface px-6 md:px-24 py-20 font-sans inicio-reveal">
 
           {/* Título Principal alineado a la izquierda */}
           <div className="flex flex-col items-start mb-16 max-w-6xl mx-auto">
@@ -543,7 +543,7 @@ export default function Home() {
 
 
         {/* --- VISTA N5: Información Institucional --- */}
-        <section id="informacion" className="w-full bg-gradient-to-r from-[#E5F1F8] to-[-surface] px-6 md:px-24 py-20 font-sans inicio-reveal">
+        <section id="informacion" className="w-full bg-gradient-to-r from-[#E5F1F8] to-surface px-6 md:px-24 py-20 font-sans inicio-reveal">
 
           <div className="flex flex-col items-center mb-16 text-center">
             <h2 className="text-3xl md:text-[40px] font-extrabold text-[#153448] tracking-tight">
@@ -621,7 +621,7 @@ export default function Home() {
           </div>
         </section>
         {/* --- VISTA N6: Vinculación Institucional --- */}
-        <section id="vinculacion" className="w-full bg-gradient-to-r from-[-surface] to-[#E5F1F8] px-6 md:px-24 py-20 font-sans inicio-reveal">
+        <section id="vinculacion" className="w-full bg-gradient-to-r from-surface to-[#E5F1F8] px-6 md:px-24 py-20 font-sans inicio-reveal">
 
           {/* Título y bajada centrados */}
           <div className="flex flex-col items-center mb-16 text-center max-w-3xl mx-auto">

@@ -53,8 +53,8 @@ export default function InicioSocio() {
         <div className="space-y-6">
             <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                    <p className="mb-1 text-sm font-semibold text-[-primary]">PANEL DE SOCIO</p>
-                    <h1 className="text-2xl font-bold uppercase tracking-tight text-[-navy] sm:text-3xl">Hola, {nombreEmpresa}</h1>
+                    <p className="mb-1 text-sm font-semibold text-primary">PANEL DE SOCIO</p>
+                    <h1 className="text-2xl font-bold uppercase tracking-tight text-navy sm:text-3xl">Hola, {nombreEmpresa}</h1>
                     <p className="mt-2 text-sm text-gray-600">Socio N° {usuario.id || "-"} <span className="mx-2">•</span> {rubro} <span className="mx-2">•</span> {localidad}</p>
                 </div>
                 <span className="w-fit rounded-sm bg-[#00bf68] px-4 py-2 text-sm font-bold text-white">Estás al día!</span>
@@ -110,7 +110,7 @@ export default function InicioSocio() {
                 <section className="border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
                     <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3">
                         <h2 className="text-lg font-medium uppercase text-gray-600">Novedades</h2>
-                        <FaChartLine className="text-[-primary]" />
+                        <FaChartLine className="text-primary" />
                     </div>
                     <div className="divide-y divide-gray-200">
                         {ultimasNoticias.length ? ultimasNoticias.map((noticia) => (

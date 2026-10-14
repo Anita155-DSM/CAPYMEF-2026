@@ -170,7 +170,7 @@ export default function Register() {
       }}
     >
       <main className="w-full max-w-[860px] rounded-[9px] border-t-[4px] border-[#2084b6] bg-[#f5f7f9] px-6 py-8 shadow-[0_12px_35px_rgba(2,18,32,0.28)] sm:px-10 sm:py-10">
-        <h1 className="text-center text-[27px] font-bold tracking-[-0.03em] sm:text-[29px]">
+        <h1 className="text-center text-[27px] font-bold tracking-0.03em sm:text-[29px]">
           Crear cuenta de socio
         </h1>
         <p className="mx-auto mt-2 max-w-[560px] text-center text-[13px] leading-[1.55] text-[#68727b]">
