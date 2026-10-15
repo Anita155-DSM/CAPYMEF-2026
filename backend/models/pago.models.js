@@ -55,7 +55,11 @@ export const Pago = sequelize.define('Pago', {
   }
 }, {
   timestamps: true,
-  tableName: 'pagos'
+  tableName: 'pagos',
+  indexes: [
+    { unique: true, fields: ['cuota_id'], name: 'pagos_cuota_id_unico' },
+    { unique: true, fields: ['idTransaccionExterna'], name: 'pagos_id_transaccion_externa_unico' },
+  ],
 });
 
 // Relaciones en Sequelize
