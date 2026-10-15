@@ -8,7 +8,8 @@ export default function EventosSocioPage() {
     eventos, cargando, error, procesando,
     mesVisible, setMesVisible,
     seleccionado, setSeleccionado,
-    proximoEvento, gestionarInscripcion,
+    proximoEvento, otrosDelDia,
+    gestionarInscripcion, descargarCertificado,
   } = useEventosSocio();
 
   return (
@@ -32,8 +33,11 @@ export default function EventosSocioPage() {
       {seleccionado && (
         <EventoDetalleModal
           evento={seleccionado}
+          otros={otrosDelDia}
           procesando={procesando}
           onInscripcion={gestionarInscripcion}
+          onCertificado={descargarCertificado}
+          onSeleccionar={setSeleccionado}
           onClose={() => setSeleccionado(null)}
         />
       )}

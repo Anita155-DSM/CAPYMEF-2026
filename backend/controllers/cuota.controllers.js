@@ -1,6 +1,13 @@
 import { Op } from 'sequelize';
-import { generarCuotasDelMes, marcarCuotasVencidas } from '../services/cuota.service.js';
+import { generarCuotasDelMes, marcarCuotasVencidas, enviarRecordatoriosDeVencimiento } from '../services/cuota.service.js';
 import { Cuota } from '../models/cuota.models.js';
+import { Notificacion } from '../models/notificacion.models.js';
+import {
+  crearNotificacion,
+  notificarAdmins,
+  formatearMonto,
+  formatearPeriodo,
+} from '../services/notificacion.service.js';
 import { User } from '../models/user.models.js';
 import { Pago } from '../models/pago.models.js';
 import { generarComprobantePago } from '../services/comprobante.service.js';
@@ -93,19 +100,48 @@ export const registrarPagoManual = async (req, res) => {
     }
 
     // 1. Creamos el registro del Pago
-    const nuevoPago = await Pago.create({
-      cuota_id: cuota.id,
-      usuario_id: cuota.usuario_id,
-      montoAbonado: cuota.monto,
-      metodoPago: metodoPago || 'Transferencia',
-      nroComprobante: nroComprobante || null,
-      observaciones: observaciones || 'Registro manual por administración'
-    });
+    // Si dos pedidos llegan a la vez (doble clic, o el pago online justo ahora), los dos
+    // pasan el chequeo de "ya pagada" de arriba. La restricción única de pagos.cuota_id hace
+    // que solo uno gane: el otro recibe este aviso en vez de crear un pago duplicado.
+    let nuevoPago;
+    try {
+      nuevoPago = await Pago.create({
+        cuota_id: cuota.id,
+        usuario_id: cuota.usuario_id,
+        montoAbonado: cuota.monto,
+        metodoPago: metodoPago || 'Transferencia',
+        nroComprobante: nroComprobante || null,
+        observaciones: observaciones || 'Registro manual por administración'
+      });
+    } catch (errorCreacion) {
+      if (errorCreacion.name === 'SequelizeUniqueConstraintError') {
+        return res.status(400).json({ exito: false, mensaje: 'Esta cuota ya fue abonada anteriormente.' });
+      }
+      throw errorCreacion;
+    }
 
     // 2. Actualizamos el estado de la cuota
     cuota.estado = 'pagada';
     await cuota.save();
 
+    // Alertas internas (nunca lanzan error: no pueden romper el registro del pago).
+    // Al socio: su pago ya figura.
+    await crearNotificacion({
+      usuarioId: cuota.usuario_id,
+      tipo: 'pago_registrado',
+      titulo: 'Registramos tu pago',
+      mensaje: `Registramos tu pago de ${formatearMonto(nuevoPago.montoAbonado)} por la cuota de ${formatearPeriodo(cuota.mes_anio)}. Ya podés descargar tu comprobante desde la sección de pagos.`,
+      referencia: `pago-registrado:${nuevoPago.id}`,
+    });
+    // A los demás administradores: queda un pago para que Tesorería lo verifique contra el banco.
+    // Se excluye a quien lo cargó, que ya sabe de este pago.
+    await notificarAdmins({
+      tipo: 'pago_por_confirmar',
+      titulo: 'Pago manual por confirmar',
+      mensaje: `${cuota.socio?.razonSocial || 'Un socio'}: pago de ${formatearMonto(nuevoPago.montoAbonado)} (cuota ${formatearPeriodo(cuota.mes_anio)}) cargado por administración. Falta la confirmación de Tesorería.`,
+      referencia: `pago-por-confirmar:${nuevoPago.id}`,
+      excluirUsuarioId: req.usuario.id,
+    });
 
     // 3. Generamos el comprobante en PDF, lo mandamos por mail y lo subimos a
     // Cloudinary para dejarlo guardado como snapshot histórico del pago.
@@ -299,6 +335,35 @@ export const confirmarPagos = async (req, res) => {
       pago.confirmadoPor = req.usuario.id;
       pago.confirmadoAt = new Date();
       await pago.save();
+
+      // Aviso al socio de que Tesorería verificó su pago.
+      await crearNotificacion({
+        usuarioId: pago.usuario_id,
+        tipo: 'pago_confirmado',
+        titulo: 'Tu pago fue confirmado',
+        mensaje: `Tesorería verificó tu pago de ${formatearMonto(pago.montoAbonado)}.`,
+        referencia: `pago-confirmado:${pago.id}`,
+      });
+    }
+
+    // Las alertas "pago por confirmar" de los admins ya no tienen nada pendiente: las damos
+    // por leídas para que no queden en la bandeja avisando algo que ya se resolvió.
+    // Si esto fallara, la confirmación igual quedó hecha: solo lo registramos.
+    if (aConfirmar.length > 0) {
+      try {
+        await Notificacion.update(
+          { leida: true, leidaAt: new Date() },
+          {
+            where: {
+              tipo: 'pago_por_confirmar',
+              leida: false,
+              referencia: aConfirmar.map((p) => `pago-por-confirmar:${p.id}`),
+            },
+          }
+        );
+      } catch (errorNotificaciones) {
+        console.error('No se pudieron cerrar las alertas de pagos por confirmar:', errorNotificaciones.message);
+      }
     }
 
     //auditoria
@@ -315,5 +380,29 @@ export const confirmarPagos = async (req, res) => {
   } catch (error) {
     console.error('Error al confirmar pagos:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al confirmar los pagos.' });
+  }
+};
+
+// ==========================================
+// 8. ENVIAR RECORDATORIOS DE VENCIMIENTO A MANO (Admin)
+// ==========================================
+// Hace lo mismo que el cron del día 7. Sirve para probar y como respaldo si el
+// servidor estuvo apagado ese día. Es seguro repetirlo: no duplica alertas.
+export const ejecutarRecordatorios = async (req, res) => {
+  try {
+    const resultado = await enviarRecordatoriosDeVencimiento();
+
+    //auditoria
+    req.auditoriaMensaje = `Se ejecutó el envío de recordatorios de vencimiento. Alertas creadas: ${resultado.enviados}`;
+    req.auditoriaCodigo = 'ENVIAR_RECORDATORIOS_CUOTAS';
+
+    res.status(200).json({
+      exito: true,
+      mensaje: `Proceso finalizado. Se enviaron ${resultado.enviados} recordatorio(s).`,
+      data: resultado,
+    });
+  } catch (error) {
+    console.error('Error al enviar recordatorios de vencimiento:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error al enviar los recordatorios de vencimiento.' });
   }
 };

@@ -1,5 +1,9 @@
 import cron from 'node-cron';
-import { generarCuotasDelMes, marcarCuotasVencidas } from '../services/cuota.service.js';
+import {
+  generarCuotasDelMes,
+  marcarCuotasVencidas,
+  enviarRecordatoriosDeVencimiento,
+} from '../services/cuota.service.js';
 
 // Sin esto node-cron usa la hora del servidor, que en un hosting suele ser UTC
 // (las 00:00 UTC son las 21:00 del día anterior en Argentina).
@@ -14,6 +18,17 @@ export const iniciarCronJobs = () => {
       console.log('[CRON JOB] Generación de cuotas completada con éxito.');
     } catch (error) {
       console.error('[CRON JOB] Error al ejecutar generación automática:', error);
+    }
+  }, opciones);
+
+  // Día 7 a las 09:00 -> recordatorio a quienes todavía no pagaron la cuota del mes
+  // (quedan tres días de ventana de pago).
+  cron.schedule('0 9 7 * *', async () => {
+    console.log('[CRON JOB] Enviando recordatorios de vencimiento...');
+    try {
+      await enviarRecordatoriosDeVencimiento();
+    } catch (error) {
+      console.error('[CRON JOB] Error al enviar recordatorios de vencimiento:', error);
     }
   }, opciones);
 

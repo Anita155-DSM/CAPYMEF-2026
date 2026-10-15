@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ejecutarGeneracionCuotas, obtenerCuotas, obtenerCuotasPendientes, registrarPagoManual, obtenerResumenFinanciero, descargarComprobante, ejecutarMarcadoVencidas, confirmarPagos, obtenerPagosSinConfirmar } from '../controllers/cuota.controllers.js';
+import { ejecutarGeneracionCuotas, obtenerCuotas, obtenerCuotasPendientes, registrarPagoManual, obtenerResumenFinanciero, descargarComprobante, ejecutarMarcadoVencidas, confirmarPagos, obtenerPagosSinConfirmar, ejecutarRecordatorios } from '../controllers/cuota.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 
@@ -13,6 +13,7 @@ router.use(verificarAdmin)
 // Endpoint para disparar la generación manualmente
 router.post('/generar-manual', ejecutarGeneracionCuotas);
 router.post('/marcar-vencidas', ejecutarMarcadoVencidas);
+router.post('/enviar-recordatorios', ejecutarRecordatorios);
 // Endpoint para consultar las cuotas del sistema
 router.get('/', obtenerCuotas);
 router.get('/:id/comprobante', descargarComprobante); // redescarga de un comprobante ya emitido
