@@ -57,7 +57,12 @@ export const User = sequelize.define('User', {
   // Guardamos el hash SHA-256 del token, nunca el token en texto plano —
   // así, si alguien accede a la base, no puede generar links de reset válidos.
   resetPasswordToken: { type: DataTypes.STRING, allowNull: true },
-  resetPasswordExpires: { type: DataTypes.DATE, allowNull: true }
+  resetPasswordExpires: { type: DataTypes.DATE, allowNull: true },
+  degradadoPorMora: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+     defaultValue: false, // true solo si el sistema lo pasó a Adherente por mora; permite devolverlo a Activo al regularizar
+  },
 }, 
 { 
   paranoid: true,
