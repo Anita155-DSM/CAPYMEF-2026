@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { registrarSocio } from "../../services/authServices"; // Importamos el servicio
-import Logo from "../../assets/img/Logo.png";
+import logo from "../../assets/img/logo.png";
 import { toast } from "sonner";
 import { FiArrowRight, FiEye, FiEyeOff, FiFileText } from "react-icons/fi";
 
@@ -510,7 +510,7 @@ export default function Register() {
         </form>
       </main>
       <Link to="/" className="absolute bottom-6 left-6">
-        <img src={Logo} alt="LogoCAPYMEF" className="h-16 w-auto object-contain" />
+        <img src={logo} alt="logoCAPYMEF" className="h-16 w-auto object-contain" />
       </Link>
     </div>
   );

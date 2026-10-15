@@ -8,7 +8,7 @@ import {
 } from 'react-icons/fa';
 import { GiAcousticMegaphone } from 'react-icons/gi';
 import { Link, Outlet } from 'react-router-dom';
-import Logo from '../assets/img/Logo.png';
+import logo from '../assets/img/logo.png';
 
 // 1. MODULARIZACIÓN DE DATOS:
 const OPCIONES_MENU = [
@@ -31,7 +31,7 @@ export default function MainLayout() {
         {/* IMAGEN DE CAPYMEF */}
         <div className="flex justify-center mt-8 mb-10">
           <Link to="/admin/inicio" aria-label="Ir al inicio del panel de administración">
-            <img src={Logo} alt="Logo CAPYMEF" className="w-40 opacity-90" />
+            <img src={logo} alt="logo CAPYMEF" className="w-40 opacity-90" />
           </Link>
         </div>
 

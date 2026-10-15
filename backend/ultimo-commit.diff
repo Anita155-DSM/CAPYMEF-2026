@@ -1,0 +1,442 @@
+commit 4f7a576647848e8fabd5e4b527bccdcd7dd95faa
+Author: AnitaDSM-155 <anahiperezdsm@gmail.com>
+Date:   Thu Oct 1 12:54:19 2026 -0300
+
+    feat(pagos): el socio consulta y paga sus cuotas con Mercado Pago
+    
+    Backend (solo lectura, filtrado por el id del token):
+    - GET /api/pagos/mis-cuotas: cuotas del socio logueado con su pago (sin datos de Tesoreria)
+    - GET /api/pagos/mis-cuotas/:id/comprobante: regenera el PDF solo si la cuota es del socio
+    
+    Frontend:
+    - Wallet Brick de Mercado Pago (@mercadopago/sdk-react) con VITE_MP_PUBLIC_KEY
+    - Modal de pago: crea la preferencia al abrirse, toma el pref_id del init_point validado
+      y si el Brick falla ofrece ir al checkout directo
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+diff --git a/backend/controllers/pago.controllers.js b/backend/controllers/pago.controllers.js
+index 243b802..d0d5a15 100644
+--- a/backend/controllers/pago.controllers.js
++++ b/backend/controllers/pago.controllers.js
+@@ -142,4 +142,73 @@ export const recibirWebhook = async (req, res) => {
+     // indefinidamente, y como ya logueamos el error, preferimos investigarlo manualmente.
+     res.status(200).json({ recibido: true });
+   }
+-};
+\ No newline at end of file
++};
++
++// ==========================================
++// 3. MIS CUOTAS (Socio logueado) — solo lectura
++// ==========================================
++// Devuelve ÚNICAMENTE las cuotas del socio dueño del token: el id sale de
++// req.usuario (firmado por nosotros), nunca de un parámetro que mande el cliente.
++export const obtenerMisCuotas = async (req, res) => {
++  try {
++    const cuotas = await Cuota.findAll({
++      where: { usuario_id: req.usuario.id },
++      attributes: ['id', 'mes_anio', 'monto', 'fecha_vencimiento', 'estado'],
++      include: [{
++        model: Pago,
++        as: 'pago',
++        // Sin datos internos de Tesorería (confirmadoPor, etc.)
++        attributes: ['id', 'montoAbonado', 'fechaPago', 'metodoPago', 'origenPago', 'urlComprobante'],
++      }],
++      order: [['mes_anio', 'DESC']],
++    });
++
++    res.status(200).json({ exito: true, data: cuotas });
++  } catch (error) {
++    console.error('Error al obtener las cuotas del socio:', error);
++    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al obtener tus cuotas.' });
++  }
++};
++
++// ==========================================
++// 4. DESCARGAR MI COMPROBANTE (Socio logueado)
++// ==========================================
++// Fallback para pagos que no tienen el PDF guardado en Cloudinary: lo regeneramos.
++// Si la cuota no es del socio respondemos 404 (no confirmamos que el id exista).
++export const descargarMiComprobante = async (req, res) => {
++  try {
++    // Un id que no es UUID haría fallar la consulta en Postgres (500): lo cortamos antes.
++    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(req.params.id)) {
++      return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
++    }
++
++    const cuota = await Cuota.findOne({
++      where: { id: req.params.id, usuario_id: req.usuario.id },
++      include: [
++        { model: User, as: 'socio', attributes: ['razonSocial', 'cuit'] },
++        { model: Pago, as: 'pago' },
++      ],
++    });
++
++    if (!cuota) {
++      return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
++    }
++
++    if (cuota.estado !== 'pagada' || !cuota.pago) {
++      return res.status(400).json({ exito: false, mensaje: 'Esta cuota todavía no tiene un pago registrado.' });
++    }
++
++    const pdfBuffer = await generarComprobantePago({
++      socio: cuota.socio,
++      cuota: { mes_anio: cuota.mes_anio },
++      pago: cuota.pago,
++    });
++
++    res.setHeader('Content-Type', 'application/pdf');
++    res.setHeader('Content-Disposition', `attachment; filename="comprobante-${cuota.mes_anio}.pdf"`);
++    res.send(pdfBuffer);
++  } catch (error) {
++    console.error('Error al generar el comprobante del socio:', error);
++    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al generar el comprobante.' });
++  }
++};
+diff --git a/backend/routes/pago.routes.js b/backend/routes/pago.routes.js
+index 5ac674e..cecb9de 100644
+--- a/backend/routes/pago.routes.js
++++ b/backend/routes/pago.routes.js
+@@ -1,9 +1,13 @@
+ import { Router } from 'express';
+-import { iniciarPagoOnline, recibirWebhook } from '../controllers/pago.controllers.js';
++import { iniciarPagoOnline, recibirWebhook, obtenerMisCuotas, descargarMiComprobante } from '../controllers/pago.controllers.js';
+ import { verificarToken } from '../middlewares/authMiddleware.js';
+ 
+ const router = Router();
+ 
++// El socio logueado consulta SUS cuotas (solo lectura, filtrado por el id del token)
++router.get('/mis-cuotas', verificarToken, obtenerMisCuotas);
++router.get('/mis-cuotas/:id/comprobante', verificarToken, descargarMiComprobante);
++
+ // El socio logueado inicia el pago de SU cuota
+ router.post('/:id/iniciar', verificarToken, iniciarPagoOnline);
+ 
+diff --git a/frontend/.env b/frontend/.env
+index 2efa58f..dab4c87 100644
+--- a/frontend/.env
++++ b/frontend/.env
+@@ -2,4 +2,5 @@ VITE_API_URL=http://localhost:3000/api
+ VITE_API_URL_AUTH=http://localhost:3000/api/auth
+ VITE_API_URL_ADMIN=http://localhost:3000/api/admin
+ VITE_API_URL_UPLOADS=http://localhost:3000
+-VITE_API_URL_EVENTOS=http://localhost:3000/api/eventos
+\ No newline at end of file
++VITE_API_URL_EVENTOS=http://localhost:3000/api/eventos
++VITE_MP_PUBLIC_KEY=APP_USR-95dce626-7a88-4990-84ff-78d88c479710
+diff --git a/frontend/package-lock.json b/frontend/package-lock.json
+index 6a2cefb..c55fc6c 100644
+--- a/frontend/package-lock.json
++++ b/frontend/package-lock.json
+@@ -8,6 +8,7 @@
+       "name": "frontend",
+       "version": "0.0.0",
+       "dependencies": {
++        "@mercadopago/sdk-react": "^1.0.7",
+         "axios": "^1.19.0",
+         "clsx": "^2.1.1",
+         "dayjs": "^1.11.23",
+@@ -520,6 +521,25 @@
+         "@jridgewell/sourcemap-codec": "^1.4.14"
+       }
+     },
++    "node_modules/@mercadopago/sdk-js": {
++      "version": "0.0.3",
++      "resolved": "https://registry.npmjs.org/@mercadopago/sdk-js/-/sdk-js-0.0.3.tgz",
++      "integrity": "sha512-kO48DNLHdfFAp3on12nuKdqNlEmw1x3+nM6wLd04BdWOXoFcAhkNMQV3AyUIanXdO/bB/dENakdacLT29297EQ==",
++      "license": "Apache-2.0"
++    },
++    "node_modules/@mercadopago/sdk-react": {
++      "version": "1.0.7",
++      "resolved": "https://registry.npmjs.org/@mercadopago/sdk-react/-/sdk-react-1.0.7.tgz",
++      "integrity": "sha512-babuAgsi1pQU+jfIQX1Sl0efp2no64OU/9yYK+RDz0NvSyARe+/D9ih9GyDNwVJJZuAA2lS4GF06oSxDFS5HYg==",
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@mercadopago/sdk-js": "^0.0.3"
++      },
++      "peerDependencies": {
++        "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
++      }
++    },
+     "node_modules/@oxc-project/types": {
+       "version": "0.142.0",
+       "resolved": "https://registry.npmjs.org/@oxc-project/types/-/types-0.142.0.tgz",
+diff --git a/frontend/package.json b/frontend/package.json
+index 9f26e64..1b7125a 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -10,6 +10,7 @@
+     "preview": "vite preview"
+   },
+   "dependencies": {
++    "@mercadopago/sdk-react": "^1.0.7",
+     "axios": "^1.19.0",
+     "clsx": "^2.1.1",
+     "dayjs": "^1.11.23",
+diff --git a/frontend/src/Pages/Socios/Components/ModalPagoCuota.jsx b/frontend/src/Pages/Socios/Components/ModalPagoCuota.jsx
+new file mode 100644
+index 0000000..f1017a1
+--- /dev/null
++++ b/frontend/src/Pages/Socios/Components/ModalPagoCuota.jsx
+@@ -0,0 +1,110 @@
++import { useEffect, useState } from "react";
++import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
++import { FaArrowUpRightFromSquare, FaLock } from "react-icons/fa6";
++import {
++  crearOrdenPagoCuota,
++  formatearFecha,
++  formatearMonto,
++  formatearPeriodo,
++  irAlCheckout,
++} from "../../../services/socioServices";
++
++// La public key es pública por diseño (identifica la cuenta en el navegador).
++// El access token secreto vive solo en el backend.
++const PUBLIC_KEY = import.meta.env.VITE_MP_PUBLIC_KEY;
++if (PUBLIC_KEY) initMercadoPago(PUBLIC_KEY, { locale: "es-AR" });
++
++export default function ModalPagoCuota({ cuota, onClose }) {
++  const [orden, setOrden] = useState(null); // { linkPago, preferenceId }
++  const [error, setError] = useState("");
++  const [brickListo, setBrickListo] = useState(false);
++  const [brickFallo, setBrickFallo] = useState(false);
++
++  // Cada apertura del modal crea la preferencia en el backend (que valida que la cuota sea del socio).
++  useEffect(() => {
++    let activo = true;
++    crearOrdenPagoCuota(cuota.id)
++      .then((datos) => activo && setOrden(datos))
++      .catch((err) => activo && setError(err.message));
++    return () => {
++      activo = false;
++    };
++  }, [cuota.id]);
++
++  useEffect(() => {
++    const overflowOriginal = document.body.style.overflow;
++    document.body.style.overflow = "hidden";
++    const cerrarConEscape = (evento) => evento.key === "Escape" && onClose();
++    window.addEventListener("keydown", cerrarConEscape);
++    return () => {
++      document.body.style.overflow = overflowOriginal;
++      window.removeEventListener("keydown", cerrarConEscape);
++    };
++  }, [onClose]);
++
++  const usarBrick = Boolean(PUBLIC_KEY && orden?.preferenceId && !brickFallo);
++
++  return (
++    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#132A46]/50 px-4" onMouseDown={(evento) => evento.target === evento.currentTarget && onClose()}>
++      <div className="w-full max-w-lg border border-[#d7e0e5] bg-white p-6 shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="titulo-pago">
++        <div className="flex items-start justify-between gap-4">
++          <div>
++            <p className="text-xs font-semibold uppercase text-[#1D7BB6]">Pago online</p>
++            <h2 id="titulo-pago" className="mt-1 text-xl font-bold text-[#132A46] first-letter:uppercase">Cuota de {formatearPeriodo(cuota.mes_anio)}</h2>
++          </div>
++          <button type="button" onClick={onClose} className="text-2xl leading-none text-gray-500 hover:text-[#132A46]" aria-label="Cerrar">&times;</button>
++        </div>
++
++        <div className="mt-5 flex items-end justify-between border-y border-gray-200 py-4">
++          <div>
++            <p className="text-sm uppercase text-gray-600">Total a pagar</p>
++            <p className="text-3xl font-bold text-[#151515]">{formatearMonto(cuota.monto)}</p>
++          </div>
++          <p className="text-sm text-gray-600">Vence el {formatearFecha(cuota.fecha_vencimiento)}</p>
++        </div>
++
++        <div className="mt-5 min-h-[60px]">
++          {error ? (
++            <p className="border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>
++          ) : !orden ? (
++            <p className="py-4 text-center text-sm text-gray-600">Preparando el pago...</p>
++          ) : (
++            <>
++              {usarBrick && (
++                <>
++                  {!brickListo && <p className="py-4 text-center text-sm text-gray-600">Cargando Mercado Pago...</p>}
++                  <Wallet
++                    initialization={{ preferenceId: orden.preferenceId, redirectMode: "self" }}
++                    onReady={() => setBrickListo(true)}
++                    onError={(errorBrick) => {
++                      console.error("Error en el botón de Mercado Pago:", errorBrick);
++                      setBrickFallo(true);
++                    }}
++                  />
++                </>
++              )}
++              {!usarBrick && (
++                <button
++                  type="button"
++                  onClick={() => irAlCheckout(orden.linkPago)}
++                  className="inline-flex w-full items-center justify-center gap-2 bg-[#2693bf] px-4 py-3 text-sm font-bold text-white hover:bg-[#1b789f]"
++                >
++                  Pagar con Mercado Pago <FaArrowUpRightFromSquare />
++                </button>
++              )}
++            </>
++          )}
++        </div>
++
++        <p className="mt-4 flex items-start gap-2 text-xs text-gray-500">
++          <FaLock className="mt-0.5 shrink-0" />
++          El pago se realiza en el sitio seguro de Mercado Pago. CAPYMEF no recibe ni guarda los datos de tu tarjeta. Al finalizar vas a volver al panel.
++        </p>
++
++        <div className="mt-5 flex justify-end">
++          <button type="button" onClick={onClose} className="border border-[#d7e0e5] px-4 py-2 text-sm text-[#17384f] hover:bg-[#f4f9fc]">Cancelar</button>
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/frontend/src/Pages/Socios/Components/TarjetaCuota.jsx b/frontend/src/Pages/Socios/Components/TarjetaCuota.jsx
+index abf409e..00c3ba0 100644
+--- a/frontend/src/Pages/Socios/Components/TarjetaCuota.jsx
++++ b/frontend/src/Pages/Socios/Components/TarjetaCuota.jsx
+@@ -1,6 +1,7 @@
+ import { FaCreditCard, FaDownload } from "react-icons/fa6";
+ import { formatearFecha, formatearMonto, formatearPeriodo } from "../../../services/socioServices";
+ import useAccionesCuota from "../Hooks/useAccionesCuota";
++import ModalPagoCuota from "./ModalPagoCuota";
+ 
+ export function AvisoCuotasNoDisponibles() {
+   return (
+@@ -12,7 +13,7 @@ export function AvisoCuotasNoDisponibles() {
+ }
+ 
+ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
+-  const { procesando, pagar, descargar } = useAccionesCuota();
++  const { procesando, pagar, descargar, cuotaAPagar, cerrarPago } = useAccionesCuota();
+ 
+   let contenido;
+   if (cuotas === undefined) {
+@@ -52,7 +53,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
+               onClick={() => pagar(cuota)}
+               className="inline-flex items-center gap-2 bg-[#2693bf] px-4 py-2 text-sm font-bold text-white hover:bg-[#1b789f] disabled:opacity-60"
+             >
+-              {procesando === `pagar-${cuota.id}` ? "Redirigiendo..." : "Pagar cuota"} <FaCreditCard />
++              "Pagar cuota" <FaCreditCard />
+             </button>
+           )}
+         </div>
+@@ -63,6 +64,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
+   return (
+     <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+       {contenido}
++      {cuotaAPagar && <ModalPagoCuota cuota={cuotaAPagar} onClose={cerrarPago} />}
+     </section>
+   );
+ }
+diff --git a/frontend/src/Pages/Socios/Hooks/useAccionesCuota.js b/frontend/src/Pages/Socios/Hooks/useAccionesCuota.js
+index 4fbbbeb..4ef0889 100644
+--- a/frontend/src/Pages/Socios/Hooks/useAccionesCuota.js
++++ b/frontend/src/Pages/Socios/Hooks/useAccionesCuota.js
+@@ -1,22 +1,19 @@
+-import { useState } from "react";
++import { useCallback, useState } from "react";
+ import { toast } from "sonner";
+-import { descargarComprobanteCuota, pagarCuotaOnline } from "../../../services/socioServices";
++import { descargarComprobanteCuota } from "../../../services/socioServices";
+ 
+ // Acciones sobre una cuota (pagar / descargar comprobante), compartidas entre Inicio y Pagos: evitan doble click y muestran el error del backend.
+ export default function useAccionesCuota() {
+   const [procesando, setProcesando] = useState(null);
++  const [cuotaAPagar, setCuotaAPagar] = useState(null); // abre el ModalPagoCuota
+ 
+-  const pagar = async (cuota) => {
+-    if (procesando) return;
+-    setProcesando(`pagar-${cuota.id}`);
+-    try {
+-      await pagarCuotaOnline(cuota.id); // redirige a Mercado Pago
+-    } catch (error) {
+-      toast.error(error.message);
+-      setProcesando(null);
+-    }
++  const pagar = (cuota) => {
++    if (procesando || cuota.estado === "pagada") return;
++    setCuotaAPagar(cuota);
+   };
+ 
++  const cerrarPago = useCallback(() => setCuotaAPagar(null), []);
++
+   const descargar = async (cuota) => {
+     if (procesando) return;
+     setProcesando(`comprobante-${cuota.id}`);
+@@ -29,5 +26,5 @@ export default function useAccionesCuota() {
+     }
+   };
+ 
+-  return { procesando, pagar, descargar };
++  return { procesando, pagar, descargar, cuotaAPagar, cerrarPago };
+ }
+diff --git a/frontend/src/Pages/Socios/PagosSocio.jsx b/frontend/src/Pages/Socios/PagosSocio.jsx
+index 0892087..f4a39f2 100644
+--- a/frontend/src/Pages/Socios/PagosSocio.jsx
++++ b/frontend/src/Pages/Socios/PagosSocio.jsx
+@@ -10,6 +10,7 @@ import {
+ } from "../../services/socioServices";
+ import TarjetaCuota, { AvisoCuotasNoDisponibles } from "./Components/TarjetaCuota";
+ import useAccionesCuota from "./Hooks/useAccionesCuota";
++import ModalPagoCuota from "./Components/ModalPagoCuota";
+ 
+ const FILTROS = [
+   { valor: "todas", texto: "Todas" },
+@@ -19,7 +20,7 @@ const FILTROS = [
+ 
+ export default function PagosSocio() {
+   const { cuotas, errorCuotas, recargarCuotas } = useOutletContext();
+-  const { procesando, pagar, descargar } = useAccionesCuota();
++  const { procesando, pagar, descargar, cuotaAPagar, cerrarPago } = useAccionesCuota();
+   const [filtro, setFiltro] = useState("todas");
+   const [actualizando, setActualizando] = useState(false);
+ 
+@@ -138,7 +139,7 @@ export default function PagosSocio() {
+                               onClick={() => pagar(cuota)}
+                               className="inline-flex items-center gap-2 bg-[#2693bf] px-3 py-1.5 text-sm font-bold text-white hover:bg-[#1b789f] disabled:opacity-60"
+                             >
+-                              {procesando === `pagar-${cuota.id}` ? "Redirigiendo..." : "Pagar"} <FaCreditCard />
++                              "Pagar" <FaCreditCard />
+                             </button>
+                           )}
+                         </td>
+@@ -151,6 +152,8 @@ export default function PagosSocio() {
+           )}
+         </section>
+       </div>
++
++      {cuotaAPagar && <ModalPagoCuota cuota={cuotaAPagar} onClose={cerrarPago} />}
+     </section>
+   );
+ }
+diff --git a/frontend/src/services/socioServices.js b/frontend/src/services/socioServices.js
+index a0bdeb5..00b6fcd 100644
+--- a/frontend/src/services/socioServices.js
++++ b/frontend/src/services/socioServices.js
+@@ -149,13 +149,21 @@ export const obtenerMisCuotas = async () => {
+   }
+ };
+ 
+-// Pide al backend la orden de Mercado Pago y redirige al checkout.
+-export const pagarCuotaOnline = async (cuotaId) => {
++// Pide al backend la orden de Mercado Pago (preferencia). Devuelve el link de checkout ya
++// validado y el id de preferencia (viene como "pref_id" dentro del link) para el Wallet Brick.
++export const crearOrdenPagoCuota = async (cuotaId) => {
+   if (!idValido(cuotaId)) throw new ErrorApi("Cuota inválida.", 400);
+   const resultado = await peticion(`/pagos/${encodeURIComponent(cuotaId)}/iniciar`, { method: "POST" });
+   const destino = urlSegura(resultado?.data?.linkPago, DOMINIO_MERCADOPAGO);
+   if (!destino) throw new ErrorApi("El enlace de pago recibido no es válido. Contactá a la administración.", 0);
+-  window.location.assign(destino.href);
++  const preferenceId = destino.searchParams.get("pref_id");
++  return { linkPago: destino.href, preferenceId: /^[\w-]{1,100}$/.test(preferenceId || "") ? preferenceId : null };
++};
++
++// Plan B si el Wallet Brick no carga: redirige directo al checkout de Mercado Pago.
++export const irAlCheckout = (linkPago) => {
++  const destino = urlSegura(linkPago, DOMINIO_MERCADOPAGO);
++  if (destino) window.location.assign(destino.href);
+ };
+ 
+ export const descargarComprobanteCuota = async (cuota) => {

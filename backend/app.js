@@ -13,20 +13,25 @@ import './models/user.models.js';
 import './models/gasto.models.js';
 import './models/noticia.models.js';
 import './models/pago.models.js';
-import './models/evento.models.js'
-import './models/inscripcion.models.js'
-import './models/cuota.models.js'
-import './models/auditoria.models.js'
+import './models/evento.models.js';
+import './models/inscripcion.models.js';
+import './models/cuota.models.js';
+import './models/auditoria.models.js';
+import './models/tarifa.models.js';
+import './models/notificacion.models.js';
 
 // IMPORTAMOS TUS RUTAS
 import authRoutes from './routes/authRoutes.js';
 import noticiaRoutes from './routes/noticia.routes.js';
 import adminRoutes from './routes/admin.routes.js';
-import gastoRoutes from './routes/gasto.routes.js'
-import cuotaRoutes from './routes/cuota.routes.js'
-import eventoRoutes from './routes/evento.routes.js'
+import gastoRoutes from './routes/gasto.routes.js';
+import cuotaRoutes from './routes/cuota.routes.js';
+import eventoRoutes from './routes/evento.routes.js';
 import pagoRoutes from './routes/pago.routes.js';
-import { iniciarCronJobs } from './config/cron.js';//automatizados de cuotas
+import { iniciarCronJobs } from './config/cron.js';//automatizados de cuotass
+import tarifaRoutes from './routes/tarifa.routes.js';
+import { asegurarTarifasIniciales } from './services/tarifa.service.js';
+import notificacionRoutes from './routes/notificacion.routes.js';
 
 
 dotenv.config();
@@ -85,14 +90,16 @@ app.use('/uploads', express.static('uploads', {
 
 // 4. REGISTRO DE RUTAS API
 //incorporacion de logs globalmente para auditar lo que se haga:)
-app.use('/api', interceptorAuditoria)
+app.use('/api', interceptorAuditoria);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes); // wndpoints: /api/admin/solicitudes, etc
 app.use('/api/noticias', noticiaRoutes);
 app.use('/api/cuotas', cuotaRoutes) //pago de cuptas
-app.use('/api/gastos', gastoRoutes)
-app.use('/api/eventos', eventoRoutes)
+app.use('/api/gastos', gastoRoutes);
+app.use('/api/eventos', eventoRoutes);
 app.use('/api/pagos', pagoRoutes);
+app.use('/api/tarifas', tarifaRoutes);
+app.use('/api/notificaciones', notificacionRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -107,12 +114,14 @@ const startServer = async () => {
   try {
     // 1. Probar la conexión y sincronizar tablas (las crea si no existen)
     await sequelize.sync(); //{alter: true}
+    await asegurarTarifasIniciales(); // siembra las tarifas de las categorías que todavía no tengan
     console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 
     // 2. Levantar el servidor Express
     app.listen(port, () => {
       console.log(`Servidor corriendo en http://localhost:${port}`);
     });
+    iniciarCronJobs();
   } catch (error) {
     console.error('Error crítico: No se pudo conectar a PostgreSQL', error.message);
   }

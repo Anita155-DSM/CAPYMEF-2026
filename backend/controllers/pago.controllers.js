@@ -143,3 +143,72 @@ export const recibirWebhook = async (req, res) => {
     res.status(200).json({ recibido: true });
   }
 };
+
+// ==========================================
+// 3. MIS CUOTAS (Socio logueado) — solo lectura
+// ==========================================
+// Devuelve ÚNICAMENTE las cuotas del socio dueño del token: el id sale de
+// req.usuario (firmado por nosotros), nunca de un parámetro que mande el cliente.
+export const obtenerMisCuotas = async (req, res) => {
+  try {
+    const cuotas = await Cuota.findAll({
+      where: { usuario_id: req.usuario.id },
+      attributes: ['id', 'mes_anio', 'monto', 'fecha_vencimiento', 'estado'],
+      include: [{
+        model: Pago,
+        as: 'pago',
+        // Sin datos internos de Tesorería (confirmadoPor, etc.)
+        attributes: ['id', 'montoAbonado', 'fechaPago', 'metodoPago', 'origenPago', 'urlComprobante'],
+      }],
+      order: [['mes_anio', 'DESC']],
+    });
+
+    res.status(200).json({ exito: true, data: cuotas });
+  } catch (error) {
+    console.error('Error al obtener las cuotas del socio:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al obtener tus cuotas.' });
+  }
+};
+
+// ==========================================
+// 4. DESCARGAR MI COMPROBANTE (Socio logueado)
+// ==========================================
+// Fallback para pagos que no tienen el PDF guardado en Cloudinary: lo regeneramos.
+// Si la cuota no es del socio respondemos 404 (no confirmamos que el id exista).
+export const descargarMiComprobante = async (req, res) => {
+  try {
+    // Un id que no es UUID haría fallar la consulta en Postgres (500): lo cortamos antes.
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(req.params.id)) {
+      return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
+    }
+
+    const cuota = await Cuota.findOne({
+      where: { id: req.params.id, usuario_id: req.usuario.id },
+      include: [
+        { model: User, as: 'socio', attributes: ['razonSocial', 'cuit'] },
+        { model: Pago, as: 'pago' },
+      ],
+    });
+
+    if (!cuota) {
+      return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
+    }
+
+    if (cuota.estado !== 'pagada' || !cuota.pago) {
+      return res.status(400).json({ exito: false, mensaje: 'Esta cuota todavía no tiene un pago registrado.' });
+    }
+
+    const pdfBuffer = await generarComprobantePago({
+      socio: cuota.socio,
+      cuota: { mes_anio: cuota.mes_anio },
+      pago: cuota.pago,
+    });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="comprobante-${cuota.mes_anio}.pdf"`);
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('Error al generar el comprobante del socio:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al generar el comprobante.' });
+  }
+};

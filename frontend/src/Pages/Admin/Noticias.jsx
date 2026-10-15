@@ -1,8 +1,8 @@
 import { FaSearch, FaPlus, FaArrowLeft } from "react-icons/fa";
 
-import Loading from "../../Components/Loading";
-import { Card } from "../../Components";
-import ModalAdmin from "./Components/Modals/ModalAdmin.jsx"; // <-- Importamos nuestro modal exclusivo de admin
+import Loading from "@/shared/ui/Loading";
+import NoticiaCard from "@/features/noticias/components/NoticiaCard";
+import EditarNoticiaModal from "@/features/noticias/components/EditarNoticiaModal";
 import { useNoticiasLogic } from "./Hooks/useNoticiasLogic.js";
 import { useState } from "react";
 
@@ -13,7 +13,8 @@ export default function NoticiasAdmin() {
     noticiasFiltradas, cargando,
     register, handleSubmit,
     imagenPreview, handleImagen,
-    onSubmit, estaPublicando
+    onSubmit, estaPublicando,
+    recargarNoticias
   } = useNoticiasLogic();
 
   const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
@@ -25,7 +26,7 @@ export default function NoticiasAdmin() {
       <div className="w-full flex flex-col animate-fade-in">
         <div className="flex justify-between items-end mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-[#132A46] uppercase mb-4">Gestión de Noticias</h2>
+            <h2 className="text-2xl font-bold text-navy uppercase mb-4">Gestión de Noticias</h2>
             <div className="relative w-80">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FaSearch className="text-gray-400" />
@@ -35,14 +36,14 @@ export default function NoticiasAdmin() {
                 placeholder="Buscar por título de la noticia..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border-2 border-[#8da5b8] rounded text-sm focus:outline-none focus:border-[#132A46] focus:ring-0"
+                className="w-full pl-10 pr-4 py-2 border-2 border-[#8da5b8] rounded text-sm focus:outline-none focus:border-navy focus:ring-0"
               />
             </div>
           </div>
 
           <button
             onClick={() => setVistaActual("formulario")}
-            className="bg-[#1D7BB6] hover:bg-[#132A46] text-white font-bold py-2 px-6 rounded flex items-center gap-2 transition-colors shadow-sm"
+            className="bg-primary hover:bg-navy text-white font-bold py-2 px-6 rounded flex items-center gap-2 transition-colors shadow-sm"
           >
             <FaPlus /> NUEVA NOTICIA
           </button>
@@ -57,7 +58,7 @@ export default function NoticiasAdmin() {
               <div key={noticia.id} className="flex flex-col">
 
                 {/* Tu Card original */}
-                <Card
+                <NoticiaCard
                   titulo={noticia.titulo}
                   subtitulo={noticia.subtitulo}
                   imagenUrl={noticia.imagenUrl}
@@ -70,7 +71,7 @@ export default function NoticiasAdmin() {
                 <div className="bg-white px-6 py-3 border-x border-b border-gray-200 rounded-b-xl flex justify-between items-center shadow-sm">
                   <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
                     <span>Para:</span>
-                    <span className="font-bold text-[#132A46] capitalize">
+                    <span className="font-bold text-navy capitalize">
                       {noticia.visibilidad || 'todos'}
                     </span>
                   </div>
@@ -78,7 +79,7 @@ export default function NoticiasAdmin() {
                   <span
                     className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider shadow-sm ${noticia.estado === 'publicado'
                       ? 'bg-[#00B859] text-white'
-                      : 'bg-[#FFC107] text-[#132A46]'
+                      : 'bg-[#FFC107] text-navy'
                       }`}
                   >
                     {noticia.estado === 'publicado' ? 'Visible' : 'Oculto'}
@@ -100,13 +101,13 @@ export default function NoticiasAdmin() {
     <div className="w-full flex flex-col max-w-3xl mx-auto animate-fade-in">
       <button
         onClick={() => setVistaActual("lista")}
-        className="flex items-center gap-2 text-[#1D7BB6] font-bold hover:underline mb-6 self-start"
+        className="flex items-center gap-2 text-primary font-bold hover:underline mb-6 self-start"
       >
         <FaArrowLeft /> Volver al listado
       </button>
 
-      <div className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-[#1D7BB6]">
-        <h1 className="text-3xl font-bold text-[#132A46] mb-2">Panel Administrativo</h1>
+      <div className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-primary">
+        <h1 className="text-3xl font-bold text-navy mb-2">Panel Administrativo</h1>
         <p className="text-gray-500 mb-8">Publicar una nueva noticia en el portal.</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
@@ -117,7 +118,7 @@ export default function NoticiasAdmin() {
               type="file"
               accept="image/*"
               onChange={handleImagen}
-              className="p-2 border border-gray-300 rounded-md file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#1D7BB6] file:text-white hover:file:bg-[#156091] cursor-pointer text-gray-600"
+              className="p-2 border border-gray-300 rounded-md file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark cursor-pointer text-gray-600"
             />
             {imagenPreview && (
               <div className="mt-3">
@@ -132,7 +133,7 @@ export default function NoticiasAdmin() {
             <input
               type="text"
               placeholder="Ej: Nuevos beneficios para socios..."
-              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] focus:ring-1 focus:ring-[#1D7BB6]"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               {...register("titulo", { required: true })}
             />
           </div>
@@ -142,7 +143,7 @@ export default function NoticiasAdmin() {
             <textarea
               placeholder="Un texto breve para enganchar al lector..."
               rows="2"
-              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] focus:ring-1 focus:ring-[#1D7BB6] resize-none"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
               {...register("subtitulo")}
             />
           </div>
@@ -152,7 +153,7 @@ export default function NoticiasAdmin() {
             <input
               type="text"
               placeholder="Ej: Institucional"
-              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] focus:ring-1 focus:ring-[#1D7BB6]"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               {...register("categoria", { required: true, maxLength: 100 })}
             />
           </div>
@@ -160,7 +161,7 @@ export default function NoticiasAdmin() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
               <label className="font-bold text-gray-700">¿Dónde se va a ver? *</label>
-              <select className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] bg-white" {...register("visibilidad", { required: true })}>
+              <select className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-primary bg-white" {...register("visibilidad", { required: true })}>
                 <option value="todos">En la página principal y en el panel</option>
                 <option value="publico">Solo en la página principal (Landing)</option>
                 <option value="socios">Solo adentro del panel de socios</option>
@@ -168,7 +169,7 @@ export default function NoticiasAdmin() {
             </div>
             <div className="flex flex-col gap-2">
               <label className="font-bold text-gray-700">Estado de publicación *</label>
-              <select className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] bg-white" {...register("estado", { required: true })}>
+              <select className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-primary bg-white" {...register("estado", { required: true })}>
                 <option value="publicado">Visible ahora mismo</option>
                 <option value="borrador">Borrador (Oculto temporalmente)</option>
               </select>
@@ -180,7 +181,7 @@ export default function NoticiasAdmin() {
             <textarea
               placeholder="Escribí todo el desarrollo de la noticia acá..."
               rows="6"
-              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#1D7BB6] focus:ring-1 focus:ring-[#1D7BB6]"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               {...register("contenido", { required: true })}
             />
           </div>
@@ -188,7 +189,7 @@ export default function NoticiasAdmin() {
           <button
             type="submit"
             disabled={estaPublicando}
-            className={`mt-4 font-bold py-3 px-6 rounded-md transition-colors text-white ${estaPublicando ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#1D7BB6] hover:bg-[#156091]'
+            className={`mt-4 font-bold py-3 px-6 rounded-md transition-colors text-white ${estaPublicando ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark'
               }`}
           >
             {estaPublicando ? 'Publicando noticia...' : 'Publicar Noticia'}
@@ -202,11 +203,12 @@ export default function NoticiasAdmin() {
     <div className="p-8 w-full font-sans relative min-h-screen bg-gray-100">
       {vistaActual === "lista" ? renderLista() : renderFormulario()}
 
-      {/* Renderizamos el nuevo Modal del Administrador */}
       {noticiaSeleccionada && (
-        <ModalAdmin
+        <EditarNoticiaModal
+          key={noticiaSeleccionada.id}
           noticia={noticiaSeleccionada}
           onClose={() => setNoticiaSeleccionada(null)}
+          onNoticiaActualizada={recargarNoticias}
         />
       )}
     </div>

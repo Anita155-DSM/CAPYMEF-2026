@@ -1,17 +1,26 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
-:root {
-  font-synthesis: none;
+/* Paleta CAPYMEF: se usa como bg-primary, text-navy, border-primary, etc. */
+@theme {
+  --color-primary: #1D7BB6;
+  /* azul institucional (110 usos hoy) */
+  --color-primary-dark: #156091;
+  /* hover de botones */
+  --color-navy: #132A46;
+  /* títulos y texto fuerte */
+  --color-navy-soft: #153448;
+  /* títulos de la landing */
+  --color-sidebar: #1B4F7A;
+  /* sidebars de admin y socio */
+  --color-teal: #187A8D;
+  --color-surface: #F4F8FB;
+  /* fondos claros */
+  --color-surface-blue: #E8F4F8;
 }
 
-html,
-body,
-#root {
-  width: 100%;
-  min-width: 0;
-  margin: 0;
-  overflow-x: hidden;
+:root {
+  font-synthesis: none;
 }
 
 /*Animación para que el Modal haga una animación de entrada*/
@@ -36,8 +45,10 @@ body,
 /* Animación de subrayado de izquierda a derecha */
 .titulo-animado {
   position: relative;
-  padding-bottom: 8px; /* Le da espacio para que la línea no pise las letras */
-  transition: color 0.3s ease; /* Suaviza el cambio de color del texto */
+  padding-bottom: 8px;
+  /* Le da espacio para que la línea no pise las letras */
+  transition: color 0.3s ease;
+  /* Suaviza el cambio de color del texto */
 }
 
 /* Acá creamos la línea invisible */
@@ -46,19 +57,25 @@ body,
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 0; /* Empieza invisible */
-  height: 3px; /* Grosor de la línea */
-  background-color: #1D7BB6; /* Color azul de CAPyMEF */
-  transition: width 0.5s ease; /* Acá están los 500ms (medio segundo) */
+  width: 0;
+  /* Empieza invisible */
+  height: 3px;
+  /* Grosor de la línea */
+  background-color: -primary;
+  /* Color azul de CAPyMEF */
+  transition: width 0.5s ease;
+  /* Acá están los 500ms (medio segundo) */
 }
 
 /* Cuando el contenedor padre (.group) tiene el mouse encima... */
 .group:hover .titulo-animado::after {
-  width: 100%; /* La línea crece al 100% */
+  width: 100%;
+  /* La línea crece al 100% */
 }
 
 .group:hover .titulo-animado {
-  color: #1D7BB6; /* El texto se vuelve azul */
+  color: -primary;
+  /* El texto se vuelve azul */
 }
 
 /* Revela el contenido al entrar en la ventana durante el desplazamiento. */
@@ -140,6 +157,7 @@ body,
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .noticia-reveal,
   .inicio-reveal,
   .inicio-reveal-hero {

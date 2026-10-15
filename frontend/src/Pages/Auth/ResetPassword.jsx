@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { restablecerPassword } from "../../services/authServices";
-import Logo from "../../assets/img/Logo.png";
+import logo from "../../assets/img/logo.png";
 import { toast } from "sonner";
 
 export default function ResetPassword() {
@@ -34,7 +34,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#132A46] flex flex-col items-center justify-center relative px-6 text-white font-sans">
+    <div className="min-h-screen w-full bg-navy flex flex-col items-center justify-center relative px-6 text-white font-sans">
       <div className="w-full max-w-md">
         <h1 className="text-center text-4xl font-[Trebuchet_MS,sans-serif] font-bold tracking-tight">
           Elegí tu nueva contraseña
@@ -91,7 +91,7 @@ export default function ResetPassword() {
             type="submit"
             disabled={enviando}
             className={`mt-8 rounded-full px-10 py-2 text-lg font-bold text-white transition-colors ${
-              enviando ? "bg-gray-500 cursor-not-allowed" : "bg-[#1D7BB6] hover:bg-[#156091]"
+              enviando ? "bg-gray-500 cursor-not-allowed" : "bg-primary hover:bg-primary-dark"
             }`}
           >
             {enviando ? "Guardando..." : "Restablecer contraseña"}
@@ -106,7 +106,7 @@ export default function ResetPassword() {
       </div>
 
       <Link to="/" className="absolute bottom-6 left-6">
-        <img src={Logo} alt="LogoCAPYMEF" className="h-16 w-auto object-contain" />
+        <img src={logo} alt="logoCAPYMEF" className="h-16 w-auto object-contain" />
       </Link>
     </div>
   );
