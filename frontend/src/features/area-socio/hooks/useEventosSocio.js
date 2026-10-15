@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import dayjs from "@/shared/utils/fechas";
+import { descargarBlob, idValido, nombreArchivoSeguro } from "@/shared/utils/seguridad";
 import {
   obtenerEventosSocios,
   obtenerEventosPublicos,
   inscribirseEvento,
   cancelarInscripcion,
+  obtenerCertificadoEvento,
 } from "@/services/eventosService";
 
 const noCancelado = (e) => e.estado !== "cancelado";
@@ -63,26 +66,45 @@ export function useEventosSocio() {
     );
   }, [eventos]);
 
+  // Eventos que ocurren el mismo día que el seleccionado
+  const otrosDelDia = useMemo(
+    () => (seleccionado ? eventos.filter((e) => e.fecha === seleccionado.fecha && e.id !== seleccionado.id) : []),
+    [eventos, seleccionado]
+  );
+
   const gestionarInscripcion = async () => {
-    if (!seleccionado) return;
+    if (!seleccionado || procesando) return;
     setProcesando(true);
-    const resultado = seleccionado.yaInscripto
-      ? await cancelarInscripcion(seleccionado.id)
-      : await inscribirseEvento(seleccionado.id);
+    const inscribir = !seleccionado.yaInscripto;
+    const resultado = inscribir ? await inscribirseEvento(seleccionado.id) : await cancelarInscripcion(seleccionado.id);
     setProcesando(false);
 
     if (!resultado.exito) {
-      setError(resultado.mensaje || "No se pudo actualizar la inscripción");
+      toast.error(resultado.mensaje || "No se pudo actualizar la inscripción");
       return;
     }
-    setEventos((act) => act.map((e) => (e.id === seleccionado.id ? { ...e, yaInscripto: !e.yaInscripto } : e)));
-    setSeleccionado((act) => ({ ...act, yaInscripto: !act.yaInscripto }));
+    setEventos((act) => act.map((e) => (e.id === seleccionado.id ? { ...e, yaInscripto: inscribir } : e)));
+    setSeleccionado((act) => ({ ...act, yaInscripto: inscribir }));
+    toast.success(resultado.mensaje || (inscribir ? "Inscripción registrada." : "Inscripción cancelada."));
+  };
+
+  const descargarCertificado = async () => {
+    if (!seleccionado || procesando) return;
+    if (!idValido(seleccionado.id)) return toast.error("Evento inválido.");
+
+    setProcesando(true);
+    const resultado = await obtenerCertificadoEvento(seleccionado.id);
+    setProcesando(false);
+
+    if (!resultado.exito) return toast.error(resultado.mensaje || "No se pudo descargar el certificado.");
+    descargarBlob(resultado.data, `certificado-${nombreArchivoSeguro(seleccionado.titulo)}.pdf`);
   };
 
   return {
     eventos, cargando, error, procesando,
     mesVisible, setMesVisible,
     seleccionado, setSeleccionado,
-    proximoEvento, gestionarInscripcion,
+    proximoEvento, otrosDelDia,
+    gestionarInscripcion, descargarCertificado,
   };
 }

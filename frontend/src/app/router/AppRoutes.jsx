@@ -23,6 +23,8 @@ import {
   NoticiasSocio,
   EmpresaSocio,
   PagosSocio,
+  ConfiguracionSocio,
+  ResultadoPago,
 } from "@/Pages/Socios/index.js";
 
 function ScrollToTop() {
@@ -53,12 +55,20 @@ export default function AppRoutes() {
 
         {/* SOCIOS (el admin también entra, por el link "VISTA SOCIO") */}
         <Route element={<RequireAuth roles={["socio", "admin"]} />}>
-          <Route path="/socios" element={<SocioLayout />}>
-            <Route index element={<InicioSocio />} />
-            <Route path="eventos" element={<EventosSocio />} />
-            <Route path="noticias" element={<NoticiasSocio />} />
-            <Route path="empresa" element={<EmpresaSocio />} />
-            <Route path="pagos" element={<PagosSocio />} />
+          <Route element={<SocioLayout />}>
+            <Route path="/socios">
+              <Route index element={<InicioSocio />} />
+              <Route path="eventos" element={<EventosSocio />} />
+              <Route path="noticias" element={<NoticiasSocio />} />
+              <Route path="empresa" element={<EmpresaSocio />} />
+              <Route path="pagos" element={<PagosSocio />} />
+              <Route path="configuracion" element={<ConfiguracionSocio />} />
+            </Route>
+
+            {/* Mercado Pago vuelve a estas rutas (back_urls del backend) */}
+            <Route path="/pago-exitoso" element={<ResultadoPago tipo="exitoso" />} />
+            <Route path="/pago-pendiente" element={<ResultadoPago tipo="pendiente" />} />
+            <Route path="/pago-fallido" element={<ResultadoPago tipo="fallido" />} />
           </Route>
         </Route>
 

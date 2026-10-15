@@ -13,6 +13,9 @@ export const inscribirseEvento = (id) =>
 export const cancelarInscripcion = (id) =>
   api(`/eventos/${id}/inscribirse`, { method: "DELETE" });
 
+export const obtenerCertificadoEvento = (id) =>
+  api(`/eventos/${encodeURIComponent(id)}/certificado`, { blob: true });
+
 // ==========================================
 // ADMIN
 // ==========================================
