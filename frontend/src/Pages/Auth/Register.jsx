@@ -1,23 +1,108 @@
-import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { registrarSocio } from "../../services/authServices"; // Importamos el servicio
-import logo from "../../assets/img/logo.png";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { FiArrowRight, FiEye, FiEyeOff, FiFileText } from "react-icons/fi";
+import {
+  FiActivity,
+  FiArrowRight,
+  FiAward,
+  FiBriefcase,
+  FiCheckCircle,
+  FiChevronDown,
+  FiEye,
+  FiEyeOff,
+  FiHash,
+  FiLock,
+  FiMail,
+  FiMapPin,
+  FiPhone,
+  FiTag,
+  FiUploadCloud,
+  FiUsers,
+} from "react-icons/fi";
+import logo from "../../assets/img/logo.png";
+import { registrarSocio } from "../../services/authServices";
+import TerminosModal from "@/features/auth/components/TerminosModal.jsx";
+import { localidadesPorDepartamento } from "@/features/auth/data/localidades.js";
+
+const TAMANOS = [
+  { valor: "Micro", texto: "Micro (1-9)" },
+  { valor: "Pequena", texto: "Pequeña (10-49)" },
+  { valor: "Mediana", texto: "Mediana (50-200)" },
+];
+const RUBROS = ["Comercio", "Industria", "Servicios", "Agropecuario", "Otro"];
+const CATEGORIAS = [
+  { valor: "activo", texto: "Activo" },
+  { valor: "adherente", texto: "Adherente" },
+  { valor: "padrino", texto: "Padrino" },
+];
+
+const MAX_ARCHIVO_MB = 5; 
+
+const claseCampo = (hayError, extra = "pr-3") =>
+  `h-10 w-full rounded-[3px] border bg-[#edf2fc] pl-10 text-[14px] text-[#1d2d3a] shadow-sm outline-none placeholder:text-[#a2aab2] focus:ring-2 ${extra} ${
+    hayError
+      ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
+      : "border-transparent focus:border-[#2693c0] focus:ring-[#2693c0]/20"
+  }`;
+
+
+function CampoForm({ id, label, icono: Icono, error, flecha = false, children }) {
+  return (
+    <div className="min-w-0">
+      <label htmlFor={id} className="mb-1 block text-[13px] font-bold text-[#4a5966]">
+        {label}
+      </label>
+      <div className="relative">
+        <Icono
+          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#89939d]"
+          size={17}
+        />
+        {children}
+        {flecha && (
+          <FiChevronDown
+            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#4a5966]"
+            size={17}
+          />
+        )}
+      </div>
+      {error && <p className="mt-1 text-[11px] leading-tight text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+function BotonOjo({ visible, alternar, etiqueta }) {
+  return (
+    <button
+      type="button"
+      aria-label={visible ? `Ocultar ${etiqueta}` : `Mostrar ${etiqueta}`}
+      title={visible ? `Ocultar ${etiqueta}` : `Mostrar ${etiqueta}`}
+      onClick={alternar}
+      className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded text-[#89939d] transition-colors hover:bg-[#dfe8f4] hover:text-[#2784ae]"
+    >
+      {visible ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+    </button>
+  );
+}
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm();
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
-  const [nombreArchivo, setNombreArchivo] = useState("");
+  const [verTerminos, setVerTerminos] = useState(false);
+
   const password = watch("password");
-  const constanciaField = register("constancia", { required: true });
+  const nombreArchivo = watch("constancia")?.[0]?.name;
 
   const handleRegister = async (data) => {
     try {
-      // 1. Armamos el paquete de datos en el frontend
       const formData = new FormData();
 
       formData.append("email", data.email);
@@ -35,31 +120,20 @@ export default function Register() {
         formData.append("constancia", data.constancia[0]);
       }
 
-      // 2. Le pasamos el paquete al SERVICIO (chao al fetch largo y feo)
       const result = await registrarSocio(formData);
 
-      // 3. Evaluamos la respuesta
       if (result.exito) {
-        console.log(result);
         toast.success("Registrado Correctamente. Queda pendiente de revisión.");
         navigate("/login");
+      } else if (result.errores) {
+        const listaDeErrores = result.errores.map((err) => `- ${err.mensaje}`).join("\n");
+        toast.error("Revisá los siguientes campos:\n" + listaDeErrores);
       } else {
-        // Evaluamos si falló el validador estricto o si es un error general
-        if (result.errores) {
-          const listaDeErrores = result.errores
-            .map((err) => `- ${err.mensaje}`)
-            .join("\n");
-          toast.error("Revisá los siguientes campos:\n" + listaDeErrores);
-        } else {
-          toast.error("Atención: " + result.mensaje);
-        }
+        toast.error("Atención: " + result.mensaje);
       }
     } catch (error) {
       console.error(error);
-      toast.error(
-        error.message ||
-          "Error de red. Verificá que el servidor esté encendido.",
-      );
+      toast.error(error.message || "Error de red. Verificá que el servidor esté encendido.");
     }
   };
 
@@ -67,451 +141,276 @@ export default function Register() {
     toast.error("Completá todos los campos obligatorios antes de registrarte.");
   };
 
-  const localidadesPorDepartamento = [
-    {
-      departamento: "Bermejo",
-      ciudades: [
-        "Laguna Yema",
-        "Los Chiriguanos",
-        "Pozo de Maza",
-        "Pozo del Mortero",
-      ],
-    },
-    {
-      departamento: "Formosa",
-      ciudades: [
-        "Formosa",
-        "Colonia Pastoril",
-        "Gran Guardia",
-        "San Hilario",
-        "Mariano Boedo",
-        "Mojón de Fierro",
-        "Villa del Carmen",
-        "Villa Trinidad",
-      ],
-    },
-    {
-      departamento: "Laishí",
-      ciudades: [
-        "San Francisco de Laishí",
-        "Banco Payaguá",
-        "General Lucio V. Mansilla",
-        "Herradura",
-        "Tatané",
-        "Villa Escolar",
-      ],
-    },
-    { departamento: "Matacos", ciudades: ["Ingeniero Juárez"] },
-    {
-      departamento: "Patiño",
-      ciudades: [
-        "Comandante Fontana",
-        "Bartolomé de las Casas",
-        "Colonia Sarmiento",
-        "El Recreo",
-        "Estanislao del Campo",
-        "Fortín Leyes",
-        "Fortín Lugones",
-        "General Manuel Belgrano",
-        "Ibarreta",
-        "Juan G. Bazán",
-        "Las Lomitas",
-        "Posta Cambio Zalazar",
-        "Pozo del Tigre",
-        "San Martín 1",
-        "San Martín 2",
-        "Subteniente Perín",
-        "Villa General Güemes",
-      ],
-    },
-    {
-      departamento: "Pilagás",
-      ciudades: [
-        "El Espinillo",
-        "Buena Vista",
-        "Misión Tacaaglé",
-        "Portón Negro",
-        "Tres Lagunas",
-      ],
-    },
-    {
-      departamento: "Pilcomayo",
-      ciudades: [
-        "Clorinda",
-        "Laguna Blanca",
-        "Laguna Naick Neck",
-        "Palma Sola",
-        "Puerto Pilcomayo",
-        "Riacho He-Hé",
-        "Riacho Negro",
-        "Siete Palmas",
-      ],
-    },
-    {
-      departamento: "Pirané",
-      ciudades: [
-        "Pirané",
-        "El Colorado",
-        "Mayor Vicente Villafañe",
-        "Palo Santo",
-        "Villa Dos Trece",
-      ],
-    },
-    { departamento: "Ramón Lista", ciudades: ["El Chorro", "El Potrillo"] },
-  ];
+  const aceptarTerminos = () => {
+    setValue("consentimiento", true, { shouldValidate: true });
+    setVerTerminos(false);
+  };
+
+  const obligatorio = "Campo obligatorio";
 
   return (
     <div
-      className="relative flex min-h-screen w-full items-center justify-center bg-[#0d3150] px-4 py-8 font-sans text-[#162b3d] sm:px-6"
+      className="relative flex min-h-dvh w-full flex-col items-center justify-center bg-[#0d3150] px-3 py-4 font-sans text-[#162b3d] sm:px-6 sm:py-6"
       style={{
         backgroundImage:
           "radial-gradient(circle at 20% 15%, rgba(70, 139, 181, 0.14) 1px, transparent 1px), radial-gradient(circle at 80% 80%, rgba(70, 139, 181, 0.1) 1px, transparent 1px)",
         backgroundSize: "34px 34px, 46px 46px",
       }}
     >
-      <main className="w-full max-w-[860px] rounded-[9px] border-t-[4px] border-[#2084b6] bg-[#f5f7f9] px-6 py-8 shadow-[0_12px_35px_rgba(2,18,32,0.28)] sm:px-10 sm:py-10">
-        <h1 className="text-center text-[27px] font-bold tracking-[-0.03em] sm:text-[29px]">
-          Crear cuenta de socio
-        </h1>
-        <p className="mx-auto mt-2 max-w-[560px] text-center text-[13px] leading-[1.55] text-[#68727b]">
-          Completá tus datos comerciales. El equipo administrativo revisará tu solicitud.
-        </p>
+      <main className="w-full max-w-[1040px] overflow-hidden rounded-[9px] border-t-[4px] border-[#2084b6] bg-[#f5f7f9] px-5 pt-6 shadow-[0_12px_35px_rgba(2,18,32,0.28)] sm:px-10 sm:pt-7">
+        <header className="border-b border-[#dfe6ee] pb-4 text-center">
+          <h1 className="text-[24px] font-bold tracking-[-0.03em] sm:text-[27px]">
+            Crear cuenta de socio
+          </h1>
+          <p className="mx-auto mt-1 max-w-[560px] text-[13px] leading-[1.5] text-[#68727b]">
+            Completá tus datos comerciales. El equipo administrativo revisará tu solicitud.
+          </p>
+        </header>
 
         <form
+          noValidate
           onSubmit={handleSubmit(handleRegister, handleInvalidRegister)}
-          className="mt-7 flex w-full flex-col text-[#162b3d]"
+          className="mt-5 flex w-full flex-col"
         >
-          <div className="grid w-full grid-cols-1 gap-x-8 gap-y-1 md:grid-cols-2">
-            {/* Columna Izquierda */}
-            <div className="flex w-full flex-col">
-              <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="email">
-                    Correo electrónico
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                    placeholder="ejemplo@correo.com"
-                  className="w-full h-11 rounded-md border border-white/30 px-4 pr-10 text-base text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                  {...register("email", { required: true })}
-                />
-              </div>
-              <div className="w-full my-3">
-                <label
-                  className="block text-lg font-bold mb-1"
-                  htmlFor="password"
-                >
-                    Contraseña
-                </label>
-                <div className="relative">
-                  <input
-                    type={mostrarPassword ? "text" : "password"}
-                    id="password"
-                    placeholder="Ingresá una contraseña"
-                    className="w-full h-11 rounded-md border border-white/30 bg-white px-4 pr-12 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                    {...register("password", { required: true })}
-                  />
-                  <button
-                    type="button"
-                    aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                    title={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                    onClick={() => setMostrarPassword((visible) => !visible)}
-                    className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-[#2084b6]"
-                  >
-                    {mostrarPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                  </button>
-                </div>
-              </div>
-              <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="confirmarPassword">
-                  Confirmar contraseña
-                </label>
-                <div className="relative">
-                  <input
-                    type={mostrarConfirmacion ? "text" : "password"}
-                    id="confirmarPassword"
-                    placeholder="Repetí tu contraseña"
-                    className="w-full h-11 rounded-md border border-white/30 bg-white px-4 pr-12 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                    {...register("confirmarPassword", {
-                      required: true,
-                      validate: (valor) => valor === password || "Las contraseñas no coinciden",
-                    })}
-                  />
-                  <button
-                    type="button"
-                    aria-label={mostrarConfirmacion ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
-                    title={mostrarConfirmacion ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
-                    onClick={() => setMostrarConfirmacion((visible) => !visible)}
-                    className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-[#2084b6]"
-                  >
-                    {mostrarConfirmacion ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                  </button>
-                </div>
-                {errors.confirmarPassword && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {errors.confirmarPassword.message || "Confirmá tu contraseña."}
-                  </p>
-                )}
-              </div>
-              <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="cuit">
-                    CUIT
-                </label>
-                <input
-                  type="text"
-                  id="cuit"
-                    placeholder="20-12345678-9"
-                  className="w-full h-11 rounded-md border border-white/30 px-4 pr-10 text-base text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                  {...register("cuit", { required: true })}
-                />
-              </div>
-              <div className="w-full my-3">
-                <label
-                  className="block text-lg font-bold mb-1"
-                  htmlFor="razonSocial"
-                >
-                  Razón Social
-                </label>
-                <input
-                  type="text"
-                  id="razonSocial"
-                    placeholder="Nombre de tu empresa"
-                  className="w-full h-11 rounded-md border border-white/30 px-4 pr-10 text-base text-black bg-white focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                  {...register("razonSocial", { required: true })}
-                />
-              </div>
-              <div className="w-full my-3">
-                <label
-                  className="block text-lg font-bold mb-1"
-                  htmlFor="telefono"
-                >
-                  Teléfono
-                </label>
-                <input
-                  type="text"
-                  id="telefono"
-                    placeholder="3704 123456"
-                  className="w-full h-11 rounded-md border border-white/30 px-4 text-base text-black bg-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                  {...register("telefono", { required: true })}
-                />
-              </div>
-            </div>
-
-            {/* Columna Derecha */}
-            <div className="flex w-full flex-col">
-              <div className="w-full my-3">
-                <label
-                  className="block text-lg font-bold mb-1"
-                  htmlFor="localidad"
-                >
-                  Localidad
-                </label>
-                <div className="relative w-full">
-                  <select
-                    id="localidad"
-                    className="w-full h-11 appearance-none rounded-md border border-white/30 bg-white px-4 pr-12 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                    defaultValue=""
-                    {...register("localidad", { required: true })}
-                  >
-                  <option value="" disabled>
-                    Seleccioná una opcion
-                  </option>
-                  {localidadesPorDepartamento.map((dep) => (
-                    <optgroup
-                      key={dep.departamento}
-                      label={`--- ${dep.departamento} ---`}
-                    >
-                      {dep.ciudades.map((ciudad) => (
-                        <option key={ciudad} value={ciudad}>
-                          {ciudad}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                  </select>
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
-                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <path d="m5 7 5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                </div>
-              </div>
-              <div className="w-full my-3">
-                <label
-                  className="block text-lg font-bold mb-1"
-                  htmlFor="tamano_empresa"
-                >
-                  Tamaño de la Empresa
-                </label>
-                <div className="relative w-full">
-                  <select
-                    id="tamano_empresa"
-                    className="w-full h-11 appearance-none rounded-md border border-white/30 bg-white px-4 pr-12 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                    defaultValue=""
-                    {...register("tamano_empresa", { required: true })}
-                  >
-                  <option value="" disabled>
-                    Seleccioná una opcion
-                  </option>
-                  <option value="Micro">Micro (1-9)</option>
-                  <option value="Pequena">Pequeña (10-49)</option>
-                  <option value="Mediana">Mediana (50-200)</option>
-                  </select>
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
-                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <path d="m5 7 5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                </div>
-              </div>
-              <div className="w-full my-3">
-                <label className="block text-lg font-bold mb-1" htmlFor="rubro">
-                  Rubro
-                </label>
-                <div className="relative w-full">
-                  <select
-                    id="rubro"
-                    className="w-full h-11 appearance-none rounded-md border border-white/30 bg-white px-4 pr-12 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                    defaultValue=""
-                    {...register("rubro", { required: true })}
-                  >
-                  <option value="" disabled>
-                    Seleccioná una opcion
-                  </option>
-                  <option value="Comercio">Comercio</option>
-                  <option value="Industria">Industria</option>
-                  <option value="Servicios">Servicios</option>
-                  <option value="Agropecuario">Agropecuario</option>
-                  <option value="Otro">Otro</option>
-                  </select>
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
-                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <path d="m5 7 5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                </div>
-              </div>
-              <div className="w-full my-3">
-                <label
-                  className="block text-lg font-bold mb-1"
-                  htmlFor="actividad"
-                >
-                  Actividad
-                </label>
-                <input
-                  type="text"
-                  id="actividad"
-                  placeholder='Ej. "Venta de repuestos"'
-                  className="w-full h-11 rounded-md border border-white/30 px-4 text-base text-black bg-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                  {...register("actividad", { required: true })}
-                />
-              </div>
-              <div className="w-full my-3">
-                <label
-                  className="block text-lg font-bold mb-1"
-                  htmlFor="categoria"
-                >
-                  Categoría
-                </label>
-                <div className="relative w-full">
-                  <select
-                    id="categoria"
-                    className="w-full h-11 appearance-none rounded-md border border-white/30 bg-white px-4 pr-12 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#2084b6]"
-                    defaultValue=""
-                    {...register("categoria", { required: true })}
-                  >
-                  <option value="" disabled>
-                    Seleccioná una opcion
-                  </option>
-                  <option value="activo">Activo</option>
-                  <option value="adherente">Adherente</option>
-                  <option value="padrino">Padrino</option>
-                  </select>
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-black">
-                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                      <path d="m5 7 5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-7 mb-7">
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-[3px] border border-dashed border-[#9bb4c3] bg-[#edf2fc] px-4 py-3 text-[#2784ae] transition-colors hover:bg-[#e4edf9]">
-              <FiFileText size={18} />
-              <span className="text-[13px] font-bold">
-                Subir constancia de AFIP/DGR
-              </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-5 w-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
-                />
-              </svg>
+          <div className="grid grid-cols-1 gap-x-5 gap-y-3.5 sm:grid-cols-2 lg:grid-cols-3">
+            <CampoForm id="razonSocial" label="Razón Social" icono={FiBriefcase} error={errors.razonSocial && obligatorio}>
               <input
-                type="file"
-                className="hidden"
-                accept=".pdf,.jpg,.jpeg,.png"
-                {...constanciaField}
-                onChange={(event) => {
-                  constanciaField.onChange(event);
-                  setNombreArchivo(event.target.files?.[0]?.name || "");
-                }}
+                id="razonSocial"
+                type="text"
+                placeholder="Nombre de tu empresa"
+                autoComplete="organization"
+                className={claseCampo(errors.razonSocial)}
+                {...register("razonSocial", { required: true })}
               />
-            </label>
-            <div className="mt-2 flex items-center justify-center gap-1 text-center text-xs text-[#68727b]">
-              <FiFileText size={14} className={nombreArchivo ? "text-[#248354]" : "text-[#9aa5ae]"} />
-              <span>{nombreArchivo || "Todavía no seleccionaste ningún archivo"}</span>
+            </CampoForm>
+
+            <CampoForm id="cuit" label="CUIT" icono={FiHash} error={errors.cuit && (errors.cuit.message || obligatorio)}>
+              <input
+                id="cuit"
+                type="text"
+                inputMode="numeric"
+                placeholder="20-12345678-9"
+                className={claseCampo(errors.cuit)}
+                {...register("cuit", {
+                  required: true,
+                  pattern: { value: /^(\d{2}-\d{8}-\d|\d{11})$/, message: "Formato: 20-12345678-9" },
+                })}
+              />
+            </CampoForm>
+
+            <CampoForm id="telefono" label="Teléfono" icono={FiPhone} error={errors.telefono && obligatorio}>
+              <input
+                id="telefono"
+                type="tel"
+                placeholder="3704 123456"
+                autoComplete="tel"
+                className={claseCampo(errors.telefono)}
+                {...register("telefono", { required: true })}
+              />
+            </CampoForm>
+
+            <CampoForm id="rubro" label="Rubro" icono={FiTag} flecha error={errors.rubro && obligatorio}>
+              <select
+                id="rubro"
+                required
+                defaultValue=""
+                className={`${claseCampo(errors.rubro, "pr-9 appearance-none cursor-pointer")} invalid:text-[#a2aab2]`}
+                {...register("rubro", { required: true })}
+              >
+                <option value="" disabled>Seleccioná una opción</option>
+                {RUBROS.map((rubro) => (
+                  <option key={rubro} value={rubro} className="text-[#1d2d3a]">{rubro}</option>
+                ))}
+              </select>
+            </CampoForm>
+
+            <CampoForm id="actividad" label="Actividad" icono={FiActivity} error={errors.actividad && obligatorio}>
+              <input
+                id="actividad"
+                type="text"
+                placeholder='Ej. "Venta de repuestos"'
+                className={claseCampo(errors.actividad)}
+                {...register("actividad", { required: true })}
+              />
+            </CampoForm>
+
+            <CampoForm id="tamano_empresa" label="Tamaño de la Empresa" icono={FiUsers} flecha error={errors.tamano_empresa && obligatorio}>
+              <select
+                id="tamano_empresa"
+                required
+                defaultValue=""
+                className={`${claseCampo(errors.tamano_empresa, "pr-9 appearance-none cursor-pointer")} invalid:text-[#a2aab2]`}
+                {...register("tamano_empresa", { required: true })}
+              >
+                <option value="" disabled>Seleccioná una opción</option>
+                {TAMANOS.map((t) => (
+                  <option key={t.valor} value={t.valor} className="text-[#1d2d3a]">{t.texto}</option>
+                ))}
+              </select>
+            </CampoForm>
+
+            <CampoForm id="categoria" label="Categoría" icono={FiAward} flecha error={errors.categoria && obligatorio}>
+              <select
+                id="categoria"
+                required
+                defaultValue=""
+                className={`${claseCampo(errors.categoria, "pr-9 appearance-none cursor-pointer")} invalid:text-[#a2aab2]`}
+                {...register("categoria", { required: true })}
+              >
+                <option value="" disabled>Seleccioná una opción</option>
+                {CATEGORIAS.map((c) => (
+                  <option key={c.valor} value={c.valor} className="text-[#1d2d3a]">{c.texto}</option>
+                ))}
+              </select>
+            </CampoForm>
+
+            <CampoForm id="localidad" label="Localidad" icono={FiMapPin} flecha error={errors.localidad && obligatorio}>
+              <select
+                id="localidad"
+                required
+                defaultValue=""
+                className={`${claseCampo(errors.localidad, "pr-9 appearance-none cursor-pointer")} invalid:text-[#a2aab2]`}
+                {...register("localidad", { required: true })}
+              >
+                <option value="" disabled>Seleccioná una opción</option>
+                {localidadesPorDepartamento.map((dep) => (
+                  <optgroup key={dep.departamento} label={dep.departamento}>
+                    {dep.ciudades.map((ciudad) => (
+                      <option key={ciudad} value={ciudad} className="text-[#1d2d3a]">{ciudad}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </CampoForm>
+
+            <div className="min-w-0">
+              <span className="mb-1 block text-[13px] font-bold text-[#4a5966]">Constancia AFIP/DGR</span>
+              <label
+                className={`flex h-10 cursor-pointer items-center justify-center gap-2 rounded-[3px] border border-dashed px-3 text-[13px] font-bold transition-colors ${
+                  errors.constancia
+                    ? "border-red-400 bg-red-50 text-red-600"
+                    : nombreArchivo
+                      ? "border-[#248354] bg-[#eaf6ef] text-[#248354]"
+                      : "border-[#9bb4c3] bg-[#edf2fc] text-[#2784ae] hover:bg-[#e4edf9]"
+                }`}
+              >
+                {nombreArchivo ? <FiCheckCircle size={17} className="shrink-0" /> : <FiUploadCloud size={17} className="shrink-0" />}
+                <span className="truncate">{nombreArchivo || "Subir archivo (PDF, JPG o PNG)"}</span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  {...register("constancia", {
+                    required: "Adjuntá la constancia.",
+                    validate: (archivos) =>
+                      !archivos?.[0] || archivos[0].size <= MAX_ARCHIVO_MB * 1024 * 1024 || `El archivo supera los ${MAX_ARCHIVO_MB} MB.`,
+                  })}
+                />
+              </label>
+              {errors.constancia && (
+                <p className="mt-1 text-[11px] leading-tight text-red-600">{errors.constancia.message}</p>
+              )}
             </div>
-            {errors.constancia && (
-              <p className="mt-1 text-center text-xs text-red-600">La constancia es obligatoria.</p>
-            )}
+
+            <CampoForm id="email" label="Correo electrónico" icono={FiMail} error={errors.email && obligatorio}>
+              <input
+                id="email"
+                type="email"
+                placeholder="ejemplo@correo.com"
+                autoComplete="email"
+                className={claseCampo(errors.email)}
+                {...register("email", { required: true })}
+              />
+            </CampoForm>
+
+            <CampoForm id="password" label="Contraseña" icono={FiLock} error={errors.password && (errors.password.message || obligatorio)}>
+              <input
+                id="password"
+                type={mostrarPassword ? "text" : "password"}
+                placeholder="Mínimo 8 caracteres"
+                autoComplete="new-password"
+                className={claseCampo(errors.password, "pr-11")}
+                {...register("password", {
+                  required: true,
+                  pattern: {
+                    value: /^(?=.*[A-Z])(?=.*\d).{8,}$/,
+                    message: "Mínimo 8 caracteres, una mayúscula y un número.",
+                  },
+                })}
+              />
+              <BotonOjo visible={mostrarPassword} alternar={() => setMostrarPassword((v) => !v)} etiqueta="contraseña" />
+            </CampoForm>
+
+            <CampoForm id="confirmarPassword" label="Confirmar contraseña" icono={FiLock} error={errors.confirmarPassword && (errors.confirmarPassword.message || "Confirmá tu contraseña.")}>
+              <input
+                id="confirmarPassword"
+                type={mostrarConfirmacion ? "text" : "password"}
+                placeholder="Repetí tu contraseña"
+                autoComplete="new-password"
+                className={claseCampo(errors.confirmarPassword, "pr-11")}
+                {...register("confirmarPassword", {
+                  required: true,
+                  validate: (valor) => valor === password || "Las contraseñas no coinciden.",
+                })}
+              />
+              <BotonOjo visible={mostrarConfirmacion} alternar={() => setMostrarConfirmacion((v) => !v)} etiqueta="confirmación de contraseña" />
+            </CampoForm>
           </div>
 
-          <label className="mb-7 flex cursor-pointer items-start gap-2 text-sm text-[#4a5966]">
-            <input
-              type="checkbox"
-              className="mt-0.5 h-4 w-4 shrink-0 accent-[#0877a8]"
-              {...register("consentimiento", { required: true })}
-            />
-            <span>
-              Acepto los Términos y Condiciones y el tratamiento de mis datos
-            </span>
-          </label>
-          {errors.consentimiento && (
-            <p className="-mt-5 mb-5 text-xs text-red-600">Debés aceptar el consentimiento para continuar.</p>
-          )}
+          <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="flex items-start gap-2 text-[13px] text-[#4a5966]">
+                <input
+                  id="consentimiento"
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#0877a8]"
+                  {...register("consentimiento", { required: true })}
+                />
+                <p>
+                  <label htmlFor="consentimiento" className="cursor-pointer">Acepto los </label>
+                  <button
+                    type="button"
+                    onClick={() => setVerTerminos(true)}
+                    className="font-bold text-[#2784ae] hover:underline"
+                  >
+                    Términos y Condiciones
+                  </button>
+                  <label htmlFor="consentimiento" className="cursor-pointer"> y el tratamiento de mis datos</label>
+                </p>
+              </div>
+              {errors.consentimiento && (
+                <p className="mt-1 text-[11px] text-red-600">Debés aceptar los términos para continuar.</p>
+              )}
+            </div>
 
-          <div className="flex justify-center">
             <button
               type="submit"
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-[9px] bg-[#0877a8] px-5 text-[15px] font-bold text-white shadow-[0_3px_5px_rgba(2,74,106,0.25)] transition-colors hover:bg-[#05648f] sm:max-w-[360px]"
+              disabled={isSubmitting}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-[9px] bg-[#0877a8] px-5 text-[15px] font-bold text-white shadow-[0_3px_5px_rgba(2,74,106,0.25)] transition-colors hover:bg-[#05648f] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto lg:min-w-[240px]"
             >
-              Enviar solicitud
-              <FiArrowRight size={19} strokeWidth={2.5} />
+              {isSubmitting ? "Enviando..." : "Enviar solicitud"}
+              {!isSubmitting && <FiArrowRight size={19} strokeWidth={2.5} />}
             </button>
           </div>
-
-          <div className="mt-7 text-center text-[12px] text-[#68727b]">
-            <span>¿Ya tenés una cuenta? </span>
-            <Link to="/login" className="font-bold text-[#2784ae] hover:underline">
-              Inicia sesión aquí
-            </Link>
-          </div>
         </form>
+
+        <div className="-mx-5 mt-5 bg-[#edf2fc] px-5 py-3.5 text-center text-[12px] text-[#68727b] sm:-mx-10 sm:px-10">
+          <span>¿Ya tenés una cuenta? </span>
+          <Link to="/login" className="font-bold text-[#2784ae] hover:underline">
+            Iniciá sesión aquí
+          </Link>
+        </div>
       </main>
-      <Link to="/" className="absolute bottom-6 left-6">
-        <img src={logo} alt="logoCAPYMEF" className="h-16 w-auto object-contain" />
+
+      <Link
+        to="/"
+        aria-label="Ir al inicio"
+        className="mt-4 self-start min-[1280px]:absolute min-[1280px]:bottom-6 min-[1280px]:left-6 min-[1280px]:mt-0"
+      >
+        <img src={logo} alt="logoCAPYMEF" className="h-14 w-auto object-contain sm:h-16 min-[1280px]:h-14" />
       </Link>
+
+      {verTerminos && <TerminosModal onClose={() => setVerTerminos(false)} onAceptar={aceptarTerminos} />}
     </div>
   );
 }
