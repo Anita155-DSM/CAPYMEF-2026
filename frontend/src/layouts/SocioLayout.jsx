@@ -1,37 +1,16 @@
-import { useEffect, useState } from "react";
-import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  FaBell,
-  FaBuilding,
-  FaCalendarCheck,
-  FaCircleUser,
-  FaGear,
-  FaHouse,
-  FaMoneyBillWave,
-  FaNewspaper,
-  FaBars,
-  FaXmark,
-  FaRightFromBracket,
-} from "react-icons/fa6";
-import logo from "../assets/img/logo.png";
+import { useCallback, useEffect, useState } from "react";
+import { Outlet, Link, useNavigate } from "react-router-dom";
+import { FaBars, FaBell, FaCircleUser } from "react-icons/fa6";
 import { obtenerPerfil } from "../services/authServices.js";
 import { useAuth } from "@/app/providers/AuthContext";
 import { useMisCuotas } from "@/features/area-socio/hooks/useMisCuotas";
 import { mayuscula } from "@/features/area-socio/utils/cuotas";
-
-const MENU = [
-  { nombre: "Inicio", icono: FaHouse, ruta: "/socios" },
-  { nombre: "Mi empresa", icono: FaBuilding, ruta: "/socios/empresa" },
-  { nombre: "Pagos", icono: FaMoneyBillWave, ruta: "/socios/pagos" },
-  { nombre: "Eventos", icono: FaCalendarCheck, ruta: "/socios/eventos" },
-  { nombre: "Noticias", icono: FaNewspaper, ruta: "/socios/noticias" },
-];
+import SidebarSocio from "./components/SidebarSocio";
 
 export default function SocioLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const { usuario, actualizarUsuario, logout } = useAuth();
   const { cuotas, errorCuotas, recargarCuotas } = useMisCuotas();
-  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   // Traemos el perfil fresco del backend y lo guardamos en el contexto
@@ -40,6 +19,9 @@ export default function SocioLayout() {
       if (resultado.exito) actualizarUsuario(resultado.data);
     });
   }, [actualizarUsuario]);
+
+  // useCallback: el sidebar lo usa en un efecto (Escape) y no queremos que se re-suscriba en cada render
+  const cerrarMenu = useCallback(() => setMenuAbierto(false), []);
 
   const salir = () => {
     logout();
@@ -51,50 +33,8 @@ export default function SocioLayout() {
   const tieneDeuda = Array.isArray(cuotas) && cuotas.some((c) => c.estado !== "pagada");
 
   return (
-    <div className="min-h-screen bg-[#eef6fb] text-navy font-sans">
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#1b527d] text-white transition-transform duration-300 lg:translate-x-0 ${menuAbierto ? "translate-x-0" : "-translate-x-full"}`}
-      >
-        <div className="flex h-20 items-center justify-between border-b border-white/10 px-3">
-          <div className="flex justify-center ml-10">
-            <Link to="/socios" aria-label="Ir al inicio del panel de socio">
-              <img src={logo} alt="logo CAPYMEF" className="w-30 opacity-90" />
-            </Link>
-          </div>
-          <button className="lg:hidden text-2xl" onClick={() => setMenuAbierto(false)} aria-label="Cerrar menú">
-            <FaXmark />
-          </button>
-        </div>
-        <nav className="space-y-2 px-3 py-7">
-          {MENU.map(({ nombre, icono: Icono, ruta }) => (
-            <Link
-              key={nombre}
-              to={ruta}
-              onClick={() => setMenuAbierto(false)}
-              className={`flex w-full items-center gap-4 border-l-4 px-4 py-3 text-left text-sm font-bold transition-colors ${pathname === ruta ? "border-[#38a4df] bg-white/20" : "border-transparent hover:bg-white/10"}`}
-            >
-              <Icono className="w-6 text-lg" />
-              {nombre}
-            </Link>
-          ))}
-        </nav>
-        <div className="absolute bottom-7 left-7 space-y-5">
-          <Link
-            to="/socios/configuracion"
-            onClick={() => setMenuAbierto(false)}
-            className={`flex items-center gap-4 text-sm font-bold hover:text-white ${pathname === "/socios/configuracion" ? "text-white" : "text-white/90"}`}
-          >
-            <FaGear className="text-xl" /> Configuración
-          </Link>
-          <button type="button" onClick={salir} className="flex items-center gap-4 text-sm font-bold text-white/90 hover:text-white">
-            <FaRightFromBracket className="text-xl" /> Cerrar sesión
-          </button>
-        </div>
-      </aside>
-
-      {menuAbierto && (
-        <button className="fixed inset-0 z-30 bg-navy/50 lg:hidden" onClick={() => setMenuAbierto(false)} aria-label="Cerrar menú" />
-      )}
+    <div className="min-h-screen bg-surface text-navy font-sans">
+      <SidebarSocio abierto={menuAbierto} onCerrar={cerrarMenu} onSalir={salir} />
 
       <div className="lg:pl-64">
         <header className="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-5 shadow-sm sm:px-8">
