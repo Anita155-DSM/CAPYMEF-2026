@@ -35,7 +35,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
               type="button"
               disabled={Boolean(procesando)}
               onClick={() => descargar(cuota)}
-              className="inline-flex items-center gap-2 border border-gray-300 bg-[#f5f9fc] px-3 py-2 text-sm font-medium hover:bg-gray-100 disabled:opacity-60"
+              className="rounded-lg inline-flex items-center gap-2 border border-gray-300 bg-[#f5f9fc] px-3 py-2 text-sm font-medium hover:bg-gray-100 disabled:opacity-60"
             >
               {procesando ? "Descargando..." : "Descargar comprobante"} <FaDownload />
             </button>
@@ -44,7 +44,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
               type="button"
               disabled={Boolean(procesando)}
               onClick={() => pagar(cuota)}
-              className="inline-flex items-center gap-2 bg-[#2693bf] px-4 py-2 text-sm font-bold text-white hover:bg-[#1b789f] disabled:opacity-60"
+              className="rounded-lg inline-flex items-center gap-2 bg-[#2693bf] px-4 py-2 text-sm font-bold text-white hover:bg-[#1b789f] disabled:opacity-60"
             >
               Pagar cuota <FaCreditCard />
             </button>

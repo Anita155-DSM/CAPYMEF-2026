@@ -7,6 +7,9 @@ export const obtenerEventosSocios = () => api("/eventos/socios");
 
 export const obtenerEventosPublicos = () => api("/eventos/publicos");
 
+// Detalle de un evento: incluye totalInscriptos y cupoDisponible (calculados en el backend)
+export const obtenerDetalleEvento = (id) => api(`/eventos/${encodeURIComponent(id)}`);
+
 export const inscribirseEvento = (id) =>
   api(`/eventos/${id}/inscribirse`, { method: "POST" });
 
