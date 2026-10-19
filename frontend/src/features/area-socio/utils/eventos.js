@@ -15,11 +15,20 @@ export function linkReunion(evento) {
 // Datos de un evento para mostrar en el Inicio
 // ---------------------------------------------------------------------------
 
+// La fecha del evento viene como "2026-10-23" (por las dudas se descarta cualquier hora que traiga pegada)
+const dia = (e) => String(e.fecha).slice(0, 10);
+
 /** Momento de inicio del evento (sin hora = 00:00) */
-export const inicioDelEvento = (e) => dayjs(`${e.fecha}T${e.horaInicio || "00:00"}`);
+export const inicioDelEvento = (e) => dayjs(`${dia(e)}T${e.horaInicio || "00:00"}`);
 
 /** Momento en que termina: hora de fin, si no la de inicio y, si tampoco hay hora, el final del día. */
-export const finDelEvento = (e) => dayjs(`${e.fecha}T${e.horaFin || e.horaInicio || "23:59"}`);
+export const finDelEvento = (e) => dayjs(`${dia(e)}T${e.horaFin || e.horaInicio || "23:59"}`);
+
+/**
+ * ¿Ya terminó? Cuenta tanto el estado "finalizado" como la fecha: el backend NO pasa los eventos a
+ * "finalizado" solo, así que un evento pasado puede seguir figurando como "programado".
+ */
+export const yaTermino = (e) => e.estado === "finalizado" || finDelEvento(e).isBefore(dayjs());
 
 /** "18:00:00" → "18:00" */
 const hhmm = (hora) => String(hora || "").slice(0, 5);
@@ -39,9 +48,13 @@ function urlHttps(texto) {
   }
 }
 
-/** Lugar listo para mostrar: si es un link se muestra con un texto claro en vez de la URL cruda. */
+/**
+ * Lugar listo para mostrar. Si es un link se muestra con un texto claro en vez de la URL cruda.
+ * El link de una reunión virtual solo se revela a quien ya está inscripto (misma regla que el modal del evento).
+ */
 export function describirLugar(evento) {
   const virtual = evento?.modalidad === "virtual";
+  if (virtual && !evento.yaInscripto) return { texto: "Virtual (el enlace se habilita al inscribirte)", href: null };
   const href = evento?.lugar ? urlHttps(evento.lugar) : null;
   if (href) return { texto: virtual ? "Unirme a la reunión" : "Ver ubicación en el mapa", href };
   return { texto: evento?.lugar || (virtual ? "Reunión virtual" : "Lugar a confirmar"), href: null };

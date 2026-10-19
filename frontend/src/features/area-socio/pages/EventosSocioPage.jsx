@@ -8,12 +8,12 @@ export default function EventosSocioPage() {
     eventos, cargando, error, procesando,
     mesVisible, setMesVisible,
     seleccionado, setSeleccionado,
-    proximoEvento, otrosDelDia,
+    proximoEvento, otrosDelDia, cupoDisponible,
     gestionarInscripcion, descargarCertificado,
   } = useEventosSocio();
 
   return (
-    <section className="min-h-[calc(100vh-9rem)] bg-[#edf7fd] px-1 py-2 sm:px-3 sm:py-5">
+    <section className="min-h-[calc(100vh-9rem)] px-1 py-2 sm:px-3 sm:py-5">
       <div className="mb-5 flex flex-col lg:flex-row justify-between items-start gap-4">
         <div>
           <h1 className="text-2xl font-normal uppercase text-[#073d6f] sm:text-[25px]">Próximos eventos y capacitaciones</h1>
@@ -35,6 +35,7 @@ export default function EventosSocioPage() {
           evento={seleccionado}
           otros={otrosDelDia}
           procesando={procesando}
+          cupoDisponible={cupoDisponible}
           onInscripcion={gestionarInscripcion}
           onCertificado={descargarCertificado}
           onSeleccionar={setSeleccionado}
