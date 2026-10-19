@@ -1,6 +1,8 @@
 import { FaCalendarCheck, FaClock, FaDownload, FaLocationDot, FaUsers, FaXmark } from "react-icons/fa6";
 import dayjs from "@/shared/utils/fechas";
 import { linkReunion } from "../utils/eventos";
+import { textoLugar } from "../utils/ubicacion";
+import MapaEvento from "./MapaEvento";
 
 const icono = "mr-2 inline text-[#0875b1]";
 const btnPrincipal = "inline-flex items-center gap-2 bg-sidebar px-4 py-2 text-sm font-bold text-white hover:bg-[#164568] disabled:opacity-60 transition-colors";
@@ -11,7 +13,7 @@ function Lugar({ evento }) {
   if (evento.modalidad === "virtual") {
     return evento.yaInscripto ? "Virtual (el enlace se informará por correo)" : "Virtual (el enlace se habilita al inscribirte)";
   }
-  return evento.lugar || "Lugar a confirmar";
+  return textoLugar(evento);
 }
 
 /** Renderizar solo con evento: {evento && <EventoDetalleModal … />} */
@@ -39,10 +41,11 @@ export default function EventoDetalleModal({ evento, otros = [], procesando, onI
         <div className="mt-5 space-y-3 border-y border-gray-200 py-4 text-sm text-gray-700">
           <p><FaCalendarCheck className={icono} />{dayjs(evento.fecha).format("dddd D [de] MMMM, YYYY")}</p>
           <p><FaClock className={icono} />{evento.horaInicio || "Horario a confirmar"}{evento.horaFin ? ` a ${evento.horaFin}` : ""}</p>
-          <p className="break-words"><FaLocationDot className={icono} /><Lugar evento={evento} /></p>
           <p><FaUsers className={icono} />{evento.cupoMaximo ? `${evento.cupoMaximo} cupos` : "Cupo abierto"}</p>
           {evento.yaInscripto && <p className="font-bold text-[#247c5c]">Ya estás inscripto a este evento.</p>}
         </div>
+
+        <MapaEvento evento={evento} />
 
         {otros.length > 0 && (
           <div className="mt-4">
