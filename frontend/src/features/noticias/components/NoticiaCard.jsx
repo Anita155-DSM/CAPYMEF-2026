@@ -20,10 +20,10 @@ export default function NoticiaCard({ titulo, subtitulo, imagenUrl, fecha, categ
             <img src={logo} alt="CAPYMEF" className="max-h-20 max-w-[70%] object-contain opacity-80 drop-shadow-md" />
           </div>
         )}
-        {estiloNoticias && (
+        {estiloNoticias && categoria && (
           <span className="absolute top-3 right-3 bg-white/95 px-2.5 py-1 rounded-full text-[11px] font-bold text-primary flex items-center gap-1 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-primary" aria-hidden="true"></span>
-            {categoria || "Institucional"}
+            {categoria}
           </span>
         )}
       </div>
@@ -33,7 +33,7 @@ export default function NoticiaCard({ titulo, subtitulo, imagenUrl, fecha, categ
         <div className="text-[11px] font-semibold text-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
           {estiloNoticias && <FaCalendarDays className="text-primary" aria-hidden="true" />}
           <span>{fecha ? new Date(fecha).toLocaleDateString('es-AR') : ""}</span>
-          {!estiloNoticias && <><span className="w-1 h-1 rounded-full bg-primary" aria-hidden="true"></span><span>{categoria || "Institucional"}</span></>}
+          {!estiloNoticias && categoria && <><span className="w-1 h-1 rounded-full bg-primary" aria-hidden="true"></span><span>{categoria}</span></>}
         </div>
 
         {/* TÍTULO */}

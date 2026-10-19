@@ -33,11 +33,3 @@ export function mapaDelEvento(evento) {
     enlace: `https://www.google.com/maps/search/?api=1&query=${consulta}`,
   };
 }
-
-/** Texto corto para tarjetas: nunca muestra la URL cruda del mapa. */
-export function textoLugar(evento) {
-  if (evento?.modalidad === "virtual") return "Virtual";
-  const lugar = (evento?.lugar || "").trim();
-  if (!lugar) return "Lugar a confirmar";
-  return esUrl(lugar) ? "Ver ubicación en el mapa" : lugar;
-}

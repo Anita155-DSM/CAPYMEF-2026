@@ -115,10 +115,12 @@ export default function NoticiasPublicas() {
                 >
                   {/* Imagen y Etiqueta */}
                   <div className="h-56 relative overflow-hidden bg-gray-100">
-                    <span className="absolute top-4 left-4 bg-surface text-[#1b4f7a] text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                      {noticia.categoria || 'Institucional'}
-                    </span>
+                    {noticia.categoria && (
+                      <span className="absolute top-4 left-4 bg-surface text-[#1b4f7a] text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        {noticia.categoria}
+                      </span>
+                    )}
                    <img
                       src={urlImagen(noticia.imagenUrl) ?? logo}
                       alt={noticia.titulo}

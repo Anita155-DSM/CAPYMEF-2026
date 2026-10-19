@@ -1,9 +1,10 @@
 import { FaCalendarCheck, FaClock, FaLocationDot } from "react-icons/fa6";
 import dayjs from "@/shared/utils/fechas";
-import { textoLugar } from "../utils/ubicacion";
+import { describirLugar, textoHorario } from "../utils/eventos";
 
 /** Tarjeta del próximo evento. Al tocarla se abre el detalle (con el mapa). */
 export default function ProximoEventoCard({ evento, onClick }) {
+  const lugar = describirLugar(evento);
   return (
     <button
       type="button"
@@ -15,11 +16,10 @@ export default function ProximoEventoCard({ evento, onClick }) {
       <div className="mt-2 text-xs text-gray-600 space-y-1.5 font-medium">
         <p><FaCalendarCheck className="inline mr-2 text-[#0875b1]" /> {dayjs(evento.fecha).format("D [de] MMMM, YYYY")}</p>
         <p>
-          <FaClock className="inline mr-2 text-[#0875b1]" /> {evento.horaInicio || "A confirmar"}
-          {evento.horaFin ? ` a ${evento.horaFin}` : ""}
+          <FaClock className="inline mr-2 text-[#0875b1]" /> {textoHorario(evento)}
         </p>
-        <p className="truncate">
-          <FaLocationDot className="inline mr-2 text-[#0875b1]" /> {textoLugar(evento)}
+        <p className="truncate" title={lugar.texto}>
+          <FaLocationDot className="inline mr-2 text-[#0875b1]" /> {lugar.texto}
         </p>
       </div>
     </button>

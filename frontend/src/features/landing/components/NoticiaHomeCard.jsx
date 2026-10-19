@@ -1,4 +1,6 @@
+import logo from "@/assets/img/logo.png";
 import { formatearFecha } from "@/shared/utils/fechas";
+import { urlImagen } from "@/shared/utils/imagenes";
 
 const IconoCalendario = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -7,21 +9,41 @@ const IconoCalendario = ({ className }) => (
 );
 
 export default function NoticiaHomeCard({ noticia, onClick }) {
+  const imagen = urlImagen(noticia.imagenUrl);
+
   return (
     <article
       onClick={onClick}
-      className="bg-white rounded-2xl overflow-hidden flex flex-col shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer group"
+      // Accesible con teclado: Enter o espacio abren la noticia, igual que un clic
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Leer la noticia: ${noticia.titulo}`}
+      className="bg-white rounded-2xl overflow-hidden flex flex-col shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar"
     >
       <div className="h-56 relative overflow-hidden bg-gray-100">
-        <span className="absolute top-4 left-4 bg-surface text-sidebar text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
-          <IconoCalendario className="w-3.5 h-3.5" />
-          {noticia.categoria || "Institucional"}
-        </span>
-        <img
-          src={noticia.imagenUrl || "https://via.placeholder.com/600x400?text=Sin+Imagen"}
-          alt={noticia.titulo}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {noticia.categoria && (
+          <span className="absolute top-4 left-4 bg-surface text-sidebar text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
+            <IconoCalendario className="w-3.5 h-3.5" />
+            {noticia.categoria}
+          </span>
+        )}
+        {imagen ? (
+          <img
+            src={imagen}
+            alt={noticia.titulo}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-navy to-primary flex items-center justify-center p-6">
+            <img src={logo} alt="CAPYMEF" className="max-h-24 max-w-[60%] object-contain opacity-80 drop-shadow-md" />
+          </div>
+        )}
       </div>
 
       <div className="p-6 md:p-8 flex flex-col flex-1 bg-white">
