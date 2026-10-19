@@ -19,7 +19,7 @@ export default function EventosSocioPage() {
           <h1 className="text-2xl font-normal uppercase text-[#073d6f] sm:text-[25px]">Próximos eventos y capacitaciones</h1>
           <p className="mt-1 text-sm text-[#6b7884]">Elegí un día en el calendario para ver el evento programado para esa fecha.</p>
         </div>
-        {proximoEvento && <ProximoEventoCard evento={proximoEvento} />}
+        {proximoEvento && <ProximoEventoCard evento={proximoEvento} onClick={() => setSeleccionado(proximoEvento)} />}
       </div>
 
       {error && <div className="mb-4 border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}

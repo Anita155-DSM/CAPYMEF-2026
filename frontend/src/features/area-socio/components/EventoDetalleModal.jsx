@@ -4,6 +4,7 @@ import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
 import dayjs from "@/shared/utils/fechas";
 import { urlImagen } from "@/shared/utils/imagenes";
 import { describirLugar, linkReunion, textoCupos, textoHorario, yaTermino } from "../utils/eventos";
+import MapaEvento from "./MapaEvento";
 
 const icono = "mr-2 inline text-[#0875b1]";
 const btnPrincipal = "inline-flex items-center gap-2 rounded-lg bg-sidebar px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#164568] disabled:cursor-not-allowed disabled:opacity-60";
@@ -81,6 +82,8 @@ export default function EventoDetalleModal({ evento, otros = [], procesando, cup
             <p className="inline-flex items-center gap-2 font-bold text-[#247c5c]"><FaCircleCheck /> Ya estás inscripto a este evento.</p>
           )}
         </div>
+
+        <MapaEvento evento={evento} />
 
         {otros.length > 0 && (
           <div className="mt-4">
