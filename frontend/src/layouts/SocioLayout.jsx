@@ -56,7 +56,7 @@ export default function SocioLayout() {
               <p className="text-sm font-bold text-navy">{nombreEmpresa}</p>
               <p className="text-xs text-gray-500">{categoria}</p>
             </div>
-            <Link to="/socios/configuracion" aria-label="Mi cuenta">
+            <Link to="/profile" aria-label="Mi cuenta">
               <FaCircleUser className="text-4xl text-primary" />
             </Link>
           </div>
