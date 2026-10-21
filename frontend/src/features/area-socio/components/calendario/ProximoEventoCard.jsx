@@ -1,6 +1,6 @@
 import { FaCalendarCheck, FaClock, FaLocationDot } from "react-icons/fa6";
 import dayjs from "@/shared/utils/fechas";
-import { describirLugar, textoHorario } from "../utils/eventos";
+import { describirLugar, textoHorario } from "../../utils/eventos";
 
 /** Tarjeta del próximo evento. Al tocarla se abre el detalle (con el mapa). */
 export default function ProximoEventoCard({ evento, onClick }) {

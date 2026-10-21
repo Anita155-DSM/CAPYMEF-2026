@@ -1,5 +1,5 @@
 import { FaArrowUpRightFromSquare, FaFilePdf, FaFolderOpen } from "react-icons/fa6";
-import { esConstanciaSegura } from "../utils/empresa";
+import { esConstanciaSegura } from "../../utils/empresa";
 
 export default function TarjetaConstancia({ url, className = "" }) {
   const disponible = esConstanciaSegura(url);

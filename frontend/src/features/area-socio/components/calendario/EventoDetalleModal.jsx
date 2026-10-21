@@ -3,7 +3,7 @@ import { FaCalendarCheck, FaCircleCheck, FaClock, FaDownload, FaLocationDot, FaU
 import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
 import dayjs from "@/shared/utils/fechas";
 import { urlImagen } from "@/shared/utils/imagenes";
-import { describirLugar, linkReunion, textoCupos, textoHorario, yaTermino } from "../utils/eventos";
+import { describirLugar, linkReunion, textoCupos, textoHorario, yaTermino } from "../../utils/eventos";
 import MapaEvento from "./MapaEvento";
 
 const icono = "mr-2 inline text-[#0875b1]";

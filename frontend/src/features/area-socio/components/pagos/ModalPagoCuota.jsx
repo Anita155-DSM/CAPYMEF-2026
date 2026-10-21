@@ -3,7 +3,7 @@ import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import { FaArrowUpRightFromSquare, FaLock } from "react-icons/fa6";
 import { crearOrdenPagoCuota, irAlCheckout } from "@/services/socioServices";
 import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
-import { formatearFechaCuota, formatearMonto, formatearPeriodo } from "../utils/cuotas";
+import { formatearFechaCuota, formatearMonto, formatearPeriodo } from "../../utils/cuotas";
 
 // La public key es pública por diseño; el access token secreto vive solo en el backend.
 const PUBLIC_KEY = import.meta.env.VITE_MP_PUBLIC_KEY;

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { FaAward, FaCircleCheck, FaGears, FaLocationDot } from "react-icons/fa6";
-import { mayuscula } from "../utils/cuotas";
-import { datosAntiguedad, ESTADOS_SOCIO, iniciales } from "../utils/empresa";
+import { mayuscula } from "../../utils/cuotas";
+import { datosAntiguedad, ESTADOS_SOCIO, iniciales } from "../../utils/empresa";
 
 const chip = "inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold ring-1 ring-white/20";
 

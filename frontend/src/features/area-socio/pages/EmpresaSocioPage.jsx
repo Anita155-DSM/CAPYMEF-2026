@@ -14,11 +14,11 @@ import {
   FaPenToSquare,
   FaPhone,
 } from "react-icons/fa6";
-import ContactoModal from "../components/ContactoModal";
-import EncabezadoEmpresa from "../components/EncabezadoEmpresa";
-import SolicitudModificacionModal from "../components/SolicitudModificacionModal";
-import TarjetaConstancia from "../components/TarjetaConstancia";
-import TarjetaFicha from "../components/TarjetaFicha";
+import ContactoModal from "../components/empresa/ContactoModal";
+import EncabezadoEmpresa from "../components/empresa/EncabezadoEmpresa";
+import SolicitudModificacionModal from "../components/empresa/SolicitudModificacionModal";
+import TarjetaConstancia from "../components/empresa/TarjetaConstancia";
+import TarjetaFicha from "../components/empresa/TarjetaFicha";
 import { mayuscula } from "../utils/cuotas";
 import { etiquetaTamano } from "../utils/empresa";
 

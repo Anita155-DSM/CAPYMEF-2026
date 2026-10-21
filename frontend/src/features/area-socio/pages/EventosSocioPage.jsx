@@ -1,7 +1,7 @@
 import { useEventosSocio } from "../hooks/useEventosSocio";
-import CalendarioEventos from "../components/CalendarioEventos";
-import ProximoEventoCard from "../components/ProximoEventoCard";
-import EventoDetalleModal from "../components/EventoDetalleModal";
+import CalendarioEventos from "../components/calendario/CalendarioEventos";
+import ProximoEventoCard from "../components/calendario/ProximoEventoCard";
+import EventoDetalleModal from "../components/calendario/EventoDetalleModal";
 
 export default function EventosSocioPage() {
   const {

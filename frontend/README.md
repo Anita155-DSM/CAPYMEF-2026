@@ -132,18 +132,55 @@ frontend/
 | `hooks/useUsuarios.js` | Carga la lista de usuarios. |
 | `utils/exportarPadron.js` | Genera el archivo Excel (carga `xlsx` solo al exportar). |
 
-**`area-socio/`** · área privada del socio (`/socios`)
+**`area-socio/`** · área privada del socio (`/socios`). Los componentes están agrupados en subcarpetas por tema.
+
+*Páginas (`pages/`)*
 | Archivo | Qué hace |
 |---|---|
-| `pages/InicioSocioPage.jsx` | Resumen: próximo evento, últimas noticias y pagos. |
-| `pages/EventosSocioPage.jsx` | Calendario de eventos e inscripción. |
-| `pages/NoticiasSocioPage.jsx` | Noticias para socios. |
-| `pages/PagosSocioPage.jsx` | Pagos (en construcción). |
-| `pages/EmpresaSocioPage.jsx` | Datos de la empresa (en construcción). |
-| `components/CalendarioEventos.jsx` | Grilla mensual con los eventos. |
-| `components/ProximoEventoCard.jsx` | Tarjeta del próximo evento. |
-| `components/EventoDetalleModal.jsx` | Detalle de un evento y botón de inscripción. |
-| `hooks/useEventosSocio.js` | Carga de eventos, mes visible e inscripción. |
+| `InicioSocioPage.jsx` | Resumen: cuota actual, estado de cuenta, próximo evento y novedades. |
+| `EventosSocioPage.jsx` | Calendario de eventos, detalle e inscripción. |
+| `NoticiasSocioPage.jsx` | Noticias para socios. |
+| `PagosSocioPage.jsx` | Cuotas, pago online con Mercado Pago y comprobantes. |
+| `EmpresaSocioPage.jsx` | Ficha de la empresa y edición del contacto. |
+| `ConfiguracionSocioPage.jsx` | Datos de la cuenta, cambio de contraseña y cierre de sesión. |
+| `ResultadoPagoPage.jsx` | Pantalla a la que vuelve Mercado Pago (exitoso, pendiente o fallido). |
+
+*Componentes (`components/`)*
+| Carpeta / archivo | Qué hace |
+|---|---|
+| `calendario/CalendarioEventos.jsx` | Grilla mensual con los eventos. |
+| `calendario/ProximoEventoCard.jsx` | Tarjeta del próximo evento (abre el detalle). |
+| `calendario/EventoDetalleModal.jsx` | Detalle del evento, inscripción y certificado. |
+| `calendario/MapaEvento.jsx` | Mapa embebido con la ubicación y "Cómo llegar". |
+| `pagos/TarjetaCuota.jsx` | Cuota actual con botón de pagar o descargar comprobante. |
+| `pagos/TablaCuotas.jsx` | Historial de cuotas. |
+| `pagos/EstadoCuenta.jsx` | Últimas tres cuotas (Inicio). |
+| `pagos/ModalPagoCuota.jsx` | Ventana de pago con Mercado Pago. |
+| `pagos/ModalPagoCuotaLazy.jsx` | Carga el modal de pago recién al usarlo. |
+| `pagos/AvisoCuotasNoDisponibles.jsx` | Aviso cuando el backend no expone las cuotas. |
+| `empresa/EncabezadoEmpresa.jsx` | Encabezado de la ficha de empresa. |
+| `empresa/TarjetaFicha.jsx` | Tarjeta con datos de la empresa. |
+| `empresa/TarjetaConstancia.jsx` | Constancia cargada por el socio. |
+| `empresa/DatoFicha.jsx` | Fila ícono + etiqueta + valor (también en Configuración). |
+| `empresa/ContactoModal.jsx` | Edita teléfono y localidad. |
+| `empresa/SolicitudModificacionModal.jsx` | Pedido de cambio de datos institucionales por correo. |
+| `inicio/TarjetaProximoEvento.jsx` | Próximo evento del Inicio. |
+| `inicio/TarjetaNovedades.jsx` | Últimas noticias del Inicio. |
+
+*Hooks (`hooks/`) y utilidades (`utils/`)*
+| Archivo | Qué hace |
+|---|---|
+| `hooks/useEventosSocio.js` | Eventos, mes visible, inscripción y certificado. |
+| `hooks/useMisCuotas.js` | Carga las cuotas del socio. |
+| `hooks/useAccionesCuota.js` | Pagar y descargar comprobante. |
+| `hooks/useNovedadesInicio.js` | Próximo evento y noticias del Inicio. |
+| `utils/cuotas.js` | Formato de períodos, montos y estados de cuota. |
+| `utils/eventos.js` | Horarios, cupos, lugar y link de reunión de un evento. |
+| `utils/ubicacion.js` | Arma el mapa embebido desde `evento.lugar`. |
+| `utils/empresa.js` | Datos de la empresa para mostrar. |
+| `utils/contacto.js` | Validación de teléfono y localidad. |
+
+El menú lateral del socio está en `layouts/components/SidebarSocio.jsx`.
 
 ### `shared/` · reutilizable
 | Archivo | Qué hace |

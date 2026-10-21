@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { FaArrowsRotate, FaCircleInfo } from "react-icons/fa6";
-import AvisoCuotasNoDisponibles from "../components/AvisoCuotasNoDisponibles";
-import ModalPagoCuotaLazy from "../components/ModalPagoCuotaLazy";
-import TablaCuotas from "../components/TablaCuotas";
-import TarjetaCuota from "../components/TarjetaCuota";
+import AvisoCuotasNoDisponibles from "../components/pagos/AvisoCuotasNoDisponibles";
+import ModalPagoCuotaLazy from "../components/pagos/ModalPagoCuotaLazy";
+import TablaCuotas from "../components/pagos/TablaCuotas";
+import TarjetaCuota from "../components/pagos/TarjetaCuota";
 import { useAccionesCuota } from "../hooks/useAccionesCuota";
 import { elegirCuotaActual, formatearMonto, ordenarPorPeriodo } from "../utils/cuotas";
 

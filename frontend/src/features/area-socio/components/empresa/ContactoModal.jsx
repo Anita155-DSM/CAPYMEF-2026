@@ -5,7 +5,7 @@ import Campo from "@/shared/ui/Campo";
 import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
 import { btnCancelarClase, btnGuardarClase, inputClase } from "@/shared/ui/estilos";
 import { actualizarMisDatosContacto } from "@/services/socioServices";
-import { validarContacto } from "../utils/contacto";
+import { validarContacto } from "../../utils/contacto";
 
 /** Edita teléfono y localidad. Renderizar solo cuando está abierto: {abierto && <ContactoModal … />} */
 export default function ContactoModal({ usuario, onGuardado, onClose }) {

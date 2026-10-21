@@ -6,7 +6,7 @@ import {
   formatearMonto,
   formatearPeriodo,
   ordenarPorPeriodo,
-} from "../utils/cuotas";
+} from "../../utils/cuotas";
 
 /** Últimas tres cuotas (tarjeta del Inicio). */
 export default function EstadoCuenta({ cuotas }) {
