@@ -1,4 +1,4 @@
-import Loading from "../../Components/Loading";
+import Loading from "@/shared/ui/Loading";
 
 export default function FinanzasAdmin() {
     return <Loading />

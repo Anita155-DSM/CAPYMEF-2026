@@ -6,7 +6,13 @@ dotenv.config();
 // para poder cambiar de base sin tocar el código.
 const usarSSL = process.env.DB_SSL === 'true';
 
-export const sequelize = new Sequelize(
+// En los tests (Vitest pone NODE_ENV='test') se usa una base SQLite en memoria: nunca se toca Neon
+// y cada corrida arranca con la base vacía.
+const esTest = process.env.NODE_ENV === 'test';
+
+export const sequelize = esTest
+  ? new Sequelize({ dialect: 'sqlite', storage: ':memory:', logging: false })
+  : new Sequelize(
   process.env.DB_DATABASE,
   process.env.DB_USER,
   process.env.DB_PASSWORD,

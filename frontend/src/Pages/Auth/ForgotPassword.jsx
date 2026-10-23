@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { recuperarPassword } from "@/services/authServices";
 import { FiArrowLeft, FiArrowRight, FiLock, FiMail, FiShield } from "react-icons/fi";
-import Logo from "../../assets/img/Logo.png";
+import logo from "../../assets/img/logo.png";
 
 export default function ForgotPassword() {
   const { register, handleSubmit, reset } = useForm();
@@ -13,34 +14,15 @@ export default function ForgotPassword() {
     setEnviando(true);
     setMensaje(null);
 
-    try {
-      const respuesta = await fetch(`${import.meta.env.VITE_API_URL_AUTH}/recuperar-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: data.email }),
-      });
+    const resultado = await recuperarPassword(data.email);
 
-      const resultado = await respuesta.json();
-
-      // El backend siempre responde con un mensaje genérico (exista o no el email),
-      // así que mostramos ese mismo mensaje sin importar si el usuario existe.
-      setMensaje({
-        tipo: resultado.exito ? "exito" : "error",
-        texto: resultado.mensaje || "Ocurrió un error. Intentá de nuevo más tarde.",
-      });
-
-      if (resultado.exito) {
-        reset();
-      }
-    } catch (error) {
-      console.error("Error al solicitar recuperación de contraseña:", error);
-      setMensaje({
-        tipo: "error",
-        texto: "No se pudo conectar con el servidor. Intentá de nuevo más tarde.",
-      });
-    } finally {
-      setEnviando(false);
-    }
+    // El backend responde con un mensaje genérico exista o no el email
+    setMensaje({
+      tipo: resultado.exito ? "exito" : "error",
+      texto: resultado.mensaje || "Ocurrió un error. Intentá de nuevo más tarde.",
+    });
+    if (resultado.exito) reset();
+    setEnviando(false);
   };
 
   return (
@@ -118,7 +100,7 @@ export default function ForgotPassword() {
         </div>
       </main>
       <Link to="/" className="absolute bottom-6 left-6">
-        <img src={Logo} alt="LogoCAPYMEF" className="h-16 w-auto object-contain" />
+        <img src={logo} alt="logoCAPYMEF" className="h-16 w-auto object-contain" />
       </Link>
     </div>
   );

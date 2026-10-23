@@ -1,5 +1,5 @@
 import { Toaster } from "sonner"
-import AppRoutes from "./Routes/AppRoutes"
+import AppRoutes from "@/app/router/AppRoutes"
 
 export default function App() {
   return (
