@@ -19,9 +19,11 @@ export default function NoticiasPublicas() {
 
   const { estaLogueado } = useAuth();
   const totalPaginas = Math.max(1, Math.ceil(noticias.length / NOTICIAS_POR_PAGINA));
+  // Página derivada: si la lista se achica, nunca nos pasamos del total (sin efecto extra).
+  const pagina = Math.min(paginaActual, totalPaginas);
   const noticiasVisibles = noticias.slice(
-    (paginaActual - 1) * NOTICIAS_POR_PAGINA,
-    paginaActual * NOTICIAS_POR_PAGINA
+    (pagina - 1) * NOTICIAS_POR_PAGINA,
+    pagina * NOTICIAS_POR_PAGINA
   );
 
   useEffect(() => {
@@ -62,11 +64,7 @@ export default function NoticiasPublicas() {
     elementos.forEach((elemento) => observer.observe(elemento));
 
     return () => observer.disconnect();
-  }, [cargando, noticias, paginaActual]);
-
-  useEffect(() => {
-    if (paginaActual > totalPaginas) setPaginaActual(totalPaginas);
-  }, [paginaActual, totalPaginas]);
+  }, [cargando, noticias, pagina]);
 
   if (cargando) {
     return (
@@ -159,19 +157,19 @@ export default function NoticiasPublicas() {
             <nav className="mt-12 flex items-center justify-center gap-3" aria-label="Paginación de noticias">
               <button
                 type="button"
-                onClick={() => setPaginaActual((pagina) => Math.max(1, pagina - 1))}
-                disabled={paginaActual === 1}
+                onClick={() => setPaginaActual(Math.max(1, pagina - 1))}
+                disabled={pagina === 1}
                 className="rounded-lg bg-surface px-4 py-2 text-sm font-bold text-[#1b4f7a] transition-colors hover:bg-[#1b4f7a] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-surface disabled:hover:text-[#1b4f7a]"
               >
                 Anterior
               </button>
               <span className="rounded-lg bg-surface px-4 py-2 text-sm font-bold text-[#1b4f7a]">
-                Página {paginaActual} de {totalPaginas}
+                Página {pagina} de {totalPaginas}
               </span>
               <button
                 type="button"
-                onClick={() => setPaginaActual((pagina) => Math.min(totalPaginas, pagina + 1))}
-                disabled={paginaActual === totalPaginas}
+                onClick={() => setPaginaActual(Math.min(totalPaginas, pagina + 1))}
+                disabled={pagina === totalPaginas}
                 className="rounded-lg bg-surface px-4 py-2 text-sm font-bold text-[#1b4f7a] transition-colors hover:bg-[#1b4f7a] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-surface disabled:hover:text-[#1b4f7a]"
               >
                 Siguiente

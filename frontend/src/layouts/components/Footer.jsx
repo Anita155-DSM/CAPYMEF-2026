@@ -1,4 +1,3 @@
-import logo from "@/assets/img/logo.png"
 import { FaPhone, FaFacebook, FaXTwitter } from "react-icons/fa6"
 import { AiFillHome } from "react-icons/ai"
 import { MdEmail } from "react-icons/md"

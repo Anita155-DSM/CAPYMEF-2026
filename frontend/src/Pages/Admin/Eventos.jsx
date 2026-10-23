@@ -45,7 +45,7 @@ const CeldaDia = ({ dia, eventoDelDia, esHoy, esSeleccionado, alSeleccionar }) =
 
 // 3. COMPONENTE PRINCIPAL (¡Ahora es cortísimo!)
 export default function EventosAdmin() {
-    const [fechaVisible, setFechaVisible] = useState(dayjs());
+    const [fechaVisible] = useState(dayjs());
     const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
     const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
     const [modalAbierto, setModalAbierto] = useState(false);
@@ -57,7 +57,13 @@ export default function EventosAdmin() {
         if (result.exito) setEventos(result.data);
     };
 
-    useEffect(() => { cargarEventos(); }, []);
+    useEffect(() => {
+        let activo = true;
+        obtenerEventosSocios().then((result) => {
+            if (activo && result.exito) setEventos(result.data);
+        });
+        return () => { activo = false; };
+    }, []);
 
     const hoy = dayjs();
     const celdasCalendario = [

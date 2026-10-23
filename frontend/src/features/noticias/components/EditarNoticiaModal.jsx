@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaRegSave, FaRegTrashAlt, FaExclamationTriangle } from "react-icons/fa";
 import { toast } from "sonner";
 import { actualizarNoticia, eliminarNoticia } from "@/services/noticiasService";
+import { useCategoriasNoticias } from "../hooks/useCategoriasNoticias";
 import logo from "@/assets/img/logo.png";
 import { urlImagen } from "@/shared/utils/imagenes";
 import ModalShell from "@/shared/ui/ModalShell";
@@ -17,14 +18,18 @@ export default function EditarNoticiaModal({ noticia, onClose, onNoticiaActualiz
     titulo: noticia.titulo || "",
     subtitulo: noticia.subtitulo || "",
     contenido: noticia.contenido || "",
-    categoria: noticia.categoria || "Institucional",
+    categoria: noticia.categoria || "",
     visibilidad: noticia.visibilidad || "todos",
     estado: noticia.estado || "publicado",
   });
   const [imagen, setImagen] = useState({ archivo: null, preview: urlImagen(noticia.imagenUrl) });
   const [guardando, setGuardando] = useState(false);
+  const { categorias, cargando: cargandoCategorias, error: errorCategorias } = useCategoriasNoticias();
   const [confirmando, setConfirmando] = useState(false);
   const [eliminando, setEliminando] = useState(false);
+
+  // Si la lista no cargó (o la categoría actual ya no existe), se conserva la actual para no perderla
+  const opcionesCategoria = form.categoria && !categorias.includes(form.categoria) ? [form.categoria, ...categorias] : categorias;
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -42,7 +47,7 @@ export default function EditarNoticiaModal({ noticia, onClose, onNoticiaActualiz
       onNoticiaActualizada?.();
       onClose();
     } else {
-      toast.error("Error: " + result.mensaje);
+      toast.error("Error: " + (result.errores?.[0]?.mensaje || result.mensaje));
     }
   };
 
@@ -95,7 +100,13 @@ export default function EditarNoticiaModal({ noticia, onClose, onNoticiaActualiz
             <textarea rows="2" name="subtitulo" value={form.subtitulo} onChange={handleChange} className={`${inputNoticia} resize-none`} />
           </Campo>
           <Campo label="Categoría *">
-            <input type="text" name="categoria" value={form.categoria} onChange={handleChange} required maxLength="100" className={inputNoticia} />
+            <select name="categoria" value={form.categoria} onChange={handleChange} required disabled={cargandoCategorias} className={`${inputNoticia} bg-white disabled:bg-gray-100`}>
+              <option value="" disabled>{cargandoCategorias ? "Cargando categorías..." : "Elegí una categoría"}</option>
+              {opcionesCategoria.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            {errorCategorias && <span className="text-red-500 text-xs">{errorCategorias}</span>}
           </Campo>
 
           <div className="grid grid-cols-2 gap-4">

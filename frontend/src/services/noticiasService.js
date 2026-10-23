@@ -5,6 +5,9 @@ export const obtenerNoticiasPublicas = () => api("/noticias/publicas");
 
 export const obtenerNoticiasSocios = () => api("/noticias/socios");
 
+// CATEGORÍAS (lista cerrada que define el backend)
+export const obtenerCategoriasNoticias = () => api("/noticias/categorias");
+
 // ADMIN
 export const obtenerTodasLasNoticiasAdmin = () => api("/noticias/admin");
 

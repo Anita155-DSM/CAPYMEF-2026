@@ -3,20 +3,20 @@ import { FaBars, FaXmark } from "react-icons/fa6";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/img/logo.png";
 
+const enlaces = [
+    { id: "inicio", nombre: "Inicio" },
+    { id: "novedades", nombre: "Novedades" },
+    { id: "nosotros", nombre: "Nosotros" },
+    { id: "beneficios", nombre: "Beneficios" },
+    { id: "informacion", nombre: "Información" },
+    { id: "vinculacion", nombre: "Vinculación" },
+    { id: "contacto", nombre: "Contacto" },
+];
+
 export default function NavbarPublico() {
     const location = useLocation();
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [seccionActiva, setSeccionActiva] = useState("inicio");
-
-    const enlaces = [
-        { id: "inicio", nombre: "Inicio" },
-        { id: "novedades", nombre: "Novedades" },
-        { id: "nosotros", nombre: "Nosotros" },
-        { id: "beneficios", nombre: "Beneficios" },
-        { id: "informacion", nombre: "Información" },
-        { id: "vinculacion", nombre: "Vinculación" },
-        { id: "contacto", nombre: "Contacto" },
-    ];
 
     useEffect(() => {
         if (location.pathname !== '/') return;

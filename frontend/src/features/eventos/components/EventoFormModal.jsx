@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { FaRegSave, FaInfoCircle, FaTrashAlt } from "react-icons/fa";
 import { toast } from "sonner";
 import dayjs from "@/shared/utils/fechas";
@@ -46,12 +46,12 @@ export default function EventoFormModal({ onClose, modo, fechaPredefinida, event
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm({ defaultValues: valoresIniciales(eventoExistente, fechaPredefinida) });
 
-  const [fecha, horaInicio, horaFin] = watch(["fecha", "horaInicio", "horaFin"]);
+  const [fecha, horaInicio, horaFin] = useWatch({ control, name: ["fecha", "horaInicio", "horaFin"] });
 
   // api() nunca lanza: se revisa result.exito (no hace falta try/catch).
   const finalizar = (result, okMsg, errMsg) => {

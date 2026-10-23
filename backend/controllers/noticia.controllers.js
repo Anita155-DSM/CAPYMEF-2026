@@ -1,6 +1,23 @@
 import { Op } from 'sequelize';
 import { Noticia } from '../models/noticia.models.js';
 import { eliminarImagenCloudinary, extraerPublicIdDeUrl } from '../services/cloudinary.service.js';
+import { CATEGORIAS_NOTICIAS, CATEGORIA_POR_DEFECTO } from '../config/categoriasNoticias.js';
+
+// Filtro opcional por categoría: ?categoria=Institucional. Si no viene, no filtra nada.
+// No se valida contra la lista: una categoría desconocida simplemente devuelve cero noticias,
+// que es lo correcto para un filtro de lectura.
+const filtroPorCategoria = (req) => {
+  const { categoria } = req.query;
+  return typeof categoria === 'string' && categoria.trim() ? { categoria: categoria.trim() } : {};
+};
+
+// ==========================================
+// 0. LISTA DE CATEGORÍAS PREDEFINIDAS (Pública)
+// ==========================================
+// El frontend la usa para armar el selector del formulario y el filtro de la página pública.
+export const obtenerCategoriasNoticias = (req, res) => {
+  res.status(200).json({ exito: true, data: CATEGORIAS_NOTICIAS });
+};
 
 // ==========================================
 // 1. OBTENER NOTICIAS PARA LA LANDING (Públicas)
@@ -10,7 +27,8 @@ export const obtenerNoticiasLanding = async (req, res) => {
     const noticias = await Noticia.findAll({
       where: {
         estado: 'publicado',
-        visibilidad: { [Op.in]: ['publico', 'todos'] }
+        visibilidad: { [Op.in]: ['publico', 'todos'] },
+        ...filtroPorCategoria(req)
       },
       order: [['fechaPublicacion', 'DESC']],
     });
@@ -30,7 +48,8 @@ export const obtenerNoticiasSocios = async (req, res) => {
     const noticias = await Noticia.findAll({
       where: {
         estado: 'publicado',
-        visibilidad: { [Op.in]: ['socios', 'todos'] }
+        visibilidad: { [Op.in]: ['socios', 'todos'] },
+        ...filtroPorCategoria(req)
       },
       order: [['fechaPublicacion', 'DESC']],
     });
@@ -48,6 +67,7 @@ export const obtenerNoticiasSocios = async (req, res) => {
 export const obtenerTodasLasNoticiasAdmin = async (req, res) => {
   try {
     const noticias = await Noticia.findAll({
+      where: filtroPorCategoria(req),
       order: [['fechaPublicacion', 'DESC']]
     });
 
@@ -100,12 +120,13 @@ export const crearNoticia = async (req, res) => {
   const imagenFile = req.file;
 
   try {
-    const { titulo, subtitulo, contenido, visibilidad, estado } = req.body;
+    const { titulo, subtitulo, contenido, categoria, visibilidad, estado } = req.body;
 
     const nuevaNoticia = await Noticia.create({
       titulo,
       subtitulo,
       contenido,
+      categoria: categoria || CATEGORIA_POR_DEFECTO, // ya validada contra la lista en el validador
       visibilidad: visibilidad || 'todos',
       estado: estado || 'publicado',
       imagenUrl: imagenFile ? imagenFile.path : null,
@@ -135,7 +156,7 @@ export const actualizarNoticia = async (req, res) => {
 
   try {
     const { id } = req.params;
-    const { titulo, subtitulo, contenido, visibilidad, estado } = req.body;
+    const { titulo, subtitulo, contenido, categoria, visibilidad, estado } = req.body;
 
     const noticia = await Noticia.findByPk(id);
 
@@ -148,6 +169,7 @@ export const actualizarNoticia = async (req, res) => {
     if (titulo) noticia.titulo = titulo;
     if (subtitulo !== undefined) noticia.subtitulo = subtitulo;
     if (contenido) noticia.contenido = contenido;
+    if (categoria) noticia.categoria = categoria; // ya validada contra la lista en el validador
     if (visibilidad) noticia.visibilidad = visibilidad;
     if (estado) noticia.estado = estado;
 

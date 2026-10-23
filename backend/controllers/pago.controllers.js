@@ -11,6 +11,7 @@ import {
   formatearMonto,
   formatearPeriodo,
 } from '../services/notificacion.service.js';
+import { evaluarCategoriaSocio } from '../services/categoria.service.js';
 
 // ==========================================
 // 1. INICIAR PAGO ONLINE (Socio logueado)
@@ -122,6 +123,10 @@ export const recibirWebhook = async (req, res) => {
 
     cuota.estado = 'pagada';
     await cuota.save();
+
+    // Si el socio estaba Adherente por mora y con este pago quedó sin deuda vencida, vuelve a Activo
+    // en el momento. Nunca lanza error: no puede romper el procesamiento del webhook.
+    await evaluarCategoriaSocio(cuota.usuario_id);
 
     // Alertas internas. Van ANTES del comprobante (que puede tardar o fallar) y no pueden
     // romper el webhook: crearNotificacion/notificarAdmins nunca lanzan error.
