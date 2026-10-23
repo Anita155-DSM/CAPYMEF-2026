@@ -113,7 +113,7 @@ app.get('/', (req, res) => {
 const startServer = async () => {
   try {
     // 1. Probar la conexión y sincronizar tablas (las crea si no existen)
-    await sequelize.sync({alter: true}); //{alter: true}
+    await sequelize.sync(); //{alter: true}
     await asegurarTarifasIniciales(); // siembra las tarifas de las categorías que todavía no tengan
     console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 
