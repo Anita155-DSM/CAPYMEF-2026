@@ -6,7 +6,8 @@ import {
   crearNoticia,
   actualizarNoticia,
   eliminarNoticia,
-  obtenerTodasLasNoticiasAdmin
+  obtenerTodasLasNoticiasAdmin,
+  obtenerCategoriasNoticias
 } from '../controllers/noticia.controllers.js';
 import { verificarToken, verificarTokenOpcional } from '../middlewares/authMiddleware.js';
 //import { uploadNoticia } from '../middlewares/multerNoticias.js';
@@ -21,6 +22,9 @@ const router = Router();
 // ==========================================
 router.get('/publicas', obtenerNoticiasLanding);
 router.get('/socios', verificarToken, obtenerNoticiasSocios);
+// Lista de categorías predefinidas, pública (la usa el filtro de la página pública y el formulario).
+// Va antes de '/:id' para que Express no la confunda con un id.
+router.get('/categorias', obtenerCategoriasNoticias);
 
 // ==========================================
 // 2. Rutas Administrativas (Siempre arriba de los :id)
