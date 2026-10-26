@@ -5,6 +5,7 @@ import { actualizarDatosSocio, darDeBajaSocio } from "@/services/adminServices";
 import ModalShell from "@/shared/ui/ModalShell";
 import ConfirmDialog from "@/shared/ui/ConfirmDialog";
 import Campo from "@/shared/ui/Campo";
+import ConstanciaSocio from "./ConstanciaSocio";
 import { inputClase, btnCancelarClase, btnGuardarClase } from "@/shared/ui/estilos";
 
 /**
@@ -63,6 +64,8 @@ export default function EditarSocioModal({ socio, onClose, onActualizado }) {
               <p><strong>Teléfono:</strong> {socio.telefono}</p>
             </div>
           </div>
+
+          <ConstanciaSocio url={socio.constanciaUrl} razonSocial={socio.razonSocial} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Campo label="Categoría">
