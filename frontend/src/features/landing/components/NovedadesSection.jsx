@@ -34,7 +34,7 @@ export default function NovedadesSection({ noticias, cargando }) {
   const [seleccionada, setSeleccionada] = useState(null);
 
   return (
-    <section id="novedades" className="w-full bg-surface px-6 sm:px-10 md:px-24 pt-20 pb-20 font-sans inicio-reveal">
+    <section id="novedades" className="w-full bg-surface px-6 sm:px-10 md:px-24 pt-20 pb-20 font-sans">
       <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between mb-16 max-w-7xl mx-auto">
         <h2 className="text-3xl md:text-4xl font-extrabold text-navy-soft tracking-tight font-sans">
           Novedades de la Cámara

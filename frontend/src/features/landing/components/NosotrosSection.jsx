@@ -4,7 +4,7 @@ import TarjetaAutoridad from "./TarjetaAutoridad";
 
 export default function NosotrosSection() {
   return (
-    <section id="nosotros" className="w-full bg-linear-to-r from-[#E5F1F8] to-surface px-6 sm:px-10 md:px-24 py-20 font-sans inicio-reveal">
+    <section id="nosotros" className="w-full bg-linear-to-r from-[#E5F1F8] to-surface px-6 sm:px-10 md:px-24 py-20 font-sans">
       <div className="max-w-7xl mx-auto flex flex-col gap-20">
         <div className="w-full flex flex-col items-start">
           <h2 className="text-3xl md:text-[40px] font-extrabold text-navy-soft mb-8 leading-tight tracking-tight">

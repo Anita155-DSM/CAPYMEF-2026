@@ -2,7 +2,7 @@ import { documentosInstitucionales } from "../data/documentos";
 
 export default function InformacionSection() {
   return (
-    <section id="informacion" className="w-full bg-linear-to-r from-[#E5F1F8] to-surface px-6 md:px-24 py-20 font-sans inicio-reveal">
+    <section id="informacion" className="w-full bg-linear-to-r from-[#E5F1F8] to-surface px-6 md:px-24 py-20 font-sans">
       <div className="flex flex-col items-center mb-16 text-center">
         <h2 className="text-3xl md:text-[40px] font-extrabold text-navy-soft tracking-tight">Información institucional</h2>
         <p className="mt-4 text-lg text-gray-600 max-w-2xl">

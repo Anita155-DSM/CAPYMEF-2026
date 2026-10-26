@@ -52,10 +52,21 @@ export default function NavbarPublico() {
             setSeccionActiva(actual);
         };
 
-        window.addEventListener("scroll", manejarScroll);
+        // Un solo cálculo por cuadro de pantalla (evita medir el DOM en cada evento de scroll)
+        let pendiente = false;
+        const alScrollear = () => {
+            if (pendiente) return;
+            pendiente = true;
+            requestAnimationFrame(() => {
+                pendiente = false;
+                manejarScroll();
+            });
+        };
+
+        window.addEventListener("scroll", alScrollear, { passive: true });
         manejarScroll();
 
-        return () => window.removeEventListener("scroll", manejarScroll);
+        return () => window.removeEventListener("scroll", alScrollear);
     }, [location.pathname]);
 
     const hacerScrollSuave = (e, id) => {
