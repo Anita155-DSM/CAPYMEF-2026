@@ -15,9 +15,16 @@ export function useUsuarios(filtro) {
     setCargando(false);
   }, [filtro]);
 
+  // Carga inicial (y cuando cambia `filtro`). `recargar` queda para refrescos manuales.
   useEffect(() => {
-    recargar();
-  }, [recargar]);
+    let activo = true;
+    obtenerTodosLosUsuarios().then((result) => {
+      if (!activo) return;
+      if (result.exito) setUsuarios(result.data.filter(filtro));
+      setCargando(false);
+    });
+    return () => { activo = false; };
+  }, [filtro]);
 
   return { usuarios, setUsuarios, cargando, recargar };
 }

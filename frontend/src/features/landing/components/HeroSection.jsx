@@ -9,7 +9,7 @@ export default function HeroSection() {
 
   return (
     <section id="inicio" className="w-full font-sans">
-      <div className="relative flex min-h-screen w-full flex-col items-start justify-center overflow-hidden bg-gray-900 inicio-reveal inicio-reveal-hero">
+      <div className="relative flex min-h-screen w-full flex-col items-start justify-center overflow-hidden bg-gray-900">
         {slidesHero.map((slide, i) => (
           <div
             key={slide.src}

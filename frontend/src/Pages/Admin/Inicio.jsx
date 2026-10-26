@@ -57,15 +57,15 @@ export default function Inicio() {
 
   return (
     <>
-      <div className="p-10 flex flex-col items-center">
+      <div className="p-4 sm:p-6 lg:p-10 flex flex-col items-center">
         {/* TARJETA PRINCIPAL: SOCIOS */}
-        <div className="bg-[#2673A6] w-full max-w-4xl rounded-[2rem] p-8 text-white shadow-md">
+        <div className="bg-[#2673A6] w-full max-w-4xl rounded-[2rem] p-5 sm:p-8 text-white shadow-md">
           <div className="text-center mb-6">
             <h2 className="text-lg font-bold tracking-widest mb-1 uppercase">
               SOCIOS
             </h2>
             {/* 3. Reemplazamos el número duro por nuestro estado dinámico */}
-            <p className="text-6xl font-bold">{conteoSocios.total}</p>
+            <p className="text-5xl sm:text-6xl font-bold">{conteoSocios.total}</p>
           </div>
 
           <div className="flex justify-around items-center border-t border-white/30 pt-6 relative">
@@ -73,7 +73,7 @@ export default function Inicio() {
               <h3 className="text-xs font-bold tracking-widest mb-1 uppercase">
                 ACTIVOS
               </h3>
-              <p className="text-4xl font-bold">{conteoSocios.activos}</p>
+              <p className="text-3xl sm:text-4xl font-bold">{conteoSocios.activos}</p>
             </div>
             <div className="absolute left-1/3 h-16 w-px bg-white/30"></div>
 
@@ -81,7 +81,7 @@ export default function Inicio() {
               <h3 className="text-xs font-bold tracking-widest mb-1 uppercase">
                 PADRINOS
               </h3>
-              <p className="text-4xl font-bold">{conteoSocios.padrinos}</p>
+              <p className="text-3xl sm:text-4xl font-bold">{conteoSocios.padrinos}</p>
             </div>
             <div className="absolute right-1/3 h-16 w-px bg-white/30"></div>
 
@@ -89,13 +89,13 @@ export default function Inicio() {
               <h3 className="text-xs font-bold tracking-widest mb-1 uppercase">
                 ADHERENTES
               </h3>
-              <p className="text-4xl font-bold">{conteoSocios.adherentes}</p>
+              <p className="text-3xl sm:text-4xl font-bold">{conteoSocios.adherentes}</p>
             </div>
           </div>
         </div>
 
         {/* 3 TARJETAS INFERIORES (Aún hardcodeadas, se conectarán en la Épica 2) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl mt-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8 w-full max-w-4xl mt-16">
           {/* Tarjeta 1 */}
           <div className="bg-white rounded-3xl p-6 text-center shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 relative pt-14">
             <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-[#1B4F7A] text-white p-5 rounded-full shadow-lg">

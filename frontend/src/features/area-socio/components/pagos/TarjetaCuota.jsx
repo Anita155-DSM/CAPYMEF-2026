@@ -1,6 +1,6 @@
 import { FaCreditCard, FaDownload } from "react-icons/fa6";
-import { useAccionesCuota } from "../hooks/useAccionesCuota";
-import { formatearFechaCuota, formatearMonto, formatearPeriodo } from "../utils/cuotas";
+import { useAccionesCuota } from "../../hooks/useAccionesCuota";
+import { formatearFechaCuota, formatearMonto, formatearPeriodo } from "../../utils/cuotas";
 import AvisoCuotasNoDisponibles from "./AvisoCuotasNoDisponibles";
 import ModalPagoCuotaLazy from "./ModalPagoCuotaLazy";
 

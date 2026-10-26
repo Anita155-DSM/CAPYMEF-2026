@@ -17,6 +17,7 @@ export default function Navbar() {
   const enlaces = [
     ["Inicio", "/"],
     ["Noticias", "/noticias"],
+    ["Admin", "/admin"],
   ];
 
   return (

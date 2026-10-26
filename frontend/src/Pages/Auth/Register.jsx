@@ -1,6 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { registrarSocio } from "../../services/authServices"; // Importamos el servicio
 import logo from "../../assets/img/logo.png";
 import { toast } from "sonner";
@@ -8,11 +8,11 @@ import { FiArrowRight, FiEye, FiEyeOff, FiFileText } from "react-icons/fi";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, control, formState: { errors } } = useForm();
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [nombreArchivo, setNombreArchivo] = useState("");
-  const password = watch("password");
+  const password = useWatch({ control, name: "password" });
   const constanciaField = register("constancia", { required: true });
 
   const handleRegister = async (data) => {

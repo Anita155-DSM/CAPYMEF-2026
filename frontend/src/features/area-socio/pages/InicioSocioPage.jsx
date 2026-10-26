@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { FaCircleCheck, FaRegClock, FaTriangleExclamation } from "react-icons/fa6";
-import EstadoCuenta from "../components/EstadoCuenta";
-import TarjetaCuota from "../components/TarjetaCuota";
-import TarjetaNovedades from "../components/TarjetaNovedades";
-import TarjetaProximoEvento from "../components/TarjetaProximoEvento";
+import EstadoCuenta from "../components/pagos/EstadoCuenta";
+import TarjetaCuota from "../components/pagos/TarjetaCuota";
+import TarjetaNovedades from "../components/inicio/TarjetaNovedades";
+import TarjetaProximoEvento from "../components/inicio/TarjetaProximoEvento";
 import { useNovedadesInicio } from "../hooks/useNovedadesInicio";
 import { elegirCuotaActual } from "../utils/cuotas";
 

@@ -1,5 +1,5 @@
 import { FaCreditCard, FaDownload } from "react-icons/fa6";
-import { ESTILOS_ESTADO_CUOTA, formatearFechaCuota, formatearMonto, formatearPeriodo } from "../utils/cuotas";
+import { ESTILOS_ESTADO_CUOTA, formatearFechaCuota, formatearMonto, formatearPeriodo } from "../../utils/cuotas";
 
 const columnas = ["Período", "Monto", "Vencimiento", "Estado", "Fecha de pago"];
 

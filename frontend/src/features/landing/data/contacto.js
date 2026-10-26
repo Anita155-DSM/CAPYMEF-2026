@@ -1,5 +1,6 @@
 export const contacto = {
   direccion: "Maipú 651, Formosa, Argentina, 3600.",
+  direccionCorta: "Maipú 651, Formosa",
   telefono: "0370 446-2508",
   correo: "info@capymef.ar",
   mapaEmbed:

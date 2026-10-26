@@ -44,7 +44,7 @@ export default function SidebarSocio({ abierto, onCerrar, onSalir }) {
         }`}
       >
         <div className="flex h-20 shrink-0 items-center gap-2.5 border-b border-white/10 px-4">
-          <Link to="/socios" onClick={onCerrar} aria-label="Ir al inicio del panel de socio" className="flex min-w-0 flex-1 items-center gap-2">
+          <Link to="/" onClick={onCerrar} aria-label="Ir al inicio del panel de socio" className="flex min-w-0 flex-1 items-center gap-2">
             <img src={logo} alt="logo CAPYMEF" className="h-11 w-auto shrink-0 object-contain drop-shadow-[0_1px_4px_rgba(0,0,0,0.35)]" />
             <span className="min-w-0 flex-1 text-[12px] font-bold leading-tight text-white">
               Cámara de Pequeñas
