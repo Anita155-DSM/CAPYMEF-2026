@@ -19,9 +19,9 @@ export default function BuscadorSocios({ titulo, filtros, dispatch, opciones }) 
   const set = (tipo) => (payload) => dispatch({ tipo, payload });
 
   return (
-    <div className="bg-[#f0f5fa] p-6 rounded-xl border border-primary/30 mb-8 flex flex-col gap-4 shadow-sm">
-      <div className="flex justify-between items-center border-b-2 border-primary pb-2">
-        <h2 className="text-3xl font-bold text-navy uppercase">{titulo}</h2>
+    <div className="bg-[#f0f5fa] p-4 sm:p-6 rounded-xl border border-primary/30 mb-8 flex flex-col gap-4 shadow-sm">
+      <div className="flex flex-wrap justify-between items-center gap-x-4 gap-y-1 border-b-2 border-primary pb-2">
+        <h2 className="text-xl sm:text-3xl font-bold text-navy uppercase">{titulo}</h2>
         <button onClick={() => dispatch({ tipo: "RESETEAR" })} className="text-sm text-primary font-bold hover:underline">
           Limpiar filtros
         </button>

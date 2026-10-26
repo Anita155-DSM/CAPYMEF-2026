@@ -5,9 +5,9 @@ const selectClase =
 
 function Selector({ etiqueta, valor, opciones, onChange }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex w-full flex-col lg:w-auto">
       <label className="text-xs text-gray-600 mb-1 font-semibold">{etiqueta}</label>
-      <select value={valor} onChange={(e) => onChange(e.target.value)} className={`${selectClase} min-w-40`}>
+      <select value={valor} onChange={(e) => onChange(e.target.value)} className={`${selectClase} w-full lg:min-w-40`}>
         {opciones.map((op) => (
           <option key={op.valor} value={op.valor}>{op.texto}</option>
         ))}
@@ -19,9 +19,9 @@ function Selector({ etiqueta, valor, opciones, onChange }) {
 /** Buscador + filtros por período y estado. Se usa junto con useFiltrosCuotas. */
 export default function FiltrosCuotas({ filtros, cambiar, limpiar, opcionesPeriodo }) {
   return (
-    <div className="bg-[#f0f5fa] p-6 rounded-xl border border-primary/30 mb-6 flex flex-col gap-4 shadow-sm">
-      <div className="flex justify-between items-center border-b-2 border-primary pb-2">
-        <h2 className="text-3xl font-bold text-navy uppercase">Historial de pagos</h2>
+    <div className="bg-[#f0f5fa] p-4 sm:p-6 rounded-xl border border-primary/30 mb-6 flex flex-col gap-4 shadow-sm">
+      <div className="flex flex-wrap justify-between items-center gap-x-4 gap-y-1 border-b-2 border-primary pb-2">
+        <h2 className="text-xl sm:text-3xl font-bold text-navy uppercase">Historial de pagos</h2>
         <button type="button" onClick={limpiar} className="text-sm text-primary font-bold hover:underline">
           Limpiar filtros
         </button>
@@ -43,8 +43,10 @@ export default function FiltrosCuotas({ filtros, cambiar, limpiar, opcionesPerio
           />
         </div>
 
-        <Selector etiqueta="Mes/Año" valor={filtros.periodo} opciones={opcionesPeriodo} onChange={cambiar("periodo")} />
-        <Selector etiqueta="Estado" valor={filtros.estado} opciones={OPCIONES_ESTADO} onChange={cambiar("estado")} />
+        <div className="grid grid-cols-2 gap-3 lg:flex lg:gap-4">
+          <Selector etiqueta="Mes/Año" valor={filtros.periodo} opciones={opcionesPeriodo} onChange={cambiar("periodo")} />
+          <Selector etiqueta="Estado" valor={filtros.estado} opciones={OPCIONES_ESTADO} onChange={cambiar("estado")} />
+        </div>
       </div>
     </div>
   );

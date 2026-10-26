@@ -24,7 +24,7 @@ export default function FinanzasPage() {
   if (cargando) return <div className="p-10"><Loading /></div>;
 
   return (
-    <div className="px-4 w-full font-sans relative">
+    <div className="px-3 pt-4 pb-6 sm:px-4 sm:pt-0 w-full font-sans relative">
       <FiltrosCuotas filtros={filtros} cambiar={cambiar} limpiar={limpiar} opcionesPeriodo={opcionesPeriodo} />
 
       {error ? (
