@@ -37,6 +37,8 @@ export default function NoticiaHomeCard({ noticia, onClick }) {
           <img
             src={imagen}
             alt={noticia.titulo}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

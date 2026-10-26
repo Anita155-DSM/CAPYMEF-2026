@@ -37,12 +37,12 @@ export default function NoticiasAdmin() {
 
     return (
       <div className="w-full flex flex-col animate-fade-in">
-        <div className="flex justify-between items-end mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-6">
           <div>
             <h2 className="text-2xl font-bold text-navy uppercase mb-4">
               Gestión de Noticias
             </h2>
-            <div className="relative w-80">
+            <div className="relative w-full sm:w-80">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FaSearch className="text-gray-400" />
               </div>
@@ -58,7 +58,7 @@ export default function NoticiasAdmin() {
 
           <button
             onClick={() => setVistaActual("formulario")}
-            className="bg-primary hover:bg-navy text-white font-bold py-2 px-6 rounded flex items-center gap-2 transition-colors shadow-sm"
+            className="bg-primary hover:bg-navy text-white font-bold py-2 px-6 rounded flex items-center justify-center gap-2 transition-colors shadow-sm"
           >
             <FaPlus /> NUEVA NOTICIA
           </button>
@@ -122,8 +122,8 @@ export default function NoticiasAdmin() {
         <FaArrowLeft /> Volver al listado
       </button>
 
-      <div className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-primary">
-        <h1 className="text-3xl font-bold text-navy mb-2">
+      <div className="bg-white p-5 sm:p-8 rounded-xl shadow-lg border-t-4 border-primary">
+        <h1 className="text-2xl sm:text-3xl font-bold text-navy mb-2">
           Panel Administrativo
         </h1>
         <p className="text-gray-500 mb-8">
@@ -264,7 +264,7 @@ export default function NoticiasAdmin() {
   );
 
   return (
-    <div className="p-8 w-full font-sans relative min-h-screen bg-gray-100">
+    <div className="p-4 sm:p-8 w-full font-sans relative min-h-screen bg-gray-100">
       {vistaActual === "lista" ? renderLista() : renderFormulario()}
 
       {noticiaSeleccionada && (

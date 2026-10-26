@@ -5,6 +5,7 @@ import { actualizarDatosSocio, darDeBajaSocio } from "@/services/adminServices";
 import ModalShell from "@/shared/ui/ModalShell";
 import ConfirmDialog from "@/shared/ui/ConfirmDialog";
 import Campo from "@/shared/ui/Campo";
+import ConstanciaSocio from "./ConstanciaSocio";
 import { inputClase, btnCancelarClase, btnGuardarClase } from "@/shared/ui/estilos";
 
 /**
@@ -54,17 +55,19 @@ export default function EditarSocioModal({ socio, onClose, onActualizado }) {
   return (
     <>
       <ModalShell titulo={`Editar Socio: ${socio.razonSocial}`} onClose={onClose} ancho="max-w-2xl">
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto flex flex-col gap-6">
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
             <p className="text-sm text-gray-500 mb-1">Información de contacto (No editable)</p>
-            <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700 break-words">
               <p><strong>CUIT:</strong> {socio.cuit}</p>
               <p><strong>Email:</strong> {socio.email}</p>
               <p><strong>Teléfono:</strong> {socio.telefono}</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <ConstanciaSocio url={socio.constanciaUrl} razonSocial={socio.razonSocial} />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Campo label="Categoría">
               <select name="categoria" value={form.categoria} onChange={handleChange} className={inputClase}>
                 <option value="activo">Activo</option>
@@ -92,13 +95,13 @@ export default function EditarSocioModal({ socio, onClose, onActualizado }) {
             </Campo>
           </div>
 
-          <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
+          <div className="pt-4 border-t border-gray-200 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between sm:items-center">
             {form.estado !== "inactivo" ? (
               <button
                 type="button"
                 onClick={() => setConfirmandoBaja(true)}
                 disabled={procesando}
-                className="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-600 hover:text-white font-semibold rounded-md flex items-center gap-2 text-sm transition-colors"
+                className="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-600 hover:text-white font-semibold rounded-md flex items-center justify-center gap-2 text-sm transition-colors"
               >
                 <FaUserSlash /> Dar de baja
               </button>
@@ -106,7 +109,7 @@ export default function EditarSocioModal({ socio, onClose, onActualizado }) {
               <span className="text-red-500 font-bold text-sm bg-red-50 px-3 py-1 rounded">Este socio está dado de baja</span>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row [&>button]:justify-center">
               <button type="button" onClick={onClose} className={btnCancelarClase}>Cancelar</button>
               <button type="submit" disabled={procesando} className={btnGuardarClase}>
                 <FaRegSave /> {procesando ? "Guardando..." : "Guardar Cambios"}

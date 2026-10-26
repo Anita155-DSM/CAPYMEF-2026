@@ -27,6 +27,8 @@ export default function VinculacionSection() {
               <img
                 src={a.logo}
                 alt={a.nombre}
+                loading="lazy"
+                decoding="async"
                 className={`max-h-full max-w-full object-contain transition-opacity duration-300 ${
                   a.oscuro ? "opacity-100" : "opacity-80 group-hover:opacity-100"
                 }`}
