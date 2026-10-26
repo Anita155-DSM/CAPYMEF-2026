@@ -17,7 +17,7 @@ export default function NosotrosSection() {
           </div>
         </div>
 
-        <div className="w-full">
+        <div id="autoridades" className="w-full scroll-mt-24">
           <h2 className="text-3xl md:text-4xl font-extrabold text-navy-soft mb-2 tracking-tight">
             Autoridades de la Cámara
           </h2>
