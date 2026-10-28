@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaBell } from "react-icons/fa6";
 import { toast } from "sonner";
 import { useNotificaciones } from "../hooks/useNotificaciones";
-import { enlaceInterno } from "../utils/notificaciones";
+import { destinoDeNotificacion } from "../utils/notificaciones";
 import ItemNotificacion from "./ItemNotificacion";
 
 /** Campana del navbar: muestra el globito de no leídas y abre el listado. */
@@ -36,7 +36,7 @@ export default function CampanaNotificaciones() {
 
   const abrirNotificacion = (notificacion) => {
     marcarLeida(notificacion);
-    const destino = enlaceInterno(notificacion.enlace);
+    const destino = destinoDeNotificacion(notificacion);
     if (destino) {
       setAbierto(false);
       navigate(destino);
@@ -72,11 +72,22 @@ export default function CampanaNotificaciones() {
           aria-label="Notificaciones"
           className="fixed right-2 top-22 z-50 w-md max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl sm:right-8"
         >
-          <div className="flex items-center justify-center bg-navy px-5 py-4 text-white">
-            <h3 className="text-base font-bold">Notificaciones</h3>
+          <div className="flex items-center justify-between gap-3 bg-navy px-5 py-4 text-white">
+            <h3 className="flex items-center gap-2 text-base font-bold">
+              Notificaciones
+              {noLeidas > 0 && (
+                <span className="rounded-full bg-[#e66d4a] px-2 py-0.5 text-xs font-bold leading-4">{noLeidas > 99 ? "99+" : noLeidas}</span>
+              )}
+            </h3>
             {noLeidas > 0 && (
-              <button type="button" onClick={leerTodas} className="text-sm font-semibold text-white/90 hover:text-white hover:underline">
-                Marcar todas como leídas
+              <button
+                type="button"
+                onClick={leerTodas}
+                aria-label="Marcar todas como leídas"
+                className="shrink-0 text-sm font-semibold text-white/90 hover:text-white hover:underline"
+              >
+                <span className="sm:hidden">Marcar todas</span>
+                <span className="hidden sm:inline">Marcar todas como leídas</span>
               </button>
             )}
           </div>

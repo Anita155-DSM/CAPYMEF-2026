@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { FaBars, FaUserCircle } from "react-icons/fa";
 import { Link, Outlet } from "react-router-dom";
+import CampanaNotificaciones from "@/features/notificaciones/components/CampanaNotificaciones";
 import SidebarAdmin from "./components/SidebarAdmin";
 
 export default function MainLayout() {
@@ -25,9 +26,12 @@ export default function MainLayout() {
             <FaBars />
           </button>
 
-          <Link to="/profile" aria-label="Mi cuenta" className="group ml-auto flex items-center gap-3">
-            <FaUserCircle className="cursor-pointer rounded-full text-[38px] text-sidebar shadow-sm transition-colors group-hover:text-[#2673A6]" />
-          </Link>
+          <div className="ml-auto flex items-center gap-3">
+            <CampanaNotificaciones />
+            <Link to="/profile" aria-label="Mi cuenta" className="group flex items-center gap-3">
+              <FaUserCircle className="cursor-pointer rounded-full text-[38px] text-sidebar shadow-sm transition-colors group-hover:text-[#2673A6]" />
+            </Link>
+          </div>
         </header>
 
         {/* ACÁ SE INYECTA EL CONTENIDO DINÁMICO */}

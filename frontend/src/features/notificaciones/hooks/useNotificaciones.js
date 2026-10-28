@@ -27,11 +27,17 @@ export function useNotificaciones() {
     const aplicar = (resultado) => {
       if (activo && resultado.exito) setNoLeidas(resultado.noLeidas ?? 0);
     };
-    obtenerContadorNotificaciones().then(aplicar);
-    const id = setInterval(() => obtenerContadorNotificaciones().then(aplicar), INTERVALO_CONTADOR_MS);
+    // Solo se consulta con la pestaña visible; al volver a ella se actualiza al instante.
+    const refrescar = () => {
+      if (document.visibilityState === "visible") obtenerContadorNotificaciones().then(aplicar);
+    };
+    refrescar();
+    const id = setInterval(refrescar, INTERVALO_CONTADOR_MS);
+    document.addEventListener("visibilitychange", refrescar);
     return () => {
       activo = false;
       clearInterval(id);
+      document.removeEventListener("visibilitychange", refrescar);
     };
   }, []);
 

@@ -11,7 +11,7 @@ export default function ItemNotificacion({ notificacion, onAbrir }) {
         type="button"
         onClick={() => onAbrir(notificacion)}
         className={cn(
-          "flex w-full items-start gap-3 border-b border-gray-100 px-10 py-3 text-left transition-colors hover:bg-gray-50",
+          "flex w-full items-start gap-3 border-b border-gray-100 px-5 py-3 text-left transition-colors hover:bg-gray-50",
           !notificacion.leida && "bg-blue-50/60"
         )}
       >
