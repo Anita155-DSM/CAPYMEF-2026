@@ -66,14 +66,14 @@ export default function PadronPage() {
   if (cargando) return <div className="p-10"><Loading /></div>;
 
   return (
-    <div className="px-4 w-full font-sans relative">
+    <div className="px-3 pt-4 pb-6 sm:px-4 sm:pt-0 w-full font-sans relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-4">
         <div className="grow w-full">
           <BuscadorSocios titulo="Padrón de Socios" filtros={filtros} dispatch={dispatch} opciones={opciones} />
         </div>
         <button
           onClick={exportar}
-          className="flex items-center gap-2 bg-[#107c41] hover:bg-[#0c5e31] text-white font-bold py-2.5 px-5 rounded-lg shadow-md transition-colors shrink-0"
+          className="flex w-full md:w-auto items-center justify-center gap-2 bg-[#107c41] hover:bg-[#0c5e31] text-white font-bold py-2.5 px-5 rounded-lg shadow-md transition-colors shrink-0"
         >
           <FaFileExcel className="text-xl" />
           Exportar a Excel

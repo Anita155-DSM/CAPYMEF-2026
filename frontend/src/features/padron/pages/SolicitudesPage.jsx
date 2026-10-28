@@ -60,7 +60,7 @@ export default function SolicitudesPage() {
   if (cargando) return <div className="p-10 text-xl font-bold text-navy"><Loading /></div>;
 
   return (
-    <div className="px-4 w-full font-sans relative">
+    <div className="px-3 pt-4 pb-6 sm:px-4 sm:pt-0 w-full font-sans relative">
       <BuscadorSocios titulo="Solicitudes de Registro Pendientes" filtros={filtros} dispatch={dispatch} opciones={opciones} />
 
       <TablaSocios

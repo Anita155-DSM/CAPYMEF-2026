@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaRegSave, FaRegTrashAlt, FaExclamationTriangle } from "react-icons/fa";
 import { toast } from "sonner";
 import { actualizarNoticia, eliminarNoticia } from "@/services/noticiasService";
+import { useCategoriasNoticias } from "../hooks/useCategoriasNoticias";
 import logo from "@/assets/img/logo.png";
 import { urlImagen } from "@/shared/utils/imagenes";
 import ModalShell from "@/shared/ui/ModalShell";
@@ -17,14 +18,18 @@ export default function EditarNoticiaModal({ noticia, onClose, onNoticiaActualiz
     titulo: noticia.titulo || "",
     subtitulo: noticia.subtitulo || "",
     contenido: noticia.contenido || "",
-    categoria: noticia.categoria || "Institucional",
+    categoria: noticia.categoria || "",
     visibilidad: noticia.visibilidad || "todos",
     estado: noticia.estado || "publicado",
   });
   const [imagen, setImagen] = useState({ archivo: null, preview: urlImagen(noticia.imagenUrl) });
   const [guardando, setGuardando] = useState(false);
+  const { categorias, cargando: cargandoCategorias, error: errorCategorias } = useCategoriasNoticias();
   const [confirmando, setConfirmando] = useState(false);
   const [eliminando, setEliminando] = useState(false);
+
+  // Si la lista no cargó (o la categoría actual ya no existe), se conserva la actual para no perderla
+  const opcionesCategoria = form.categoria && !categorias.includes(form.categoria) ? [form.categoria, ...categorias] : categorias;
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -42,7 +47,7 @@ export default function EditarNoticiaModal({ noticia, onClose, onNoticiaActualiz
       onNoticiaActualizada?.();
       onClose();
     } else {
-      toast.error("Error: " + result.mensaje);
+      toast.error("Error: " + (result.errores?.[0]?.mensaje || result.mensaje));
     }
   };
 
@@ -69,7 +74,7 @@ export default function EditarNoticiaModal({ noticia, onClose, onNoticiaActualiz
   return (
     <>
       <ModalShell titulo="Panel de Edición de Noticia" onClose={onClose}>
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex flex-col gap-4 grow">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto flex flex-col gap-4 grow">
           <Campo label="Imagen de portada" className="gap-2">
             <div className="flex items-center gap-4">
               {imagen.preview ? (
@@ -95,10 +100,16 @@ export default function EditarNoticiaModal({ noticia, onClose, onNoticiaActualiz
             <textarea rows="2" name="subtitulo" value={form.subtitulo} onChange={handleChange} className={`${inputNoticia} resize-none`} />
           </Campo>
           <Campo label="Categoría *">
-            <input type="text" name="categoria" value={form.categoria} onChange={handleChange} required maxLength="100" className={inputNoticia} />
+            <select name="categoria" value={form.categoria} onChange={handleChange} required disabled={cargandoCategorias} className={`${inputNoticia} bg-white disabled:bg-gray-100`}>
+              <option value="" disabled>{cargandoCategorias ? "Cargando categorías..." : "Elegí una categoría"}</option>
+              {opcionesCategoria.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            {errorCategorias && <span className="text-red-500 text-xs">{errorCategorias}</span>}
           </Campo>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Campo label="Visibilidad *">
               <select name="visibilidad" value={form.visibilidad} onChange={handleChange} className="p-2.5 border rounded-md text-sm">
                 <option value="todos">Todos</option>
@@ -118,15 +129,15 @@ export default function EditarNoticiaModal({ noticia, onClose, onNoticiaActualiz
             <textarea rows="5" name="contenido" value={form.contenido} onChange={handleChange} required className={inputNoticia} />
           </Campo>
 
-          <div className="pt-4 border-t flex justify-between items-center">
+          <div className="pt-4 border-t flex flex-col-reverse gap-3 sm:flex-row sm:justify-between sm:items-center">
             <button
               type="button"
               onClick={() => setConfirmando(true)}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md flex items-center gap-2 text-sm"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md flex items-center justify-center gap-2 text-sm"
             >
               <FaRegTrashAlt /> Eliminar
             </button>
-            <div className="flex gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row [&>button]:justify-center">
               <button type="button" onClick={onClose} className={btnCancelarClase}>Cancelar</button>
               <button type="submit" disabled={guardando} className={btnGuardarClase}>
                 <FaRegSave /> {guardando ? "Guardando..." : "Guardar"}

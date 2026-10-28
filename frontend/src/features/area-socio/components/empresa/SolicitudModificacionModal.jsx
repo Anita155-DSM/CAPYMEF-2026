@@ -2,7 +2,7 @@ import { useState } from "react";
 import ModalShell from "@/shared/ui/ModalShell";
 import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
 import { btnCancelarClase, btnGuardarClase } from "@/shared/ui/estilos";
-import { EMAIL_CAPYMEF, LARGO_MAXIMO_SOLICITUD } from "../utils/contacto";
+import { EMAIL_CAPYMEF, LARGO_MAXIMO_SOLICITUD } from "../../utils/contacto";
 
 /**
  * Los datos institucionales solo los cambia la administración. No hay endpoint de

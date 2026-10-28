@@ -1,6 +1,6 @@
 export { default as InicioAdmin } from "../Admin/Inicio"
 export { default as NoticiasAdmin } from "./Noticias"
 export { default as EventosAdmin } from "../Admin/Eventos"
-export { default as FinanzasAdmin } from "../Admin/Finanzas"
+export { default as FinanzasAdmin } from "@/features/finanzas/pages/FinanzasPage"
 export { default as RegistrosAdmin } from "@/features/padron/pages/SolicitudesPage"
 export { default as SociosAdmin } from "@/features/padron/pages/PadronPage"

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { restablecerPassword } from "../../services/authServices";
 import logo from "../../assets/img/logo.png";
 import { toast } from "sonner";
@@ -8,11 +8,11 @@ import { toast } from "sonner";
 export default function ResetPassword() {
   const { token } = useParams(); // viene de la URL: /reset-password/:token
   const navigate = useNavigate();
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, control, formState: { errors } } = useForm();
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState(null);
 
-  const password = watch("password");
+  const password = useWatch({ control, name: "password" });
 
   const handleReset = async (data) => {
     setEnviando(true);

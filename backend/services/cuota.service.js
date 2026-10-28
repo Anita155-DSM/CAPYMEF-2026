@@ -10,6 +10,7 @@ import {
   formatearPeriodo,
   diasEntre,
 } from './notificacion.service.js';
+import { evaluarCategoriasDeTodos } from './categoria.service.js';
 
 const ZONA_HORARIA = 'America/Argentina/Buenos_Aires';
 
@@ -156,7 +157,20 @@ export const marcarCuotasVencidas = async () => {
   }
 
   console.log(` Cuotas marcadas como vencidas: ${marcadas}`);
-  return { exito: true, marcadas, fechaCorte: hoy };
+
+  // Con las deudas ya actualizadas, se aplica la regla de categorías: 3 cuotas vencidas sin pagar
+  // los Activos pasan a Adherente (y quien regularizó vuelve a Activo). Se evalúa a todos y no solo
+  // a quienes vencieron hoy, así también alcanza a las deudas que ya existían al poner la regla en
+  // marcha y corrige cualquier caso que se haya escapado. Si esto fallara, el cierre de cuotas ya
+  // quedó hecho: solo se registra el error.
+  let categorias = { degradados: 0, recuperados: 0 };
+  try {
+    categorias = await evaluarCategoriasDeTodos();
+  } catch (errorCategorias) {
+    console.error('No se pudieron evaluar las categorías de los socios:', errorCategorias.message);
+  }
+
+  return { exito: true, marcadas, fechaCorte: hoy, categorias };
 };
 
 // Recordatorio previo al vencimiento: avisa a quienes todavía tienen la cuota pendiente

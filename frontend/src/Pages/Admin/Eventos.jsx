@@ -35,7 +35,7 @@ const CeldaDia = ({ dia, eventoDelDia, esHoy, esSeleccionado, alSeleccionar }) =
                 {dia}
             </div>
             {eventoDelDia && (
-                <span className="absolute top-11 text-[11px] leading-tight font-semibold text-gray-700 w-[120%] truncate px-1 pointer-events-none" title={eventoDelDia.titulo}>
+                <span className="hidden sm:block absolute top-11 text-[11px] leading-tight font-semibold text-gray-700 w-[120%] truncate px-1 pointer-events-none" title={eventoDelDia.titulo}>
                     {eventoDelDia.titulo}
                 </span>
             )}
@@ -45,7 +45,7 @@ const CeldaDia = ({ dia, eventoDelDia, esHoy, esSeleccionado, alSeleccionar }) =
 
 // 3. COMPONENTE PRINCIPAL (¡Ahora es cortísimo!)
 export default function EventosAdmin() {
-    const [fechaVisible, setFechaVisible] = useState(dayjs());
+    const [fechaVisible] = useState(dayjs());
     const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
     const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
     const [modalAbierto, setModalAbierto] = useState(false);
@@ -57,7 +57,13 @@ export default function EventosAdmin() {
         if (result.exito) setEventos(result.data);
     };
 
-    useEffect(() => { cargarEventos(); }, []);
+    useEffect(() => {
+        let activo = true;
+        obtenerEventosSocios().then((result) => {
+            if (activo && result.exito) setEventos(result.data);
+        });
+        return () => { activo = false; };
+    }, []);
 
     const hoy = dayjs();
     const celdasCalendario = [
@@ -77,12 +83,12 @@ export default function EventosAdmin() {
     };
 
     return (
-        <div className="p-8 w-full font-sans bg-[#F4F7F9] min-h-screen relative">
-            <div className="flex justify-between items-center mb-10">
-                <h1 className="text-2xl font-semibold text-navy uppercase tracking-wide">
+        <div className="p-4 sm:p-8 w-full font-sans bg-[#F4F7F9] min-h-screen relative">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-10">
+                <h1 className="text-xl sm:text-2xl font-semibold text-navy uppercase tracking-wide">
                     Gestión de Eventos y Capacitaciones
                 </h1>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                     {fechaSeleccionada && eventoSeleccionado && (
                         <Button variant="warning" onClick={() => { setModoModal("editar"); setModalAbierto(true); }}>
                             <FaEdit /> Editar Evento
@@ -96,17 +102,20 @@ export default function EventosAdmin() {
 
             <div className="max-w-5xl">
                 <div className="flex justify-between items-end border-b-2 border-primary pb-2 mb-6">
-                    <h2 className="text-3xl font-light text-primary capitalize">{fechaVisible.format("MMMM")}</h2>
-                    <span className="text-3xl font-light text-primary">{fechaVisible.format("YYYY")}</span>
+                    <h2 className="text-2xl sm:text-3xl font-light text-primary capitalize">{fechaVisible.format("MMMM")}</h2>
+                    <span className="text-2xl sm:text-3xl font-light text-primary">{fechaVisible.format("YYYY")}</span>
                 </div>
 
-                <div className="grid grid-cols-7 gap-4 text-center mb-6">
+                <div className="grid grid-cols-7 gap-1 sm:gap-4 text-center mb-4 sm:mb-6">
                     {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((dia) => (
-                        <div key={dia} className="font-bold text-primary text-sm">{dia}</div>
+                        <div key={dia} className="font-bold text-primary text-xs sm:text-sm">
+                            <span className="sm:hidden">{dia.slice(0, 3)}</span>
+                            <span className="hidden sm:inline">{dia}</span>
+                        </div>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-7 gap-y-8 gap-x-4 text-center border-b-2 border-primary pb-12">
+                <div className="grid grid-cols-7 gap-y-3 gap-x-1 sm:gap-y-8 sm:gap-x-4 text-center border-b-2 border-primary pb-6 sm:pb-12">
                     {celdasCalendario.map((dia, index) => {
                         const esHoy = dia === hoy.date() && fechaVisible.isSame(hoy, 'month');
                         const esSeleccionado = dia && fechaSeleccionada && fechaSeleccionada.date() === dia && fechaVisible.isSame(fechaSeleccionada, 'month');
@@ -125,6 +134,13 @@ export default function EventosAdmin() {
                         );
                     })}
                 </div>
+
+                {/* En celular los títulos no entran en la grilla: se muestra el del día elegido */}
+                {fechaSeleccionada && (
+                    <p className="sm:hidden mt-4 text-center text-sm font-semibold text-navy">
+                        {eventoSeleccionado ? `${eventoSeleccionado.titulo} (${eventoSeleccionado.estado})` : "Día libre"}
+                    </p>
+                )}
             </div>
 
             {modalAbierto && (

@@ -1,5 +1,5 @@
 import { FaLocationDot } from "react-icons/fa6";
-import { mapaDelEvento } from "../utils/ubicacion";
+import { mapaDelEvento } from "../../utils/ubicacion";
 
 /** Mapa embebido con el lugar del evento y botón "Cómo llegar". No renderiza nada si no hay ubicación. */
 export default function MapaEvento({ evento }) {

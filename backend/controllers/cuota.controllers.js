@@ -13,6 +13,7 @@ import { Pago } from '../models/pago.models.js';
 import { generarComprobantePago } from '../services/comprobante.service.js';
 import { enviarMailComprobantePago } from '../config/mailer.js';
 import { subirPDFCloudinary } from '../services/cloudinary.service.js';
+import { evaluarCategoriaSocio } from '../services/categoria.service.js';
 
 // ==========================================
 // 1. EJECUCIÓN MANUAL (Para Pruebas y Admin)
@@ -123,6 +124,10 @@ export const registrarPagoManual = async (req, res) => {
     // 2. Actualizamos el estado de la cuota
     cuota.estado = 'pagada';
     await cuota.save();
+
+    // Si el socio estaba Adherente por mora y con este pago quedó sin deuda vencida, vuelve a Activo
+    // en el momento. Nunca lanza error: no puede romper el registro del pago.
+    await evaluarCategoriaSocio(cuota.usuario_id);
 
     // Alertas internas (nunca lanzan error: no pueden romper el registro del pago).
     // Al socio: su pago ya figura.
@@ -275,12 +280,12 @@ export const ejecutarMarcadoVencidas = async (req, res) => {
     const resultado = await marcarCuotasVencidas();
 
     //auditoria
-    req.auditoriaMensaje = `Se ejecutó el cierre de la ventana de pago. Cuotas marcadas como vencidas: ${resultado.marcadas}`;
+    req.auditoriaMensaje = `Se ejecutó el cierre de la ventana de pago. Cuotas marcadas como vencidas: ${resultado.marcadas}. Socios pasados a Adherente por mora: ${resultado.categorias.degradados}. Socios recuperados a Activo: ${resultado.categorias.recuperados}`;
     req.auditoriaCodigo = 'MARCAR_CUOTAS_VENCIDAS';
 
     res.status(200).json({
       exito: true,
-      mensaje: `Proceso finalizado. ${resultado.marcadas} cuotas pasaron a vencidas.`,
+      mensaje: `Proceso finalizado. ${resultado.marcadas} cuotas pasaron a vencidas. ${resultado.categorias.degradados} socio(s) pasaron a Adherente por mora y ${resultado.categorias.recuperados} volvieron a Activo.`,
       data: resultado,
     });
   } catch (error) {

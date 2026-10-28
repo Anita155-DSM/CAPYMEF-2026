@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { FaRegSave, FaInfoCircle, FaTrashAlt } from "react-icons/fa";
 import { toast } from "sonner";
 import dayjs from "@/shared/utils/fechas";
@@ -46,12 +46,12 @@ export default function EventoFormModal({ onClose, modo, fechaPredefinida, event
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm({ defaultValues: valoresIniciales(eventoExistente, fechaPredefinida) });
 
-  const [fecha, horaInicio, horaFin] = watch(["fecha", "horaInicio", "horaFin"]);
+  const [fecha, horaInicio, horaFin] = useWatch({ control, name: ["fecha", "horaInicio", "horaFin"] });
 
   // api() nunca lanza: se revisa result.exito (no hace falta try/catch).
   const finalizar = (result, okMsg, errMsg) => {
@@ -94,7 +94,7 @@ export default function EventoFormModal({ onClose, modo, fechaPredefinida, event
   return (
     <>
       <ModalShell titulo={esCrear ? "Crear Nuevo Evento" : "Editar Evento"} onClose={onClose}>
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 overflow-y-auto flex flex-col gap-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6 overflow-y-auto flex flex-col gap-5">
           <Campo label="Título del Evento *">
             <input
               type="text"
@@ -114,7 +114,7 @@ export default function EventoFormModal({ onClose, modo, fechaPredefinida, event
           </Campo>
 
           <div className="flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Campo label="Fecha *">
                 <input type="date" {...register("fecha", { required: true })} className={inputClase} />
               </Campo>
@@ -130,7 +130,7 @@ export default function EventoFormModal({ onClose, modo, fechaPredefinida, event
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Campo label="Modalidad">
               <select {...register("modalidad")} className={inputClase}>
                 <option value="presencial">Presencial</option>
@@ -194,7 +194,7 @@ export default function EventoFormModal({ onClose, modo, fechaPredefinida, event
             />
           </Campo>
 
-          <div className="pt-4 mt-2 border-t border-gray-200 flex justify-between items-center gap-3">
+          <div className="pt-4 mt-2 border-t border-gray-200 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between sm:items-center">
             {esCrear ? (
               <div />
             ) : (
@@ -202,13 +202,13 @@ export default function EventoFormModal({ onClose, modo, fechaPredefinida, event
                 type="button"
                 onClick={() => setConfirmandoBorrado(true)}
                 disabled={procesando}
-                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-md text-sm transition-colors flex items-center gap-2 border border-red-200"
+                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-md text-sm transition-colors flex items-center justify-center gap-2 border border-red-200"
               >
                 <FaTrashAlt /> Eliminar Evento
               </button>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row [&>button]:justify-center">
               <button type="button" onClick={onClose} disabled={procesando} className={btnCancelarClase}>
                 Cancelar
               </button>

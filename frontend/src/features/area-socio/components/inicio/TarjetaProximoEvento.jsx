@@ -9,7 +9,7 @@ import {
   FaVideo,
 } from "react-icons/fa6";
 import dayjs from "@/shared/utils/fechas";
-import { describirLugar, textoCupos, textoHorario } from "../utils/eventos";
+import { describirLugar, textoCupos, textoHorario } from "../../utils/eventos";
 
 const fila = "flex items-start gap-2.5 text-sm text-gray-600";
 const iconoFila = "mt-0.5 w-4 shrink-0 text-primary";

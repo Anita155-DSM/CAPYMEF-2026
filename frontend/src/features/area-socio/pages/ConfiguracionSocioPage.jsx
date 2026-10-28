@@ -4,7 +4,7 @@ import { FaEnvelope, FaIdCard, FaKey, FaRightFromBracket, FaUserShield, FaUsers 
 import { toast } from "sonner";
 import { useAuth } from "@/app/providers/AuthContext";
 import { recuperarPassword } from "@/services/authServices";
-import DatoFicha from "../components/DatoFicha";
+import DatoFicha from "../components/empresa/DatoFicha";
 import { mayuscula } from "../utils/cuotas";
 
 const tarjeta = "border border-[#e0e0e0] bg-white px-3 py-5 sm:px-4";

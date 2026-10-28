@@ -14,6 +14,18 @@ const eliminarArchivo = (filePath) => {
   }
 };
 
+// Reglas de contraseña para el restablecimiento. DEBEN ser las mismas que en el registro
+// (user.validator.js -> validacionRegistro). Antes acá se pedían solo 6 caracteres, y alguien
+// podía "recuperar" su cuenta con una clave más débil que la que le exigimos al registrarse.
+// Devuelve el mensaje de error, o null si la contraseña es válida.
+const validarFortalezaPassword = (password) => {
+  if (typeof password !== 'string' || password.length === 0) return 'La contraseña es obligatoria.';
+  if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
+  if (!/\d/.test(password)) return 'La contraseña debe contener al menos un número.';
+  if (!/[A-Z]/.test(password)) return 'La contraseña debe contener al menos una letra mayúscula.';
+  return null;
+};
+
 // ==========================================
 // 1. REGISTRO DE SOLICITUD DE SOCIO
 // ==========================================
@@ -134,6 +146,24 @@ export const loginUsuario = async (req, res) => {
       });
     }
 
+    // Antes un usuario 'inactivo' (dado de baja por la administración) pasaba los controles
+    // de arriba y podía iniciar sesión. Ahora solo entra quien está 'aprobado': el bloqueo
+    // específico da un mensaje claro y el último chequeo cubre cualquier estado nuevo que se
+    // agregue en el futuro sin acordarse de venir a tocar el login.
+    if (usuario.estado === 'inactivo') {
+      return res.status(403).json({
+        exito: false,
+        mensaje: 'Tu cuenta se encuentra inactiva. Ponete en contacto con la administración.',
+      });
+    }
+
+    if (usuario.estado !== 'aprobado') {
+      return res.status(403).json({
+        exito: false,
+        mensaje: 'Tu cuenta no está habilitada para iniciar sesión.',
+      });
+    }
+
     // Generar JWT incluyendo la categoría para que el Frontend sepa qué cobrarle
     const tokenPayload = {
       id: usuario.id,
@@ -178,9 +208,10 @@ export const obtenerPerfil = async (req, res) => {
     // El id viene del token gracias a tu middleware verificarToken
     const usuarioId = req.usuario.id; 
 
-    // Buscamos al usuario excluyendo la contraseña por seguridad
+    // Buscamos al usuario sin datos internos de seguridad. Antes solo se excluía la contraseña
+    // y la respuesta incluía resetPasswordToken y resetPasswordExpires (el frontend no los usa).
     const usuario = await User.findByPk(usuarioId, {
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ['password', 'resetPasswordToken', 'resetPasswordExpires'] }
     });
 
     if (!usuario) {
@@ -285,8 +316,9 @@ export const restablecerPassword = async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
-    if (!password || password.length < 6) {
-      return res.status(400).json({ exito: false, mensaje: 'La contraseña debe tener al menos 6 caracteres.' });
+    const errorPassword = validarFortalezaPassword(password);
+    if (errorPassword) {
+      return res.status(400).json({ exito: false, mensaje: errorPassword });
     }
 
     // Hasheamos el token recibido para compararlo contra el que guardamos en la base

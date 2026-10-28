@@ -3,20 +3,20 @@ import { FaBars, FaXmark } from "react-icons/fa6";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/img/logo.png";
 
+const enlaces = [
+    { id: "inicio", nombre: "Inicio" },
+    { id: "novedades", nombre: "Novedades" },
+    { id: "nosotros", nombre: "Nosotros" },
+    { id: "beneficios", nombre: "Beneficios" },
+    { id: "informacion", nombre: "Información" },
+    { id: "vinculacion", nombre: "Vinculación" },
+    { id: "contacto", nombre: "Contacto" },
+];
+
 export default function NavbarPublico() {
     const location = useLocation();
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [seccionActiva, setSeccionActiva] = useState("inicio");
-
-    const enlaces = [
-        { id: "inicio", nombre: "Inicio" },
-        { id: "novedades", nombre: "Novedades" },
-        { id: "nosotros", nombre: "Nosotros" },
-        { id: "beneficios", nombre: "Beneficios" },
-        { id: "informacion", nombre: "Información" },
-        { id: "vinculacion", nombre: "Vinculación" },
-        { id: "contacto", nombre: "Contacto" },
-    ];
 
     useEffect(() => {
         if (location.pathname !== '/') return;
@@ -52,10 +52,21 @@ export default function NavbarPublico() {
             setSeccionActiva(actual);
         };
 
-        window.addEventListener("scroll", manejarScroll);
+        // Un solo cálculo por cuadro de pantalla (evita medir el DOM en cada evento de scroll)
+        let pendiente = false;
+        const alScrollear = () => {
+            if (pendiente) return;
+            pendiente = true;
+            requestAnimationFrame(() => {
+                pendiente = false;
+                manejarScroll();
+            });
+        };
+
+        window.addEventListener("scroll", alScrollear, { passive: true });
         manejarScroll();
 
-        return () => window.removeEventListener("scroll", manejarScroll);
+        return () => window.removeEventListener("scroll", alScrollear);
     }, [location.pathname]);
 
     const hacerScrollSuave = (e, id) => {

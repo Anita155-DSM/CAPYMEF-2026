@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
-import { FaBars, FaBell, FaCircleUser } from "react-icons/fa6";
+import { FaBars, FaCircleUser } from "react-icons/fa6";
 import { obtenerPerfil } from "../services/authServices.js";
 import { useAuth } from "@/app/providers/AuthContext";
 import { useMisCuotas } from "@/features/area-socio/hooks/useMisCuotas";
 import { mayuscula } from "@/features/area-socio/utils/cuotas";
+import CampanaNotificaciones from "@/features/notificaciones/components/CampanaNotificaciones";
 import SidebarSocio from "./components/SidebarSocio";
 
 export default function SocioLayout() {
@@ -30,7 +31,6 @@ export default function SocioLayout() {
 
   const nombreEmpresa = usuario.razonSocial || "Tu empresa";
   const categoria = mayuscula(usuario.categoria) || "Socio";
-  const tieneDeuda = Array.isArray(cuotas) && cuotas.some((c) => c.estado !== "pagada");
 
   return (
     <div className="min-h-screen bg-surface text-navy font-sans">
@@ -43,20 +43,12 @@ export default function SocioLayout() {
           </button>
           <div className="hidden text-sm text-gray-500 sm:block"></div>
           <div className="ml-auto flex items-center gap-4 sm:gap-6">
-            <Link
-              to="/socios/pagos"
-              className="relative text-xl text-primary"
-              aria-label={tieneDeuda ? "Notificaciones: tenés cuotas por pagar" : "Notificaciones"}
-              title={tieneDeuda ? "Tenés cuotas por pagar" : "Sin novedades"}
-            >
-              <FaBell />
-              {tieneDeuda && <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#e66d4a]" />}
-            </Link>
+            <CampanaNotificaciones />
             <div className="hidden text-right sm:block">
               <p className="text-sm font-bold text-navy">{nombreEmpresa}</p>
               <p className="text-xs text-gray-500">{categoria}</p>
             </div>
-            <Link to="/socios/configuracion" aria-label="Mi cuenta">
+            <Link to="/profile" aria-label="Mi cuenta">
               <FaCircleUser className="text-4xl text-primary" />
             </Link>
           </div>

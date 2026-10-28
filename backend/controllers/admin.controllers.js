@@ -70,9 +70,11 @@ export const obtenerDistribucionPorRubro = async (req, res) => {
 // ==========================================
 export const obtenerTodosLosUsuarios = async (req, res) => {
   try {
-    // Obtenemos todos los registros excluyendo la contraseña por seguridad
+    // Obtenemos todos los registros sin datos internos de seguridad. Antes solo se excluía la
+    // contraseña, y el listado devolvía el resetPasswordToken (hash) y resetPasswordExpires
+    // de TODOS los socios; el frontend no los usa.
     const usuarios = await User.findAll({
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password", "resetPasswordToken", "resetPasswordExpires"] },
       order: [["createdAt", "DESC"]], // Los más recientes primero
     });
 
@@ -204,6 +206,13 @@ export const actualizarSocio = async (req, res) => {
         usuario[campo] = req.body[campo];
       }
     });
+
+    // Si el admin cambia la categoría a mano, esa decisión manda: se borra la marca de "degradado por
+    // mora" para que el sistema no lo devuelva a Activo por su cuenta al regularizar la deuda.
+    // (Si lo pasa a Activo teniendo 3 cuotas vencidas, el cierre diario lo volverá a degradar.)
+    if (usuario.changed('categoria')) {
+      usuario.degradadoPorMora = false;
+    }
 
     await usuario.save();
 

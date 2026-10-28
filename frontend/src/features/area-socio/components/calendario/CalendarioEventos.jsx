@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { FaChevronLeft, FaChevronRight, FaCircleCheck } from "react-icons/fa6";
 import dayjs from "@/shared/utils/fechas";
-import { yaTermino } from "../utils/eventos";
+import { yaTermino } from "../../utils/eventos";
 
 const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
