@@ -17,8 +17,15 @@ import { verificarToken } from '../middlewares/authMiddleware.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 import { uploadEvento } from '../middlewares/multer/multerEventos.js';
 import { validacionEvento, validacionActualizarEvento } from '../middlewares/validator/evento.validator.js';
+import { paramUuid } from '../middlewares/validarParametros.js';
 
 const router = Router();
+
+// El :id/:eventoId es el UUID de un evento y :inscripcionId el UUID de una inscripción: el formato se valida antes de consultar la base y se responde 400
+// (sin esto, un id inválido terminaba en un 500).
+router.param('id', paramUuid);
+router.param('eventoId', paramUuid);
+router.param('inscripcionId', paramUuid);
 
 // ==========================================
 // Rutas Públicas (Landing)

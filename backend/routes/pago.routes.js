@@ -1,8 +1,13 @@
 import { Router } from 'express';
 import { iniciarPagoOnline, recibirWebhook, obtenerMisCuotas, descargarMiComprobante } from '../controllers/pago.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
+import { paramUuid } from '../middlewares/validarParametros.js';
 
 const router = Router();
+
+// El :id de estas rutas es siempre el UUID de una cuota: si no tiene ese formato se responde 400
+// sin consultar la base (antes terminaba en un 500).
+router.param('id', paramUuid);
 
 // El socio logueado consulta SUS cuotas (solo lectura, filtrado por el id del token)
 router.get('/mis-cuotas', verificarToken, obtenerMisCuotas);

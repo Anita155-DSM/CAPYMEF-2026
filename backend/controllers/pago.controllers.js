@@ -12,6 +12,7 @@ import {
   formatearPeriodo,
 } from '../services/notificacion.service.js';
 import { evaluarCategoriaSocio } from '../services/categoria.service.js';
+import { descargarPdfGuardado } from '../services/comprobanteGuardado.service.js';
 
 // ==========================================
 // 1. INICIAR PAGO ONLINE (Socio logueado)
@@ -216,15 +217,12 @@ export const obtenerMisCuotas = async (req, res) => {
 // ==========================================
 // 4. DESCARGAR MI COMPROBANTE (Socio logueado)
 // ==========================================
-// Fallback para pagos que no tienen el PDF guardado en Cloudinary: lo regeneramos.
+// Se entrega el MISMO PDF que se emitió y se guardó en Cloudinary (urlComprobante). Solo si no está
+// o no se puede traer, se regenera como plan B.
 // Si la cuota no es del socio respondemos 404 (no confirmamos que el id exista).
+// El formato del id (UUID) ya lo valida router.param en pago.routes.js, antes de llegar acá.
 export const descargarMiComprobante = async (req, res) => {
   try {
-    // Un id que no es UUID haría fallar la consulta en Postgres (500): lo cortamos antes.
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(req.params.id)) {
-      return res.status(404).json({ exito: false, mensaje: 'Cuota no encontrada.' });
-    }
-
     const cuota = await Cuota.findOne({
       where: { id: req.params.id, usuario_id: req.usuario.id },
       include: [
@@ -241,11 +239,15 @@ export const descargarMiComprobante = async (req, res) => {
       return res.status(400).json({ exito: false, mensaje: 'Esta cuota todavía no tiene un pago registrado.' });
     }
 
-    const pdfBuffer = await generarComprobantePago({
-      socio: cuota.socio,
-      cuota: { mes_anio: cuota.mes_anio },
-      pago: cuota.pago,
-    });
+    let pdfBuffer = await descargarPdfGuardado(cuota.pago.urlComprobante);
+
+    if (!pdfBuffer) {
+      pdfBuffer = await generarComprobantePago({
+        socio: cuota.socio,
+        cuota: { mes_anio: cuota.mes_anio },
+        pago: cuota.pago,
+      });
+    }
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="comprobante-${cuota.mes_anio}.pdf"`);
