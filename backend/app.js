@@ -32,6 +32,7 @@ import { iniciarCronJobs } from './config/cron.js';//automatizados de cuotass
 import tarifaRoutes from './routes/tarifa.routes.js';
 import { asegurarTarifasIniciales } from './services/tarifa.service.js';
 import notificacionRoutes from './routes/notificacion.routes.js';
+import { rutaNoEncontrada, manejadorErrores } from './middlewares/manejadorErrores.js';
 
 
 dotenv.config();
@@ -108,6 +109,12 @@ app.get('/', (req, res) => {
     status: 'ok',
   });
 });
+
+// Manejo de errores: SIEMPRE al final, después de todas las rutas.
+// rutaNoEncontrada responde 404 a cualquier URL que no exista; manejadorErrores evita que Express
+// devuelva el stack trace (rutas de archivos del servidor) cuando algo falla.
+app.use(rutaNoEncontrada);
+app.use(manejadorErrores);
 
 // Función para conectar a la base de datos, sincronizar tablas y levantar el servidor
 const startServer = async () => {
