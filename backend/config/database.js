@@ -43,7 +43,11 @@ export const sequelize = esTest
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Conexión exitosa a PostgreSQL con Sequelize');
+    // En los tests la base es SQLite en memoria: decir "PostgreSQL" ahí hacía pensar que se estaba
+    // conectando a la base real.
+    console.log(esTest
+      ? 'Base de datos de pruebas (SQLite en memoria) lista'
+      : 'Conexión exitosa a PostgreSQL con Sequelize');
   } catch (error) {
     console.error('Error conectando a la base de datos:', error);
   }
