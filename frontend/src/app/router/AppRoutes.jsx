@@ -6,7 +6,6 @@ import MainLayout from "@/layouts/MainLayout.jsx";
 import SocioLayout from "@/layouts/SocioLayout.jsx";
 
 import Home from "@/features/landing/pages/LandingPage";
-import Profile from "@/Pages/Profile.jsx";
 import { Noticias } from "@/Pages/HomePage/index.js";
 import { ForgotPassword, Login, Register, ResetPassword } from "@/Pages/Auth/index.js";
 import {
@@ -48,10 +47,8 @@ export default function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* CUALQUIER USUARIO LOGUEADO */}
-        <Route element={<RequireAuth />}>
-          <Route path="/profile" element={<Profile />} />
-        </Route>
+        {/* /profile ya no existe como página propia: redirigimos a Mi empresa */}
+        <Route path="/profile" element={<Navigate to="/socios/empresa" replace />} />
 
         {/* SOCIOS (el admin también entra, por el link "VISTA SOCIO") */}
         <Route element={<RequireAuth roles={["socio", "admin"]} />}>

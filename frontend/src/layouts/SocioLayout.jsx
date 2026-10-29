@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import { FaBars, FaCircleUser } from "react-icons/fa6";
+import { Outlet, useNavigate } from "react-router-dom";
+import { FaBars } from "react-icons/fa6";
 import { obtenerPerfil } from "../services/authServices.js";
 import { useAuth } from "@/app/providers/AuthContext";
 import { useMisCuotas } from "@/features/area-socio/hooks/useMisCuotas";
 import { mayuscula } from "@/features/area-socio/utils/cuotas";
 import CampanaNotificaciones from "@/features/notificaciones/components/CampanaNotificaciones";
 import SidebarSocio from "./components/SidebarSocio";
+import MenuPerfilSocio from "./components/MenuPerfilSocio";
 
 export default function SocioLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false);
@@ -48,9 +49,8 @@ export default function SocioLayout() {
               <p className="text-sm font-bold text-navy">{nombreEmpresa}</p>
               <p className="text-xs text-gray-500">{categoria}</p>
             </div>
-            <Link to="/profile" aria-label="Mi cuenta">
-              <FaCircleUser className="text-4xl text-primary" />
-            </Link>
+            {/* Reemplaza el link a /profile por el dropdown de perfil */}
+            <MenuPerfilSocio />
           </div>
         </header>
 
