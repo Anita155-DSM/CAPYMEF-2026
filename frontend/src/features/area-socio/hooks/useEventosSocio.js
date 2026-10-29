@@ -14,7 +14,11 @@ import { inicioDelEvento, yaTermino } from "../utils/eventos";
 
 const noCancelado = (e) => e.estado !== "cancelado";
 
-/** Datos y acciones del calendario de eventos del socio. */
+/**
+ * Hook para la sección de Eventos y Capacitaciones del socio.
+ * Gestiona la carga de eventos, vista activa (calendario / listado),
+ * consulta de cupos, inscripciones y descarga del certificado en PDF.
+ */
 export function useEventosSocio() {
   const [mesVisible, setMesVisible] = useState(() => dayjs().startOf("month"));
   const [eventos, setEventos] = useState([]);
@@ -22,7 +26,8 @@ export function useEventosSocio() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [procesando, setProcesando] = useState(false);
-  const [cupo, setCupo] = useState({ id: null, valor: undefined }); // cupos libres del evento abierto
+  const [cupo, setCupo] = useState({ id: null, valor: undefined });
+  const [vista, setVista] = useState("calendario"); // "calendario" | "tarjetas"
 
   useEffect(() => {
     let cancelado = false;
@@ -32,14 +37,14 @@ export function useEventosSocio() {
       if (cancelado) return;
 
       if (!resultado.exito) {
-        setError(resultado.mensaje || "Error al cargar los eventos");
+        setError(resultado.mensaje || "Error al cargar los eventos.");
         setCargando(false);
         return;
       }
 
       let lista = (resultado.data || []).filter(noCancelado);
 
-      // Sin eventos para socios → se muestran los públicos
+      // Si no vinieran eventos para socios, intentamos obtener los públicos
       if (!lista.length) {
         const publicos = await obtenerEventosPublicos();
         if (cancelado) return;
@@ -50,7 +55,9 @@ export function useEventosSocio() {
 
       // Centrar el calendario en el primer evento futuro
       const primerFuturo = lista.find((e) => !yaTermino(e));
-      if (primerFuturo) setMesVisible(dayjs(primerFuturo.fecha).startOf("month"));
+      if (primerFuturo) {
+        setMesVisible(dayjs(primerFuturo.fecha).startOf("month"));
+      }
       setCargando(false);
     })();
 
@@ -59,13 +66,16 @@ export function useEventosSocio() {
     };
   }, []);
 
-  // Próximo = el primero que todavía no terminó (un evento de hoy cuenta hasta que acaba)
+  // Próximo evento programado más cercano
   const proximoEvento = useMemo(
-    () => eventos.filter((e) => !yaTermino(e)).sort((a, b) => inicioDelEvento(a).diff(inicioDelEvento(b)))[0] || null,
+    () =>
+      eventos
+        .filter((e) => !yaTermino(e))
+        .sort((a, b) => inicioDelEvento(a).diff(inicioDelEvento(b)))[0] || null,
     [eventos]
   );
 
-  // /eventos/socios no informa cuántos cupos quedan: se pregunta al detalle del evento que se abre
+  // Consulta de cupos disponibles mediante GET /api/eventos/:id
   const cargarCupo = useCallback(async (id) => {
     const resultado = await obtenerDetalleEvento(id);
     return resultado.exito ? resultado.data?.cupoDisponible ?? null : null;
@@ -82,49 +92,85 @@ export function useEventosSocio() {
     };
   }, [idSeleccionado, conLimite, cargarCupo]);
 
-  // undefined = consultando · null = sin límite o no se pudo saber · número = cupos libres
   const cupoDisponible = !conLimite ? null : cupo.id === idSeleccionado ? cupo.valor : undefined;
 
-  // Eventos que ocurren el mismo día que el seleccionado
+  // Otros eventos que se realizan en la misma fecha
   const otrosDelDia = useMemo(
     () => (seleccionado ? eventos.filter((e) => e.fecha === seleccionado.fecha && e.id !== seleccionado.id) : []),
     [eventos, seleccionado]
   );
 
-  const gestionarInscripcion = async () => {
-    if (!seleccionado || procesando) return;
+  /**
+   * Inscripción o cancelación de inscripción para el socio logueado.
+   */
+  const gestionarInscripcion = async (eventoObjetivo) => {
+    const ev = eventoObjetivo || seleccionado;
+    if (!ev || procesando) return;
+
     setProcesando(true);
-    const inscribir = !seleccionado.yaInscripto;
-    const resultado = inscribir ? await inscribirseEvento(seleccionado.id) : await cancelarInscripcion(seleccionado.id);
+    const inscribir = !ev.yaInscripto;
+    const resultado = inscribir ? await inscribirseEvento(ev.id) : await cancelarInscripcion(ev.id);
     setProcesando(false);
 
     if (!resultado.exito) {
-      toast.error(resultado.mensaje || "No se pudo actualizar la inscripción");
+      toast.error(resultado.mensaje || "No se pudo actualizar la inscripción.");
       return;
     }
-    setEventos((act) => act.map((e) => (e.id === seleccionado.id ? { ...e, yaInscripto: inscribir } : e)));
-    setSeleccionado((act) => ({ ...act, yaInscripto: inscribir }));
-    toast.success(resultado.mensaje || (inscribir ? "Inscripción registrada." : "Inscripción cancelada."));
-    if (seleccionado.cupoMaximo != null) cargarCupo(seleccionado.id).then((valor) => setCupo({ id: seleccionado.id, valor })); // los cupos cambiaron
+
+    setEventos((act) =>
+      act.map((e) => (e.id === ev.id ? { ...e, yaInscripto: inscribir } : e))
+    );
+
+    if (seleccionado?.id === ev.id) {
+      setSeleccionado((act) => ({ ...act, yaInscripto: inscribir }));
+    }
+
+    toast.success(
+      resultado.mensaje || (inscribir ? "Inscripción registrada con éxito." : "Inscripción cancelada.")
+    );
+
+    if (ev.cupoMaximo != null) {
+      cargarCupo(ev.id).then((valor) => setCupo({ id: ev.id, valor }));
+    }
   };
 
-  const descargarCertificado = async () => {
-    if (!seleccionado || procesando) return;
-    if (!idValido(seleccionado.id)) return toast.error("Evento inválido.");
+  /**
+   * Descarga segura del certificado en PDF.
+   */
+  const descargarCertificado = async (eventoObjetivo) => {
+    const ev = eventoObjetivo || seleccionado;
+    if (!ev || procesando) return;
+    if (!idValido(ev.id)) return toast.error("Evento no válido.");
 
     setProcesando(true);
-    const resultado = await obtenerCertificadoEvento(seleccionado.id);
+    const resultado = await obtenerCertificadoEvento(ev.id);
     setProcesando(false);
 
-    if (!resultado.exito) return toast.error(resultado.mensaje || "No se pudo descargar el certificado.");
-    descargarBlob(resultado.data, `certificado-${nombreArchivoSeguro(seleccionado.titulo)}.pdf`);
+    if (!resultado.exito) {
+      return toast.error(
+        resultado.mensaje || "No se pudo descargar el certificado. Verificá que la asistencia esté confirmada."
+      );
+    }
+
+    descargarBlob(resultado.data, `certificado-${nombreArchivoSeguro(ev.titulo)}.pdf`);
+    toast.success("Certificado descargado con éxito.");
   };
 
   return {
-    eventos, cargando, error, procesando,
-    mesVisible, setMesVisible,
-    seleccionado, setSeleccionado,
-    proximoEvento, otrosDelDia, cupoDisponible,
-    gestionarInscripcion, descargarCertificado,
+    eventos,
+    cargando,
+    error,
+    procesando,
+    mesVisible,
+    setMesVisible,
+    seleccionado,
+    setSeleccionado,
+    proximoEvento,
+    otrosDelDia,
+    cupoDisponible,
+    vista,
+    setVista,
+    gestionarInscripcion,
+    descargarCertificado,
   };
 }
