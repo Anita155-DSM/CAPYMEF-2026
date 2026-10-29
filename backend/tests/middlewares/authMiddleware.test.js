@@ -148,3 +148,48 @@ describe('verificarTokenOpcional', () => {
     expect(respuesta.body.usuario).toBeNull();
   });
 });
+
+describe('verificarToken después de un cambio de contraseña', () => {
+  // "iat" es el momento en que se emitió el token, en segundos. Se fija a mano para controlar
+  // exactamente si el token es anterior, posterior o del mismo segundo que el cambio de contraseña.
+  const iat = Math.floor(Date.now() / 1000) - 120; // emitido hace 2 minutos
+  const tokenEmitidoEn = (id) => firmar({ id, iat });
+  const pedirCon = (token) => request(app).get('/protegida').set('Authorization', `Bearer ${token}`);
+
+  it('deja pasar el token si la contraseña nunca se cambió', async () => {
+    const usuario = await crearUsuario({ passwordChangedAt: null });
+
+    const respuesta = await pedirCon(tokenEmitidoEn(usuario.id));
+
+    expect(respuesta.status).toBe(200);
+  });
+
+  it('responde 403 si la contraseña se cambió después de emitido el token', async () => {
+    // Es el caso de una sesión robada: el dueño restablece la clave y el token viejo deja de servir.
+    const usuario = await crearUsuario({ passwordChangedAt: new Date((iat + 60) * 1000) });
+
+    const respuesta = await pedirCon(tokenEmitidoEn(usuario.id));
+
+    expect(respuesta.status).toBe(403);
+    expect(respuesta.body.mensaje).toContain('Iniciá sesión');
+  });
+
+  it('deja pasar un token emitido después del cambio de contraseña', async () => {
+    // Por ejemplo, el login que el socio hace con su clave nueva.
+    const usuario = await crearUsuario({ passwordChangedAt: new Date((iat - 60) * 1000) });
+
+    const respuesta = await pedirCon(tokenEmitidoEn(usuario.id));
+
+    expect(respuesta.status).toBe(200);
+  });
+
+  it('deja pasar un token emitido en el mismo segundo del cambio', async () => {
+    // "iat" no tiene milisegundos: si el cambio fue a los 500 ms de ese segundo, el login que sigue
+    // al restablecimiento queda con el mismo iat y no debe rechazarse.
+    const usuario = await crearUsuario({ passwordChangedAt: new Date(iat * 1000 + 500) });
+
+    const respuesta = await pedirCon(tokenEmitidoEn(usuario.id));
+
+    expect(respuesta.status).toBe(200);
+  });
+});
