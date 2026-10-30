@@ -73,14 +73,14 @@ export default function TarjetaProximoEvento({ estado }) {
   }
 
   return (
-    <section className="flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center justify-between gap-3 border-b border-gray-100 pb-3">
         <h2 className="text-base font-bold uppercase tracking-wide text-gray-700">Próximo evento</h2>
         <Link to="/socios/eventos" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-primary-dark hover:underline">
           {evento?.yaInscripto ? "Ver detalle" : "Ver todos"} <FaArrowRight />
         </Link>
       </div>
-      <div className="flex-1">{contenido}</div>
+      <div>{contenido}</div>
     </section>
   );
 }

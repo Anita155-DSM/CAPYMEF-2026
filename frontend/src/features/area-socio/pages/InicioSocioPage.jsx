@@ -81,10 +81,10 @@ export default function InicioSocioPage() {
         <>
           <TarjetaCuota cuota={cuotaActual} cuotas={cuotas} errorCuotas={errorCuotas} />
 
-          {/* Las dos columnas miden lo mismo: Novedades se estira hasta el final de la columna izquierda */}
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
-            <div className="space-y-6">
-              <EstadoCuenta cuotas={cuotas} />
+          <EstadoCuenta cuotas={cuotas} />
+
+          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
+            <div>
               <TarjetaProximoEvento estado={evento} />
             </div>
             <TarjetaNovedades estado={noticias} />
@@ -92,7 +92,7 @@ export default function InicioSocioPage() {
         </>
       ) : (
         /* Si NO abona cuota (Padrino / Adherente / Honorario): vista limpia y distribuida en 2 columnas */
-        <div className="grid gap-6 lg:grid-cols-2 items-stretch">
+        <div className="grid items-start gap-6 lg:grid-cols-2">
           <TarjetaProximoEvento estado={evento} />
           <TarjetaNovedades estado={noticias} />
         </div>
