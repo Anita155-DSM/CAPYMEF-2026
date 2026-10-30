@@ -35,7 +35,7 @@ export default function ConfiguracionSocioPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <header>
         <p className="mb-1 text-sm font-semibold text-primary">TU CUENTA</p>
-        <h1 className="text-2xl font-bold uppercase tracking-tight text-navy sm:text-3xl">Configuración</h1>
+        <h1 className="text-2xl font-semibold uppercase tracking-tight text-navy sm:text-3xl">Configuración</h1>
       </header>
 
       <div className="space-y-6">

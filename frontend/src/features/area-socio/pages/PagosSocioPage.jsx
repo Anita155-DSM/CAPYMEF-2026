@@ -48,7 +48,7 @@ export default function PagosSocioPage() {
       <div className="space-y-6">
         <header>
           <p className="mb-1 text-sm font-semibold text-primary">TU APORTE A CAPYMEF</p>
-          <h1 className="text-2xl font-bold uppercase tracking-tight text-navy sm:text-3xl">
+          <h1 className="text-2xl font-semibold uppercase tracking-tight text-navy sm:text-3xl">
             Contribuciones
           </h1>
         </header>
@@ -106,7 +106,7 @@ export default function PagosSocioPage() {
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div>
           <p className="mb-1 text-sm font-semibold text-primary">TUS CUOTAS</p>
-          <h1 className="text-2xl font-bold uppercase tracking-tight text-navy sm:text-3xl">Pagos</h1>
+          <h1 className="text-2xl font-semibold uppercase tracking-tight text-navy sm:text-3xl">Pagos</h1>
           <p className="mt-1 text-sm text-gray-600">Consultá tus cuotas, pagá online y descargá tus comprobantes.</p>
         </div>
         <button

@@ -52,7 +52,7 @@ export default function EncabezadoEmpresa({ usuario, cuotas, errorCuotas }) {
         </div>
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Mi empresa</p>
-          <h1 className="mt-1 break-words text-2xl font-bold leading-tight sm:text-3xl">{nombre}</h1>
+          <h1 className="mt-1 break-words text-2xl font-semibold leading-tight sm:text-3xl">{nombre}</h1>
           <div className="mt-3 flex flex-wrap gap-2">
             <span className={chip}>
               <span className={`h-2 w-2 rounded-full ${estado.punto}`} /> {estado.texto}

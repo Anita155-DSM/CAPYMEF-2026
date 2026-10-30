@@ -48,7 +48,7 @@ export default function EventosSocioPage() {
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="mb-1 text-sm font-semibold text-primary">ENCUENTROS Y FORMACIÓN</p>
-          <h1 className="text-2xl font-bold uppercase tracking-tight text-navy sm:text-3xl">
+          <h1 className="text-2xl font-semibold uppercase tracking-tight text-navy sm:text-3xl">
             Eventos y capacitaciones
           </h1>
           <p className="mt-1 max-w-xl text-sm leading-relaxed text-gray-600">

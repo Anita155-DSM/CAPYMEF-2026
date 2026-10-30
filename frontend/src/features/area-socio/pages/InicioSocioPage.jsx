@@ -61,7 +61,7 @@ export default function InicioSocioPage() {
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="min-w-0">
           <p className="mb-1 text-sm font-semibold text-primary">PANEL DE SOCIO</p>
-          <h1 className="break-words text-2xl font-bold uppercase tracking-tight text-navy sm:text-3xl">Hola, {nombreEmpresa}</h1>
+          <h1 className="break-words text-2xl font-semibold uppercase tracking-tight text-navy sm:text-3xl">Hola, {nombreEmpresa}</h1>
           <p className="mt-2 text-sm text-gray-600">
             Socio N° {usuario.id || "-"} <span className="mx-2">•</span> {rubro} <span className="mx-2">•</span> {localidad}
           </p>
