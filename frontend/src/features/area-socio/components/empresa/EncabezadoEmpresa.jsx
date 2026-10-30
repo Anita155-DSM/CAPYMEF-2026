@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { FaAward, FaCircleCheck, FaGears, FaLocationDot } from "react-icons/fa6";
-import { mayuscula } from "../../utils/cuotas";
+import { abonaCuotaSocial, mayuscula } from "../../utils/cuotas";
 import { datosAntiguedad, ESTADOS_SOCIO, iniciales } from "../../utils/empresa";
 
 const chip = "inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold ring-1 ring-white/20";
@@ -20,6 +20,9 @@ export default function EncabezadoEmpresa({ usuario, cuotas, errorCuotas }) {
   const estado = ESTADOS_SOCIO[usuario.estado] || ESTADOS_SOCIO.aprobado;
   const { desde, antiguedad } = datosAntiguedad(usuario.createdAt);
   const impagas = Array.isArray(cuotas) ? cuotas.filter((c) => c.estado !== "pagada").length : 0;
+
+  // Solo los socios activos abonan cuota social
+  const sinCuotas = !abonaCuotaSocial(usuario?.categoria);
 
   let estadoCuotas;
   if (cuotas === undefined) estadoCuotas = "Cargando...";
@@ -71,12 +74,12 @@ export default function EncabezadoEmpresa({ usuario, cuotas, errorCuotas }) {
         </div>
       </div>
 
-      <div className="relative grid divide-y divide-white/10 border-t border-white/10 bg-black/10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <div className={`relative grid divide-y divide-white/10 border-t border-white/10 bg-black/10 ${sinCuotas ? "sm:grid-cols-2" : "sm:grid-cols-3"} sm:divide-x sm:divide-y-0`}>
         <Dato etiqueta="N° de socio">{usuario.id ? `N° ${usuario.id}` : "-"}</Dato>
         <Dato etiqueta="Cuenta creada" sub={antiguedad && `${antiguedad} en CAPYMEF`}>
           {desde ? <span className="first-letter:uppercase">{desde}</span> : "-"}
         </Dato>
-        <Dato etiqueta="Estado de cuotas">{estadoCuotas}</Dato>
+        {!sinCuotas && <Dato etiqueta="Estado de cuotas">{estadoCuotas}</Dato>}
       </div>
     </section>
   );

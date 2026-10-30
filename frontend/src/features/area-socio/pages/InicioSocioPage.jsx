@@ -6,16 +6,15 @@ import TarjetaCuota from "../components/pagos/TarjetaCuota";
 import TarjetaNovedades from "../components/inicio/TarjetaNovedades";
 import TarjetaProximoEvento from "../components/inicio/TarjetaProximoEvento";
 import { useNovedadesInicio } from "../hooks/useNovedadesInicio";
-import { elegirCuotaActual } from "../utils/cuotas";
+import { abonaCuotaSocial, elegirCuotaActual, mayuscula } from "../utils/cuotas";
 
 const insignia = "inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-white shadow-sm";
 
 /**
- * Insignia de la esquina: refleja la situación REAL de las cuotas.
- * (Antes decía "Estás al día" también cuando todavía no había ninguna cuota generada.)
+ * Insignia de la esquina: refleja la situación REAL de las cuotas para socios con cuota mensual activa.
  */
 function EstadoDePagos({ cuotas, errorCuotas }) {
-  if (!Array.isArray(cuotas) || errorCuotas) return null; // cargando, no disponible o con error: no afirmamos nada
+  if (!Array.isArray(cuotas) || errorCuotas) return null;
 
   const impagas = cuotas.filter((c) => c.estado !== "pagada").length;
   const vencidas = cuotas.filter((c) => c.estado === "vencida").length;
@@ -45,10 +44,13 @@ function EstadoDePagos({ cuotas, errorCuotas }) {
 }
 
 export default function InicioSocioPage() {
-  const { usuario, cuotas, errorCuotas } = useOutletContext(); // vienen del SocioLayout
+  const { usuario, cuotas, errorCuotas } = useOutletContext();
   const { evento, noticias } = useNovedadesInicio();
 
   const cuotaActual = useMemo(() => (Array.isArray(cuotas) ? elegirCuotaActual(cuotas) : null), [cuotas]);
+
+  // Solo los socios activos abonan cuota social mensual; Padrinos, Adherentes y Honorarios no
+  const sinCuotas = !abonaCuotaSocial(usuario?.categoria);
 
   const nombreEmpresa = usuario.razonSocial || "Tu empresa";
   const rubro = usuario.rubro || "Rubro no informado";
@@ -64,19 +66,37 @@ export default function InicioSocioPage() {
             Socio N° {usuario.id || "-"} <span className="mx-2">•</span> {rubro} <span className="mx-2">•</span> {localidad}
           </p>
         </div>
-        <EstadoDePagos cuotas={cuotas} errorCuotas={errorCuotas} />
+
+        {sinCuotas ? (
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-surface-blue px-3.5 py-1.5 text-xs sm:text-sm font-bold text-primary border border-primary/20 shadow-2xs">
+            Categoría {mayuscula(usuario.categoria) || "Socio"}
+          </span>
+        ) : (
+          <EstadoDePagos cuotas={cuotas} errorCuotas={errorCuotas} />
+        )}
       </section>
 
-      <TarjetaCuota cuota={cuotaActual} cuotas={cuotas} errorCuotas={errorCuotas} />
+      {/* Si abona cuota (Socio Activo): muestra tarjeta de cuota y estado de cuenta */}
+      {!sinCuotas ? (
+        <>
+          <TarjetaCuota cuota={cuotaActual} cuotas={cuotas} errorCuotas={errorCuotas} />
 
-      {/* Las dos columnas miden lo mismo: Novedades se estira hasta el final de la columna izquierda */}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
-        <div className="space-y-6">
-          <EstadoCuenta cuotas={cuotas} />
+          {/* Las dos columnas miden lo mismo: Novedades se estira hasta el final de la columna izquierda */}
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
+            <div className="space-y-6">
+              <EstadoCuenta cuotas={cuotas} />
+              <TarjetaProximoEvento estado={evento} />
+            </div>
+            <TarjetaNovedades estado={noticias} />
+          </div>
+        </>
+      ) : (
+        /* Si NO abona cuota (Padrino / Adherente / Honorario): vista limpia y distribuida en 2 columnas */
+        <div className="grid gap-6 lg:grid-cols-2 items-stretch">
           <TarjetaProximoEvento estado={evento} />
+          <TarjetaNovedades estado={noticias} />
         </div>
-        <TarjetaNovedades estado={noticias} />
-      </div>
+      )}
     </div>
   );
 }

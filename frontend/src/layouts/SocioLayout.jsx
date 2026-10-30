@@ -35,7 +35,13 @@ export default function SocioLayout() {
 
   return (
     <div className="min-h-screen bg-surface text-navy font-sans">
-      <SidebarSocio abierto={menuAbierto} onCerrar={cerrarMenu} onSalir={salir} />
+      {/* Se pasa la categoría raw (sin mayuscula) para que el sidebar pueda filtrar */}
+      <SidebarSocio
+        abierto={menuAbierto}
+        onCerrar={cerrarMenu}
+        onSalir={salir}
+        categoria={usuario.categoria}
+      />
 
       <div className="lg:pl-64">
         <header className="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-5 shadow-sm sm:px-8">
@@ -49,7 +55,6 @@ export default function SocioLayout() {
               <p className="text-sm font-bold text-navy">{nombreEmpresa}</p>
               <p className="text-xs text-gray-500">{categoria}</p>
             </div>
-            {/* Reemplaza el link a /profile por el dropdown de perfil */}
             <MenuPerfilSocio />
           </div>
         </header>

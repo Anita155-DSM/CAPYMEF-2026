@@ -5,9 +5,9 @@ import AvisoCuotasNoDisponibles from "./AvisoCuotasNoDisponibles";
 import ModalPagoCuotaLazy from "./ModalPagoCuotaLazy";
 
 function etiquetaEstado(cuota) {
-  if (cuota.estado === "pagada") return { texto: "Pagada", clase: "bg-[#61d5a5] text-[#247c5c]" };
-  if (cuota.estado === "vencida") return { texto: `Venció el ${formatearFechaCuota(cuota.fecha_vencimiento)}`, clase: "bg-[#f7b4a2] text-[#9b3418]" };
-  return { texto: `Vence el ${formatearFechaCuota(cuota.fecha_vencimiento)} ◷`, clase: "bg-gray-300 text-gray-600" };
+  if (cuota.estado === "pagada") return { texto: "Pagada", clase: "bg-emerald-100 text-emerald-800" };
+  if (cuota.estado === "vencida") return { texto: `Venció el ${formatearFechaCuota(cuota.fecha_vencimiento)}`, clase: "bg-red-100 text-red-800" };
+  return { texto: `Vence el ${formatearFechaCuota(cuota.fecha_vencimiento)} ◷`, clase: "bg-amber-100 text-amber-800" };
 }
 
 /** Cuota actual del socio. `cuotas` y `errorCuotas` vienen del layout (useMisCuotas). */
@@ -25,9 +25,9 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
     contenido = (
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
         <div>
-          <p className="text-sm font-medium uppercase text-gray-600">Cuota de {formatearPeriodo(cuota.mes_anio)}</p>
-          <p className="mt-1 text-4xl font-bold text-[#151515]">{formatearMonto(cuota.monto)}</p>
-          <span className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${estado.clase}`}>{estado.texto}</span>
+          <p className="text-sm font-semibold uppercase tracking-wider text-gray-500">Cuota de {formatearPeriodo(cuota.mes_anio)}</p>
+          <p className="mt-1 text-3xl font-bold text-navy sm:text-4xl">{formatearMonto(cuota.monto)}</p>
+          <span className={`mt-2.5 inline-flex rounded-full px-3 py-1 text-xs font-bold ${estado.clase}`}>{estado.texto}</span>
         </div>
         <div className="flex flex-wrap gap-3">
           {pagada ? (
@@ -35,7 +35,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
               type="button"
               disabled={Boolean(procesando)}
               onClick={() => descargar(cuota)}
-              className="rounded-lg inline-flex items-center gap-2 border border-gray-300 bg-[#f5f9fc] px-3 py-2 text-sm font-medium hover:bg-gray-100 disabled:opacity-60"
+              className="rounded-lg inline-flex items-center gap-2 border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-navy transition-colors hover:bg-surface-blue hover:text-primary disabled:opacity-60 cursor-pointer shadow-xs"
             >
               {procesando ? "Descargando..." : "Descargar comprobante"} <FaDownload />
             </button>
@@ -44,7 +44,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
               type="button"
               disabled={Boolean(procesando)}
               onClick={() => pagar(cuota)}
-              className="rounded-lg inline-flex items-center gap-2 bg-[#2693bf] px-4 py-2 text-sm font-bold text-white hover:bg-[#1b789f] disabled:opacity-60"
+              className="rounded-lg inline-flex items-center gap-2 bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 cursor-pointer shadow-sm"
             >
               Pagar cuota <FaCreditCard />
             </button>

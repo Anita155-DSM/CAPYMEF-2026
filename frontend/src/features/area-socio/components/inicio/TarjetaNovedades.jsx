@@ -39,7 +39,7 @@ export default function TarjetaNovedades({ estado }) {
         <FaNewspaper className="text-primary" />
       </div>
       <div className="flex-1">{contenido}</div>
-      <Link to="/socios/noticias" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline">
+      <Link to="/socios/noticias" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">
         Ver todas las noticias <FaChevronRight />
       </Link>
     </section>

@@ -37,3 +37,10 @@ export const ESTILOS_ESTADO_CUOTA = {
 };
 
 export const mayuscula = (texto) => (texto ? texto.replace(/^./, (l) => l.toUpperCase()) : "");
+
+/**
+ * Solo los socios "Activos" abonan cuota social mensual.
+ * Adherentes, Honorarios y Padrinos (contribución eventual) no abonan cuota periódica.
+ */
+export const abonaCuotaSocial = (categoria) =>
+  String(categoria || "").trim().toLowerCase() === "activo";

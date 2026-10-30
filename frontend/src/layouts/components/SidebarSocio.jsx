@@ -12,11 +12,12 @@ import {
 } from "react-icons/fa6";
 import logo from "@/assets/img/logo.png";
 import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
+import { abonaCuotaSocial } from "@/features/area-socio/utils/cuotas";
 
-const MENU = [
+const MENU_BASE = [
   { nombre: "Inicio", icono: FaHouse, ruta: "/socios", exacta: true },
   { nombre: "Mi empresa", icono: FaBuilding, ruta: "/socios/empresa" },
-  { nombre: "Pagos", icono: FaMoneyBillWave, ruta: "/socios/pagos" },
+  { nombre: "Pagos", icono: FaMoneyBillWave, ruta: "/socios/pagos", soloConCuota: true },
   { nombre: "Eventos", icono: FaCalendarCheck, ruta: "/socios/eventos" },
   { nombre: "Noticias", icono: FaNewspaper, ruta: "/socios/noticias" },
 ];
@@ -26,8 +27,8 @@ const claseItem = ({ isActive }) =>
     isActive ? "border-[#38a4df] bg-white/20" : "border-transparent hover:bg-white/10"
   }`;
 
-export default function SidebarSocio({ abierto, onCerrar, onSalir }) {
-  useBloquearScroll(abierto); 
+export default function SidebarSocio({ abierto, onCerrar, onSalir, categoria }) {
+  useBloquearScroll(abierto);
 
   useEffect(() => {
     if (!abierto) return undefined;
@@ -35,6 +36,11 @@ export default function SidebarSocio({ abierto, onCerrar, onSalir }) {
     window.addEventListener("keydown", alTeclear);
     return () => window.removeEventListener("keydown", alTeclear);
   }, [abierto, onCerrar]);
+
+  // Solo los socios activos ven la sección "Pagos" (cuotas sociales)
+  const menu = MENU_BASE.filter(
+    (item) => !item.soloConCuota || abonaCuotaSocial(categoria)
+  );
 
   return (
     <>
@@ -57,7 +63,7 @@ export default function SidebarSocio({ abierto, onCerrar, onSalir }) {
         </div>
 
         <nav aria-label="Menú del socio" className="flex-1 space-y-2 overflow-y-auto px-3 py-7">
-          {MENU.map(({ nombre, icono: Icono, ruta, exacta }) => (
+          {menu.map(({ nombre, icono: Icono, ruta, exacta }) => (
             <NavLink key={ruta} to={ruta} end={exacta} onClick={onCerrar} className={claseItem}>
               <Icono className="w-6 text-lg" />
               {nombre}
