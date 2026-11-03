@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { iniciarPagoOnline, recibirWebhook, obtenerMisCuotas, descargarMiComprobante } from '../controllers/pago.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { paramUuid } from '../middlewares/validarParametros.js';
+import { verificarOrigenWebhook } from '../middlewares/firmaMercadoPago.js';
 
 const router = Router();
 
@@ -16,7 +17,9 @@ router.get('/mis-cuotas/:id/comprobante', verificarToken, descargarMiComprobante
 // El socio logueado inicia el pago de SU cuota
 router.post('/:id/iniciar', verificarToken, iniciarPagoOnline);
 
-// Mercado Pago llama a esta ruta SIN token — es el propio servidor de MP quien la invoca
-router.post('/webhook', recibirWebhook);
+// Mercado Pago llama a esta ruta SIN token — es el propio servidor de MP quien la invoca.
+// Como no hay token, se verifica la firma del aviso para que nadie pueda mandar uno falso
+// (según MP_WEBHOOK_MODE: off / log / enforce).
+router.post('/webhook', verificarOrigenWebhook, recibirWebhook);
 
 export default router;
