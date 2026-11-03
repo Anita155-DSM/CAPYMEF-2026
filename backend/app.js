@@ -56,8 +56,8 @@ const dominiosPermitidos = [
 //     exito: false,
 //     mensaje: "Has superado el límite de peticiones. Por favor, intentá de nuevo en 15 minutos." // aviso de que sucede
 //   },
-//   standardHeaders: true, 
-//   legacyHeaders: false, 
+//   standardHeaders: true,
+//   legacyHeaders: false,
 // });
 // // Aplicamos el limitador a todas las rutas que empiecen con /api/
 // app.use('/api/', limitadorGeneral);
