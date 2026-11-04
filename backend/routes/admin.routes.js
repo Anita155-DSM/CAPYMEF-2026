@@ -5,6 +5,7 @@ import { darDeBajaSocio, obtenerTodosLosUsuarios } from '../controllers/admin.co
 import { obtenerDistribucionPorLocalidad, obtenerDistribucionPorRubro } from '../controllers/admin.controllers.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 import { validacionActualizarSocio } from '../middlewares/validator/user.validator.js';
+import { obtenerResumenInicio } from '../controllers/admin.controllers.js';
 import { paramEntero } from '../middlewares/validarParametros.js';
 
 const router = Router();
@@ -30,6 +31,9 @@ router.get("/reportes/distribucion-localidad", obtenerDistribucionPorLocalidad);
 
 // enpoint de registros de logs (de acciones de quien hizo que, solo puede acceder el administrador)
 router.get('/auditorias', obtenerAuditorias)
+
+// Cifras reales para las tarjetas del inicio del panel (antes eran inventadas en el frontend)
+router.get('/resumen-inicio', obtenerResumenInicio);
 
 
 export default router;

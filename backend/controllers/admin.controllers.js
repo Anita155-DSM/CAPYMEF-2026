@@ -2,6 +2,8 @@
 import { User } from "../models/user.models.js"; 
 import { fn, col, literal, Op } from "sequelize";
 import { Auditoria } from "../models/auditoria.models.js";
+import { calcularResumenInicio } from "../services/resumenInicio.service.js";
+import { fechaHoyArgentina } from "../services/cuota.service.js";
 
 // ============================================================================
 // PANTALLA: DASHBOARD DE REPORTES (Gráficos y Geolocalización)
@@ -335,5 +337,20 @@ export const obtenerAuditorias = async (req, res) => {
       exito: false,
       mensaje: 'Error al consultar la auditoría del sistema'
     });
+  }
+};
+
+// ==========================================
+// RESUMEN PARA EL INICIO DEL PANEL (tarjetas de recaudación, morosidad y próximo evento)
+// ==========================================
+// Devuelve números crudos (no textos como "$1.850.000"): el formato lo decide el frontend.
+// Las reglas de cada cifra están documentadas en services/resumenInicio.service.js.
+export const obtenerResumenInicio = async (req, res) => {
+  try {
+    const data = await calcularResumenInicio({ hoy: fechaHoyArgentina() });
+    res.status(200).json({ exito: true, data });
+  } catch (error) {
+    console.error("Error al calcular el resumen del inicio:", error);
+    res.status(500).json({ exito: false, mensaje: "Error interno del servidor al calcular el resumen." });
   }
 };
