@@ -2,8 +2,13 @@ import { Router } from 'express';
 import { ejecutarGeneracionCuotas, obtenerCuotas, obtenerCuotasPendientes, registrarPagoManual, obtenerResumenFinanciero, descargarComprobante, ejecutarMarcadoVencidas, confirmarPagos, obtenerPagosSinConfirmar, ejecutarRecordatorios } from '../controllers/cuota.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
+import { paramUuid } from '../middlewares/validarParametros.js';
 
 const router = Router();
+
+// El :id es el UUID de una cuota: el formato se valida antes de consultar la base y se responde 400
+// (sin esto, un id inválido terminaba en un 500).
+router.param('id', paramUuid);
 
 // Todas las rutas requieren token administrativo
 router.use(verificarToken);

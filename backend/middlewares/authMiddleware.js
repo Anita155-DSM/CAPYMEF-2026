@@ -12,11 +12,22 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Devuelve el usuario actualizado para armar req.usuario, o null si la cuenta no puede operar.
 const cargarUsuarioHabilitado = async (decodificado) => {
   const usuario = await User.findByPk(decodificado.id, {
-    attributes: ['id', 'email', 'rol', 'estado', 'categoria'],
+    attributes: ['id', 'email', 'rol', 'estado', 'categoria', 'passwordChangedAt'],
   });
 
   if (!usuario) return { usuario: null, motivo: 'La cuenta ya no existe.' };
   if (usuario.estado !== 'aprobado') return { usuario: null, motivo: 'Tu cuenta no está habilitada.' };
+
+  // Si la contraseña se cambió DESPUÉS de emitido el token, ese token ya no vale. Sin esto, quien
+  // hubiera robado una sesión seguía adentro hasta 8 horas aunque el dueño restableciera su clave.
+  // "iat" (momento de emisión) está en segundos, por eso se compara en segundos: un token emitido en
+  // el mismo segundo del cambio (el login que sigue al restablecimiento) sigue siendo válido.
+  if (usuario.passwordChangedAt) {
+    const cambioEnSegundos = Math.floor(usuario.passwordChangedAt.getTime() / 1000);
+    if (!decodificado.iat || decodificado.iat < cambioEnSegundos) {
+      return { usuario: null, motivo: 'La sesión ya no es válida. Iniciá sesión nuevamente.' };
+    }
+  }
 
   return {
     usuario: {

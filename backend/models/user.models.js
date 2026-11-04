@@ -10,46 +10,46 @@ export const User = sequelize.define('User', {
   email: { type: DataTypes.STRING(100), allowNull: false, unique: true },
   password: { type: DataTypes.STRING(255), allowNull: false },
   constanciaUrl: { type: DataTypes.STRING, allowNull: true },
-  
+
   // ==========================================
   // 2. Datos de Contacto (Nuevos - Estatuto Capymef)
   // ==========================================
   telefono: { type: DataTypes.STRING(20), allowNull: false },
   localidad: { type: DataTypes.STRING(100), allowNull: false },
-  
+
   // ==========================================
   // 3. Categorización Capymef
   // ==========================================
-  categoria: { 
+  categoria: {
     // Crucial para saber a quién cobrarle y cuánto (Épica 2)
-    type: DataTypes.ENUM('activo', 'adherente', 'padrino', 'honorario'), 
+    type: DataTypes.ENUM('activo', 'adherente', 'padrino', 'honorario'),
     allowNull: false,
-    defaultValue: 'adherente' 
+    defaultValue: 'adherente'
   },
-  rubro: { 
-    type: DataTypes.ENUM('Comercio', 'Industria', 'Servicios', 'Agropecuario', 'Otro'), 
-    allowNull: false 
+  rubro: {
+    type: DataTypes.ENUM('Comercio', 'Industria', 'Servicios', 'Agropecuario', 'Otro'),
+    allowNull: false
   },
-  actividad: { 
-    type: DataTypes.STRING, 
-    allowNull: true 
+  actividad: {
+    type: DataTypes.STRING,
+    allowNull: true
   },
-  tamano_empresa: { 
-    type: DataTypes.ENUM('Micro', 'Pequena', 'Mediana', 'Grande'), 
-    allowNull: true 
+  tamano_empresa: {
+    type: DataTypes.ENUM('Micro', 'Pequena', 'Mediana', 'Grande'),
+    allowNull: true
   },
   // ...
-  
+
   // ==========================================
   // 4. Control de Administración y Accesos
   // ==========================================
-  estado: { 
-    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado', 'inactivo'), 
-    defaultValue: 'pendiente' 
+  estado: {
+    type: DataTypes.ENUM('pendiente', 'aprobado', 'rechazado', 'inactivo'),
+    defaultValue: 'pendiente'
   },
-  rol: { 
-    type: DataTypes.ENUM('socio', 'admin'), 
-    defaultValue: 'socio' 
+  rol: {
+    type: DataTypes.ENUM('socio', 'admin'),
+    defaultValue: 'socio'
   },
    // ==========================================
   // 5. Recuperación de contraseña
@@ -58,13 +58,14 @@ export const User = sequelize.define('User', {
   // así, si alguien accede a la base, no puede generar links de reset válidos.
   resetPasswordToken: { type: DataTypes.STRING, allowNull: true },
   resetPasswordExpires: { type: DataTypes.DATE, allowNull: true },
+  passwordChangedAt: { type: DataTypes.DATE, allowNull: true },
   degradadoPorMora: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
      defaultValue: false, // true solo si el sistema lo pasó a Adherente por mora; permite devolverlo a Activo al regularizar
   },
-}, 
-{ 
+},
+{
   paranoid: true,
-  timestamps: true 
+  timestamps: true
 });

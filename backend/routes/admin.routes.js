@@ -5,8 +5,13 @@ import { darDeBajaSocio, obtenerTodosLosUsuarios } from '../controllers/admin.co
 import { obtenerDistribucionPorLocalidad, obtenerDistribucionPorRubro } from '../controllers/admin.controllers.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 import { validacionActualizarSocio } from '../middlewares/validator/user.validator.js';
+import { paramEntero } from '../middlewares/validarParametros.js';
 
 const router = Router();
+
+// El :id es el id numérico de un usuario: el formato se valida antes de consultar la base y se responde 400
+// (sin esto, un id inválido terminaba en un 500).
+router.param('id', paramEntero);
 
 // Todas las rutas de este archivo exigirán que el usuario esté logueado
 router.use(verificarToken); 

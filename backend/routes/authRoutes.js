@@ -3,15 +3,15 @@ import { loginUsuario, registrarUsuario, obtenerPerfil, actualizarPerfil, recupe
 import { validacionRegistro, validacionLogin } from '../middlewares/validator/user.validator.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { uploadNube } from '../middlewares/multer/multerCloudinary.js';
-import { limitadorLogin, limitadorRecuperacion } from '../middlewares/rateLimiters.js';
+import { limitadorLoginPorIp, limitadorLoginPorCuenta, limitadorRecuperacion, limitadorRestablecer } from '../middlewares/rateLimiters.js';
 
 const router = Router();
 
 // Rutas Públicas (No requieren token)
 router.post('/registro', uploadNube.single('constancia'), validacionRegistro, registrarUsuario);
-router.post('/login', limitadorLogin, validacionLogin, loginUsuario);
+router.post('/login', limitadorLoginPorIp, limitadorLoginPorCuenta, validacionLogin, loginUsuario);
 router.post('/recuperar-password', limitadorRecuperacion, recuperarPassword);
-router.put('/restablecer-password/:token', restablecerPassword);
+router.put('/restablecer-password/:token', limitadorRestablecer, restablecerPassword);
 
 // Rutas Protegidas (SÍ requieren token)
 router.get('/perfil', verificarToken, obtenerPerfil);

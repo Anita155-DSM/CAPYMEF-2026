@@ -32,6 +32,7 @@ import { iniciarCronJobs } from './config/cron.js';//automatizados de cuotass
 import tarifaRoutes from './routes/tarifa.routes.js';
 import { asegurarTarifasIniciales } from './services/tarifa.service.js';
 import notificacionRoutes from './routes/notificacion.routes.js';
+import { rutaNoEncontrada, manejadorErrores } from './middlewares/manejadorErrores.js';
 
 
 dotenv.config();
@@ -55,8 +56,8 @@ const dominiosPermitidos = [
 //     exito: false,
 //     mensaje: "Has superado el límite de peticiones. Por favor, intentá de nuevo en 15 minutos." // aviso de que sucede
 //   },
-//   standardHeaders: true, 
-//   legacyHeaders: false, 
+//   standardHeaders: true,
+//   legacyHeaders: false,
 // });
 // // Aplicamos el limitador a todas las rutas que empiecen con /api/
 // app.use('/api/', limitadorGeneral);
@@ -109,11 +110,17 @@ app.get('/', (req, res) => {
   });
 });
 
+// Manejo de errores: SIEMPRE al final, después de todas las rutas.
+// rutaNoEncontrada responde 404 a cualquier URL que no exista; manejadorErrores evita que Express
+// devuelva el stack trace (rutas de archivos del servidor) cuando algo falla.
+app.use(rutaNoEncontrada);
+app.use(manejadorErrores);
+
 // Función para conectar a la base de datos, sincronizar tablas y levantar el servidor
 const startServer = async () => {
   try {
     // 1. Probar la conexión y sincronizar tablas (las crea si no existen)
-    await sequelize.sync({alter: true}); //{alter: true}
+    await sequelize.sync(); //{alter: true}
     await asegurarTarifasIniciales(); // siembra las tarifas de las categorías que todavía no tengan
     console.log('Conexión exitosa a PostgreSQL y tablas sincronizadas con Sequelize');
 

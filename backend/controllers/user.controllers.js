@@ -340,6 +340,8 @@ export const restablecerPassword = async (req, res) => {
     usuario.password = await bcrypt.hash(password, salt);
     usuario.resetPasswordToken = null;
     usuario.resetPasswordExpires = null;
+    // Marca el momento del cambio: verificarToken rechaza cualquier sesión abierta antes de este instante.
+    usuario.passwordChangedAt = new Date();
     await usuario.save();
 
     //auditoria

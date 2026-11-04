@@ -257,15 +257,26 @@ export const actualizarSocio = async (req, res) => {
 // ======================================================
 export const obtenerAuditorias = async (req, res) => {
   try {
-    const { 
-      modulo, 
-      accionTipo, 
-      busqueda, 
-      fechaInicio, 
-      fechaFin,
-      page = 1, 
-      limit = 10 
-    } = req.query;
+    // Solo se aceptan textos: si llega otra cosa (por ejemplo ?modulo[]=x, que Express convierte en
+    // array) se ignora en vez de romper con un error.
+    const texto = (valor) => (typeof valor === 'string' && valor.trim() ? valor.trim() : undefined);
+    const modulo = texto(req.query.modulo);
+    const accionTipo = texto(req.query.accionTipo);
+    const busqueda = texto(req.query.busqueda);
+    const fechaInicio = texto(req.query.fechaInicio);
+    const fechaFin = texto(req.query.fechaFin);
+
+    // Paginación segura: antes, page=abc o limit=abc producían NaN, la base de datos fallaba y la
+    // respuesta devolvía el mensaje interno del motor SQL. Ahora un valor inválido usa el
+    // predeterminado, y el límite tiene un máximo (100) para que nadie pida la tabla entera de una vez.
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 10, 1), 100);
+
+    // Fechas inválidas: se rechazan con un 400 claro en vez de dejar que fallen en la base de datos.
+    if ((fechaInicio && Number.isNaN(new Date(fechaInicio).getTime())) ||
+        (fechaFin && Number.isNaN(new Date(`${fechaFin}T23:59:59`).getTime()))) {
+      return res.status(400).json({ exito: false, mensaje: 'Las fechas deben tener el formato AAAA-MM-DD.' });
+    }
 
     // Objeto dinámico de condiciones WHERE para PostgreSQL
     const condiciones = {};
@@ -297,13 +308,13 @@ export const obtenerAuditorias = async (req, res) => {
     }
 
     // Configuración de paginación
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const offset = (page - 1) * limit;
 
     // Consulta en PostgreSQL con Sequelize
     const { count, rows } = await Auditoria.findAndCountAll({
       where: condiciones,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
+      limit,
+      offset,
       order: [['createdAt', 'DESC']] // Los más recientes primero
     });
 
@@ -311,17 +322,18 @@ export const obtenerAuditorias = async (req, res) => {
       exito: true,
       totalRegistros: count,
       totalPaginas: Math.ceil(count / limit),
-      paginaActual: parseInt(page),
-      registrosPorPagina: parseInt(limit),
+      paginaActual: page,
+      registrosPorPagina: limit,
       data: rows
     });
 
   } catch (error) {
+    // Antes la respuesta incluía "error: error.message", que filtraba el texto interno del motor de
+    // base de datos (nombres de columnas, etc.). El detalle queda solo en el log del servidor.
     console.error('Error al obtener el historial de auditoría:', error);
     return res.status(500).json({
       exito: false,
-      mensaje: 'Error al consultar la auditoría del sistema',
-      error: error.message
+      mensaje: 'Error al consultar la auditoría del sistema'
     });
   }
 };

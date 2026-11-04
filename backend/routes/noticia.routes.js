@@ -14,8 +14,13 @@ import { verificarToken, verificarTokenOpcional } from '../middlewares/authMiddl
 import { uploadNoticia } from '../middlewares/multer/multerNoticias.js';
 import { validacionNoticia, validacionActualizarNoticia } from '../middlewares/validator/noticia.validator.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
+import { paramEntero } from '../middlewares/validarParametros.js';
 
 const router = Router();
+
+// El :id es el id numérico de una noticia: el formato se valida antes de consultar la base y se responde 400
+// (sin esto, un id inválido terminaba en un 500).
+router.param('id', paramEntero);
 
 // ==========================================
 // 1. Rutas Públicas y de Socios
