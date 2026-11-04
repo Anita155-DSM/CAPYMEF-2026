@@ -3,11 +3,9 @@ import { Link, NavLink } from "react-router-dom";
 import {
   FaBuilding,
   FaCalendarCheck,
-  FaGear,
   FaHouse,
   FaMoneyBillWave,
   FaNewspaper,
-  FaRightFromBracket,
   FaXmark,
 } from "react-icons/fa6";
 import logo from "@/assets/img/logo.png";
@@ -27,7 +25,7 @@ const claseItem = ({ isActive }) =>
     isActive ? "border-[#38a4df] bg-white/20" : "border-transparent hover:bg-white/10"
   }`;
 
-export default function SidebarSocio({ abierto, onCerrar, onSalir, categoria }) {
+export default function SidebarSocio({ abierto, onCerrar, categoria }) {
   useBloquearScroll(abierto);
 
   useEffect(() => {
@@ -70,25 +68,6 @@ export default function SidebarSocio({ abierto, onCerrar, onSalir, categoria }) 
             </NavLink>
           ))}
         </nav>
-
-        <div className="flex shrink-0 items-center justify-between border-t border-white/10 px-6 py-3">
-          <NavLink
-            to="/socios/configuracion"
-            onClick={onCerrar}
-            className={({ isActive }) => `flex items-center gap-4 text-sm font-bold hover:text-white ${isActive ? "text-white" : "text-white/90"}`}
-          >
-            <FaGear className="text-xl" /> Configuración
-          </NavLink>
-          <button
-            type="button"
-            onClick={onSalir}
-            aria-label="Cerrar sesión"
-            title="Cerrar sesión"
-            className="grid h-10 w-10 place-items-center rounded-lg text-xl text-white/90 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <FaRightFromBracket />
-          </button>
-        </div>
       </aside>
 
       {abierto && (

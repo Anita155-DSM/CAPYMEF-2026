@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { FaBars } from "react-icons/fa6";
 import { obtenerPerfil } from "../services/authServices.js";
 import { useAuth } from "@/app/providers/AuthContext";
@@ -11,9 +11,8 @@ import MenuPerfilSocio from "./components/MenuPerfilSocio";
 
 export default function SocioLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false);
-  const { usuario, actualizarUsuario, logout } = useAuth();
+  const { usuario, actualizarUsuario } = useAuth();
   const { cuotas, errorCuotas, recargarCuotas } = useMisCuotas();
-  const navigate = useNavigate();
 
   // Traemos el perfil fresco del backend y lo guardamos en el contexto
   useEffect(() => {
@@ -25,11 +24,6 @@ export default function SocioLayout() {
   // useCallback: el sidebar lo usa en un efecto (Escape) y no queremos que se re-suscriba en cada render
   const cerrarMenu = useCallback(() => setMenuAbierto(false), []);
 
-  const salir = () => {
-    logout();
-    navigate("/login", { replace: true });
-  };
-
   const nombreEmpresa = usuario.razonSocial || "Tu empresa";
   const categoria = mayuscula(usuario.categoria) || "Socio";
 
@@ -39,7 +33,6 @@ export default function SocioLayout() {
       <SidebarSocio
         abierto={menuAbierto}
         onCerrar={cerrarMenu}
-        onSalir={salir}
         categoria={usuario.categoria}
       />
 

@@ -36,14 +36,12 @@ export default function EmpresaSocioPage() {
     { icono: FaGears, etiqueta: "Rubro", valor: usuario.rubro },
     { icono: FaChartBar, etiqueta: "Tamaño de la empresa", valor: etiquetaTamano(usuario.tamano_empresa) },
     { icono: FaChartLine, etiqueta: "Actividad", valor: usuario.actividad, completo: true },
-  ];
-
-  // Teléfono y localidad los edita el propio socio (PUT /auth/perfil); el correo no
-  const contacto = [
-    { icono: FaPhone, etiqueta: "Teléfono", valor: usuario.telefono, copiable: true },
     { icono: FaEnvelope, etiqueta: "Correo electrónico", valor: usuario.email, copiable: true },
     { icono: FaLocationDot, etiqueta: "Localidad", valor: usuario.localidad },
   ];
+
+  // Lo único que edita el propio socio es el teléfono (PUT /auth/perfil); correo y localidad van en datos institucionales
+  const contacto = [{ icono: FaPhone, etiqueta: "Teléfono", valor: usuario.telefono, copiable: true }];
 
   const pieInstitucional = (
     <div className="flex flex-col gap-3 border-t border-gray-100 bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">

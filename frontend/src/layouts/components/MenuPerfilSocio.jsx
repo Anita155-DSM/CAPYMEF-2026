@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaBuilding,
-  FaCircleUser,
   FaEnvelope,
-  FaGear,
   FaIdCard,
   FaRightFromBracket,
 } from "react-icons/fa6";
@@ -12,17 +10,19 @@ import { useAuth } from "@/app/providers/AuthContext";
 import { mayuscula } from "@/features/area-socio/utils/cuotas";
 import { iniciales } from "@/features/area-socio/utils/empresa";
 
+const ENLACES_SOCIO = [{ to: "/socios/empresa", icono: FaBuilding, texto: "Mi empresa" }];
+
 /**
  * Avatar con menú desplegable para el encabezado del panel de socio.
  *
  * Al hacer clic muestra una tarjeta flotante con:
  * - Avatar de iniciales de la empresa
  * - Razón social, CUIT, categoría y correo
- * - Accesos rápidos a Mi empresa, Configuración y Cerrar sesión
+ * - Accesos rápidos (por defecto Mi empresa) y Cerrar sesión
  *
  * Se cierra al hacer clic fuera del menú o al presionar Escape.
  */
-export default function MenuPerfilSocio() {
+export default function MenuPerfilSocio({ enlaces = ENLACES_SOCIO, etiqueta }) {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
   const [abierto, setAbierto] = useState(false);
@@ -52,8 +52,8 @@ export default function MenuPerfilSocio() {
     navigate("/login", { replace: true });
   };
 
-  const nombre = usuario?.razonSocial || "Tu empresa";
-  const categoria = mayuscula(usuario?.categoria) || "Socio";
+  const nombre = usuario?.razonSocial || (etiqueta ? usuario?.nombre || usuario?.email : "") || "Tu empresa";
+  const categoria = etiqueta || mayuscula(usuario?.categoria) || "Socio";
   const avatar = iniciales(nombre);
 
   return (
@@ -64,9 +64,9 @@ export default function MenuPerfilSocio() {
         aria-label="Abrir menú de perfil"
         aria-expanded={abierto}
         onClick={() => setAbierto((v) => !v)}
-        className="text-primary transition-colors hover:text-navy focus-visible:outline-none"
+        className="grid size-10 place-items-center rounded-full bg-primary text-lg font-bold text-white shadow-sm transition-colors hover:bg-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <FaCircleUser className="text-4xl" />
+        {nombre.trim().charAt(0).toUpperCase() || "?"}
       </button>
 
       {/* Tarjeta desplegable */}
@@ -124,29 +124,25 @@ export default function MenuPerfilSocio() {
           </div>
 
           {/* Accesos rápidos */}
-          <nav className="p-2" role="none">
-            <Link
-              to="/socios/empresa"
-              onClick={() => setAbierto(false)}
-              role="menuitem"
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-navy transition-colors hover:bg-surface-blue hover:text-primary"
-            >
-              <FaBuilding className="shrink-0 text-primary" />
-              Mi empresa
-            </Link>
-            <Link
-              to="/socios/configuracion"
-              onClick={() => setAbierto(false)}
-              role="menuitem"
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-navy transition-colors hover:bg-surface-blue hover:text-primary"
-            >
-              <FaGear className="shrink-0 text-primary" />
-              Configuración
-            </Link>
-          </nav>
+          {enlaces.length > 0 && (
+            <nav className="p-2" role="none">
+              {enlaces.map(({ to, icono: Icono, texto }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setAbierto(false)}
+                  role="menuitem"
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-navy transition-colors hover:bg-surface-blue hover:text-primary"
+                >
+                  <Icono className="shrink-0 text-primary" />
+                  {texto}
+                </Link>
+              ))}
+            </nav>
+          )}
 
           {/* Cerrar sesión separado */}
-          <div className="border-t border-gray-100 p-2">
+          <div className={`p-2 ${enlaces.length > 0 ? "border-t border-gray-100" : ""}`}>
             <button
               type="button"
               role="menuitem"

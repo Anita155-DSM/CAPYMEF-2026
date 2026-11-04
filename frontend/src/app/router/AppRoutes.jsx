@@ -22,7 +22,6 @@ import {
   NoticiasSocio,
   EmpresaSocio,
   PagosSocio,
-  ConfiguracionSocio,
   ResultadoPago,
 } from "@/Pages/Socios/index.js";
 
@@ -59,7 +58,6 @@ export default function AppRoutes() {
               <Route path="noticias" element={<NoticiasSocio />} />
               <Route path="empresa" element={<EmpresaSocio />} />
               <Route path="pagos" element={<PagosSocio />} />
-              <Route path="configuracion" element={<ConfiguracionSocio />} />
             </Route>
 
             {/* Mercado Pago vuelve a estas rutas (back_urls del backend) */}
