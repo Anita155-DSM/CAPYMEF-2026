@@ -151,18 +151,22 @@ describe('recibirWebhook - pago aprobado: respuesta inmediata y trabajo en segun
 
   const avisoDePago = () => request(app).post('/webhook?type=payment&data.id=555').send({});
 
-  // Espera, sin sleeps, a que el segundo plano llegue a su último paso (o a que algo lo corte), y
+  // Espera, sin sleeps, a que el segundo plano llegue al punto indicado (o a que algo lo corte), y
   // después da una vuelta más del event loop para que Node avise si quedó un rechazo sin capturar.
   const esperarSegundoPlano = async (condicion) => {
     await vi.waitFor(condicion);
     await new Promise((resolve) => setImmediate(resolve));
   };
+  // El último paso del camino completo es guardar la dirección del comprobante.
+  const terminoTodo = () => expect(nuevoPago.save).toHaveBeenCalled();
 
-  it('responde 200 antes de que terminen el comprobante y los avisos', async () => {
-    // El PDF queda "trabado" hasta que el test lo libere: si la respuesta esperara al segundo plano,
-    // nunca llegaría.
-    let liberarPdf;
-    generarComprobantePago.mockImplementation(() => new Promise((resolve) => { liberarPdf = resolve; }));
+  it('responde 200 antes de que terminen los avisos y el comprobante', async () => {
+    // Los avisos quedan "trabados" hasta que el test los libere: si la respuesta esperara al
+    // segundo plano, nunca llegaría.
+    let liberarAvisoSocio;
+    let liberarAvisoAdmins;
+    crearNotificacion.mockImplementation(() => new Promise((resolve) => { liberarAvisoSocio = resolve; }));
+    notificarAdmins.mockImplementation(() => new Promise((resolve) => { liberarAvisoAdmins = resolve; }));
 
     const respuesta = await avisoDePago();
 
@@ -173,92 +177,119 @@ describe('recibirWebhook - pago aprobado: respuesta inmediata y trabajo en segun
     expect(cuota.estado).toBe('pagada');
     expect(cuota.save).toHaveBeenCalled();
     expect(evaluarCategoriaSocio).toHaveBeenCalledWith(7);
-    // ...y lo demás todavía no terminó.
-    expect(generarComprobantePago).toHaveBeenCalled();
-    expect(subirPDFCloudinary).not.toHaveBeenCalled();
-    expect(crearNotificacion).not.toHaveBeenCalled();
-    expect(notificarAdmins).not.toHaveBeenCalled();
+    // ...y lo demás todavía no terminó: los avisos están pendientes y el comprobante no arrancó.
+    expect(crearNotificacion).toHaveBeenCalled();
+    expect(notificarAdmins).toHaveBeenCalled();
+    expect(generarComprobantePago).not.toHaveBeenCalled();
 
-    liberarPdf(Buffer.from('%PDF-1.4 comprobante'));
-    await esperarSegundoPlano(() => expect(notificarAdmins).toHaveBeenCalled());
+    liberarAvisoSocio();
+    liberarAvisoAdmins();
+    await esperarSegundoPlano(terminoTodo);
     expect(rechazosSinCapturar).toEqual([]);
   });
 
-  it('después de responder, completa comprobante, mail, Cloudinary y los dos avisos', async () => {
-    await avisoDePago();
-    await esperarSegundoPlano(() => expect(notificarAdmins).toHaveBeenCalled());
+  it('el aviso a Tesorería no espera al comprobante (ni al mail ni a Cloudinary)', async () => {
+    // El PDF queda trabado: el aviso de "pago por confirmar" tiene que salir igual.
+    let liberarPdf;
+    generarComprobantePago.mockImplementation(() => new Promise((resolve) => { liberarPdf = resolve; }));
 
+    await avisoDePago();
+    await vi.waitFor(() => expect(generarComprobantePago).toHaveBeenCalled());
+
+    expect(notificarAdmins).toHaveBeenCalledWith(expect.objectContaining({ tipo: 'pago_por_confirmar' }));
+    expect(crearNotificacion).toHaveBeenCalledWith(expect.objectContaining({ usuarioId: 7, tipo: 'pago_registrado' }));
+    expect(enviarMailComprobantePago).not.toHaveBeenCalled();
+    expect(subirPDFCloudinary).not.toHaveBeenCalled();
+
+    liberarPdf(Buffer.from('%PDF-1.4 comprobante'));
+    await esperarSegundoPlano(terminoTodo);
+    expect(rechazosSinCapturar).toEqual([]);
+  });
+
+  it('después de responder, completa los dos avisos, el comprobante, el mail y Cloudinary', async () => {
+    await avisoDePago();
+    await esperarSegundoPlano(terminoTodo);
+
+    expect(crearNotificacion).toHaveBeenCalledWith(expect.objectContaining({ usuarioId: 7, tipo: 'pago_registrado' }));
+    expect(notificarAdmins).toHaveBeenCalledWith(expect.objectContaining({ tipo: 'pago_por_confirmar' }));
     expect(generarComprobantePago).toHaveBeenCalledTimes(1);
     expect(enviarMailComprobantePago).toHaveBeenCalledWith('socio@test.com', expect.any(Object), expect.any(Buffer));
     expect(subirPDFCloudinary).toHaveBeenCalledTimes(1);
     expect(nuevoPago.urlComprobante).toBe('https://res.cloudinary.com/demo/raw/upload/comprobante-pago-1');
-    expect(nuevoPago.save).toHaveBeenCalled();
-    expect(crearNotificacion).toHaveBeenCalledWith(expect.objectContaining({ usuarioId: 7, tipo: 'pago_registrado' }));
-    expect(notificarAdmins).toHaveBeenCalledWith(expect.objectContaining({ tipo: 'pago_por_confirmar' }));
     expect(rechazosSinCapturar).toEqual([]);
   });
 
-  it('si falla el mail, igual sube el comprobante a Cloudinary y sigue con los avisos', async () => {
+  it('si falla el mail, igual sube el comprobante a Cloudinary', async () => {
     enviarMailComprobantePago.mockRejectedValue(new Error('SMTP caído'));
 
     const respuesta = await avisoDePago();
-    await esperarSegundoPlano(() => expect(notificarAdmins).toHaveBeenCalled());
+    await esperarSegundoPlano(terminoTodo);
 
     expect(respuesta.status).toBe(200);
     expect(subirPDFCloudinary).toHaveBeenCalledTimes(1);
-    expect(nuevoPago.save).toHaveBeenCalled();
     expect(espiaError).toHaveBeenCalledWith(expect.stringContaining('mail'), 'SMTP caído');
     expect(rechazosSinCapturar).toEqual([]);
   });
 
-  // Decisión: el comprobante va ANTES que los avisos, así que si un aviso falla, el comprobante, el
-  // mail y Cloudinary ya se hicieron. Si falla el aviso al socio, el de administradores no se manda
-  // (los dos están en el mismo bloque); queda en el log. crearNotificacion y notificarAdmins están
-  // pensadas para no lanzar nunca, así que es un caso muy improbable.
-  it('si falla el aviso al socio, no queda ningún error sin capturar y el comprobante ya se hizo', async () => {
-    crearNotificacion.mockRejectedValue(new Error('falla del aviso'));
+  it('si falla el aviso al socio, el aviso a Tesorería y el comprobante se hacen igual', async () => {
+    crearNotificacion.mockRejectedValue(new Error('falla del aviso al socio'));
 
     await avisoDePago();
-    await esperarSegundoPlano(() => {
-      expect(espiaError.mock.calls.length + rechazosSinCapturar.length).toBeGreaterThan(0);
-    });
+    await esperarSegundoPlano(terminoTodo);
 
     expect(rechazosSinCapturar).toEqual([]);
-    expect(espiaError).toHaveBeenCalledWith(expect.stringContaining('pago-1'), expect.any(Error));
+    expect(espiaError).toHaveBeenCalledWith(expect.stringContaining('aviso del pago online pago-1'), expect.any(Error));
+    expect(notificarAdmins).toHaveBeenCalled();
     expect(generarComprobantePago).toHaveBeenCalled();
     expect(enviarMailComprobantePago).toHaveBeenCalled();
     expect(subirPDFCloudinary).toHaveBeenCalled();
   });
 
-  it('si falla el aviso a los administradores, no queda ningún error sin capturar', async () => {
+  it('si falla el aviso a Tesorería, el aviso al socio y el comprobante se hacen igual', async () => {
     notificarAdmins.mockRejectedValue(new Error('falla del aviso a admins'));
 
     await avisoDePago();
-    await esperarSegundoPlano(() => {
-      expect(espiaError.mock.calls.length + rechazosSinCapturar.length).toBeGreaterThan(0);
-    });
+    await esperarSegundoPlano(terminoTodo);
 
     expect(rechazosSinCapturar).toEqual([]);
-    expect(espiaError).toHaveBeenCalledWith(expect.stringContaining('pago-1'), expect.any(Error));
+    expect(espiaError).toHaveBeenCalledWith(expect.stringContaining('aviso del pago online pago-1'), expect.any(Error));
     expect(crearNotificacion).toHaveBeenCalled();
     expect(subirPDFCloudinary).toHaveBeenCalled();
   });
 
-  it('si falla el generador del PDF, no hay error sin capturar ni segunda respuesta, y los avisos se mandan', async () => {
+  it('si falla el generador del PDF, no hay error sin capturar ni segunda respuesta, y los avisos ya salieron', async () => {
     generarComprobantePago.mockRejectedValue(new Error('PDF roto'));
 
     const respuesta = await avisoDePago();
-    await esperarSegundoPlano(() => expect(notificarAdmins).toHaveBeenCalled());
+    await esperarSegundoPlano(() => expect(espiaError).toHaveBeenCalledWith(expect.stringContaining('generar el comprobante'), 'PDF roto'));
 
     expect(respuesta.status).toBe(200);
     expect(respuesta.body).toEqual({ recibido: true });
     expect(rechazosSinCapturar).toEqual([]);
-    expect(espiaError).toHaveBeenCalledWith(expect.stringContaining('generar el comprobante'), 'PDF roto');
     // Un intento de responder dos veces terminaría en el catch general con este mensaje: no tiene que aparecer.
     expect(espiaError).not.toHaveBeenCalledWith('Error al procesar webhook de Mercado Pago:', expect.anything());
+    expect(crearNotificacion).toHaveBeenCalled();
+    expect(notificarAdmins).toHaveBeenCalled();
     expect(enviarMailComprobantePago).not.toHaveBeenCalled();
     expect(subirPDFCloudinary).not.toHaveBeenCalled();
-    expect(crearNotificacion).toHaveBeenCalled();
+  });
+
+  it('si algo falla fuera de los try internos (cuota sin socio), queda en el log y no hay error sin capturar', async () => {
+    // Por ejemplo, un socio dado de baja: lo crítico no usa sus datos, así que el pago se registra,
+    // pero armar el texto del aviso a Tesorería falla. Lo atrapa el try/catch general del segundo plano.
+    cuota.socio = null;
+
+    const respuesta = await avisoDePago();
+    await esperarSegundoPlano(() => {
+      expect(espiaError.mock.calls.length + rechazosSinCapturar.length).toBeGreaterThan(0);
+    });
+
+    expect(respuesta.status).toBe(200);
+    expect(rechazosSinCapturar).toEqual([]);
+    expect(espiaError).toHaveBeenCalledWith(expect.stringContaining('trabajo posterior al pago pago-1'), expect.any(TypeError));
+    // Los textos se arman antes de llamar a nada: no queda ningún aviso lanzado a medias.
+    expect(crearNotificacion).not.toHaveBeenCalled();
+    expect(notificarAdmins).not.toHaveBeenCalled();
   });
 
   // Respuestas tempranas: responden 200 y no llegan nunca al segundo plano.

@@ -104,13 +104,17 @@ export const redirigirRetornoPago = (req, res) => {
 // 2. WEBHOOK — Mercado Pago nos avisa que cambió el estado de un pago
 // ==========================================
 
-// Lo que se hace DESPUÉS de responderle a Mercado Pago: comprobante (PDF, mail y subida a
-// Cloudinary) y avisos internos. Antes el webhook esperaba todo esto y tardaba 14 a 20 segundos en
-// responder; Mercado Pago espera la respuesta un tiempo limitado y, si no llega, reintenta el aviso.
+// Lo que se hace DESPUÉS de responderle a Mercado Pago: avisos internos y comprobante (PDF, mail y
+// subida a Cloudinary). Antes el webhook esperaba todo esto y tardaba 14 a 20 segundos en responder;
+// Mercado Pago espera la respuesta un tiempo limitado y, si no llega, reintenta el aviso.
 // El pago ya quedó registrado cuando esto corre, así que nada de lo que pase acá puede deshacerlo.
 //
-// Orden: primero el comprobante y después los avisos. Así, si un aviso fallara, el comprobante y el
-// mail ya se hicieron; y el aviso al socio ("ya podés descargar tu comprobante") llega cuando es cierto.
+// Orden: primero los avisos y después el comprobante. El aviso a Tesorería ("pago por confirmar") es
+// lo operativo importante y no tiene que esperar al mail ni a la subida del PDF. El aviso al socio
+// dice "ya podés descargar tu comprobante", y es cierto aunque llegue antes: si el PDF todavía no se
+// subió (o falló), descargarMiComprobante lo regenera.
+// Los dos avisos van en paralelo y con allSettled: si uno falla, el otro se manda igual, y el
+// comprobante se intenta de todos modos.
 //
 // Si el servidor se reinicia justo después de responder, el comprobante no se pierde:
 // descargarMiComprobante lo regenera cuando el pago no tiene urlComprobante.
@@ -119,6 +123,30 @@ export const redirigirRetornoPago = (req, res) => {
 // tirar abajo el proceso): todo va dentro de un try/catch que solo deja el error en el log.
 const completarPagoEnSegundoPlano = async ({ cuota, nuevoPago }) => {
   try {
+    // Los dos textos se arman ANTES de llamar a nada: si armar uno fallara, no queda ningún aviso ya
+    // lanzado cuya promesa nadie espera.
+    // Al socio: confirmación de que su pago ya figura.
+    const avisoSocio = {
+      usuarioId: cuota.usuario_id,
+      tipo: 'pago_registrado',
+      titulo: 'Recibimos tu pago',
+      mensaje: `Registramos tu pago de ${formatearMonto(nuevoPago.montoAbonado)} por la cuota de ${formatearPeriodo(cuota.mes_anio)}. Ya podés descargar tu comprobante desde la sección de pagos.`,
+      referencia: `pago-registrado:${nuevoPago.id}`,
+    };
+    // A los administradores: hay un pago online que Tesorería todavía debe verificar contra el banco.
+    const avisoAdmins = {
+      tipo: 'pago_por_confirmar',
+      titulo: 'Pago online por confirmar',
+      mensaje: `${cuota.socio.razonSocial} pagó ${formatearMonto(nuevoPago.montoAbonado)} (cuota ${formatearPeriodo(cuota.mes_anio)}). Falta la confirmación de Tesorería.`,
+      referencia: `pago-por-confirmar:${nuevoPago.id}`,
+    };
+    const avisos = await Promise.allSettled([crearNotificacion(avisoSocio), notificarAdmins(avisoAdmins)]);
+    for (const aviso of avisos) {
+      if (aviso.status === 'rejected') {
+        console.error(`Error al crear un aviso del pago online ${nuevoPago.id}:`, aviso.reason);
+      }
+    }
+
     // Comprobante + mail + Cloudinary, mismo patrón que en el pago manual.
     try {
       const pdfBuffer = await generarComprobantePago({
@@ -150,27 +178,13 @@ const completarPagoEnSegundoPlano = async ({ cuota, nuevoPago }) => {
     } catch (errorComprobante) {
       console.error('Error al generar el comprobante (pago online):', errorComprobante.message);
     }
-
-    // Alertas internas.
-    // Al socio: confirmación de que su pago ya figura.
-    await crearNotificacion({
-      usuarioId: cuota.usuario_id,
-      tipo: 'pago_registrado',
-      titulo: 'Recibimos tu pago',
-      mensaje: `Registramos tu pago de ${formatearMonto(nuevoPago.montoAbonado)} por la cuota de ${formatearPeriodo(cuota.mes_anio)}. Ya podés descargar tu comprobante desde la sección de pagos.`,
-      referencia: `pago-registrado:${nuevoPago.id}`,
-    });
-    // A los administradores: hay un pago online que Tesorería todavía debe verificar contra el banco.
-    await notificarAdmins({
-      tipo: 'pago_por_confirmar',
-      titulo: 'Pago online por confirmar',
-      mensaje: `${cuota.socio.razonSocial} pagó ${formatearMonto(nuevoPago.montoAbonado)} (cuota ${formatearPeriodo(cuota.mes_anio)}). Falta la confirmación de Tesorería.`,
-      referencia: `pago-por-confirmar:${nuevoPago.id}`,
-    });
   } catch (error) {
+    // Lo que no atrapan los try internos (por ejemplo, una cuota cuyo socio ya no existe, que rompe al
+    // armar el texto del aviso) termina acá: queda en el log y el proceso sigue.
     console.error(`Error en el trabajo posterior al pago ${nuevoPago?.id} (el pago ya está registrado):`, error);
   }
 };
+
 // OJO: esta ruta NO tiene verificarToken. Quien la llama es el servidor de
 // Mercado Pago, no un usuario logueado — no tiene forma de mandar un JWT nuestro.
 export const recibirWebhook = async (req, res) => {
