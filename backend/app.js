@@ -33,6 +33,8 @@ import tarifaRoutes from './routes/tarifa.routes.js';
 import { asegurarTarifasIniciales } from './services/tarifa.service.js';
 import notificacionRoutes from './routes/notificacion.routes.js';
 import { rutaNoEncontrada, manejadorErrores } from './middlewares/manejadorErrores.js';
+import { verificarConfiguracion } from './config/verificarConfiguracion.js';
+import { armarDominiosPermitidos } from './config/cors.js';
 
 
 dotenv.config();
@@ -42,10 +44,11 @@ const app = express();
 // Cambiamos el puerto por defecto a 3000 para no chocar con el puerto 5000 de Postgres, exceptuando como lo tengan
 const port = process.env.PORT || 3000;
 // 2. CORS: Define quién puede consumir nuestra API (La lista blanca)
-const dominiosPermitidos = [
-  'http://localhost:5173', // front de Eric en desarrollo
-  // 'https://www.capymef.org.ar' masomenos esto se agregaria cuando pasen a producción
-];
+// Sale de FRONTEND_URL (y en desarrollo suma http://localhost:5173): ver config/cors.js.
+const dominiosPermitidos = armarDominiosPermitidos({
+  frontendUrl: process.env.FRONTEND_URL,
+  produccion: process.env.NODE_ENV === 'production',
+});
 
 // //RATE LIMITING es el límite de peticiones general en 15 minutos, esto para evitar ataques de decifrado de contraseñas
 //LO COMENTO ESTO PORQUE AUN ESTAMOS EN ETAPA DE DESARROLLO
@@ -118,6 +121,10 @@ app.use(manejadorErrores);
 
 // Función para conectar a la base de datos, sincronizar tablas y levantar el servidor
 const startServer = async () => {
+  // 0. Antes que nada, revisar las variables de entorno: en producción, si falta algo importante,
+  // el servidor no arranca (mejor enterarse acá que en medio de un pago). En desarrollo solo avisa.
+  verificarConfiguracion();
+
   try {
     // 1. Probar la conexión y sincronizar tablas (las crea si no existen)
     await sequelize.sync(); //{alter: true}
