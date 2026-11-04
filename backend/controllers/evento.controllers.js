@@ -4,6 +4,7 @@ import { Evento } from '../models/evento.models.js';
 import { Inscripcion } from '../models/inscripcion.models.js';
 import { User } from '../models/user.models.js';
 import { generarCertificadoAsistencia } from '../services/certificado.service.js';
+import { ocultarLugarSiCorresponde, tieneEnlacePrivado } from '../services/privacidadEvento.service.js';
 
 // ==========================================
 // Helpers para manejo de imagen en Cloudinary
@@ -43,6 +44,20 @@ const parsearLogosExternos = (valor) => {
   }
 };
 
+// Arma el listado que ven los usuarios logueados: cada evento con `yaInscripto` y con el link de la
+// reunión solo si quien consulta es admin o está inscripto en ese evento (ver privacidadEvento.service.js).
+// Lo usan /socios y /admin, así las dos respuestas tienen la misma forma.
+const armarListadoParaUsuario = async (eventos, usuario) => {
+  const inscripciones = await Inscripcion.findAll({ where: { usuario_id: usuario.id } });
+  const idsInscriptos = new Set(inscripciones.map((i) => i.evento_id));
+  const esAdmin = usuario.rol === 'admin';
+
+  return eventos.map((evento) => {
+    const yaInscripto = idsInscriptos.has(evento.id);
+    return ocultarLugarSiCorresponde({ ...evento.toJSON(), yaInscripto }, esAdmin || yaInscripto);
+  });
+};
+
 // ==========================================
 // 1. EVENTOS PARA LA LANDING (Públicos, sin login)
 // ==========================================
@@ -53,7 +68,10 @@ export const obtenerEventosPublicos = async (req, res) => {
       order: [['fecha', 'ASC']],
     });
 
-    res.status(200).json({ exito: true, data: eventos });
+    // Sin login nadie puede ver el link de una reunión virtual.
+    const data = eventos.map((evento) => ocultarLugarSiCorresponde(evento.toJSON(), false));
+
+    res.status(200).json({ exito: true, data });
   } catch (error) {
     console.error('Error al obtener eventos públicos:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
@@ -70,15 +88,8 @@ export const obtenerEventosSocios = async (req, res) => {
       order: [['fecha', 'ASC']],
     });
 
-    const inscripciones = await Inscripcion.findAll({
-      where: { usuario_id: req.usuario.id },
-    });
-    const idsInscriptos = new Set(inscripciones.map((i) => i.evento_id));
-
-    const data = eventos.map((evento) => ({
-      ...evento.toJSON(),
-      yaInscripto: idsInscriptos.has(evento.id),
-    }));
+    // Un socio no inscripto no recibe el link de la reunión (antes lo recibía cualquier socio).
+    const data = await armarListadoParaUsuario(eventos, req.usuario);
 
     res.status(200).json({ exito: true, data });
   } catch (error) {
@@ -88,8 +99,28 @@ export const obtenerEventosSocios = async (req, res) => {
 };
 
 // ==========================================
+// 2.b LISTADO COMPLETO PARA EL ADMIN (incluye cancelados)
+// ==========================================
+// Por qué existe: el panel admin usaba GET /socios, que excluye los cancelados, así que un evento
+// cancelado desaparecía del panel y no se podía volver a editar ni borrar. Acá van TODOS, con el link
+// completo (el admin lo necesita para editar el evento) y con la misma forma que /socios.
+export const obtenerEventosAdmin = async (req, res) => {
+  try {
+    const eventos = await Evento.findAll({ order: [['fecha', 'ASC']] });
+    const data = await armarListadoParaUsuario(eventos, req.usuario);
+
+    res.status(200).json({ exito: true, data });
+  } catch (error) {
+    console.error('Error al obtener los eventos para el admin:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
+  }
+};
+
+// ==========================================
 // 3. OBTENER UN EVENTO POR ID (con cupo disponible calculado)
 // ==========================================
+// La ruta no exige login (verificarTokenOpcional): sin token, o con uno inválido, se responde como a un
+// visitante anónimo, sin el link de una reunión virtual.
 export const obtenerEventoPorId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -102,9 +133,15 @@ export const obtenerEventoPorId = async (req, res) => {
     const totalInscriptos = await Inscripcion.count({ where: { evento_id: id } });
     const cupoDisponible = evento.cupoMaximo != null ? evento.cupoMaximo - totalInscriptos : null;
 
+    // Solo se consulta la inscripción si hace falta (evento con link privado y alguien logueado).
+    let puedeVerEnlace = req.usuario?.rol === 'admin';
+    if (!puedeVerEnlace && req.usuario && tieneEnlacePrivado(evento)) {
+      puedeVerEnlace = Boolean(await Inscripcion.findOne({ where: { evento_id: id, usuario_id: req.usuario.id } }));
+    }
+
     res.status(200).json({
       exito: true,
-      data: { ...evento.toJSON(), totalInscriptos, cupoDisponible },
+      data: ocultarLugarSiCorresponde({ ...evento.toJSON(), totalInscriptos, cupoDisponible }, puedeVerEnlace),
     });
   } catch (error) {
     console.error('Error al obtener el evento:', error);

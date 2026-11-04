@@ -136,6 +136,30 @@ describe('verificarTokenOpcional', () => {
     expect(respuesta.body.usuario).toMatchObject({ id: usuario.id, rol: 'admin' });
   });
 
+  it('con un token firmado con otra clave sigue como anónimo (aunque diga ser admin)', async () => {
+    // Un token falsificado nunca puede dar privilegios, ni siquiera en una ruta pública.
+    const usuario = await crearUsuario({ rol: 'admin' });
+    const tokenFalso = jwt.sign({ id: usuario.id, rol: 'admin' }, 'otra-clave');
+
+    const respuesta = await request(app).get('/opcional').set('Authorization', `Bearer ${tokenFalso}`);
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body.usuario).toBeNull();
+  });
+
+  it('con un token emitido antes del último cambio de contraseña sigue como anónimo', async () => {
+    // Misma regla que verificarToken: una sesión vieja (por ejemplo, robada) ya no vale.
+    const iat = Math.floor(Date.now() / 1000) - 120;
+    const usuario = await crearUsuario({ rol: 'admin', passwordChangedAt: new Date((iat + 60) * 1000) });
+
+    const respuesta = await request(app)
+      .get('/opcional')
+      .set('Authorization', `Bearer ${firmar({ id: usuario.id, iat })}`);
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body.usuario).toBeNull();
+  });
+
   it('con el token de una cuenta inactiva sigue como anónimo', async () => {
     // Una cuenta dada de baja no debe ver la información extra de los usuarios logueados.
     const usuario = await crearUsuario({ rol: 'admin', estado: 'inactivo' });
