@@ -71,7 +71,11 @@ export const recibirWebhook = async (req, res) => {
       return res.status(200).json({ recibido: true });
     }
 
-    const paymentId = req.query.id || req.query['data.id'] || req.body?.data?.id;
+    // El id que se procesa tiene que ser el MISMO que cubre la firma: el middleware de firma
+    // (firmaMercadoPago.js) verifica req.query['data.id'] (con respaldo en el cuerpo). Si acá se
+    // leyera primero req.query.id, un aviso con ?data.id=A (firmado) y &id=B haría validar A y
+    // procesar B. El formato viejo (?id=) queda solo como último respaldo.
+    const paymentId = req.query['data.id'] || req.body?.data?.id || req.query.id;
 
     if (!paymentId) {
       return res.status(200).json({ recibido: true });
