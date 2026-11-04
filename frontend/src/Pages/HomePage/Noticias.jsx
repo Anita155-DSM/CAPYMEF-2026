@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import Footer from "@/layouts/components/Footer";
-import Navbar from "@/layouts/components/Navbar";
 import NavbarPublico from "@/layouts/components/NavbarPublico";
 import NoticiaModal from "@/features/noticias/components/NoticiaModal";
 import { formatearFecha } from "@/shared/utils/fechas";
 import { obtenerNoticiasPublicas } from "../../services/noticiasService";
-import { useAuth } from "@/app/providers/AuthContext";
 import logo from "@/assets/img/logo.png";
 import { urlImagen } from "@/shared/utils/imagenes";
 
@@ -17,7 +15,6 @@ export default function NoticiasPublicas() {
   const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
   const [paginaActual, setPaginaActual] = useState(1);
 
-  const { estaLogueado } = useAuth();
   const totalPaginas = Math.max(1, Math.ceil(noticias.length / NOTICIAS_POR_PAGINA));
   // Página derivada: si la lista se achica, nunca nos pasamos del total (sin efecto extra).
   const pagina = Math.min(paginaActual, totalPaginas);
@@ -77,7 +74,7 @@ export default function NoticiasPublicas() {
   return (
     <>
       <header>
-        {estaLogueado ? <Navbar /> : <NavbarPublico />}
+        <NavbarPublico />
       </header>
 
       <main className="bg-surface min-h-screen pt-28 pb-16 px-6 sm:px-10 md:px-24 font-sans animacion-modal">

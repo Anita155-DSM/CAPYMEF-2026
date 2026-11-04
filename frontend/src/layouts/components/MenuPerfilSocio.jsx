@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaBuilding,
+  FaChevronDown,
   FaEnvelope,
   FaIdCard,
   FaRightFromBracket,
@@ -14,13 +15,7 @@ const ENLACES_SOCIO = [{ to: "/socios/empresa", icono: FaBuilding, texto: "Mi em
 
 /**
  * Avatar con menú desplegable para el encabezado del panel de socio.
- *
- * Al hacer clic muestra una tarjeta flotante con:
- * - Avatar de iniciales de la empresa
- * - Razón social, CUIT, categoría y correo
- * - Accesos rápidos (por defecto Mi empresa) y Cerrar sesión
- *
- * Se cierra al hacer clic fuera del menú o al presionar Escape.
+ * Disposición: [Avatar a la izquierda] + [Nombre y Categoría en el medio] + [Flecha abajo a la derecha]
  */
 export default function MenuPerfilSocio({ enlaces = ENLACES_SOCIO, etiqueta }) {
   const { usuario, logout } = useAuth();
@@ -52,57 +47,76 @@ export default function MenuPerfilSocio({ enlaces = ENLACES_SOCIO, etiqueta }) {
     navigate("/login", { replace: true });
   };
 
-  const nombre = usuario?.razonSocial || (etiqueta ? usuario?.nombre || usuario?.email : "") || "Tu empresa";
+  const nombre =
+    usuario?.razonSocial || (etiqueta ? usuario?.nombre || usuario?.email : "") || "Tu empresa";
   const categoria = etiqueta || mayuscula(usuario?.categoria) || "Socio";
   const avatar = iniciales(nombre);
 
   return (
     <div ref={ref} className="relative">
-      {/* Botón avatar */}
+      {/* Botón de perfil: Avatar a la izquierda + Nombre/Categoría + Flechita abajo a la derecha */}
       <button
         type="button"
         aria-label="Abrir menú de perfil"
         aria-expanded={abierto}
         onClick={() => setAbierto((v) => !v)}
-        className="grid size-10 place-items-center rounded-full bg-primary text-lg font-bold text-white shadow-sm transition-colors hover:bg-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="flex cursor-pointer items-center gap-3 rounded-xl py-1 pr-1.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        {nombre.trim().charAt(0).toUpperCase() || "?"}
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-linear-to-br from-primary to-sidebar text-sm font-semibold text-white shadow-xs ring-2 ring-surface-blue">
+          {avatar}
+        </span>
+
+        <div className="hidden text-left sm:block">
+          <p className="max-w-[220px] truncate text-sm font-semibold text-navy">
+            {nombre}
+          </p>
+          <p className="text-xs font-medium text-primary">
+            {etiqueta ? categoria : `Socio ${categoria}`}
+          </p>
+        </div>
+
+        <FaChevronDown
+          className={`shrink-0 text-xs text-navy/70 transition-transform duration-200 ${
+            abierto ? "rotate-180" : ""
+          }`}
+        />
       </button>
 
       {/* Tarjeta desplegable */}
       {abierto && (
         <div
-          className="absolute right-0 top-[calc(100%+10px)] z-50 w-72 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl sm:w-80"
+          className="animacion-modal absolute right-0 top-[calc(100%+10px)] z-50 w-72 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xl sm:w-80"
           role="menu"
         >
           {/* Cabecera con avatar grande y datos identificatorios */}
           <div className="bg-linear-to-br from-navy via-sidebar to-primary p-5">
-            <div className="flex items-center gap-4">
-              {/* Avatar grande con iniciales */}
-              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-white/20 text-xl font-bold text-white ring-1 ring-white/30">
+            <div className="flex items-center gap-3.5">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/15 text-base font-semibold text-white ring-1 ring-white/30">
                 {avatar}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-base font-bold text-white leading-tight">
+                <p className="truncate text-base font-semibold leading-tight text-white">
                   {nombre}
                 </p>
-                <p className="mt-0.5 text-xs font-semibold text-white/70 uppercase tracking-wide">
-                  {categoria}
+                <p className="mt-0.5 text-xs font-medium uppercase tracking-wider text-[#8bd0f8]">
+                  Socio {categoria}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Datos rápidos */}
-          <div className="divide-y divide-gray-100 border-b border-gray-100">
+          <div className="divide-y divide-slate-100 border-b border-slate-100">
             {usuario?.cuit && (
               <div className="flex items-center gap-3 px-5 py-3">
-                <FaIdCard className="shrink-0 text-sm text-primary" />
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-surface-blue text-xs text-primary">
+                  <FaIdCard />
+                </span>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
                     CUIT
                   </p>
-                  <p className="truncate text-sm font-semibold text-navy">
+                  <p className="truncate text-sm font-semibold text-navy tabular-nums">
                     {usuario.cuit}
                   </p>
                 </div>
@@ -110,10 +124,12 @@ export default function MenuPerfilSocio({ enlaces = ENLACES_SOCIO, etiqueta }) {
             )}
             {usuario?.email && (
               <div className="flex items-center gap-3 px-5 py-3">
-                <FaEnvelope className="shrink-0 text-sm text-primary" />
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-surface-blue text-xs text-primary">
+                  <FaEnvelope />
+                </span>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                    Correo
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                    Correo electrónico
                   </p>
                   <p className="truncate text-sm font-semibold text-navy">
                     {usuario.email}
@@ -132,7 +148,7 @@ export default function MenuPerfilSocio({ enlaces = ENLACES_SOCIO, etiqueta }) {
                   to={to}
                   onClick={() => setAbierto(false)}
                   role="menuitem"
-                  className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-navy transition-colors hover:bg-surface-blue hover:text-primary"
+                  className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-navy transition-colors hover:bg-surface-blue hover:text-primary"
                 >
                   <Icono className="shrink-0 text-primary" />
                   {texto}
@@ -141,13 +157,13 @@ export default function MenuPerfilSocio({ enlaces = ENLACES_SOCIO, etiqueta }) {
             </nav>
           )}
 
-          {/* Cerrar sesión separado */}
-          <div className={`p-2 ${enlaces.length > 0 ? "border-t border-gray-100" : ""}`}>
+          {/* Cerrar sesión */}
+          <div className={`p-2 ${enlaces.length > 0 ? "border-t border-slate-100" : ""}`}>
             <button
               type="button"
               role="menuitem"
               onClick={salir}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+              className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
             >
               <FaRightFromBracket className="shrink-0" />
               Cerrar sesión
@@ -158,4 +174,3 @@ export default function MenuPerfilSocio({ enlaces = ENLACES_SOCIO, etiqueta }) {
     </div>
   );
 }
-

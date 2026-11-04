@@ -3,6 +3,7 @@
 
 /* Paleta CAPYMEF: se usa como bg-primary, text-navy, border-primary, etc. */
 @theme {
+  --font-socio: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --color-primary: #1D7BB6;
   /* azul institucional (110 usos hoy) */
   --color-primary-dark: #156091;

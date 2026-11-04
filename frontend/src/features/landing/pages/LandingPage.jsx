@@ -1,5 +1,3 @@
-import { useAuth } from "@/app/providers/AuthContext";
-import Navbar from "@/layouts/components/Navbar";
 import NavbarPublico from "@/layouts/components/NavbarPublico";
 import Footer from "@/layouts/components/Footer";
 import { useNoticiasPublicas } from "@/features/noticias/hooks/useNoticiasPublicas";
@@ -11,12 +9,13 @@ import InformacionSection from "../components/InformacionSection";
 import VinculacionSection from "../components/VinculacionSection";
 
 export default function LandingPage() {
-  const { estaLogueado } = useAuth();
   const { noticias, cargando } = useNoticiasPublicas();
 
   return (
     <>
-      <header>{estaLogueado ? <Navbar /> : <NavbarPublico />}</header>
+      <header>
+        <NavbarPublico />
+      </header>
 
       <main className="w-full overflow-x-clip">
         <HeroSection />

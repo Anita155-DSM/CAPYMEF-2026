@@ -24,7 +24,7 @@ function Lugar({ evento }) {
         href={reunion}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-bold text-primary transition-colors hover:text-primary-dark hover:underline"
+        className="font-semibold text-primary transition-colors hover:text-primary-dark hover:underline"
       >
         Unirme a la reunión virtual (enlace directo)
       </a>
@@ -42,7 +42,7 @@ function Lugar({ evento }) {
         href={lugar.href}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-bold text-primary transition-colors hover:text-primary-dark hover:underline"
+        className="font-semibold text-primary transition-colors hover:text-primary-dark hover:underline"
       >
         {lugar.texto}
       </a>
@@ -54,7 +54,7 @@ function Lugar({ evento }) {
 /**
  * Modal detallado de evento para socios.
  * Muestra la información completa con la imagen adaptada a todo el ancho (estilo NoticiaModal),
- * ficha estructurada de datos y gestión de asistencia/inscripción.
+ * ficha estructurada de datos 2x2 y gestión de asistencia/inscripción.
  */
 export default function EventoDetalleModal({
   evento,
@@ -111,7 +111,7 @@ export default function EventoDetalleModal({
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="animacion-modal max-h-[90vh] w-full max-w-2xl sm:max-w-3xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl sm:p-7"
+        className="animacion-modal max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl sm:max-w-3xl sm:p-7"
         role="dialog"
         aria-modal="true"
         aria-label={evento.titulo}
@@ -157,13 +157,13 @@ export default function EventoDetalleModal({
           <img
             src={imagen}
             alt={evento.titulo}
-            className="mt-4 h-64 sm:h-80 w-full rounded-xl object-cover shadow-xs"
+            className="mt-4 h-64 w-full rounded-xl object-cover shadow-xs sm:h-80"
           />
         )}
 
-        {/* Ficha estructurada de datos clave (Fecha, Horario, Ubicación, Cupos) */}
-        <div className="mt-5 grid grid-cols-1 gap-3.5 rounded-xl border border-gray-100 bg-surface p-4 sm:grid-cols-2 sm:p-5">
-          {/* Fecha */}
+        {/* Ficha estructurada de datos clave en grilla 2x2 (Fecha, Horario, Ubicación, Disponibilidad) */}
+        <div className="mt-5 grid grid-cols-1 gap-4 rounded-xl border border-gray-100 bg-surface p-4 sm:grid-cols-2 sm:p-5">
+          {/* 1. Fecha */}
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-surface-blue text-primary">
               <FaCalendarCheck className="text-base" />
@@ -178,7 +178,7 @@ export default function EventoDetalleModal({
             </div>
           </div>
 
-          {/* Horario */}
+          {/* 2. Horario */}
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-surface-blue text-primary">
               <FaClock className="text-base" />
@@ -193,8 +193,8 @@ export default function EventoDetalleModal({
             </div>
           </div>
 
-          {/* Ubicación / Enlace */}
-          <div className="flex items-start gap-3 sm:col-span-2">
+          {/* 3. Ubicación / Enlace */}
+          <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-surface-blue text-primary">
               <IconoLugar className="text-base" />
             </span>
@@ -208,8 +208,8 @@ export default function EventoDetalleModal({
             </div>
           </div>
 
-          {/* Disponibilidad / Cupos */}
-          <div className="flex items-center gap-3 sm:col-span-2">
+          {/* 4. Disponibilidad / Cupos */}
+          <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-surface-blue text-primary">
               <FaUsers className="text-base" />
             </span>

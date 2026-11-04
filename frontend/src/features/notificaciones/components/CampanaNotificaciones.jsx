@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBell } from "react-icons/fa6";
+import { FaBell, FaCheckDouble } from "react-icons/fa6";
 import { toast } from "sonner";
 import { useNotificaciones } from "../hooks/useNotificaciones";
 import { destinoDeNotificacion } from "../utils/notificaciones";
@@ -11,8 +11,17 @@ export default function CampanaNotificaciones() {
   const [abierto, setAbierto] = useState(false);
   const contenedorRef = useRef(null);
   const navigate = useNavigate();
-  const { items, noLeidas, cargando, error, hayMas, cargar, cargarMas, marcarLeida, marcarTodasLeidas } =
-    useNotificaciones();
+  const {
+    items,
+    noLeidas,
+    cargando,
+    error,
+    hayMas,
+    cargar,
+    cargarMas,
+    marcarLeida,
+    marcarTodasLeidas,
+  } = useNotificaciones();
 
   // Cierra con Escape o al hacer clic afuera.
   useEffect(() => {
@@ -30,7 +39,7 @@ export default function CampanaNotificaciones() {
   }, [abierto]);
 
   const alternar = () => {
-    if (!abierto) cargar(); // al abrir siempre traemos la lista fresca
+    if (!abierto) cargar();
     setAbierto((valor) => !valor);
   };
 
@@ -56,11 +65,11 @@ export default function CampanaNotificaciones() {
         aria-haspopup="dialog"
         aria-expanded={abierto}
         aria-label={noLeidas > 0 ? `Notificaciones: ${noLeidas} sin leer` : "Notificaciones"}
-        className="relative grid h-10 w-10 place-items-center rounded-full text-xl text-primary transition-colors hover:bg-surface"
+        className="relative grid h-10 w-10 cursor-pointer place-items-center rounded-full bg-surface text-lg text-primary transition-colors hover:bg-surface-blue"
       >
         <FaBell />
         {noLeidas > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-[#e66d4a] px-1 text-[11px] font-bold leading-5 text-white">
+          <span className="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-[#e66d4a] px-1 text-[11px] font-semibold leading-5 text-white tabular-nums">
             {noLeidas > 99 ? "99+" : noLeidas}
           </span>
         )}
@@ -70,13 +79,15 @@ export default function CampanaNotificaciones() {
         <div
           role="dialog"
           aria-label="Notificaciones"
-          className="fixed right-2 top-22 z-50 w-md max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl sm:right-8"
+          className="animacion-modal fixed right-2 top-22 z-50 w-md max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xl sm:right-8"
         >
-          <div className="flex items-center justify-between gap-3 bg-navy px-5 py-4 text-white">
-            <h3 className="flex items-center gap-2 text-base font-bold">
+          <div className="flex items-center justify-between gap-3 bg-linear-to-r from-navy via-sidebar to-primary px-5 py-4 text-white">
+            <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider">
               Notificaciones
               {noLeidas > 0 && (
-                <span className="rounded-full bg-[#e66d4a] px-2 py-0.5 text-xs font-bold leading-4">{noLeidas > 99 ? "99+" : noLeidas}</span>
+                <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold leading-4 text-white ring-1 ring-white/30">
+                  {noLeidas > 99 ? "99+" : noLeidas}
+                </span>
               )}
             </h3>
             {noLeidas > 0 && (
@@ -84,27 +95,34 @@ export default function CampanaNotificaciones() {
                 type="button"
                 onClick={leerTodas}
                 aria-label="Marcar todas como leídas"
-                className="shrink-0 text-sm font-semibold text-white/90 hover:text-white hover:underline"
+                className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 text-xs font-medium text-white/90 transition-colors hover:text-white hover:underline"
               >
+                <FaCheckDouble className="text-[11px]" />
                 <span className="sm:hidden">Marcar todas</span>
-                <span className="hidden sm:inline">Marcar todas como leídas</span>
+                <span className="hidden sm:inline">Marcar como leídas</span>
               </button>
             )}
           </div>
 
-          <div className="max-h-[70vh] overflow-y-auto">
-            {error && <p className="px-5 py-6 text-center text-base text-red-600">{error}</p>}
+          <div className="max-h-[68vh] overflow-y-auto">
+            {error && <p className="px-5 py-6 text-center text-sm text-red-600">{error}</p>}
 
             {!error && items.length === 0 && (
-              <p className="px-5 py-10 text-center text-base text-gray-500">
-                {cargando ? "Cargando..." : "No tenés notificaciones."}
-              </p>
+              <div className="px-5 py-10 text-center">
+                <p className="text-sm font-medium text-slate-500">
+                  {cargando ? "Cargando notificaciones..." : "No tenés notificaciones por el momento."}
+                </p>
+              </div>
             )}
 
             {items.length > 0 && (
-              <ul>
+              <ul className="divide-y divide-slate-100">
                 {items.map((notificacion) => (
-                  <ItemNotificacion key={notificacion.id} notificacion={notificacion} onAbrir={abrirNotificacion} />
+                  <ItemNotificacion
+                    key={notificacion.id}
+                    notificacion={notificacion}
+                    onAbrir={abrirNotificacion}
+                  />
                 ))}
               </ul>
             )}
@@ -114,9 +132,9 @@ export default function CampanaNotificaciones() {
                 type="button"
                 onClick={cargarMas}
                 disabled={cargando}
-                className="w-full px-5 py-3 text-base font-bold text-primary hover:bg-surface disabled:opacity-50"
+                className="w-full cursor-pointer border-t border-slate-100 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-primary transition-colors hover:bg-surface-blue/50 disabled:opacity-50"
               >
-                {cargando ? "Cargando..." : "Ver más"}
+                {cargando ? "Cargando..." : "Ver anteriores"}
               </button>
             )}
           </div>
