@@ -22,6 +22,9 @@ export default function HeroSection() {
 
         <div className="absolute inset-0 bg-black/50 z-0" />
 
+        {/* Degradado inferior: el Hero se funde con el fondo de Novedades (sin corte brusco) */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-16 bg-linear-to-b from-transparent to-surface sm:h-3" aria-hidden="true" />
+
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex flex-col items-start mt-16">
           <span className="text-white/90 text-sm sm:text-base font-bold tracking-[0.2em] uppercase mb-4 drop-shadow-md">
             Impulsando el desarrollo comercial

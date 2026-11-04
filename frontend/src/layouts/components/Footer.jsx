@@ -1,14 +1,20 @@
 import { FaEnvelope, FaFacebookF, FaLocationDot, FaPhone, FaXTwitter } from "react-icons/fa6";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { contacto } from "@/features/landing/data/contacto";
-import { documentosInstitucionales } from "@/features/landing/data/documentos";
 
 const URL_FACEBOOK = "https://www.facebook.com/camara.capymef/";
 const URL_X = "https://x.com/capymef";
 
-const estatuto = documentosInstitucionales.find((doc) => doc.titulo === "Estatuto Social");
+const enlacesNavegacion = [
+  { id: "inicio", nombre: "Inicio" },
+  { id: "novedades", nombre: "Novedades" },
+  { id: "nosotros", nombre: "Sobre nosotros" },
+  { id: "beneficios", nombre: "Beneficios" },
+  { id: "informacion", nombre: "Información" },
+  { id: "vinculacion", nombre: "Vinculación" },
+];
 
-const claseEnlace = "text-left text-lg text-white/90 transition-colors hover:text-white";
+const claseEnlace = "text-left text-lg text-white/90 transition-colors hover:text-white cursor-pointer";
 const claseRed =
   "grid size-13 place-items-center rounded-full bg-white/10 text-xl text-white transition-colors hover:bg-white/25";
 
@@ -28,7 +34,24 @@ export default function Footer() {
 
   // Desde la Landing baja suave a la sección; desde otra página vuelve a "/" y luego baja.
   const irASeccion = (id) => {
-    const bajar = () => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    if (id === "inicio") {
+      if (location.pathname === "/") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        navigate("/");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
+
+    const bajar = () => {
+      const elemento = document.getElementById(id);
+      if (elemento) {
+        const navOffset = 90;
+        const top = elemento.getBoundingClientRect().top + window.scrollY - navOffset;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+    };
 
     if (location.pathname === "/") {
       bajar();
@@ -64,29 +87,20 @@ export default function Footer() {
             </ul>
           </Columna>
 
-          {/* 2. ENLACES RÁPIDOS */}
-          <Columna titulo="Enlaces rápidos">
-            <ul className="space-y-6">
-              <li>
-                <Link to="/noticias" className={claseEnlace}>Noticias</Link>
-              </li>
-              <li>
-                <button type="button" onClick={() => irASeccion("nosotros")} className={claseEnlace}>
-                  Sobre nosotros
-                </button>
-              </li>
-              <li>
-                <button type="button" onClick={() => irASeccion("autoridades")} className={claseEnlace}>
-                  Autoridades
-                </button>
-              </li>
-              {estatuto && (
-                <li>
-                  <a href={estatuto.href} target="_blank" rel="noreferrer" className={claseEnlace}>
-                    Estatuto
-                  </a>
+          {/* 2. NAVEGACIÓN */}
+          <Columna titulo="Navegación">
+            <ul className="space-y-4">
+              {enlacesNavegacion.map((enlace) => (
+                <li key={enlace.id}>
+                  <button
+                    type="button"
+                    onClick={() => irASeccion(enlace.id)}
+                    className={claseEnlace}
+                  >
+                    {enlace.nombre}
+                  </button>
                 </li>
-              )}
+              ))}
             </ul>
           </Columna>
 

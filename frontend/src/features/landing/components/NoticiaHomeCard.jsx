@@ -1,20 +1,23 @@
+import { FaArrowRight, FaCalendarDay, FaTag } from "react-icons/fa6";
 import logo from "@/assets/img/logo.png";
-import { formatearFecha } from "@/shared/utils/fechas";
+import { formatearFechaLarga } from "@/shared/utils/fechas";
 import { urlImagen } from "@/shared/utils/imagenes";
 
-const IconoCalendario = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-);
-
+/**
+ * Tarjeta de noticia para la sección de socios y novedades.
+ * Estilo unificado con las tarjetas de eventos (EventoCard):
+ * - Mismo borde redondeado (rounded-2xl) y sombra suave
+ * - Imagen de cabecera con proporción uniforme y respaldo con logo
+ * - Insignia de categoría flotante sobre la imagen
+ * - Fecha con ícono y texto institucional formateado en formato largo (dddd D de MMMM, YYYY)
+ * - Enlace inferior claro con flecha animada al hacer hover
+ */
 export default function NoticiaHomeCard({ noticia, onClick }) {
   const imagen = urlImagen(noticia.imagenUrl);
 
   return (
     <article
       onClick={onClick}
-      // Accesible con teclado: Enter o espacio abren la noticia, igual que un clic
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -24,48 +27,59 @@ export default function NoticiaHomeCard({ noticia, onClick }) {
       role="button"
       tabIndex={0}
       aria-label={`Leer la noticia: ${noticia.titulo}`}
-      className="bg-white rounded-2xl overflow-hidden flex flex-col shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar cursor-pointer"
     >
-      <div className="h-56 relative overflow-hidden bg-gray-100">
-        {noticia.categoria && (
-          <span className="absolute top-4 left-4 bg-surface text-sidebar text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm uppercase tracking-wide flex items-center gap-1.5">
-            <IconoCalendario className="w-3.5 h-3.5" />
-            {noticia.categoria}
-          </span>
-        )}
+      {/* Cabecera con imagen o degradado institucional con logo */}
+      <div className="relative h-48 w-full overflow-hidden bg-gray-100">
         {imagen ? (
           <img
             src={imagen}
             alt={noticia.titulo}
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-navy to-primary flex items-center justify-center p-6">
-            <img src={logo} alt="CAPYMEF" className="max-h-24 max-w-[60%] object-contain opacity-80 drop-shadow-md" />
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy to-primary p-6">
+            <img
+              src={logo}
+              alt="CAPYMEF"
+              className="max-h-20 max-w-[55%] object-contain opacity-80 drop-shadow-md"
+            />
+          </div>
+        )}
+
+        {noticia.categoria && (
+          <div className="absolute left-3 top-3 z-10">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-navy shadow-sm backdrop-blur-xs">
+              <FaTag className="text-[11px] text-primary" />
+              {noticia.categoria}
+            </span>
           </div>
         )}
       </div>
 
-      <div className="p-6 md:p-8 flex flex-col flex-1 bg-white">
-        <div className="flex items-center gap-2 mb-3 text-sidebar">
-          <IconoCalendario className="w-3.5 h-3.5" />
-          <span className="text-[11px] font-semibold uppercase tracking-wider">
-            {formatearFecha(noticia.fechaPublicacion)}
-          </span>
+      {/* Contenido descriptivo */}
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
+          <FaCalendarDay />
+          <span>{formatearFechaLarga(noticia.fechaPublicacion)}</span>
         </div>
 
-        <h3 className="text-lg font-bold mb-4 leading-snug text-navy-soft group-hover:text-sidebar transition-colors line-clamp-2">
+        <h3 className="line-clamp-2 text-lg font-bold leading-snug text-navy transition-colors group-hover:text-primary">
           {noticia.titulo}
         </h3>
 
-        <p className="text-gray-500 text-sm mb-6 flex-grow leading-relaxed line-clamp-3">
-          {noticia.subtitulo || noticia.resumen}
+        <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-gray-600">
+          {noticia.subtitulo || noticia.resumen || noticia.contenido || "Sin descripción disponible."}
         </p>
 
-        <div className="mt-auto flex items-center text-sidebar font-bold text-sm bg-surface w-max px-4 py-2 rounded-lg transition-colors group-hover:bg-sidebar group-hover:text-white">
-          Leer más <span className="ml-2 transform transition-transform group-hover:translate-x-1">&rarr;</span>
+        {/* Acciones al pie */}
+        <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4">
+          <span className="text-xs font-bold text-primary group-hover:underline">
+            Leer noticia completa
+          </span>
+          <FaArrowRight className="text-xs text-primary transition-transform group-hover:translate-x-1" />
         </div>
       </div>
     </article>

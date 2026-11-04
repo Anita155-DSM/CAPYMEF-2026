@@ -7,9 +7,9 @@ export const gruposAutoridades = [
     columnas: "lg:grid-cols-3",
     compacto: false,
     personas: [
-      { cargo: "Presidente", nombre: "Carlos A. Werlen", icono: FaUserTie },
-      { cargo: "Secretario", nombre: "Antonio F. Hryniewicz", icono: FaPenClip },
-      { cargo: "Tesorero", nombre: "Mónica G. Lozano", icono: FaCoins },
+      { cargo: "Presidente", nombre: "Carlos A. Werlen", icono: FaUserTie, funcion: "Representa legalmente a la Cámara y lidera la Comisión Directiva." },
+      { cargo: "Secretario", nombre: "Antonio F. Hryniewicz", icono: FaPenClip, funcion: "Lleva las actas y la comunicación institucional con los socios." },
+      { cargo: "Tesorero", nombre: "Mónica G. Lozano", icono: FaCoins, funcion: "Administra los fondos y las cuentas de la Cámara." },
     ],
   },
   {

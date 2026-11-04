@@ -1,0 +1,93 @@
+export const localidadesPorDepartamento = [
+  {
+    departamento: "Bermejo",
+    ciudades: [
+      "Laguna Yema",
+      "Los Chiriguanos",
+      "Pozo de Maza",
+      "Pozo del Mortero",
+    ],
+  },
+  {
+    departamento: "Formosa",
+    ciudades: [
+      "Formosa",
+      "Colonia Pastoril",
+      "Gran Guardia",
+      "San Hilario",
+      "Mariano Boedo",
+      "Mojón de Fierro",
+      "Villa del Carmen",
+      "Villa Trinidad",
+    ],
+  },
+  {
+    departamento: "Laishí",
+    ciudades: [
+      "San Francisco de Laishí",
+      "Banco Payaguá",
+      "General Lucio V. Mansilla",
+      "Herradura",
+      "Tatané",
+      "Villa Escolar",
+    ],
+  },
+  { departamento: "Matacos", ciudades: ["Ingeniero Juárez"] },
+  {
+    departamento: "Patiño",
+    ciudades: [
+      "Comandante Fontana",
+      "Bartolomé de las Casas",
+      "Colonia Sarmiento",
+      "El Recreo",
+      "Estanislao del Campo",
+      "Fortín Leyes",
+      "Fortín Lugones",
+      "General Manuel Belgrano",
+      "Ibarreta",
+      "Juan G. Bazán",
+      "Las Lomitas",
+      "Posta Cambio Zalazar",
+      "Pozo del Tigre",
+      "San Martín 1",
+      "San Martín 2",
+      "Subteniente Perín",
+      "Villa General Güemes",
+    ],
+  },
+  {
+    departamento: "Pilagás",
+    ciudades: [
+      "El Espinillo",
+      "Buena Vista",
+      "Misión Tacaaglé",
+      "Portón Negro",
+      "Tres Lagunas",
+    ],
+  },
+  {
+    departamento: "Pilcomayo",
+    ciudades: [
+      "Clorinda",
+      "Laguna Blanca",
+      "Laguna Naick Neck",
+      "Palma Sola",
+      "Puerto Pilcomayo",
+      "Riacho He-Hé",
+      "Riacho Negro",
+      "Siete Palmas",
+    ],
+  },
+  {
+    departamento: "Pirané",
+    ciudades: [
+      "Pirané",
+      "El Colorado",
+      "Mayor Vicente Villafañe",
+      "Palo Santo",
+      "Villa Dos Trece",
+    ],
+  },
+  { departamento: "Ramón Lista", ciudades: ["El Chorro", "El Potrillo"] },
+];
+

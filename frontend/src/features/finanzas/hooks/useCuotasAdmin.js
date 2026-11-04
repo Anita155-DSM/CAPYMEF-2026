@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { obtenerCuotasAdmin } from "@/services/finanzasServices";
 
-/** Carga todas las cuotas del sistema (con su socio) una sola vez. */
+/** Carga todas las cuotas del sistema (con su socio) una sola vez y permite marcar una como pagada. */
 export function useCuotasAdmin() {
   const [cuotas, setCuotas] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -18,5 +18,9 @@ export function useCuotasAdmin() {
     return () => { activo = false; };
   }, []);
 
-  return { cuotas, cargando, error };
+  // Tras registrar un pago, la cuota pasa a "pagada" sin volver a pedir todo el listado
+  const marcarPagada = (id) =>
+    setCuotas((actuales) => actuales.map((c) => (c.id === id ? { ...c, estado: "pagada" } : c)));
+
+  return { cuotas, cargando, error, marcarPagada };
 }

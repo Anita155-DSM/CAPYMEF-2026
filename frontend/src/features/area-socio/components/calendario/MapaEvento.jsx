@@ -1,27 +1,35 @@
 import { FaLocationDot } from "react-icons/fa6";
 import { mapaDelEvento } from "../../utils/ubicacion";
 
-/** Mapa embebido con el lugar del evento y botón "Cómo llegar". No renderiza nada si no hay ubicación. */
+/**
+ * Mapa interactivo embebido para eventos presenciales con ubicación válida.
+ * Proporción compacta para una óptima distribución dentro del modal de detalle.
+ */
 export default function MapaEvento({ evento }) {
   const mapa = mapaDelEvento(evento);
   if (!mapa) return null;
 
   return (
     <div className="mt-4">
-      <iframe
-        title={`Mapa: ${evento.titulo}`}
-        src={mapa.embed}
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        className="h-56 w-full border border-[#d7e0e5]"
-      />
+      <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+        Ubicación en el mapa
+      </p>
+      <div className="overflow-hidden rounded-xl border border-gray-200 shadow-xs">
+        <iframe
+          title={`Mapa: ${evento.titulo}`}
+          src={mapa.embed}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          className="h-44 w-full border-0 sm:h-48"
+        />
+      </div>
       <a
         href={mapa.enlace}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-[#0875b1] hover:underline"
+        className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary transition-colors hover:text-primary-dark hover:underline"
       >
-        <FaLocationDot /> Cómo llegar
+        <FaLocationDot className="text-primary" /> Abrir en Google Maps para ver cómo llegar
       </a>
     </div>
   );

@@ -4,15 +4,17 @@ import Loading from "@/shared/ui/Loading";
 import Paginacion from "@/shared/ui/Paginacion";
 import { descargarComprobanteAdmin } from "@/services/finanzasServices";
 import FiltrosCuotas from "../components/FiltrosCuotas";
+import PagoEfectivoModal from "../components/PagoEfectivoModal";
 import TablaCuotasAdmin from "../components/TablaCuotasAdmin";
 import { useCuotasAdmin } from "../hooks/useCuotasAdmin";
 import { useFiltrosCuotas } from "../hooks/useFiltrosCuotas";
 
 export default function FinanzasPage() {
-  const { cuotas, cargando, error } = useCuotasAdmin();
+  const { cuotas, cargando, error, marcarPagada } = useCuotasAdmin();
   const { filtros, cambiar, limpiar, opcionesPeriodo, filtradas, visibles, pagina, totalPaginas, setPagina } =
     useFiltrosCuotas(cuotas);
   const [descargandoId, setDescargandoId] = useState(null);
+  const [cuotaEfectivo, setCuotaEfectivo] = useState(null);
 
   const descargar = async (cuota) => {
     setDescargandoId(cuota.id);
@@ -39,6 +41,7 @@ export default function FinanzasPage() {
             cuotas={visibles}
             descargandoId={descargandoId}
             onDescargar={descargar}
+            onPagarEfectivo={setCuotaEfectivo}
             mensajeVacio={
               cuotas.length === 0
                 ? "Todavía no hay cuotas generadas."
@@ -48,6 +51,10 @@ export default function FinanzasPage() {
 
           <Paginacion pagina={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
         </>
+      )}
+
+      {cuotaEfectivo && (
+        <PagoEfectivoModal cuota={cuotaEfectivo} onRegistrado={marcarPagada} onClose={() => setCuotaEfectivo(null)} />
       )}
     </div>
   );

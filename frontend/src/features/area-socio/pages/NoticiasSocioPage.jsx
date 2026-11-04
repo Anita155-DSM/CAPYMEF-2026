@@ -54,7 +54,7 @@ export default function NoticiasSocio() {
     <div className="space-y-6">
       <header>
         <p className="mb-1 text-sm font-semibold text-primary">NOVEDADES DE LA CÁMARA</p>
-        <h1 className="text-2xl font-bold uppercase tracking-tight text-navy sm:text-3xl">Noticias</h1>
+        <h1 className="text-2xl font-semibold uppercase tracking-tight text-navy sm:text-3xl">Noticias</h1>
       </header>
 
       {error && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}

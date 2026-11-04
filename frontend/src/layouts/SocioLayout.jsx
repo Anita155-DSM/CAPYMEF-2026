@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import { FaBars, FaCircleUser } from "react-icons/fa6";
+import { Outlet } from "react-router-dom";
+import { FaBars } from "react-icons/fa6";
 import { obtenerPerfil } from "../services/authServices.js";
 import { useAuth } from "@/app/providers/AuthContext";
 import { useMisCuotas } from "@/features/area-socio/hooks/useMisCuotas";
 import { mayuscula } from "@/features/area-socio/utils/cuotas";
 import CampanaNotificaciones from "@/features/notificaciones/components/CampanaNotificaciones";
 import SidebarSocio from "./components/SidebarSocio";
+import MenuPerfilSocio from "./components/MenuPerfilSocio";
 
 export default function SocioLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false);
-  const { usuario, actualizarUsuario, logout } = useAuth();
+  const { usuario, actualizarUsuario } = useAuth();
   const { cuotas, errorCuotas, recargarCuotas } = useMisCuotas();
-  const navigate = useNavigate();
 
   // Traemos el perfil fresco del backend y lo guardamos en el contexto
   useEffect(() => {
@@ -24,17 +24,17 @@ export default function SocioLayout() {
   // useCallback: el sidebar lo usa en un efecto (Escape) y no queremos que se re-suscriba en cada render
   const cerrarMenu = useCallback(() => setMenuAbierto(false), []);
 
-  const salir = () => {
-    logout();
-    navigate("/login", { replace: true });
-  };
-
   const nombreEmpresa = usuario.razonSocial || "Tu empresa";
   const categoria = mayuscula(usuario.categoria) || "Socio";
 
   return (
     <div className="min-h-screen bg-surface text-navy font-sans">
-      <SidebarSocio abierto={menuAbierto} onCerrar={cerrarMenu} onSalir={salir} />
+      {/* Se pasa la categoría raw (sin mayuscula) para que el sidebar pueda filtrar */}
+      <SidebarSocio
+        abierto={menuAbierto}
+        onCerrar={cerrarMenu}
+        categoria={usuario.categoria}
+      />
 
       <div className="lg:pl-64">
         <header className="flex h-20 items-center justify-between border-b border-gray-200 bg-white px-5 shadow-sm sm:px-8">
@@ -48,9 +48,7 @@ export default function SocioLayout() {
               <p className="text-sm font-bold text-navy">{nombreEmpresa}</p>
               <p className="text-xs text-gray-500">{categoria}</p>
             </div>
-            <Link to="/profile" aria-label="Mi cuenta">
-              <FaCircleUser className="text-4xl text-primary" />
-            </Link>
+            <MenuPerfilSocio />
           </div>
         </header>
 

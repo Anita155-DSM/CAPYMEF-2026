@@ -1,4 +1,4 @@
-import { FaFileDownload } from "react-icons/fa";
+import { FaFileDownload, FaMoneyBillWave } from "react-icons/fa";
 import { ESTADOS_CUOTA, formatearMonto, mayuscula, nombreCuota } from "../utils/cuotas";
 
 function EstadoCuota({ estado }) {
@@ -11,8 +11,20 @@ function EstadoCuota({ estado }) {
   );
 }
 
-function BotonComprobante({ cuota, descargandoId, onDescargar }) {
-  if (cuota.estado !== "pagada") return null;
+function BotonAccion({ cuota, descargandoId, onDescargar, onPagarEfectivo }) {
+  if (cuota.estado !== "pagada") {
+    return (
+      <button
+        type="button"
+        onClick={() => onPagarEfectivo(cuota)}
+        className="inline-flex items-center gap-2 rounded bg-green-50 px-3 py-2 text-xs font-bold text-green-700 shadow-sm transition-colors hover:bg-green-600 hover:text-white"
+        title="Registrar pago en efectivo"
+        aria-label={`Registrar pago en efectivo de ${nombreCuota(cuota.mes_anio)}`}
+      >
+        <FaMoneyBillWave size={14} /> Efectivo
+      </button>
+    );
+  }
   return (
     <button
       type="button"
@@ -29,10 +41,10 @@ function BotonComprobante({ cuota, descargandoId, onDescargar }) {
 
 /**
  * Historial de cuotas. md+: tabla. Celular: una tarjeta por cuota.
- * El comprobante solo aparece en las pagadas.
+ * En las pagadas se descarga el comprobante; en las pendientes o vencidas se puede registrar un pago en efectivo.
  */
-export default function TablaCuotasAdmin({ cuotas, mensajeVacio, descargandoId, onDescargar }) {
-  const columnas = ["Socio", "Cuota", "Categoría", "Monto", "Estado", "Comprobante"];
+export default function TablaCuotasAdmin({ cuotas, mensajeVacio, descargandoId, onDescargar, onPagarEfectivo }) {
+  const columnas = ["Socio", "Cuota", "Categoría", "Monto", "Estado", "Acciones"];
 
   if (cuotas.length === 0) {
     return (
@@ -53,7 +65,7 @@ export default function TablaCuotasAdmin({ cuotas, mensajeVacio, descargandoId, 
                 <p className="text-base font-bold text-navy wrap-break-word">{cuota.socio?.razonSocial ?? "Socio eliminado"}</p>
                 <p className="text-xs text-gray-500">{cuota.socio?.cuit}</p>
               </div>
-              <BotonComprobante cuota={cuota} descargandoId={descargandoId} onDescargar={onDescargar} />
+              <BotonAccion cuota={cuota} descargandoId={descargandoId} onDescargar={onDescargar} onPagarEfectivo={onPagarEfectivo} />
             </div>
 
             <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
@@ -76,7 +88,7 @@ export default function TablaCuotasAdmin({ cuotas, mensajeVacio, descargandoId, 
           <thead>
             <tr className="bg-navy text-white">
               {columnas.map((titulo) => (
-                <th key={titulo} className={`py-3 px-4 font-semibold text-sm ${titulo === "Comprobante" ? "text-center" : ""}`}>
+                <th key={titulo} className={`py-3 px-4 font-semibold text-sm ${titulo === "Acciones" ? "text-center" : ""}`}>
                   {titulo}
                 </th>
               ))}
@@ -94,7 +106,7 @@ export default function TablaCuotasAdmin({ cuotas, mensajeVacio, descargandoId, 
                 <td className="py-3 px-4 text-gray-700 whitespace-nowrap">{formatearMonto(cuota.monto)}</td>
                 <td className="py-3 px-4"><EstadoCuota estado={cuota.estado} /></td>
                 <td className="py-3 px-4 text-center">
-                  <BotonComprobante cuota={cuota} descargandoId={descargandoId} onDescargar={onDescargar} />
+                  <BotonAccion cuota={cuota} descargandoId={descargandoId} onDescargar={onDescargar} onPagarEfectivo={onPagarEfectivo} />
                 </td>
               </tr>
             ))}

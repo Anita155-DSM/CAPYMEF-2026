@@ -8,6 +8,18 @@ import { descargarBlob, idValido, nombreArchivoSeguro } from "@/shared/utils/seg
 /** Todas las cuotas del sistema, cada una con los datos de su socio. */
 export const obtenerCuotasAdmin = () => api("/cuotas");
 
+/**
+ * Registra que el socio pagó la cuota en efectivo (PUT /cuotas/:id/pagar).
+ * El backend crea el pago, marca la cuota como pagada, avisa al socio y le manda el comprobante.
+ */
+export function registrarPagoEfectivo(cuota, observaciones = "") {
+  if (!idValido(cuota?.id)) return Promise.resolve({ exito: false, mensaje: "Cuota inválida." });
+  return api(`/cuotas/${encodeURIComponent(cuota.id)}/pagar`, {
+    method: "PUT",
+    body: { metodoPago: "Efectivo", observaciones: observaciones.trim() || "Pago en efectivo registrado por administración" },
+  });
+}
+
 /** Descarga el PDF del comprobante de una cuota ya pagada. */
 export async function descargarComprobanteAdmin(cuota) {
   if (!idValido(cuota?.id)) return { exito: false, mensaje: "Cuota inválida." };
