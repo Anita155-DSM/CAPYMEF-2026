@@ -5,6 +5,8 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { User } from '../../models/user.models.js';
 import { verificarToken, verificarTokenOpcional } from '../../middlewares/authMiddleware.js';
+import { verificarAdmin } from '../../middlewares/roleMiddleware.js';
+import { CODIGOS_AUTH } from '../../middlewares/codigosAuth.js';
 import { reiniciarBase, cerrarBase, crearUsuario } from '../helpers/baseDeDatos.js';
 
 // Una app mínima solo con el middleware y una ruta que devuelve req.usuario. Así se prueba
@@ -12,6 +14,7 @@ import { reiniciarBase, cerrarBase, crearUsuario } from '../helpers/baseDeDatos.
 const app = express();
 app.get('/protegida', verificarToken, (req, res) => res.json({ usuario: req.usuario }));
 app.get('/opcional', verificarTokenOpcional, (req, res) => res.json({ usuario: req.usuario ?? null }));
+app.get('/solo-admin', verificarToken, verificarAdmin, (req, res) => res.json({ ok: true }));
 
 const firmar = (datos, opciones = { expiresIn: '1h' }) => jwt.sign(datos, process.env.JWT_SECRET, opciones);
 
@@ -215,5 +218,91 @@ describe('verificarToken después de un cambio de contraseña', () => {
     const respuesta = await pedirCon(tokenEmitidoEn(usuario.id));
 
     expect(respuesta.status).toBe(200);
+  });
+});
+
+describe('códigos de error de autenticación (campo "codigo")', () => {
+  // El frontend cierra la sesión según el código, no según el texto. Status y mensaje tienen que
+  // seguir exactamente iguales: hay tests y un script de seguridad que dependen de ellos.
+  const pedirCon = (ruta, token) =>
+    token ? request(app).get(ruta).set('Authorization', `Bearer ${token}`) : request(app).get(ruta);
+
+  it('SIN_SESION: sin token (401, mismo mensaje)', async () => {
+    const respuesta = await pedirCon('/protegida');
+
+    expect(respuesta.status).toBe(401);
+    expect(respuesta.body).toEqual({
+      exito: false,
+      mensaje: 'Acceso denegado. No se proporcionó un token de sesión.',
+      codigo: CODIGOS_AUTH.SIN_SESION,
+    });
+  });
+
+  it.each([
+    ['basura', 'cualquier-cosa'],
+    ['firmado con otra clave', jwt.sign({ id: 1 }, 'otra-clave')],
+    ['vencido', jwt.sign({ id: 1, exp: Math.floor(Date.now() / 1000) - 60 }, process.env.JWT_SECRET)],
+  ])('TOKEN_INVALIDO: token %s (403, mismo mensaje)', async (_, token) => {
+    const respuesta = await pedirCon('/protegida', token);
+
+    expect(respuesta.status).toBe(403);
+    expect(respuesta.body).toEqual({ exito: false, mensaje: 'Token inválido o expirado.', codigo: CODIGOS_AUTH.TOKEN_INVALIDO });
+  });
+
+  it('SESION_INVALIDA: la cuenta ya no existe (403, mismo mensaje)', async () => {
+    const respuesta = await pedirCon('/protegida', firmar({ id: 9999 }));
+
+    expect(respuesta.status).toBe(403);
+    expect(respuesta.body).toEqual({ exito: false, mensaje: 'La cuenta ya no existe.', codigo: CODIGOS_AUTH.SESION_INVALIDA });
+  });
+
+  it('SESION_INVALIDA: la cuenta no está habilitada (403, mismo mensaje)', async () => {
+    const usuario = await crearUsuario({ estado: 'inactivo' });
+
+    const respuesta = await pedirCon('/protegida', firmar({ id: usuario.id }));
+
+    expect(respuesta.status).toBe(403);
+    expect(respuesta.body).toEqual({ exito: false, mensaje: 'Tu cuenta no está habilitada.', codigo: CODIGOS_AUTH.SESION_INVALIDA });
+  });
+
+  it('SESION_INVALIDA: la contraseña cambió después de emitido el token (403, mismo mensaje)', async () => {
+    const iat = Math.floor(Date.now() / 1000) - 120;
+    const usuario = await crearUsuario({ passwordChangedAt: new Date((iat + 60) * 1000) });
+
+    const respuesta = await pedirCon('/protegida', firmar({ id: usuario.id, iat }));
+
+    expect(respuesta.status).toBe(403);
+    expect(respuesta.body).toEqual({
+      exito: false,
+      mensaje: 'La sesión ya no es válida. Iniciá sesión nuevamente.',
+      codigo: CODIGOS_AUTH.SESION_INVALIDA,
+    });
+  });
+
+  it('SIN_PERMISOS: un socio en una ruta de admin (403, mismo mensaje)', async () => {
+    const socio = await crearUsuario({ rol: 'socio' });
+
+    const respuesta = await pedirCon('/solo-admin', firmar({ id: socio.id }));
+
+    expect(respuesta.status).toBe(403);
+    expect(respuesta.body).toEqual({
+      exito: false,
+      mensaje: 'Acceso denegado. Se requieren permisos de Administrador para realizar esta acción.',
+      codigo: CODIGOS_AUTH.SIN_PERMISOS,
+    });
+  });
+
+  it('un admin pasa verificarAdmin sin ningún código de error', async () => {
+    const admin = await crearUsuario({ rol: 'admin' });
+
+    const respuesta = await pedirCon('/solo-admin', firmar({ id: admin.id }));
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body).toEqual({ ok: true });
+  });
+
+  it('los cuatro códigos son textos fijos y distintos', () => {
+    expect(Object.values(CODIGOS_AUTH)).toEqual(['SIN_SESION', 'TOKEN_INVALIDO', 'SESION_INVALIDA', 'SIN_PERMISOS']);
+    expect(Object.isFrozen(CODIGOS_AUTH)).toBe(true);
   });
 });

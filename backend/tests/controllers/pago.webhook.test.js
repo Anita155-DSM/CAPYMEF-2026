@@ -33,7 +33,7 @@ const { crearNotificacion, notificarAdmins } = await import('../../services/noti
 const { evaluarCategoriaSocio } = await import('../../services/categoria.service.js');
 const { Cuota } = await import('../../models/cuota.models.js');
 const { Pago } = await import('../../models/pago.models.js');
-const { recibirWebhook } = await import('../../controllers/pago.controllers.js');
+const { recibirWebhook, iniciarPagoOnline } = await import('../../controllers/pago.controllers.js');
 
 // App mínima solo con el controlador (sin el middleware de firma, que tiene sus propios tests):
 // acá se prueba qué id procesa el controlador.
@@ -345,5 +345,27 @@ describe('recibirWebhook - pago aprobado: respuesta inmediata y trabajo en segun
     expect((await avisoDePago()).status).toBe(200);
     expect(Cuota.findByPk).not.toHaveBeenCalled();
     await segundoPlanoNoArranco();
+  });
+});
+
+// ==========================================
+// Iniciar el pago de una cuota ajena: 403 con código SIN_PERMISOS
+// ==========================================
+describe('iniciarPagoOnline - cuota de otro socio', () => {
+  // App aparte: se simula el socio logueado (id 7) en vez de pasar por verificarToken.
+  const appPago = express();
+  appPago.post('/pagos/:id/iniciar', (req, res, next) => {
+    req.usuario = { id: 7, rol: 'socio' };
+    next();
+  }, iniciarPagoOnline);
+
+  it('responde 403 con el mismo mensaje y código SIN_PERMISOS (la sesión es válida: no hay que cerrarla)', async () => {
+    vi.resetAllMocks();
+    Cuota.findByPk.mockResolvedValue({ id: 'cuota-ajena', usuario_id: 99, estado: 'pendiente' });
+
+    const respuesta = await request(appPago).post('/pagos/cuota-ajena/iniciar');
+
+    expect(respuesta.status).toBe(403);
+    expect(respuesta.body).toEqual({ exito: false, mensaje: 'No tenés permiso para pagar esta cuota.', codigo: 'SIN_PERMISOS' });
   });
 });

@@ -13,6 +13,7 @@ import {
 } from '../services/notificacion.service.js';
 import { evaluarCategoriaSocio } from '../services/categoria.service.js';
 import { descargarPdfGuardado } from '../services/comprobanteGuardado.service.js';
+import { CODIGOS_AUTH } from '../middlewares/codigosAuth.js';
 
 // ==========================================
 // 1. INICIAR PAGO ONLINE (Socio logueado)
@@ -34,7 +35,8 @@ export const iniciarPagoOnline = async (req, res) => {
 
     // Un socio solo puede pagar SU PROPIA cuota, no la de otro.
     if (cuota.usuario_id !== usuarioId) {
-      return res.status(403).json({ exito: false, mensaje: 'No tenés permiso para pagar esta cuota.' });
+      // SIN_PERMISOS: la sesión es válida (solo que la cuota es de otro), así que no hay que cerrarla.
+      return res.status(403).json({ exito: false, mensaje: 'No tenés permiso para pagar esta cuota.', codigo: CODIGOS_AUTH.SIN_PERMISOS });
     }
 
     if (cuota.estado === 'pagada') {
