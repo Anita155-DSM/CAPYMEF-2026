@@ -209,6 +209,7 @@ export default function EditarSocioModal({ socio, onClose, onActualizado }) {
                     <option value="activo">Activo (abona cuota mensual)</option>
                     <option value="adherente">Adherente (sin cuota obligatoria)</option>
                     <option value="padrino">Padrino (aporte voluntario)</option>
+                    <option value="honorario">Honorario (distinción institucional · exento)</option>
                   </select>
                 </div>
 

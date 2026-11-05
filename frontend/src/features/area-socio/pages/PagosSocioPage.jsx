@@ -12,9 +12,13 @@ import ModalPagoCuotaLazy from "../components/pagos/ModalPagoCuotaLazy";
 import TablaCuotas from "../components/pagos/TablaCuotas";
 import TarjetaCuota from "../components/pagos/TarjetaCuota";
 import { useAccionesCuota } from "../hooks/useAccionesCuota";
-import { elegirCuotaActual, formatearMonto, ordenarPorPeriodo } from "../utils/cuotas";
-
-const ES_PADRINO = (categoria) => categoria?.toLowerCase() === "padrino";
+import {
+  abonaCuotaSocial,
+  elegirCuotaActual,
+  formatearMonto,
+  mayuscula,
+  ordenarPorPeriodo,
+} from "../utils/cuotas";
 
 const FILTROS = [
   { valor: "todas", texto: "Todas" },
@@ -31,7 +35,8 @@ export default function PagosSocioPage() {
   const [filtro, setFiltro] = useState("todas");
   const [actualizando, setActualizando] = useState(false);
 
-  const esPadrino = ES_PADRINO(usuario?.categoria);
+  const categoriaLower = usuario?.categoria?.toLowerCase() || "";
+  const esExentoCuotaFija = !abonaCuotaSocial(usuario?.categoria, cuotas);
 
   const ordenadas = useMemo(() => ordenarPorPeriodo(Array.isArray(cuotas) ? cuotas : []), [cuotas]);
   const cuotaActual = useMemo(() => elegirCuotaActual(ordenadas), [ordenadas]);
@@ -45,29 +50,28 @@ export default function PagosSocioPage() {
     setActualizando(false);
   };
 
-  // ─── Vista especial para socios Padrino ───────────────────────────────────
-  if (esPadrino) {
+  // ─── Vista especial para socios sin cuota mensual fija (Padrino, Honorario, Adherente) ───
+  if (esExentoCuotaFija) {
+    const etiquetaCat = mayuscula(categoriaLower) || "Socio";
     return (
       <div className="space-y-6">
         <header className="relative overflow-hidden rounded-none border border-primary/15 bg-linear-to-r from-white via-white to-surface-blue p-5 shadow-xs sm:p-7">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-            Tu aporte a CAPYMEF
+            Tu vínculo con CAPYMEF
           </p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-navy sm:text-3xl">
-            Contribuciones
+            Estado de aportes
           </h1>
         </header>
 
-        <div className="flex items-start gap-4 rounded-2xl border border-primary/20 bg-surface-blue/70 p-5 sm:p-6">
+        <div className="flex items-start gap-4 rounded-none border border-primary/20 bg-surface-blue/70 p-5 sm:p-6">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-xl text-primary shadow-2xs">
             <FaHandshake />
           </span>
           <div>
-            <p className="font-semibold text-navy">Sos socio Padrino de CAPYMEF</p>
+            <p className="font-semibold text-navy">Sos socio {etiquetaCat} de CAPYMEF</p>
             <p className="mt-1 text-sm leading-relaxed text-slate-600">
-              Como Padrino, tu vínculo con la Cámara se basa en contribuciones y donaciones ocasionales,
-              no en una cuota mensual fija. Si realizaste alguna contribución, podés consultar
-              el historial a continuación o comunicarte con la administración.
+              Tu categoría societaria ({etiquetaCat}) no registra una cuota mensual obligatoria. Si realizaste alguna contribución o tenés consultas administrativas, podés comunicarte con la Cámara.
             </p>
             <a
               href="mailto:info@capymef.ar"

@@ -19,7 +19,6 @@ const OPCIONES_MENU = [
   { nombre: "Finanzas", ruta: "/admin/finanzas", icono: FaMoneyBillWave },
   { nombre: "Registros", ruta: "/admin/registros", icono: FaClipboardCheck },
   { nombre: "Socios", ruta: "/admin/socios", icono: FaUserGroup },
-  { nombre: "Vista Socio (Test)", ruta: "/socios", icono: FaUserGroup },
 ];
 
 const claseItem = ({ isActive }) =>

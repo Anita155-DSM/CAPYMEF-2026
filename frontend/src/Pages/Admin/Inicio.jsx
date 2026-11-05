@@ -125,6 +125,7 @@ export default function Inicio() {
     const activos = aprobados.filter((s) => s.categoria?.toLowerCase() === "activo").length;
     const padrinos = aprobados.filter((s) => s.categoria?.toLowerCase() === "padrino").length;
     const adherentes = aprobados.filter((s) => s.categoria?.toLowerCase() === "adherente").length;
+    const honorarios = aprobados.filter((s) => s.categoria?.toLowerCase() === "honorario").length;
     const degradadosMora = aprobados.filter((s) => Boolean(s.degradadoPorMora)).length;
 
     return {
@@ -132,6 +133,7 @@ export default function Inicio() {
       activos,
       padrinos,
       adherentes,
+      honorarios,
       pendientes,
       degradadosMora,
     };
@@ -322,15 +324,17 @@ export default function Inicio() {
 
               <div className="rounded-none border border-slate-200/70 bg-surface/65 p-5">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Padrinos
+                  Padrinos {conteoSocios.honorarios > 0 ? `/ Honorarios` : ""}
                 </p>
                 <p className="mt-2 text-3xl font-semibold text-navy tabular-nums sm:text-4xl">
-                  {conteoSocios.padrinos}
+                  {conteoSocios.padrinos + conteoSocios.honorarios}
                 </p>
                 <p className="mt-1.5 text-xs text-slate-500">
-                  {conteoSocios.total > 0
-                    ? `${Math.round((conteoSocios.padrinos / conteoSocios.total) * 100)}% del padrón`
-                    : "Sin registros"}
+                  {conteoSocios.honorarios > 0
+                    ? `${conteoSocios.padrinos} padrinos · ${conteoSocios.honorarios} honorarios`
+                    : conteoSocios.total > 0
+                      ? `${Math.round((conteoSocios.padrinos / conteoSocios.total) * 100)}% del padrón`
+                      : "Sin registros"}
                 </p>
               </div>
 

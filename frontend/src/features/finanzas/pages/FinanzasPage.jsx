@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { FaCoins, FaHourglassHalf } from "react-icons/fa6";
+import { FaCoins, FaHourglassHalf, FaReceipt } from "react-icons/fa6";
 import { toast } from "sonner";
 import Paginacion from "@/shared/ui/Paginacion";
 import { descargarComprobanteAdmin } from "@/services/finanzasServices";
 import FiltrosCuotas from "../components/FiltrosCuotas";
+import GastosOperativosModal from "../components/GastosOperativosModal";
 import PagoEfectivoModal from "../components/PagoEfectivoModal";
 import PagosSinConfirmarModal from "../components/PagosSinConfirmarModal";
 import TablaCuotasAdmin from "../components/TablaCuotasAdmin";
@@ -31,6 +32,7 @@ export default function FinanzasPage() {
   const [cuotaEfectivo, setCuotaEfectivo] = useState(null);
   const [modalTarifasAbierto, setModalTarifasAbierto] = useState(false);
   const [modalTesoreriaAbierto, setModalTesoreriaAbierto] = useState(false);
+  const [modalGastosAbierto, setModalGastosAbierto] = useState(false);
 
   const descargar = async (cuota) => {
     setDescargandoId(cuota.id);
@@ -80,6 +82,14 @@ export default function FinanzasPage() {
                 Por confirmar ({pagosSinConfirmar.length})
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={() => setModalGastosAbierto(true)}
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-primary/25 bg-white px-3.5 py-2 text-xs font-semibold text-primary shadow-2xs transition-colors hover:bg-surface-blue sm:text-sm"
+            >
+              <FaReceipt /> Egresos
+            </button>
 
             <button
               type="button"
@@ -196,6 +206,10 @@ export default function FinanzasPage() {
           onClose={() => setModalTesoreriaAbierto(false)}
           onConfirmados={() => recargar(true)}
         />
+      )}
+
+      {modalGastosAbierto && (
+        <GastosOperativosModal onClose={() => setModalGastosAbierto(false)} />
       )}
     </div>
   );

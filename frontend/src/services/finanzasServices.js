@@ -96,3 +96,20 @@ export function actualizarTarifaAdmin(categoria, monto) {
     body: { monto: Number(monto) },
   });
 }
+
+// ==========================================
+// EGRESOS / GASTOS OPERATIVOS (solo admin)
+// ==========================================
+
+/** Obtiene el historial de gastos operativos de la Cámara (GET /gastos). */
+export const obtenerGastosAdmin = () => api("/gastos");
+
+/** Registra un nuevo gasto operativo con comprobante opcional (POST /gastos). */
+export const registrarGastoAdmin = (formData) =>
+  api("/gastos", { method: "POST", body: formData });
+
+/** Elimina (borrado lógico) un gasto operativo por su UUID (DELETE /gastos/:id). */
+export function eliminarGastoAdmin(id) {
+  if (!idValido(id)) return Promise.resolve({ exito: false, mensaje: "Gasto inválido." });
+  return api(`/gastos/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
