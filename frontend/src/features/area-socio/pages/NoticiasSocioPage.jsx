@@ -61,7 +61,7 @@ export default function NoticiasSocio() {
 
   return (
     <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-2xl border border-primary/15 bg-linear-to-r from-white via-white to-surface-blue p-5 shadow-xs sm:p-7">
+      <header className="relative overflow-hidden rounded-none border border-primary/15 bg-linear-to-r from-white via-white to-surface-blue p-5 shadow-xs sm:p-7">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-primary/6"

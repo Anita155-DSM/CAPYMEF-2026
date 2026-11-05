@@ -6,7 +6,7 @@ export default function TarjetaConstancia({ url, cargando = false, className = "
 
   return (
     <section
-      className={`flex flex-col rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6 ${className}`}
+      className={`flex flex-col rounded-none border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6 ${className}`}
     >
       <div className="mb-5 flex items-center gap-2.5 border-b border-slate-100 pb-3.5">
         <span className="grid h-8 w-8 place-items-center rounded-lg bg-surface-blue text-sm text-primary">
@@ -17,7 +17,7 @@ export default function TarjetaConstancia({ url, cargando = false, className = "
         </h2>
       </div>
 
-      <div className="flex flex-1 items-center gap-3.5 rounded-xl border border-primary/15 bg-surface-blue/40 p-4">
+      <div className="flex flex-1 items-center gap-3.5 rounded-none border border-primary/15 bg-surface-blue/40 p-4">
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-lg text-[#c0392b] shadow-2xs ring-1 ring-slate-200/70">
           <FaFilePdf />
         </span>

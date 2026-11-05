@@ -13,7 +13,7 @@ async function copiar(texto, etiqueta) {
 function Item({ icono: Icono, etiqueta, valor, copiable, completo, cargando }) {
   return (
     <div
-      className={`group flex items-center gap-3.5 rounded-xl border border-slate-100 bg-surface/65 p-3.5 transition-colors hover:border-primary/20 hover:bg-surface-blue/40 ${
+      className={`group flex items-center gap-3.5 rounded-none border border-slate-100 bg-surface/65 p-3.5 transition-colors hover:border-primary/20 hover:bg-surface-blue/40 ${
         completo ? "sm:col-span-2" : ""
       }`}
     >
@@ -59,7 +59,7 @@ export default function TarjetaFicha({
 }) {
   const IconoAccion = accion?.icono;
   return (
-    <section className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+    <section className="flex h-full flex-col overflow-hidden rounded-none border border-slate-200/90 bg-white shadow-xs">
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="mb-5 flex items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
           <div className="flex items-center gap-2.5">

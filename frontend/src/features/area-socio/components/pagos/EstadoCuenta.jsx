@@ -14,7 +14,7 @@ export default function EstadoCuenta({ cuotas }) {
   const movimientos = Array.isArray(cuotas) ? ordenarPorPeriodo(cuotas).slice(0, 2) : [];
 
   return (
-    <section className="flex h-full flex-col rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
+    <section className="flex h-full flex-col rounded-none border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
       <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3.5">
         <div className="flex items-center gap-2.5">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-surface-blue text-sm text-primary">

@@ -60,7 +60,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
     const pagada = cuota.estado === "pagada";
     const estado = etiquetaEstado(cuota);
     contenido = (
-      <div className="flex flex-1 flex-row items-center justify-between gap-3 rounded-xl border border-primary/15 bg-linear-to-br from-surface via-white to-surface-blue/60 p-4 sm:gap-4 sm:p-5">
+      <div className="flex flex-1 flex-row items-center justify-between gap-3 rounded-none border border-primary/15 bg-linear-to-br from-surface via-white to-surface-blue/60 p-4 sm:gap-4 sm:p-5">
         <div className="min-w-0">
           <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs">
             Período {formatearPeriodo(cuota.mes_anio)}
@@ -100,7 +100,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
   }
 
   return (
-    <section className="flex h-full flex-col rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
+    <section className="flex h-full flex-col rounded-none border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
       <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
         <div className="flex items-center gap-2.5">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-surface-blue text-sm text-primary">

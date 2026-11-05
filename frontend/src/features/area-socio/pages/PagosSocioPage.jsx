@@ -49,7 +49,7 @@ export default function PagosSocioPage() {
   if (esPadrino) {
     return (
       <div className="space-y-6">
-        <header className="relative overflow-hidden rounded-2xl border border-primary/15 bg-linear-to-r from-white via-white to-surface-blue p-5 shadow-xs sm:p-7">
+        <header className="relative overflow-hidden rounded-none border border-primary/15 bg-linear-to-r from-white via-white to-surface-blue p-5 shadow-xs sm:p-7">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
             Tu aporte a CAPYMEF
           </p>
@@ -79,7 +79,7 @@ export default function PagosSocioPage() {
         </div>
 
         {Array.isArray(cuotas) && cuotas.length > 0 && (
-          <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
+          <section className="rounded-none border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
             <div className="mb-4 flex flex-col justify-between gap-3 border-b border-slate-100 pb-3.5 sm:flex-row sm:items-center">
               <div className="flex items-center gap-2.5">
                 <span className="grid h-8 w-8 place-items-center rounded-lg bg-surface-blue text-sm text-primary">
@@ -117,7 +117,7 @@ export default function PagosSocioPage() {
   // ─── Vista estándar para socios Activos ───────────────────────────────────
   return (
     <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-2xl border border-primary/15 bg-linear-to-r from-white via-white to-surface-blue p-5 shadow-xs sm:p-7">
+      <header className="relative overflow-hidden rounded-none border border-primary/15 bg-linear-to-r from-white via-white to-surface-blue p-5 shadow-xs sm:p-7">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-primary/6"
@@ -165,7 +165,7 @@ export default function PagosSocioPage() {
         </div>
       </div>
 
-      <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
+      <section className="rounded-none border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
         <div className="mb-5 flex flex-col justify-between gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2.5">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-surface-blue text-sm text-primary">

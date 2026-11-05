@@ -11,7 +11,7 @@ const columnas = ["Período", "Monto", "Vencimiento", "Estado", "Fecha de pago"]
 /** Historial de cuotas. `procesando`, `onPagar` y `onDescargar` vienen de useAccionesCuota. */
 export default function TablaCuotas({ cuotas, procesando, onPagar, onDescargar }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-100">
+    <div className="overflow-x-auto rounded-none border border-slate-100">
       <table className="w-full min-w-[640px] text-left text-sm">
         <thead>
           <tr className="border-b border-slate-200/80 bg-surface text-[11px] font-semibold uppercase tracking-wider text-slate-500">

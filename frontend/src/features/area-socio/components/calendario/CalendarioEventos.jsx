@@ -30,7 +30,7 @@ export default function CalendarioEventos({ mes, onCambiarMes, eventos = [], onS
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+    <div className="overflow-hidden rounded-none border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
       {/* Barra superior de mes y controles de navegación */}
       <div className="flex items-center justify-between border-b-2 border-primary/20 pb-2.5 text-primary">
         <button

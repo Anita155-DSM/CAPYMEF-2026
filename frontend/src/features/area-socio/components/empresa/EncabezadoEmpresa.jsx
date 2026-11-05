@@ -13,7 +13,7 @@ export default function EncabezadoEmpresa({ usuario }) {
   const nombre = usuario.razonSocial || "Tu empresa";
 
   return (
-    <section className="relative overflow-hidden rounded-2xl bg-linear-to-br from-navy via-sidebar to-primary text-white shadow-sm">
+    <section className="relative overflow-hidden rounded-none bg-linear-to-br from-navy via-sidebar to-primary text-white shadow-sm">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10"
