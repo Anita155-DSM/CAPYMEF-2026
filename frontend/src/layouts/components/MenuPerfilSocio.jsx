@@ -99,7 +99,7 @@ export default function MenuPerfilSocio({ enlaces = ENLACES_SOCIO, etiqueta }) {
                   {nombre}
                 </p>
                 <p className="mt-0.5 text-xs font-medium uppercase tracking-wider text-[#8bd0f8]">
-                  Socio {categoria}
+                  {etiqueta ? categoria : `Socio ${categoria}`}
                 </p>
               </div>
             </div>

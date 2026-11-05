@@ -108,13 +108,13 @@ export default function NoticiasSocio() {
       )}
 
       {cargando ? (
-        <div className="rounded-2xl border border-slate-200/90 bg-white py-16 text-center shadow-xs">
+        <div className="rounded-none border border-slate-200/90 bg-white py-16 text-center shadow-xs">
           <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-sidebar border-t-transparent" />
           <p className="text-sm text-slate-600">Buscando las últimas novedades...</p>
         </div>
       ) : filtradas.length === 0 ? (
         !error && (
-          <div className="rounded-2xl border border-slate-200/90 bg-white py-16 text-center shadow-xs">
+          <div className="rounded-none border border-slate-200/90 bg-white py-16 text-center shadow-xs">
             <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-surface-blue text-2xl text-primary">
               <FaNewspaper />
             </span>

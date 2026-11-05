@@ -85,19 +85,19 @@ export default function EventosSocioPage() {
 
       {/* Alerta de error si ocurre alguno */}
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="rounded-none border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {/* Contenido principal según estado de carga y vista seleccionada */}
       {cargando ? (
-        <div className="rounded-2xl border border-slate-200/90 bg-white py-16 text-center shadow-xs">
+        <div className="rounded-none border border-slate-200/90 bg-white py-16 text-center shadow-xs">
           <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-sidebar border-t-transparent" />
           <p className="text-sm text-slate-600">Cargando eventos y capacitaciones...</p>
         </div>
       ) : eventos.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200/90 bg-white py-16 text-center shadow-xs">
+        <div className="rounded-none border border-slate-200/90 bg-white py-16 text-center shadow-xs">
           <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-surface-blue text-2xl text-primary">
             <FaRegCalendarCheck />
           </span>

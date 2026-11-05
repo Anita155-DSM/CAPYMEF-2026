@@ -1,49 +1,66 @@
 import { useState } from "react";
-import { FaExternalLinkAlt, FaEye, FaEyeSlash, FaFilePdf } from "react-icons/fa";
+import {
+  FaArrowUpRightFromSquare,
+  FaEye,
+  FaEyeSlash,
+  FaFilePdf,
+} from "react-icons/fa6";
 import { esConstanciaSegura } from "@/features/area-socio/utils/empresa";
 import VisorConstancia from "./VisorConstancia";
 
 /**
  * Constancia AFIP/DGR que el socio adjuntó al registrarse.
- * Se puede ver siempre, sin importar si el socio está aprobado, rechazado o inactivo.
- * El visor queda plegado hasta que el admin toca "Ver constancia".
+ * Permite previsualizarla dentro del modal o abrirla en una pestaña nueva.
  */
 export default function ConstanciaSocio({ url, razonSocial }) {
   const [visible, setVisible] = useState(false);
   const disponible = esConstanciaSegura(url);
 
   return (
-    <div className="rounded-lg border border-gray-200 overflow-hidden">
-      <div className="flex flex-wrap items-center gap-3 bg-gray-50 p-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-lg text-[#c0392b] shadow-sm">
-          <FaFilePdf />
-        </span>
+    <div className="overflow-hidden rounded-xl border border-gray-100 bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-lg text-red-600 shadow-2xs ring-1 ring-slate-200/70">
+            <FaFilePdf />
+          </span>
 
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-navy">Constancia AFIP/DGR</p>
-          <p className="text-xs text-gray-500">
-            {disponible ? "Adjuntada al registrarse" : url ? "Archivo de origen desconocido" : "No hay constancia cargada"}
-          </p>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-navy">Constancia AFIP / DGR</p>
+            <p className="text-xs text-slate-500">
+              {disponible
+                ? "Documento respaldatorio cargado al registrarse"
+                : url
+                ? "Archivo de origen desconocido"
+                : "Sin constancia cargada"}
+            </p>
+          </div>
         </div>
 
         {disponible && (
-          <div className="flex w-full gap-2 sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setVisible((v) => !v)}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-navy transition-colors hover:border-primary/40 hover:bg-surface-blue"
+            >
+              {visible ? <FaEyeSlash className="text-[11px]" /> : <FaEye className="text-[11px]" />}
+              {visible ? "Ocultar visor" : "Ver aquí"}
+            </button>
+
             <a
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              title="Abrir en una pestaña nueva"
-              aria-label="Abrir constancia en una pestaña nueva"
-              className="inline-flex items-center justify-center rounded-lg border border-primary mr-10 px-3 py-2 text-sm text-primary transition-colors hover:bg-surface"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white shadow-2xs transition-colors hover:bg-primary-dark"
             >
-              <FaExternalLinkAlt />
+              Abrir PDF <FaArrowUpRightFromSquare className="text-[10px]" />
             </a>
           </div>
         )}
       </div>
 
       {disponible && visible && (
-        <div className="h-[60vh] border-t border-gray-200 bg-gray-100">
+        <div className="h-80 border-t border-slate-200/80 bg-white sm:h-96">
           <VisorConstancia url={url} razonSocial={razonSocial} />
         </div>
       )}
