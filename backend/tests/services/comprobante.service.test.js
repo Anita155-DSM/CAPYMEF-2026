@@ -1,7 +1,11 @@
 import '../helpers/entorno.js';
 import zlib from 'node:zlib';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { generarComprobantePago } from '../../services/comprobante.service.js';
+
+// El PDF se genera con la máquina en hora argentina: ahí era donde la fecha de pago salía un día antes.
+// Así el test detecta ese error aunque se corra en un servidor en UTC.
+const zonaOriginal = process.env.TZ;
 
 // Se genera el PDF de verdad y se lee el texto que quedó adentro (no solo lo que se le pidió a pdfkit).
 // pdfkit comprime cada página con zlib y escribe el texto en hexadecimal dentro de operadores TJ:
@@ -28,12 +32,18 @@ let pdf;
 let texto;
 
 beforeAll(async () => {
+  process.env.TZ = 'America/Argentina/Buenos_Aires';
   pdf = await generarComprobantePago({
     socio: { razonSocial: 'Empresa de prueba', cuit: '20-00000001-1' },
     cuota: { mes_anio: '2026-11' },
     pago: { id: 'pago-123', fechaPago: '2026-11-05', montoAbonado: 10000, metodoPago: 'Efectivo', observaciones: 'Pagó en la sede' },
   });
   texto = extraerTexto(pdf);
+});
+
+afterAll(() => {
+  if (zonaOriginal === undefined) delete process.env.TZ;
+  else process.env.TZ = zonaOriginal;
 });
 
 describe('generarComprobantePago', () => {
@@ -51,6 +61,14 @@ describe('generarComprobantePago', () => {
     // La Cámara factura por ARCA: el PDF no puede pasar por factura.
     expect(texto).toContain('Documento no válido como factura.');
     expect(texto).toContain('La factura correspondiente es emitida por la Cámara a través de ARCA.');
+  });
+
+  it('muestra la fecha de pago correcta: "2026-11-05" → "5/11/2026" (no el día anterior)', () => {
+    expect(texto).toContain('Fecha de pago: 5/11/2026');
+  });
+
+  it('el pie dice cuándo se generó, en hora argentina de 24 horas', () => {
+    expect(texto).toMatch(/generado automáticamente por el sistema de CAPYMEF el \d{1,2}\/\d{1,2}\/\d{4}, \d{2}:\d{2}\./);
   });
 
   it('no dice "recibo" en ningún lado', () => {

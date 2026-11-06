@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit';
+import { formatearFechaArgentina, formatearFechaHoraArgentina } from '../utils/fechas.js';
 
 // La Cámara factura por ARCA: este PDF es solo una constancia y tiene que decirlo.
 export const LEYENDA_NO_FACTURA =
@@ -48,7 +49,8 @@ export const generarComprobantePago = ({ socio, cuota, pago }) => {
     // ===== Datos de la constancia =====
     doc.fontSize(11).fillColor('#000000');
     doc.text(`Constancia N°: ${pago.id}`);
-    doc.text(`Fecha de pago: ${new Date(pago.fechaPago).toLocaleDateString('es-AR')}`);
+    // fechaPago es una fecha sin hora: con new Date(...) salía un día antes (ver utils/fechas.js).
+    doc.text(`Fecha de pago: ${formatearFechaArgentina(pago.fechaPago)}`);
     doc.moveDown(0.8);
 
     // ===== Datos del socio =====
@@ -82,7 +84,7 @@ export const generarComprobantePago = ({ socio, cuota, pago }) => {
       .fontSize(9)
       .fillColor('#666666')
       .text(
-        `Comprobante generado automáticamente por el sistema de CAPYMEF el ${new Date().toLocaleString('es-AR')}.`,
+        `Comprobante generado automáticamente por el sistema de CAPYMEF el ${formatearFechaHoraArgentina(new Date())}.`,
         { align: 'center' }
       );
 
