@@ -16,8 +16,10 @@ export default function RequireAuth({ roles }) {
   // No logueado → al login (guardamos a dónde quería ir)
   if (!usuario) return <Navigate to="/login" replace state={{ desde: location.pathname }} />;
 
-  // Logueado pero sin el rol necesario → al inicio
-  if (sinPermiso) return <Navigate to="/" replace />;
+  // Logueado pero sin el rol necesario → a su panel correspondiente
+  if (sinPermiso) {
+    return <Navigate to={usuario.rol === "admin" ? "/admin/inicio" : "/socios"} replace />;
+  }
 
   return <Outlet />;
 }

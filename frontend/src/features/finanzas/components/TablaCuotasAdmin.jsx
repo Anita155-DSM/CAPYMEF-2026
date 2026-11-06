@@ -1,12 +1,52 @@
-import { FaFileDownload, FaMoneyBillWave } from "react-icons/fa";
-import { ESTADOS_CUOTA, formatearMonto, mayuscula, nombreCuota } from "../utils/cuotas";
+import { FaFileArrowDown, FaFileInvoiceDollar, FaMoneyBillWave } from "react-icons/fa6";
+import { formatearFechaCorta, formatearMonto, mayuscula, nombreCuota } from "../utils/cuotas";
+
+const ESTILOS_BADGE = {
+  pagada: {
+    contenedor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    punto: "bg-emerald-500",
+    etiqueta: "Pagada",
+  },
+  pendiente: {
+    contenedor: "bg-amber-50 text-amber-800 border-amber-200",
+    punto: "bg-amber-500",
+    etiqueta: "Pendiente",
+  },
+  vencida: {
+    contenedor: "bg-red-50 text-red-700 border-red-200",
+    punto: "bg-red-500",
+    etiqueta: "Vencida",
+  },
+};
 
 function EstadoCuota({ estado }) {
-  const config = ESTADOS_CUOTA[estado] ?? { texto: String(estado || "-").toUpperCase(), punto: "bg-gray-400" };
+  const cfg = ESTILOS_BADGE[estado] ?? {
+    contenedor: "bg-slate-100 text-slate-600 border-slate-200",
+    punto: "bg-slate-400",
+    etiqueta: estado || "-",
+  };
   return (
-    <span className="inline-flex items-center gap-2 font-medium text-gray-800">
-      <span className={`h-2.5 w-2.5 rounded-full ${config.punto}`} aria-hidden="true" />
-      {config.texto}
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold capitalize ${cfg.contenedor}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${cfg.punto}`} />
+      {cfg.etiqueta}
+    </span>
+  );
+}
+
+function CategoriaSocio({ categoria }) {
+  const cat = (categoria || "").toLowerCase();
+  const clase =
+    cat === "padrino"
+      ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+      : cat === "activo"
+        ? "border-primary/20 bg-surface-blue text-primary"
+        : "border-slate-200 bg-slate-50 text-slate-600";
+
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${clase}`}>
+      {mayuscula(categoria)}
     </span>
   );
 }
@@ -17,99 +57,170 @@ function BotonAccion({ cuota, descargandoId, onDescargar, onPagarEfectivo }) {
       <button
         type="button"
         onClick={() => onPagarEfectivo(cuota)}
-        className="inline-flex items-center gap-2 rounded bg-green-50 px-3 py-2 text-xs font-bold text-green-700 shadow-sm transition-colors hover:bg-green-600 hover:text-white"
-        title="Registrar pago en efectivo"
-        aria-label={`Registrar pago en efectivo de ${nombreCuota(cuota.mes_anio)}`}
+        className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors hover:bg-navy"
+        title="Registrar pago manual / en efectivo"
+        aria-label={`Registrar pago de ${nombreCuota(cuota.mes_anio)}`}
       >
-        <FaMoneyBillWave size={14} /> Efectivo
+        <FaMoneyBillWave className="text-xs" /> Efectivo
       </button>
     );
   }
+  const descargando = descargandoId === cuota.id;
   return (
     <button
       type="button"
       onClick={() => onDescargar(cuota)}
-      disabled={descargandoId === cuota.id}
-      className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded transition-colors shadow-sm disabled:opacity-50"
-      title="Descargar comprobante"
+      disabled={descargando}
+      className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-primary/25 bg-surface-blue/60 px-3.5 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+      title="Descargar comprobante PDF"
       aria-label={`Descargar comprobante de ${nombreCuota(cuota.mes_anio)}`}
     >
-      <FaFileDownload size={16} />
+      <FaFileArrowDown className="text-xs" />
+      <span>{descargando ? "Descargando..." : "Comprobante"}</span>
     </button>
   );
 }
 
 /**
- * Historial de cuotas. md+: tabla. Celular: una tarjeta por cuota.
- * En las pagadas se descarga el comprobante; en las pendientes o vencidas se puede registrar un pago en efectivo.
+ * Historial de cuotas. lg+: tabla. < lg: cuadrícula de tarjetas responsivas.
+ * En las pagadas se descarga el comprobante; en las pendientes o vencidas se puede registrar un pago.
  */
-export default function TablaCuotasAdmin({ cuotas, mensajeVacio, descargandoId, onDescargar, onPagarEfectivo }) {
+export default function TablaCuotasAdmin({
+  cuotas,
+  mensajeVacio,
+  descargandoId,
+  onDescargar,
+  onPagarEfectivo,
+}) {
   const columnas = ["Socio", "Cuota", "Categoría", "Monto", "Estado", "Acciones"];
 
   if (cuotas.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-md border border-gray-200 py-6 px-4 text-center text-gray-500 font-medium">
-        {mensajeVacio}
+      <div className="flex flex-col items-center justify-center rounded-none border border-slate-200/90 bg-white px-5 py-14 text-center shadow-xs">
+        <span className="mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-surface-blue text-xl text-primary">
+          <FaFileInvoiceDollar />
+        </span>
+        <p className="text-base font-semibold text-navy">{mensajeVacio}</p>
+        <p className="mt-1 max-w-md text-xs text-slate-500 sm:text-sm">
+          Cuando se generen nuevas cuotas mensuales o cambies los filtros aplicados, aparecerán listadas en esta sección.
+        </p>
       </div>
     );
   }
 
   return (
     <>
-      {/* CELULAR: tarjetas */}
-      <ul className="md:hidden flex flex-col gap-3">
-        {cuotas.map((cuota) => (
-          <li key={cuota.id} className="bg-white rounded-xl shadow-md border border-gray-200 p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-base font-bold text-navy wrap-break-word">{cuota.socio?.razonSocial ?? "Socio eliminado"}</p>
-                <p className="text-xs text-gray-500">{cuota.socio?.cuit}</p>
+      {/* CELULAR Y TABLET (< lg): cuadrícula de tarjetas */}
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:hidden">
+        {cuotas.map((cuota) => {
+          const vencimiento = formatearFechaCorta(cuota.fecha_vencimiento);
+          return (
+            <li
+              key={cuota.id}
+              className="flex flex-col justify-between rounded-none border border-slate-200/90 bg-white p-4 shadow-xs sm:p-5"
+            >
+              <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+                <div className="min-w-0">
+                  <p className="wrap-break-word text-sm font-semibold text-navy sm:text-base">
+                    {cuota.socio?.razonSocial ?? "Socio eliminado"}
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-slate-400">
+                    CUIT: {cuota.socio?.cuit || "-"}
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  <BotonAccion
+                    cuota={cuota}
+                    descargandoId={descargandoId}
+                    onDescargar={onDescargar}
+                    onPagarEfectivo={onPagarEfectivo}
+                  />
+                </div>
               </div>
-              <BotonAccion cuota={cuota} descargandoId={descargandoId} onDescargar={onDescargar} onPagarEfectivo={onPagarEfectivo} />
-            </div>
 
-            <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
-              <dt className="font-semibold text-gray-500">Cuota</dt>
-              <dd className="text-gray-700">{nombreCuota(cuota.mes_anio)}</dd>
-              <dt className="font-semibold text-gray-500">Categoría</dt>
-              <dd className="text-gray-700">{mayuscula(cuota.socio?.categoria)}</dd>
-              <dt className="font-semibold text-gray-500">Monto</dt>
-              <dd className="text-gray-700">{formatearMonto(cuota.monto)}</dd>
-              <dt className="font-semibold text-gray-500">Estado</dt>
-              <dd><EstadoCuota estado={cuota.estado} /></dd>
-            </dl>
-          </li>
-        ))}
+              <dl className="mt-3 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 text-xs">
+                <dt className="font-semibold uppercase tracking-wider text-slate-400">Cuota</dt>
+                <dd className="min-w-0 font-semibold text-slate-700">
+                  {nombreCuota(cuota.mes_anio)}
+                  {vencimiento && (
+                    <span className="ml-1.5 text-[11px] font-normal text-slate-400">
+                      (Vence {vencimiento})
+                    </span>
+                  )}
+                </dd>
+
+                <dt className="font-semibold uppercase tracking-wider text-slate-400">Categoría</dt>
+                <dd className="min-w-0">
+                  <CategoriaSocio categoria={cuota.socio?.categoria} />
+                </dd>
+
+                <dt className="font-semibold uppercase tracking-wider text-slate-400">Monto</dt>
+                <dd className="font-semibold text-navy tabular-nums">
+                  {formatearMonto(cuota.monto)}
+                </dd>
+
+                <dt className="font-semibold uppercase tracking-wider text-slate-400">Estado</dt>
+                <dd>
+                  <EstadoCuota estado={cuota.estado} />
+                </dd>
+              </dl>
+            </li>
+          );
+        })}
       </ul>
 
-      {/* MD+: tabla (con scroll horizontal si no entra) */}
-      <div className="hidden md:block bg-white rounded-xl shadow-md overflow-x-auto border border-gray-200">
-        <table className="w-full text-left border-collapse">
+      {/* ESCRITORIO (lg+): tabla */}
+      <div className="hidden overflow-x-auto rounded-none border border-slate-200/90 bg-white shadow-xs lg:block">
+        <table className="w-full border-collapse text-left text-sm">
           <thead>
-            <tr className="bg-navy text-white">
+            <tr className="border-b border-slate-200/80 bg-surface text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               {columnas.map((titulo) => (
-                <th key={titulo} className={`py-3 px-4 font-semibold text-sm ${titulo === "Acciones" ? "text-center" : ""}`}>
+                <th
+                  key={titulo}
+                  className={`px-4 py-3.5 ${titulo === "Acciones" ? "text-right" : ""}`}
+                >
                   {titulo}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
-            {cuotas.map((cuota) => (
-              <tr key={cuota.id} className="border-b hover:bg-gray-50 transition-colors">
-                <td className="py-3 px-4">
-                  <p className="text-gray-800 font-medium">{cuota.socio?.razonSocial ?? "Socio eliminado"}</p>
-                  <p className="text-xs text-gray-500">{cuota.socio?.cuit}</p>
-                </td>
-                <td className="py-3 px-4 text-gray-700">{nombreCuota(cuota.mes_anio)}</td>
-                <td className="py-3 px-4 text-gray-600">{mayuscula(cuota.socio?.categoria)}</td>
-                <td className="py-3 px-4 text-gray-700 whitespace-nowrap">{formatearMonto(cuota.monto)}</td>
-                <td className="py-3 px-4"><EstadoCuota estado={cuota.estado} /></td>
-                <td className="py-3 px-4 text-center">
-                  <BotonAccion cuota={cuota} descargandoId={descargandoId} onDescargar={onDescargar} onPagarEfectivo={onPagarEfectivo} />
-                </td>
-              </tr>
-            ))}
+          <tbody className="divide-y divide-slate-100">
+            {cuotas.map((cuota) => {
+              const vencimiento = formatearFechaCorta(cuota.fecha_vencimiento);
+              return (
+                <tr key={cuota.id} className="transition-colors hover:bg-surface-blue/35">
+                  <td className="px-4 py-3.5">
+                    <p className="font-semibold text-navy">
+                      {cuota.socio?.razonSocial ?? "Socio eliminado"}
+                    </p>
+                    <p className="text-xs text-slate-400">{cuota.socio?.cuit || "-"}</p>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <p className="font-medium text-slate-700">{nombreCuota(cuota.mes_anio)}</p>
+                    {vencimiento && (
+                      <p className="text-[11px] text-slate-400">Vence: {vencimiento}</p>
+                    )}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <CategoriaSocio categoria={cuota.socio?.categoria} />
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3.5 font-semibold text-navy tabular-nums">
+                    {formatearMonto(cuota.monto)}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <EstadoCuota estado={cuota.estado} />
+                  </td>
+                  <td className="px-4 py-3.5 text-right">
+                    <BotonAccion
+                      cuota={cuota}
+                      descargandoId={descargandoId}
+                      onDescargar={onDescargar}
+                      onPagarEfectivo={onPagarEfectivo}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

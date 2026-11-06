@@ -1,30 +1,44 @@
 import { FaArrowUpRightFromSquare, FaFilePdf, FaFolderOpen } from "react-icons/fa6";
 import { esConstanciaSegura } from "../../utils/empresa";
 
-export default function TarjetaConstancia({ url, className = "" }) {
+export default function TarjetaConstancia({ url, cargando = false, className = "" }) {
   const disponible = esConstanciaSegura(url);
 
   return (
-    <section className={`rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6 ${className}`}>
-      <h2 className="mb-5 flex items-center gap-2.5 border-b border-gray-100 pb-4 text-base font-bold uppercase tracking-wide text-gray-700">
-        <FaFolderOpen className="text-primary" /> Documentación
-      </h2>
-      <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-surface p-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-lg text-[#c0392b] shadow-sm">
+    <section
+      className={`flex flex-col rounded-none border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6 ${className}`}
+    >
+      <div className="mb-5 flex items-center gap-2.5 border-b border-slate-100 pb-3.5">
+        <span className="grid h-8 w-8 place-items-center rounded-lg bg-surface-blue text-sm text-primary">
+          <FaFolderOpen />
+        </span>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-navy">
+          Documentación
+        </h2>
+      </div>
+
+      <div className="flex flex-1 items-center gap-3.5 rounded-none border border-primary/15 bg-surface-blue/40 p-4">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white text-lg text-[#c0392b] shadow-2xs ring-1 ring-slate-200/70">
           <FaFilePdf />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-navy">Constancia AFIP/DGR</p>
-          <p className="text-xs text-gray-500">{disponible ? "Presentada al registrarte" : "No hay constancia cargada"}</p>
+          <p className="text-sm font-semibold text-navy">Constancia AFIP / DGR</p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {disponible
+              ? "Documento respaldatorio cargado"
+              : cargando
+              ? "Cargando constancia..."
+              : "No hay constancia cargada"}
+          </p>
         </div>
         {disponible && (
           <a
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors hover:bg-primary-dark sm:text-sm"
           >
-            Ver <FaArrowUpRightFromSquare className="text-xs" />
+            Ver PDF <FaArrowUpRightFromSquare className="text-xs" />
           </a>
         )}
       </div>

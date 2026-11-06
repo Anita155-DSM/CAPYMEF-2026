@@ -14,8 +14,7 @@ import { urlImagen } from "@/shared/utils/imagenes";
  * Estilo visual unificado con el modal de eventos (EventoDetalleModal):
  * - Fondo con desenfoque suave y base institucional (bg-navy/60 backdrop-blur-xs)
  * - Mismo contenedor redondeado (rounded-2xl) con animación de entrada (animacion-modal)
- * - Encabezado limpio con categoría y fecha de publicación superior
- * - Botón de cierre con FaXmark
+ * - Encabezado limpio con fecha de publicación a la izquierda y categoría + botón cerrar a la derecha
  * - Imagen adaptada a todo el ancho disponible (h-64 sm:h-80 w-full object-cover rounded-xl)
  * - Cuerpo de contenido con tipografía clara y legible
  * - Pie de acciones con botón de cierre estandarizado
@@ -45,9 +44,18 @@ export default function NoticiaModal({ noticia, onClose }) {
         aria-modal="true"
         aria-label={noticia.titulo}
       >
-        {/* Cabecera del modal: Insignia de categoría, fecha de publicación y botón de cierre */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+        {/* Cabecera del modal: Fecha a la izquierda y categoría + botón de cierre a la derecha */}
+        <div className="flex items-center justify-between gap-4">
+          {noticia.fechaPublicacion ? (
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
+              <FaCalendarDays className="text-[12px]" />
+              <span>{formatearFechaLarga(noticia.fechaPublicacion)}</span>
+            </span>
+          ) : (
+            <span />
+          )}
+
+          <div className="ml-auto flex shrink-0 items-center gap-2.5">
             {noticia.categoria ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-blue px-2.5 py-1 text-xs font-bold text-primary">
                 <FaTag className="text-[11px]" />
@@ -59,22 +67,15 @@ export default function NoticiaModal({ noticia, onClose }) {
               </span>
             )}
 
-            {noticia.fechaPublicacion && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-                <FaCalendarDays className="text-[12px]" />
-                <span>{formatearFechaLarga(noticia.fechaPublicacion)}</span>
-              </span>
-            )}
+            <button
+              type="button"
+              aria-label="Cerrar ventana"
+              onClick={onClose}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            >
+              <FaXmark className="text-xl" />
+            </button>
           </div>
-
-          <button
-            type="button"
-            aria-label="Cerrar ventana"
-            onClick={onClose}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-          >
-            <FaXmark className="text-xl" />
-          </button>
         </div>
 
         {/* Título principal de la noticia */}

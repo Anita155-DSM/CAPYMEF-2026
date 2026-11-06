@@ -13,7 +13,7 @@ export function useNoticiasLogic() {
     const [estaPublicando, setEstaPublicando] = useState(false);
 
     const { register, handleSubmit, reset } = useForm({
-        defaultValues: { visibilidad: "todos", estado: "publicado" }
+        defaultValues: {categoria:"", visibilidad: "todos", estado: "publicado" }
     });
     const [imagenPreview, setImagenPreview] = useState(null);
     const [imagenArchivo, setImagenArchivo] = useState(null);
@@ -34,8 +34,20 @@ export function useNoticiasLogic() {
         }
     }
 
+    // Carga inicial: `cargando` ya arranca en true, así que no hace falta setearlo acá.
     useEffect(() => {
-        cargarNoticias();
+        let activo = true;
+        obtenerTodasLasNoticiasAdmin()
+            .then((result) => {
+                if (activo && result.exito) {
+                    setNoticias(Array.isArray(result.data) ? result.data : []);
+                }
+            })
+            .catch((error) => console.error("Error:", error))
+            .finally(() => {
+                if (activo) setCargando(false);
+            });
+        return () => { activo = false; };
     }, []);
 
     const handleImagen = (e) => {
@@ -72,7 +84,7 @@ export function useNoticiasLogic() {
                 // 2. Se llama a la función principal sin problemas
                 cargarNoticias();
             } else {
-                toast.error("Error al publicar: " + result.mensaje);
+                toast.error("Error al publicar: " + (result.errores?.[0]?.mensaje || result.mensaje));
             }
         } catch (error) {
             toast.error("Hubo un error al intentar conectarse con el servidor.");

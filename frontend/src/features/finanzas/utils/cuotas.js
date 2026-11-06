@@ -21,6 +21,17 @@ export function nombrePeriodo(mesAnio) {
   return largo ? `${largo} ${anio}` : mesAnio || "-";
 }
 
+/** "2026-11-10" → "10/11/2026" */
+export function formatearFechaCorta(fechaIso) {
+  if (!fechaIso) return null;
+  const partes = String(fechaIso).slice(0, 10).split("-");
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+  const fecha = new Date(fechaIso);
+  return Number.isNaN(fecha.getTime()) ? null : fecha.toLocaleDateString("es-AR");
+}
+
 export const ESTADOS_CUOTA = {
   pagada: { texto: "PAGADO", punto: "bg-green-500" },
   pendiente: { texto: "PENDIENTE", punto: "bg-yellow-400" },
@@ -29,7 +40,15 @@ export const ESTADOS_CUOTA = {
 
 export const OPCIONES_ESTADO = [
   { valor: "todos", texto: "Todos" },
-  { valor: "pagada", texto: "Pagado" },
+  { valor: "pagada", texto: "Pagada" },
   { valor: "pendiente", texto: "Pendiente" },
-  { valor: "vencida", texto: "Vencido" },
+  { valor: "vencida", texto: "Vencida" },
+];
+
+export const OPCIONES_CATEGORIA_CUOTA = [
+  { valor: "todas", texto: "Todas" },
+  { valor: "activo", texto: "Activo" },
+  { valor: "adherente", texto: "Adherente" },
+  { valor: "padrino", texto: "Padrino" },
+  { valor: "honorario", texto: "Honorario" },
 ];

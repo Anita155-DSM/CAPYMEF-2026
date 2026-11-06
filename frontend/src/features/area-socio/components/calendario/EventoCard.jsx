@@ -38,7 +38,7 @@ export default function EventoCard({
       role="button"
       tabIndex={0}
       aria-label={`Ver evento: ${evento.titulo}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar cursor-pointer"
+      className="group flex flex-col overflow-hidden rounded-none border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar cursor-pointer"
     >
       {/* Cabecera con imagen o degradado institucional con logo */}
       <div className="relative h-48 w-full overflow-hidden bg-gray-100">

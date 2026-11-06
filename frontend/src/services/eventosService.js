@@ -4,6 +4,7 @@ import { api } from "@/api/client";
 // SOCIO / PÚBLICO
 // ==========================================
 export const obtenerEventosSocios = () => api("/eventos/socios");
+export const obtenerEventos = obtenerEventosSocios;
 
 export const obtenerEventosPublicos = () => api("/eventos/publicos");
 
@@ -30,3 +31,21 @@ export const actualizarEvento = (id, formData) =>
 
 export const eliminarEvento = (id) =>
   api(`/eventos/admin/${id}`, { method: "DELETE" });
+
+export const obtenerInscriptosEvento = (eventoId) =>
+  api(`/eventos/admin/${encodeURIComponent(eventoId)}/inscriptos`);
+
+export const marcarAsistenciaInscripto = (eventoId, inscripcionId, asistio) =>
+  api(
+    `/eventos/admin/${encodeURIComponent(eventoId)}/inscriptos/${encodeURIComponent(inscripcionId)}/asistencia`,
+    {
+      method: "PUT",
+      body: { asistio },
+    }
+  );
+
+export const descargarCertificadoInscriptoAdmin = (eventoId, inscripcionId) =>
+  api(
+    `/eventos/admin/${encodeURIComponent(eventoId)}/inscriptos/${encodeURIComponent(inscripcionId)}/certificado`,
+    { blob: true }
+  );
