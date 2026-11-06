@@ -297,7 +297,7 @@ export const inscribirseEvento = async (req, res) => {
     // Verificamos el cupo, si el evento tiene límite
     if (evento.cupoMaximo != null) {
       const totalInscriptos = await Inscripcion.count({ where: { evento_id: id } });
-      if (totalInscriptos >= evento.cupoMaximo) {
+      if (totalInscriptos > evento.cupoMaximo) {
         return res.status(400).json({ exito: false, mensaje: 'El cupo para este evento ya está completo.' });
       }
     }
