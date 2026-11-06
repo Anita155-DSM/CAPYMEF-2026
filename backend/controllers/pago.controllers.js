@@ -15,6 +15,7 @@ import { evaluarCategoriaSocio } from '../services/categoria.service.js';
 import { descargarPdfGuardado } from '../services/comprobanteGuardado.service.js';
 import { CODIGOS_AUTH } from '../middlewares/codigosAuth.js';
 import { esCuentaDeGestion } from '../services/abonaCuota.service.js';
+import { validarPagoContraCuota } from '../services/validarPagoMP.service.js';
 
 // ==========================================
 // 1. INICIAR PAGO ONLINE (Socio logueado)
@@ -214,7 +215,8 @@ export const recibirWebhook = async (req, res) => {
       return res.status(200).json({ recibido: true });
     }
 
-    const { aprobado, cuotaId, montoPagado, idTransaccionExterna } = await procesarNotificacionPago(paymentId);
+    const pagoMP = await procesarNotificacionPago(paymentId);
+    const { aprobado, cuotaId, montoPagado, idTransaccionExterna } = pagoMP;
 
     if (!aprobado || !cuotaId) {
       return res.status(200).json({ recibido: true }); // pago rechazado/pendiente: no hacemos nada todavía
@@ -227,6 +229,33 @@ export const recibirWebhook = async (req, res) => {
     if (!cuota || cuota.estado === 'pagada') {
       // Ya procesada (o no existe): respondemos 200 igual, para no reintentos infinitos.
       return res.status(200).json({ recibido: true });
+    }
+
+    // El pago tiene que corresponder EXACTAMENTE a esta cuota (aprobado, en pesos, por el monto de la
+    // cuota y con su referencia). Si no, no se registra nada: un pago de $1 con la referencia de una cuota
+    // de $10.000 no puede dejarla pagada. Se responde 200 igual (si no, Mercado Pago reintenta sin fin) y
+    // se avisa a los admins para que lo revisen a mano.
+    const validacion = validarPagoContraCuota(pagoMP, cuota);
+    if (!validacion.valido) {
+      // En el log solo ids y montos: nada de datos personales del socio.
+      console.warn(
+        `Pago de Mercado Pago ${idTransaccionExterna} rechazado para la cuota ${cuota.id}: ${validacion.motivos.join('; ')} ` +
+        `(esperado ${cuota.monto} ARS, recibido ${montoPagado} ${pagoMP.moneda ?? '?'}).`
+      );
+      res.status(200).json({ recibido: true });
+      // El aviso va después de responder, como el resto de lo no crítico. Si Mercado Pago reenvía el mismo
+      // aviso no se duplica: la referencia incluye el id del pago y crearNotificacion no repite una alerta
+      // con el mismo usuario, tipo y referencia. notificarAdmins nunca lanza error.
+      notificarAdmins({
+        tipo: 'pago_mp_no_coincide',
+        titulo: 'Pago de Mercado Pago que no coincide con la cuota: revisar',
+        mensaje:
+          `Mercado Pago informó el pago ${idTransaccionExterna} para la cuota de ${cuota.socio?.razonSocial || 'un socio'} ` +
+          `(${formatearPeriodo(cuota.mes_anio)}), pero ${validacion.motivos.join('; ')}. Se esperaban ${formatearMonto(cuota.monto)} ` +
+          `y se recibieron ${formatearMonto(montoPagado)} (${pagoMP.moneda ?? 'sin moneda'}). La cuota NO se marcó como pagada.`,
+        referencia: `pago-mp-no-coincide:${idTransaccionExterna}`,
+      });
+      return;
     }
 
     // Evitamos procesar 2 veces la misma transacción si el webhook llega duplicado.

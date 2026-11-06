@@ -119,13 +119,15 @@ describe('recibirWebhook - pago aprobado: respuesta inmediata y trabajo en segun
       usuario_id: 7,
       estado: 'pendiente',
       mes_anio: '2026-11',
+      monto: '10000.00', // DECIMAL: Sequelize lo devuelve como texto
       socio: { razonSocial: 'Empresa de prueba', email: 'socio@test.com', cuit: '20-00000001-1' },
       save: vi.fn(async () => {}),
     };
     nuevoPago = { id: 'pago-1', montoAbonado: 10000, save: vi.fn(async () => {}) };
 
+    // Un pago legítimo: aprobado, en pesos, por el monto exacto de la cuota y con su referencia.
     procesarNotificacionPago.mockResolvedValue({
-      aprobado: true, cuotaId: cuota.id, montoPagado: 10000, idTransaccionExterna: 'mp-555',
+      aprobado: true, estado: 'approved', moneda: 'ARS', cuotaId: cuota.id, montoPagado: 10000, idTransaccionExterna: 'mp-555',
     });
     Cuota.findByPk.mockResolvedValue(cuota);
     Pago.findOne.mockResolvedValue(null);

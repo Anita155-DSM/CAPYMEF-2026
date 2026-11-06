@@ -109,6 +109,9 @@ export const procesarNotificacionPago = async (paymentId) => {
 
   return {
     aprobado: resultado.status === 'approved',
+    // estado y moneda se devuelven para validar el pago contra la cuota (validarPagoMP.service.js).
+    estado: resultado.status,
+    moneda: resultado.currency_id,
     cuotaId: resultado.external_reference,
     montoPagado: resultado.transaction_amount,
     idTransaccionExterna: String(resultado.id),
