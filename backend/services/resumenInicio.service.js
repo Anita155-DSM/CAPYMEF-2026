@@ -6,6 +6,8 @@
 //
 // Reglas (cada una con su tarjeta):
 // 1) RECAUDACIÓN DEL MES — período = mes actual en hora argentina ("YYYY-MM").
+//    En todas las cifras se dejan afuera las cuentas de gestión (admin): no son socios ni pagan cuota
+//    (ver abonaCuota.service.js), aunque hayan quedado con cuotas viejas.
 //    - montoRecaudado: suma de montoAbonado de los pagos de las CUOTAS DE ESE MES (cuota.mes_anio).
 //      [A confirmar] No cuenta lo cobrado este mes por cuotas atrasadas de meses anteriores.
 //    - porcentajeCobrado: cuotas pagadas del mes / cuotas generadas del mes × 100 (un decimal).
@@ -33,6 +35,7 @@ import { User } from '../models/user.models.js';
 import { Evento } from '../models/evento.models.js';
 import { Inscripcion } from '../models/inscripcion.models.js';
 import { LIMITE_CUOTAS_VENCIDAS } from './categoria.service.js';
+import { FILTRO_SOLO_SOCIOS, INCLUDE_SOLO_SOCIOS } from './abonaCuota.service.js';
 
 // Con 1 cuota menos que el límite de degradación, el socio ya está "en riesgo".
 export const UMBRAL_RIESGO = LIMITE_CUOTAS_VENCIDAS - 1;
@@ -43,13 +46,13 @@ export const porcentaje = (parte, total) => {
   return Math.round((parte / total) * 1000) / 10;
 };
 
-const SOLO_SOCIOS_APROBADOS = [{ model: User, as: 'socio', attributes: [], where: { estado: 'aprobado' } }];
+const SOLO_SOCIOS_APROBADOS = [{ model: User, as: 'socio', attributes: [], where: { estado: 'aprobado', ...FILTRO_SOLO_SOCIOS } }];
 
 const calcularRecaudacion = async (periodo) => {
   const [cuotasDelMes, cuotasPagadas, idsCuotasDelMes] = await Promise.all([
-    Cuota.count({ where: { mes_anio: periodo } }),
-    Cuota.count({ where: { mes_anio: periodo, estado: 'pagada' } }),
-    Cuota.findAll({ where: { mes_anio: periodo }, attributes: ['id'], raw: true }),
+    Cuota.count({ where: { mes_anio: periodo }, include: INCLUDE_SOLO_SOCIOS }),
+    Cuota.count({ where: { mes_anio: periodo, estado: 'pagada' }, include: INCLUDE_SOLO_SOCIOS }),
+    Cuota.findAll({ where: { mes_anio: periodo }, attributes: ['id'], include: INCLUDE_SOLO_SOCIOS, raw: true }),
   ]);
 
   // Una sola suma sobre los pagos de esas cuotas (no una consulta por cuota).
@@ -64,7 +67,7 @@ const calcularMorosidad = async () => {
     Cuota.count({ distinct: true, col: 'usuario_id', include: SOLO_SOCIOS_APROBADOS }),
     Cuota.count({ distinct: true, col: 'usuario_id', where: { estado: 'vencida' }, include: SOLO_SOCIOS_APROBADOS }),
     Cuota.count({ where: { estado: 'vencida' }, include: SOLO_SOCIOS_APROBADOS }),
-    User.findAll({ where: { estado: 'aprobado', categoria: 'activo' }, attributes: ['id'], raw: true }),
+    User.findAll({ where: { estado: 'aprobado', categoria: 'activo', ...FILTRO_SOLO_SOCIOS }, attributes: ['id'], raw: true }),
   ]);
 
   // Cuántas vencidas tiene cada socio Activo: un solo conteo agrupado por socio.

@@ -11,6 +11,7 @@ import {
   diasEntre,
 } from './notificacion.service.js';
 import { evaluarCategoriasDeTodos } from './categoria.service.js';
+import { abonaCuota, FILTRO_SOLO_SOCIOS, INCLUDE_SOLO_SOCIOS } from './abonaCuota.service.js';
 
 const ZONA_HORARIA = 'America/Argentina/Buenos_Aires';
 
@@ -31,8 +32,9 @@ export const generarCuotasDelMes = async () => {
 
     const tarifas = await obtenerMapaDeTarifas();
 
+    // Las cuentas de gestión (admin) no son socios: ni se cargan (ver abonaCuota.service.js).
     const sociosActivos = await User.findAll({
-      where: { estado: 'aprobado' }
+      where: { estado: 'aprobado', ...FILTRO_SOLO_SOCIOS }
     });
 
     let cuotasCreadas = 0;
@@ -48,8 +50,8 @@ export const generarCuotasDelMes = async () => {
         continue;
       }
 
-      // Tarifa en 0: esta categoría no paga cuota mensual.
-      if (monto <= 0) {
+      // Quién paga lo decide abonaCuota (regla única): tarifa en 0 = esta categoría no paga cuota mensual.
+      if (!abonaCuota(socio, tarifas)) {
         sociosExentos++;
         continue;
       }
@@ -108,9 +110,12 @@ export const marcarCuotasVencidas = async () => {
 
   // Antes era un único UPDATE masivo. Ahora primero identificamos QUÉ cuotas vencen,
   // porque necesitamos saber a qué socios avisarles.
+  // Solo cuotas de socios: si una cuenta de gestión (admin) quedó con cuotas viejas, no se las marca
+  // vencidas ni se le avisa (no paga cuota, ver abonaCuota.service.js).
   const porVencer = await Cuota.findAll({
     where: { estado: 'pendiente', fecha_vencimiento: { [Op.lt]: hoy } },
     attributes: ['id'],
+    include: INCLUDE_SOLO_SOCIOS,
   });
 
   let marcadas = 0;
@@ -147,7 +152,7 @@ export const marcarCuotasVencidas = async () => {
   // El detalle de la deuda a demanda está en el panel de Finanzas (resumen-financiero).
   // La referencia lleva la fecha, así que si el cron corre dos veces el mismo día no se repite.
   if (marcadas > 0) {
-    const totalVencidas = await Cuota.count({ where: { estado: 'vencida' } });
+    const totalVencidas = await Cuota.count({ where: { estado: 'vencida' }, include: INCLUDE_SOLO_SOCIOS });
     await notificarAdmins({
       tipo: 'resumen_vencidas',
       titulo: 'Cuotas vencidas sin pagar',
@@ -180,9 +185,11 @@ export const marcarCuotasVencidas = async () => {
 export const enviarRecordatoriosDeVencimiento = async () => {
   const hoy = fechaHoyArgentina();
 
+  // Sin recordatorios a cuentas de gestión (admin), aunque tengan una cuota vieja pendiente.
   const pendientes = await Cuota.findAll({
     where: { estado: 'pendiente', fecha_vencimiento: { [Op.gte]: hoy } },
     attributes: ['id', 'usuario_id', 'mes_anio', 'monto', 'fecha_vencimiento'],
+    include: INCLUDE_SOLO_SOCIOS,
   });
 
   let enviados = 0;
