@@ -10,11 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mercadopago/sdk-react": "^1.0.7",
+    "axios": "^1.19.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.23",
-    "leaflet": "^1.9.4",
-    "motion": "^14.9.0",
+    "dotenv": "^17.4.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.85.0",
