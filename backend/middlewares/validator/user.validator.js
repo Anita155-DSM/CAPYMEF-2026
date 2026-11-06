@@ -1,6 +1,10 @@
 import { body } from 'express-validator';
 import { validarResultado } from './validarResultado.js';
 
+// Categorías que se pueden pedir al registrarse y las que solo asigna la Cámara (ver validacionRegistro).
+export const CATEGORIAS_DEL_REGISTRO = ['activo', 'adherente'];
+export const CATEGORIAS_QUE_ASIGNA_LA_CAMARA = ['padrino', 'honorario'];
+
 // Middleware genérico que revisa si express-validator atrapó algún error
 // export const validarResultado = (req, res, next) => {
 //   const errores = validationResult(req);
@@ -51,9 +55,16 @@ export const validacionRegistro = [
     .notEmpty().withMessage('La localidad es obligatoria.'),
 
   // 3. Categorización
+  // En el registro público solo se puede pedir Activo o Adherente. Padrino (quien hizo una donación o
+  // contribución) y Honorario (designado por la Cámara) no se eligen: los asigna un admin desde la
+  // edición del socio. Si se pudieran elegir acá, cualquiera podría registrarse con una categoría que no
+  // le corresponde.
   body('categoria')
     .optional() // Es opcional porque el controlador le pone 'adherente' por defecto si no lo envían
-    .isIn(['activo', 'adherente', 'padrino']).withMessage('La categoría no es válida.'),
+    .not().isIn(CATEGORIAS_QUE_ASIGNA_LA_CAMARA)
+    .withMessage('Esta categoría la asigna la Cámara: en el registro podés elegir Activo o Adherente.')
+    .bail()
+    .isIn(CATEGORIAS_DEL_REGISTRO).withMessage('La categoría no es válida. En el registro podés elegir Activo o Adherente.'),
 
   validarResultado
 ];
