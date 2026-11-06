@@ -3,6 +3,7 @@ import { User } from "../models/user.models.js";
 import { fn, col, literal, Op } from "sequelize";
 import { Auditoria } from "../models/auditoria.models.js";
 import { calcularResumenInicio } from "../services/resumenInicio.service.js";
+import { registrarFechaAprobacion } from "../services/padron.service.js";
 import { fechaHoyArgentina } from "../services/cuota.service.js";
 
 // ============================================================================
@@ -139,6 +140,9 @@ export const gestionarSolicitud = async (req, res) => {
 
     // Actualizamos el campo unificado
     usuario.estado = nuevoEstado;
+    // Al aprobar se guarda la fecha: la antigüedad para votar en Asamblea se cuenta desde acá
+    // (si ya tenía una aprobación anterior, se conserva).
+    registrarFechaAprobacion(usuario);
     await usuario.save();
 
     //auditoria
@@ -215,6 +219,10 @@ export const actualizarSocio = async (req, res) => {
     if (usuario.changed('categoria')) {
       usuario.degradadoPorMora = false;
     }
+
+    // Si la edición deja la cuenta aprobada y nunca se había registrado la aprobación, se registra ahora
+    // (mismo criterio que al aprobar una solicitud).
+    registrarFechaAprobacion(usuario);
 
     await usuario.save();
 

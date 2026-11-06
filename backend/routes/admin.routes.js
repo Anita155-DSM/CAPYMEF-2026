@@ -6,6 +6,7 @@ import { obtenerDistribucionPorLocalidad, obtenerDistribucionPorRubro } from '..
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 import { validacionActualizarSocio } from '../middlewares/validator/user.validator.js';
 import { obtenerResumenInicio } from '../controllers/admin.controllers.js';
+import { obtenerPadron, exportarPadron } from '../controllers/padron.controllers.js';
 import { paramEntero } from '../middlewares/validarParametros.js';
 
 const router = Router();
@@ -34,6 +35,10 @@ router.get('/auditorias', obtenerAuditorias)
 
 // Cifras reales para las tarjetas del inicio del panel (antes eran inventadas en el frontend)
 router.get('/resumen-inicio', obtenerResumenInicio);
+
+// Padrón de socios habilitados para votar en Asamblea (?fecha=YYYY-MM-DD opcional, por defecto hoy)
+router.get('/padron', obtenerPadron);
+router.get('/padron/exportar', exportarPadron);
 
 
 export default router;
