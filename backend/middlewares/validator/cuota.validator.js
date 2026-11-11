@@ -6,6 +6,9 @@ import { validarResultado } from './validarResultado.js';
 // qué. Ahora se corta antes con un 400 que explica el problema, y la cuota no queda pagada.
 export const LARGO_MAXIMO_OBSERVACIONES = 255;
 
+// La columna pagos.nroComprobante es VARCHAR(100) (models/pago.models.js): mismo motivo que las observaciones.
+export const LARGO_MAXIMO_NRO_COMPROBANTE = 100;
+
 // Pago manual que registra la administración (PUT /api/cuotas/:id/pagar): efectivo, transferencia, etc.
 export const validacionPagoManual = [
   // Opcional: si no se manda, el controlador pone "Registro manual por administración".
@@ -17,6 +20,14 @@ export const validacionPagoManual = [
     .bail()
     .isLength({ max: LARGO_MAXIMO_OBSERVACIONES })
     .withMessage(`Las observaciones pueden tener como máximo ${LARGO_MAXIMO_OBSERVACIONES} caracteres.`),
+
+  // Número de recibo o id de la transferencia del banco. Opcional (null = sin número), como las observaciones.
+  body('nroComprobante')
+    .optional({ values: 'null' })
+    .isString().withMessage('El número de comprobante debe ser un texto.')
+    .bail()
+    .isLength({ max: LARGO_MAXIMO_NRO_COMPROBANTE })
+    .withMessage(`El número de comprobante puede tener como máximo ${LARGO_MAXIMO_NRO_COMPROBANTE} caracteres.`),
 
   validarResultado
 ];

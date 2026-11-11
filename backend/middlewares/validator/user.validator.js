@@ -9,6 +9,13 @@ export const CATEGORIAS_QUE_ASIGNA_LA_CAMARA = ['padrino', 'honorario'];
 // guardado en la base con un 500. Con este tope se responde un 400 que dice qué está mal.
 export const LARGO_MAXIMO_TELEFONO = 20;
 
+// La columna users.localidad es VARCHAR(100) (models/user.models.js): mismo motivo que el teléfono.
+export const LARGO_MAXIMO_LOCALIDAD = 100;
+
+// Un solo texto por tope, para que el registro, la edición del admin y "mi perfil" digan lo mismo.
+const MENSAJE_TOPE_TELEFONO = `El teléfono puede tener como máximo ${LARGO_MAXIMO_TELEFONO} caracteres.`;
+const MENSAJE_TOPE_LOCALIDAD = `La localidad puede tener como máximo ${LARGO_MAXIMO_LOCALIDAD} caracteres.`;
+
 // Middleware genérico que revisa si express-validator atrapó algún error
 // export const validarResultado = (req, res, next) => {
 //   const errores = validationResult(req);
@@ -50,13 +57,19 @@ export const validacionRegistro = [
     .matches(/[A-Z]/).withMessage('La contraseña debe contener al menos una letra mayúscula.'),
 
   // 2. Datos de Contacto (Nuevos por Estatuto)
+  // Además de obligatorios, con el largo de su columna: un texto más largo daba un 500 de la base.
+  // bail(): si falta el dato, se informa solo eso (no también el tope).
   body('telefono')
     .trim()
-    .notEmpty().withMessage('El número de teléfono es obligatorio.'),
+    .notEmpty().withMessage('El número de teléfono es obligatorio.')
+    .bail()
+    .isLength({ max: LARGO_MAXIMO_TELEFONO }).withMessage(MENSAJE_TOPE_TELEFONO),
 
   body('localidad')
     .trim()
-    .notEmpty().withMessage('La localidad es obligatoria.'),
+    .notEmpty().withMessage('La localidad es obligatoria.')
+    .bail()
+    .isLength({ max: LARGO_MAXIMO_LOCALIDAD }).withMessage(MENSAJE_TOPE_LOCALIDAD),
 
   // 3. Categorización
   // En el registro público solo se puede pedir Activo o Adherente. Padrino (quien hizo una donación o
@@ -104,15 +117,20 @@ export const validacionActualizarSocio = [
     .isEmail().withMessage('Debe proporcionar un correo electrónico válido.')
     .normalizeEmail(),
 
+  // Mismos topes que en el registro (largo de la columna en la base).
   body('telefono')
     .optional()
     .trim()
-    .notEmpty().withMessage('El teléfono no puede quedar vacío.'),
+    .notEmpty().withMessage('El teléfono no puede quedar vacío.')
+    .bail()
+    .isLength({ max: LARGO_MAXIMO_TELEFONO }).withMessage(MENSAJE_TOPE_TELEFONO),
 
   body('localidad')
     .optional()
     .trim()
-    .notEmpty().withMessage('La localidad no puede quedar vacía.'),
+    .notEmpty().withMessage('La localidad no puede quedar vacía.')
+    .bail()
+    .isLength({ max: LARGO_MAXIMO_LOCALIDAD }).withMessage(MENSAJE_TOPE_LOCALIDAD),
 
   body('categoria')
     .optional()
@@ -144,7 +162,14 @@ export const validacionActualizarPerfil = [
     .optional()
     .trim() // igual que en el registro: los espacios de los costados no cuentan ni se guardan
     .isLength({ max: LARGO_MAXIMO_TELEFONO })
-    .withMessage(`El teléfono puede tener como máximo ${LARGO_MAXIMO_TELEFONO} caracteres.`),
+    .withMessage(MENSAJE_TOPE_TELEFONO),
+
+  // La localidad también la puede cambiar el socio y va a la misma columna VARCHAR(100).
+  body('localidad')
+    .optional()
+    .trim()
+    .isLength({ max: LARGO_MAXIMO_LOCALIDAD })
+    .withMessage(MENSAJE_TOPE_LOCALIDAD),
 
   validarResultado
 ];
