@@ -155,6 +155,33 @@ describe('login con intentos fallidos', () => {
     expect(noExiste.body).toEqual(malaClave.body);
   });
 
+  // Igualar el tiempo: con un email que no existe también se pasa por bcrypt (contra un hash de relleno), para que
+  // no responda más rápido que una contraseña incorrecta y no se pueda saber por el tiempo qué emails existen.
+  it('con un email inexistente igual compara la contraseña (contra un hash de relleno del mismo costo) y responde el mismo 401', async () => {
+    const [malaClave] = await fallar(EMAIL, 1);
+    const comparar = vi.spyOn(bcrypt, 'compare');
+
+    const noExiste = await login('nadie@test.com', 'ClaveIncorrecta9');
+
+    expect(comparar).toHaveBeenCalledOnce();
+    const [claveRecibida, hashUsado] = comparar.mock.calls[0];
+    expect(claveRecibida).toBe('ClaveIncorrecta9');
+    expect(hashUsado).toMatch(/^\$2[aby]\$10\$/); // mismo costo (10) que las contraseñas reales
+    expect(await comparar.mock.results[0].value).toBe(false);
+    expect(noExiste.status).toBe(401);
+    expect(noExiste.body).toEqual(malaClave.body);
+  });
+
+  it('el intento con un email inexistente sigue sumando: con 4 más queda bloqueado', async () => {
+    await fallar('nadie@test.com', 1);
+    expect(intentos.consultarBloqueo('nadie@test.com').bloqueado).toBe(false);
+
+    await fallar('nadie@test.com', 4);
+
+    expect(intentos.consultarBloqueo('nadie@test.com').bloqueado).toBe(true);
+    expect((await login('nadie@test.com', CLAVE)).status).toBe(429);
+  });
+
   it('mayúsculas y espacios en el email cuentan como el mismo email', async () => {
     for (const variante of ['Socio@Test.com', '  socio@test.com', 'SOCIO@TEST.COM ', 'socio@TEST.com', EMAIL]) {
       await login(variante, 'ClaveIncorrecta9');

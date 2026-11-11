@@ -18,6 +18,18 @@ import {
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
+// Costo de bcrypt de todas las contraseñas (registro y restablecimiento). Está en un solo lugar para que el hash
+// de relleno de abajo cueste siempre lo mismo que uno real.
+const COSTO_BCRYPT = 10;
+
+// Hash de relleno para el login con un email que no existe. Sin esto, ese caso respondía sin pasar por bcrypt,
+// unos milisegundos más rápido que una contraseña incorrecta de un email real: midiendo los tiempos se podía
+// saber qué emails están registrados. Comparando contra este hash, los dos casos tardan lo mismo.
+// Se genera una sola vez al cargar el módulo, con un texto al azar que nadie conoce (ninguna contraseña coincide),
+// y con el mismo costo que los hashes reales. Es asíncrono (una promesa que se espera al usarla) para no frenar
+// el arranque del servidor mientras se calcula; para el primer login ya está listo.
+const hashDeRelleno = bcrypt.hash(crypto.randomBytes(32).toString('hex'), COSTO_BCRYPT);
+
 // Función auxiliar para borrar archivos subidos si falla el registro
 const eliminarArchivo = (filePath) => {
   if (filePath && fs.existsSync(filePath)) {
@@ -72,7 +84,7 @@ export const registrarUsuario = async (req, res) => {
     }
 
     // C. Encriptar contraseña
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(COSTO_BCRYPT);
     const passwordHash = await bcrypt.hash(password, salt);
 
     // D. Crear el registro en PostgreSQL con todos los datos
@@ -194,6 +206,9 @@ export const loginUsuario = async (req, res) => {
     if (!usuario) {
       // Un email que no existe cuenta igual que una contraseña incorrecta: si no se contara, que un email nunca
       // se bloquee delataría que no está registrado.
+      // Se compara igual contra el hash de relleno (siempre da false) para que tarde lo mismo que una contraseña
+      // incorrecta de un email existente. String(): bcrypt exige texto, igual que en la comparación real.
+      await bcrypt.compare(String(password), await hashDeRelleno);
       return await responderCredencialesInvalidas(req, res, email);
     }
 
@@ -414,7 +429,7 @@ export const restablecerPassword = async (req, res) => {
       return res.status(400).json({ exito: false, mensaje: 'El link de recuperación es inválido o ya venció.' });
     }
 
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(COSTO_BCRYPT);
     usuario.password = await bcrypt.hash(password, salt);
     usuario.resetPasswordToken = null;
     usuario.resetPasswordExpires = null;
