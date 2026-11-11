@@ -94,6 +94,7 @@ describe('registro público: qué categorías se pueden pedir', () => {
       rubro: 'Comercio',
       actividad: 'Venta',
       tamano_empresa: 'Micro',
+      aceptaTerminos: true, // aceptación de los términos (obligatoria en los tests, ver config/terminos.js)
       ...(categoria !== undefined && { categoria }),
     });
   };

@@ -77,6 +77,7 @@ describe('POST /api/auth/registro', () => {
     actividad: 'Metalúrgica',
     tamano_empresa: 'Pequena',
     categoria: 'activo',
+    aceptaTerminos: true, // aceptación de los términos (obligatoria en los tests, ver config/terminos.js)
   };
 
   it('crea la solicitud: 201, queda pendiente de aprobación y con rol socio', async () => {

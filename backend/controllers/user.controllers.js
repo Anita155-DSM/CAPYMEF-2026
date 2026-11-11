@@ -4,6 +4,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { User } from '../models/user.models.js';
 import { enviarMailRecuperacion } from '../config/mailer.js';
+import { VERSION_TERMINOS, aceptoLosTerminos } from '../config/terminos.js';
 import { Auditoria } from '../models/auditoria.models.js';
 import { CODIGOS_AUTH } from '../middlewares/codigosAuth.js';
 import { notificarAdmins } from '../services/notificacion.service.js';
@@ -57,7 +58,14 @@ export const registrarUsuario = async (req, res) => {
 
   try {
     // Extraemos todos los campos, incluyendo los nuevos del Estatuto
-    const { razonSocial, cuit, email, password, telefono, localidad, categoria, rubro, actividad, tamano_empresa } = req.body;
+    const { razonSocial, cuit, email, password, telefono, localidad, categoria, rubro, actividad, tamano_empresa, aceptaTerminos } = req.body;
+
+    // Aceptación de los términos: la fecha la pone el servidor y la versión el backend. Si el cliente mandara
+    // terminosVersion o terminosAceptadosAt, se ignoran (no se toman del body). En el modo transitorio (el
+    // frontend todavía no manda el campo) la cuenta se crea sin fecha ni versión.
+    const aceptoTerminos = aceptoLosTerminos(aceptaTerminos);
+    const terminosAceptadosAt = aceptoTerminos ? new Date() : null;
+    const terminosVersion = aceptoTerminos ? VERSION_TERMINOS : null;
 
     // A. Validar comprobante AFIP/DGR (express-validator valida texto, nosotros validamos el archivo acá)
     if (!constanciaFile) {
@@ -99,13 +107,17 @@ export const registrarUsuario = async (req, res) => {
       rubro,             // NUEVO
       actividad,         // NUEVO
       tamano_empresa,    // NUEVO
+      terminosAceptadosAt,
+      terminosVersion,
       constanciaUrl: constanciaFile.path,
       estado: 'pendiente',      // Queda pendiente de aprobación
       rol: 'socio'
     });
 
     //auditoria
-    req.auditoriaMensaje = `Nueva solicitud de registro recibida de la empresa ${razonSocial} (CUIT: ${cuit})`;
+    // Queda constancia de qué versión de los términos aceptó (la fecha es la del propio registro de auditoría).
+    req.auditoriaMensaje = `Nueva solicitud de registro recibida de la empresa ${razonSocial} (CUIT: ${cuit}). ` +
+      (aceptoTerminos ? `Aceptó los términos y condiciones versión ${terminosVersion}.` : 'Sin registro de aceptación de los términos.');
     req.auditoriaCodigo = 'REGISTRO_SOCIO_SOLICITUD';
 
     res.status(201).json({

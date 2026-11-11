@@ -98,6 +98,7 @@ describe('registro público: teléfono ≤ 20 y localidad ≤ 100', () => {
       telefono: '3704555555',
       localidad: 'Clorinda',
       rubro: 'Comercio',
+      aceptaTerminos: true, // aceptación de los términos (obligatoria en los tests, ver config/terminos.js)
       ...datos,
     });
   const registradas = () => User.count({ where: { email: 'nueva@empresa.com' } });

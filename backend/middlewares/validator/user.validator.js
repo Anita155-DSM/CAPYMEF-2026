@@ -1,5 +1,6 @@
 import { body } from 'express-validator';
 import { validarResultado } from './validarResultado.js';
+import { aceptoLosTerminos, terminosObligatorios, MENSAJE_TERMINOS_OBLIGATORIOS } from '../../config/terminos.js';
 
 // Categorías que se pueden pedir al registrarse y las que solo asigna la Cámara (ver validacionRegistro).
 export const CATEGORIAS_DEL_REGISTRO = ['activo', 'adherente'];
@@ -82,6 +83,13 @@ export const validacionRegistro = [
     .withMessage('Esta categoría la asigna la Cámara: en el registro podés elegir Activo o Adherente.')
     .bail()
     .isIn(CATEGORIAS_DEL_REGISTRO).withMessage('La categoría no es válida. En el registro podés elegir Activo o Adherente.'),
+
+  // 4. Términos y condiciones: la aceptación tiene que venir explícita (aceptaTerminos = true). Mientras el
+  // frontend no mande el campo, la exigencia está apagada (ver terminosObligatorios en config/terminos.js).
+  body('aceptaTerminos').custom((valor) => {
+    if (!terminosObligatorios() || aceptoLosTerminos(valor)) return true;
+    throw new Error(MENSAJE_TERMINOS_OBLIGATORIOS);
+  }),
 
   validarResultado
 ];

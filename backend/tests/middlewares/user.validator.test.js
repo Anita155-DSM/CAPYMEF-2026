@@ -26,6 +26,7 @@ const registroValido = {
   password: 'ClaveSegura1',
   telefono: '3704123456',
   localidad: 'Formosa',
+  aceptaTerminos: true, // aceptación de los términos (obligatoria en los tests, ver config/terminos.js)
 };
 
 const camposConError = (respuesta) => respuesta.body.errores.map((e) => e.campo);
