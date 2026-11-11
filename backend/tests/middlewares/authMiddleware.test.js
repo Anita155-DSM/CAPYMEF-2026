@@ -301,8 +301,8 @@ describe('códigos de error de autenticación (campo "codigo")', () => {
     expect(respuesta.body).toEqual({ ok: true });
   });
 
-  it('los cuatro códigos son textos fijos y distintos', () => {
-    expect(Object.values(CODIGOS_AUTH)).toEqual(['SIN_SESION', 'TOKEN_INVALIDO', 'SESION_INVALIDA', 'SIN_PERMISOS']);
+  it('los códigos son textos fijos y distintos', () => {
+    expect(Object.values(CODIGOS_AUTH)).toEqual(['SIN_SESION', 'TOKEN_INVALIDO', 'SESION_INVALIDA', 'SIN_PERMISOS', 'CUENTA_BLOQUEADA_TEMPORALMENTE']);
     expect(Object.isFrozen(CODIGOS_AUTH)).toBe(true);
   });
 });

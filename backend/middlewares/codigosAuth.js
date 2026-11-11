@@ -10,9 +10,12 @@
 // Regla para el frontend:
 //   - SIN_SESION, TOKEN_INVALIDO o SESION_INVALIDA → cerrar la sesión y mandar al login.
 //   - SIN_PERMISOS → NO cerrar la sesión: la sesión es válida, solo no puede hacer eso.
+//   - CUENTA_BLOQUEADA_TEMPORALMENTE → NO cerrar la sesión (llega en el login, donde todavía no hay una):
+//     mostrar el mensaje, que dice cuántos minutos faltan.
 export const CODIGOS_AUTH = Object.freeze({
   SIN_SESION: 'SIN_SESION', // no se mandó ningún token (401)
   TOKEN_INVALIDO: 'TOKEN_INVALIDO', // token mal firmado, roto o vencido (403)
   SESION_INVALIDA: 'SESION_INVALIDA', // token bien firmado, pero la cuenta ya no existe, no está habilitada o cambió la contraseña (403)
   SIN_PERMISOS: 'SIN_PERMISOS', // sesión válida, pero sin permiso para esta acción (403)
+  CUENTA_BLOQUEADA_TEMPORALMENTE: 'CUENTA_BLOQUEADA_TEMPORALMENTE', // login bloqueado por intentos fallidos (429)
 });
