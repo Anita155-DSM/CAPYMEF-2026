@@ -6,6 +6,23 @@ import { calcularResumenInicio } from "../services/resumenInicio.service.js";
 import { registrarFechaAprobacion } from "../services/padron.service.js";
 import { fechaHoyArgentina } from "../services/cuota.service.js";
 import { FILTRO_SOLO_SOCIOS } from "../services/abonaCuota.service.js";
+import { dejaDeTenerAcceso, liberarInscripcionesFuturas } from "../services/inscripcion.service.js";
+import { sequelize } from "../config/database.js";
+
+// Guarda la cuenta y, si con este cambio deja de estar aprobada (baja, rechazo u otro estado sin acceso),
+// libera sus lugares en eventos que todavía no ocurrieron. Antes la baja dejaba las inscripciones y el socio
+// seguía ocupando cupo sin poder ir. Va todo en una transacción: si falla una parte, no queda ni la baja sin
+// liberar los lugares ni los lugares liberados sin la baja.
+// Lo usan los tres caminos por los que el admin le quita el acceso a una cuenta: la baja, el rechazo de una
+// solicitud y la edición del estado.
+const guardarCuentaYLiberarLugares = async (usuario) => {
+  // changed() se consulta ANTES de guardar: después de save() ya no hay cambios pendientes.
+  const liberar = dejaDeTenerAcceso(usuario);
+  await sequelize.transaction(async (transaction) => {
+    await usuario.save({ transaction });
+    if (liberar) await liberarInscripcionesFuturas(usuario.id, { transaction });
+  });
+};
 
 // ============================================================================
 // PANTALLA: DASHBOARD DE REPORTES (Gráficos y Geolocalización)
@@ -147,7 +164,7 @@ export const gestionarSolicitud = async (req, res) => {
     // Al aprobar se guarda la fecha: la antigüedad para votar en Asamblea se cuenta desde acá
     // (si ya tenía una aprobación anterior, se conserva).
     registrarFechaAprobacion(usuario);
-    await usuario.save();
+    await guardarCuentaYLiberarLugares(usuario);
 
     //auditoria
     req.auditoriaMensaje = `Se ${nuevoEstado === 'aprobado' ? 'aprobó' : 'rechazó'} la solicitud de registro del socio: ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
@@ -175,7 +192,7 @@ export const darDeBajaSocio = async (req, res) => {
 
     // Cambiamos su estado para que la barrera del login lo bloquee
     usuario.estado = "inactivo";
-    await usuario.save();
+    await guardarCuentaYLiberarLugares(usuario);
 
     //auditoria
     req.auditoriaMensaje = `Se dio de baja al socio ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
@@ -228,7 +245,7 @@ export const actualizarSocio = async (req, res) => {
     // (mismo criterio que al aprobar una solicitud).
     registrarFechaAprobacion(usuario);
 
-    await usuario.save();
+    await guardarCuentaYLiberarLugares(usuario);
 
     //auditoria
     req.auditoriaMensaje = `Se actualizaron los datos del socio ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;

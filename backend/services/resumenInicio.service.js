@@ -33,9 +33,9 @@ import { Cuota } from '../models/cuota.models.js';
 import { Pago } from '../models/pago.models.js';
 import { User } from '../models/user.models.js';
 import { Evento } from '../models/evento.models.js';
-import { Inscripcion } from '../models/inscripcion.models.js';
 import { LIMITE_CUOTAS_VENCIDAS } from './categoria.service.js';
 import { FILTRO_SOLO_SOCIOS, INCLUDE_SOLO_SOCIOS } from './abonaCuota.service.js';
+import { contarInscriptos } from './inscripcion.service.js';
 
 // Con 1 cuota menos que el límite de degradación, el socio ya está "en riesgo".
 export const UMBRAL_RIESGO = LIMITE_CUOTAS_VENCIDAS - 1;
@@ -98,7 +98,8 @@ const buscarProximoEvento = async (hoy) => {
   });
   if (!evento) return null;
 
-  const inscriptos = await Inscripcion.count({ where: { evento_id: evento.id } });
+  // Mismo conteo que el detalle del evento y la inscripción (ver inscripcion.service.js).
+  const inscriptos = await contarInscriptos(evento.id);
   const cupoMaximo = evento.cupoMaximo ?? null;
   return {
     id: evento.id,

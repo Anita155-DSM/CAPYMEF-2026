@@ -5,6 +5,8 @@ import { Inscripcion } from '../models/inscripcion.models.js';
 import { User } from '../models/user.models.js';
 import { generarCertificadoAsistencia } from '../services/certificado.service.js';
 import { ocultarLugarSiCorresponde, tieneEnlacePrivado } from '../services/privacidadEvento.service.js';
+import { contarInscriptos } from '../services/inscripcion.service.js';
+import { sequelize } from '../config/database.js';
 
 // ==========================================
 // Helpers para manejo de imagen en Cloudinary
@@ -130,7 +132,7 @@ export const obtenerEventoPorId = async (req, res) => {
       return res.status(404).json({ exito: false, mensaje: 'Evento no encontrado.' });
     }
 
-    const totalInscriptos = await Inscripcion.count({ where: { evento_id: id } });
+    const totalInscriptos = await contarInscriptos(id);
     const cupoDisponible = evento.cupoMaximo != null ? evento.cupoMaximo - totalInscriptos : null;
 
     // Solo se consulta la inscripción si hace falta (evento con link privado y alguien logueado).
@@ -276,36 +278,47 @@ export const inscribirseEvento = async (req, res) => {
     const { id } = req.params; // ID del evento
     const usuarioId = req.usuario.id;
 
-    const evento = await Evento.findByPk(id);
+    // Antes se contaban los inscriptos y después se creaba la inscripción por separado: si dos socios pedían el
+    // último lugar al mismo tiempo, los dos contaban "queda 1" y entraban los dos (el evento quedaba con uno de
+    // más). Ahora todo pasa en una transacción que empieza BLOQUEANDO la fila del evento (SELECT ... FOR UPDATE
+    // en Postgres): el segundo pedido espera a que el primero termine y recién ahí cuenta, ya con la inscripción
+    // nueva incluida. El bloqueo es solo de ese evento: las inscripciones a otros eventos no esperan.
+    const resultado = await sequelize.transaction(async (transaction) => {
+      const evento = await Evento.findByPk(id, { transaction, lock: transaction.LOCK.UPDATE });
 
-    if (!evento) {
-      return res.status(404).json({ exito: false, mensaje: 'Evento no encontrado.' });
-    }
-
-    if (evento.estado !== 'programado') {
-      return res.status(400).json({ exito: false, mensaje: 'Este evento ya no admite inscripciones.' });
-    }
-
-    // Verificamos que no esté ya inscripto
-    const inscripcionExistente = await Inscripcion.findOne({
-      where: { evento_id: id, usuario_id: usuarioId },
-    });
-    if (inscripcionExistente) {
-      return res.status(400).json({ exito: false, mensaje: 'Ya estás inscripto a este evento.' });
-    }
-
-    // Verificamos el cupo, si el evento tiene límite
-    if (evento.cupoMaximo != null) {
-      const totalInscriptos = await Inscripcion.count({ where: { evento_id: id } });
-      if (totalInscriptos >= evento.cupoMaximo) {
-        return res.status(400).json({ exito: false, mensaje: 'El cupo para este evento ya está completo.' });
+      if (!evento) {
+        return { status: 404, cuerpo: { exito: false, mensaje: 'Evento no encontrado.' } };
       }
-    }
 
-    const nuevaInscripcion = await Inscripcion.create({
-      evento_id: id,
-      usuario_id: usuarioId,
+      if (evento.estado !== 'programado') {
+        return { status: 400, cuerpo: { exito: false, mensaje: 'Este evento ya no admite inscripciones.' } };
+      }
+
+      // Verificamos que no esté ya inscripto
+      const inscripcionExistente = await Inscripcion.findOne({
+        where: { evento_id: id, usuario_id: usuarioId },
+        transaction,
+      });
+      if (inscripcionExistente) {
+        return { status: 400, cuerpo: { exito: false, mensaje: 'Ya estás inscripto a este evento.' } };
+      }
+
+      // Verificamos el cupo, si el evento tiene límite. Se cuenta DENTRO de la transacción, con el evento bloqueado.
+      if (evento.cupoMaximo != null) {
+        const totalInscriptos = await contarInscriptos(id, { transaction });
+        if (totalInscriptos >= evento.cupoMaximo) {
+          return { status: 400, cuerpo: { exito: false, mensaje: 'El cupo para este evento ya está completo.' } };
+        }
+      }
+
+      const nuevaInscripcion = await Inscripcion.create({ evento_id: id, usuario_id: usuarioId }, { transaction });
+      return { status: 201, evento, nuevaInscripcion };
     });
+
+    if (resultado.status !== 201) {
+      return res.status(resultado.status).json(resultado.cuerpo);
+    }
+    const { evento, nuevaInscripcion } = resultado;
 
     //auditoria
     req.auditoriaMensaje = `El usuario se inscribió al evento "${evento.titulo}"`;
@@ -317,6 +330,11 @@ export const inscribirseEvento = async (req, res) => {
       data: nuevaInscripcion,
     });
   } catch (error) {
+    // Respaldo del índice único (evento_id, usuario_id): si el mismo socio manda dos pedidos a la vez, la base
+    // rechaza el segundo. Es el mismo caso que "ya estás inscripto", no un error del servidor.
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ exito: false, mensaje: 'Ya estás inscripto a este evento.' });
+    }
     console.error('Error al inscribirse al evento:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }

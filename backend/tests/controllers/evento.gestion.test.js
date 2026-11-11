@@ -26,6 +26,7 @@ const { Evento } = await import('../../models/evento.models.js');
 const { Inscripcion } = await import('../../models/inscripcion.models.js');
 const { default: eventoRoutes } = await import('../../routes/evento.routes.js');
 const { reiniciarBase, cerrarBase, crearUsuario } = await import('../helpers/baseDeDatos.js');
+const { calcularResumenInicio } = await import('../../services/resumenInicio.service.js');
 const { esPdf, extraerTextoPdf } = await import('../helpers/pdf.js');
 
 // La columna logosExternos es un ARRAY de Postgres que SQLite no tiene: solo en los tests se la trata
@@ -234,6 +235,64 @@ describe('POST /api/eventos/:id/inscribirse', () => {
 
     expect(respuesta.status).toBe(400);
     expect(respuesta.body.mensaje).toBe('El cupo para este evento ya está completo.');
+  });
+
+  // Límite exacto del cupo, con un cupo mayor a 1 para que se note la diferencia entre > y >=.
+  // (inscribe directo en la base a otros socios para dejar el evento con la cantidad justa de inscriptos)
+  const conInscriptos = async (cupoMaximo, cantidad) => {
+    const existente = await evento({ cupoMaximo });
+    for (let i = 0; i < cantidad; i++) {
+      await Inscripcion.create({ evento_id: existente.id, usuario_id: (await crearUsuario()).id });
+    }
+    return existente;
+  };
+
+  it('cupo 3 con 2 inscriptos (N-1): el socio entra y ocupa el último lugar', async () => {
+    const existente = await conInscriptos(3, 2);
+
+    const respuesta = await inscribirse(existente.id);
+
+    expect(respuesta.status).toBe(201);
+    expect(await Inscripcion.count({ where: { evento_id: existente.id } })).toBe(3);
+  });
+
+  it('cupo 3 con 3 inscriptos (N): el siguiente se rechaza con 400 y no se crea la inscripción', async () => {
+    const existente = await conInscriptos(3, 3);
+
+    const respuesta = await inscribirse(existente.id);
+
+    expect(respuesta.status).toBe(400);
+    expect(respuesta.body.mensaje).toBe('El cupo para este evento ya está completo.');
+    expect(await Inscripcion.count({ where: { evento_id: existente.id } })).toBe(3);
+  });
+
+  it('sin cupo máximo siempre se puede inscribir, haya los inscriptos que haya', async () => {
+    const existente = await conInscriptos(null, 5);
+
+    expect((await inscribirse(existente.id)).status).toBe(201);
+  });
+
+  it('una inscripción cancelada libera el lugar (se borra, así que deja de contar)', async () => {
+    const existente = await conInscriptos(1, 0);
+    await inscribirse(existente.id);
+    await comoSocio(request(app).delete(`/api/eventos/${existente.id}/inscribirse`));
+
+    // Con el lugar libre, otro usuario (el admin) puede ocuparlo.
+    const respuesta = await comoAdmin(request(app).post(`/api/eventos/${existente.id}/inscribirse`));
+
+    expect(respuesta.status).toBe(201);
+  });
+
+  it('el detalle del evento y el resumen del inicio del panel cuentan los mismos inscriptos y lugares', async () => {
+    const existente = await conInscriptos(5, 2);
+    await inscribirse(existente.id);
+    await comoSocio(request(app).delete(`/api/eventos/${existente.id}/inscribirse`)); // cancelada: no cuenta
+
+    const detalle = (await request(app).get(`/api/eventos/${existente.id}`)).body.data;
+    const resumen = (await calcularResumenInicio({ hoy: '2026-11-01' })).proximoEvento;
+
+    expect(detalle).toMatchObject({ totalInscriptos: 2, cupoDisponible: 3 });
+    expect(resumen).toMatchObject({ id: existente.id, inscriptos: 2, cuposDisponibles: 3 });
   });
 
   it('el cupo disponible que muestra el evento baja con cada inscripción', async () => {
