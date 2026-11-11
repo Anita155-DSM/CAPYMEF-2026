@@ -27,7 +27,13 @@ export const Cuota = sequelize.define('Cuota', {
   }
 }, {
   timestamps: true,
-  tableName: 'cuotas'
+  tableName: 'cuotas',
+  indexes: [
+    // Una sola cuota por socio y por mes. La generación ya busca antes de crear, pero dos generaciones al mismo
+    // tiempo podían crear dos cuotas iguales (y cobrarle dos veces el mismo mes). Mismo nombre que el índice
+    // creado a mano en Neon, así una base nueva (y la de los tests) queda igual que la real.
+    { unique: true, fields: ['usuario_id', 'mes_anio'], name: 'cuotas_usuario_mes_unico' },
+  ],
 });
 
 // ==========================================

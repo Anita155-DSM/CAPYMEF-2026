@@ -61,13 +61,24 @@ export const generarCuotasDelMes = async () => {
       });
 
       if (!cuotaExistente) {
-        const cuotaNueva = await Cuota.create({
-          usuario_id: socio.id,
-          mes_anio: mesActual,
-          monto,
-          fecha_vencimiento: fechaVencimiento,
-          estado: 'pendiente'
-        });
+        // La búsqueda de arriba no alcanza si dos generaciones corren al mismo tiempo (el cron del día 1 a las
+        // 00:00 y un "generar-manual" justo en ese momento): las dos pueden no encontrar la cuota y las dos
+        // crearla. El índice único (usuario_id, mes_anio) de la tabla hace que la segunda falle con un
+        // UniqueConstraintError. Eso quiere decir "la cuota ya existía": no es un error, no se cuenta como cuota
+        // nueva, no se vuelve a avisar al socio y se sigue con los demás. Cualquier otro error sigue subiendo.
+        let cuotaNueva;
+        try {
+          cuotaNueva = await Cuota.create({
+            usuario_id: socio.id,
+            mes_anio: mesActual,
+            monto,
+            fecha_vencimiento: fechaVencimiento,
+            estado: 'pendiente'
+          });
+        } catch (errorCreacion) {
+          if (errorCreacion.name === 'SequelizeUniqueConstraintError') continue;
+          throw errorCreacion;
+        }
         cuotasCreadas++;
 
         // Aviso interno al socio. crearNotificacion nunca lanza error: si fallara,
