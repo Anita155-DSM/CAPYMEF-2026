@@ -6,6 +6,7 @@ import { User } from '../models/user.models.js';
 import { generarCertificadoAsistencia } from '../services/certificado.service.js';
 import { ocultarLugarSiCorresponde, tieneEnlacePrivado } from '../services/privacidadEvento.service.js';
 import { contarInscriptos } from '../services/inscripcion.service.js';
+import { fechaHoyArgentina } from '../services/cuota.service.js';
 import { sequelize } from '../config/database.js';
 
 // ==========================================
@@ -133,7 +134,9 @@ export const obtenerEventoPorId = async (req, res) => {
     }
 
     const totalInscriptos = await contarInscriptos(id);
-    const cupoDisponible = evento.cupoMaximo != null ? evento.cupoMaximo - totalInscriptos : null;
+    // Nunca negativo (mínimo 0), igual que en resumen-inicio: si hubiera más inscriptos que cupo (datos viejos,
+    // anteriores al control de la edición), se muestra "sin lugares" y no un número que no tiene sentido.
+    const cupoDisponible = evento.cupoMaximo != null ? Math.max(evento.cupoMaximo - totalInscriptos, 0) : null;
 
     // Solo se consulta la inscripción si hace falta (evento con link privado y alguien logueado).
     let puedeVerEnlace = req.usuario?.rol === 'admin';
@@ -200,33 +203,60 @@ export const actualizarEvento = async (req, res) => {
     const { id } = req.params;
     const { titulo, descripcion, fecha, horaInicio, horaFin, modalidad, lugar, cupoMaximo, estado, logosExternos } = req.body;
 
-    const evento = await Evento.findByPk(id);
+    // Va en una transacción que bloquea la fila del evento, igual que inscribirseEvento: así ninguna inscripción
+    // se puede colar entre el conteo de inscriptos y el guardado del cupo nuevo (la inscripción espera a que
+    // esta edición termine, y después cuenta con el cupo ya cambiado).
+    const resultado = await sequelize.transaction(async (transaction) => {
+      const evento = await Evento.findByPk(id, { transaction, lock: transaction.LOCK.UPDATE });
 
-    if (!evento) {
-      if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
-      return res.status(404).json({ exito: false, mensaje: 'Evento no encontrado.' });
-    }
-
-    if (titulo) evento.titulo = titulo;
-    if (descripcion) evento.descripcion = descripcion;
-    if (fecha) evento.fecha = fecha;
-    if (horaInicio !== undefined) evento.horaInicio = horaInicio || null;
-    if (horaFin !== undefined) evento.horaFin = horaFin || null;
-    if (modalidad) evento.modalidad = modalidad;
-    if (lugar !== undefined) evento.lugar = lugar || null;
-    if (cupoMaximo !== undefined) evento.cupoMaximo = cupoMaximo || null;
-    if (estado) evento.estado = estado;
-    if (logosExternos !== undefined) evento.logosExternos = parsearLogosExternos(logosExternos);
-
-    if (imagenFile) {
-      if (evento.imagenUrl) {
-        const publicIdAnterior = extraerPublicIdDeUrl(evento.imagenUrl);
-        eliminarImagenCloudinary(publicIdAnterior);
+      if (!evento) {
+        return { status: 404, cuerpo: { exito: false, mensaje: 'Evento no encontrado.' } };
       }
-      evento.imagenUrl = imagenFile.path;
-    }
 
-    await evento.save();
+      if (titulo) evento.titulo = titulo;
+      if (descripcion) evento.descripcion = descripcion;
+      if (fecha) evento.fecha = fecha;
+      if (horaInicio !== undefined) evento.horaInicio = horaInicio || null;
+      if (horaFin !== undefined) evento.horaFin = horaFin || null;
+      if (modalidad) evento.modalidad = modalidad;
+      if (lugar !== undefined) evento.lugar = lugar || null;
+      if (cupoMaximo !== undefined) evento.cupoMaximo = cupoMaximo || null;
+      if (estado) evento.estado = estado;
+      if (logosExternos !== undefined) evento.logosExternos = parsearLogosExternos(logosExternos);
+
+      // El cupo no puede quedar por debajo de los que ya están inscriptos: antes se guardaba (por ejemplo, cupo
+      // 20 con 25 inscriptos) y el evento mostraba un cupo disponible negativo. Bajarlo justo al número de
+      // inscriptos sí se permite (queda lleno), y subirlo o quitarlo (null = sin límite) siempre.
+      // Solo se revisa si el cupo cambia: editar otro dato de un evento que ya estuviera excedido no se bloquea.
+      if (evento.changed('cupoMaximo') && evento.cupoMaximo != null) {
+        const inscriptos = await contarInscriptos(id, { transaction });
+        if (Number(evento.cupoMaximo) < inscriptos) {
+          return {
+            status: 400,
+            cuerpo: { exito: false, mensaje: `Ya hay ${inscriptos} inscriptos: el cupo no puede ser menor a ${inscriptos}.` },
+          };
+        }
+      }
+
+      // La imagen anterior se borra de Cloudinary recién DESPUÉS de guardar (ver abajo): antes se borraba
+      // primero, y si el guardado fallaba el evento quedaba apuntando a una imagen que ya no existía.
+      let publicIdAnterior = null;
+      if (imagenFile) {
+        if (evento.imagenUrl) publicIdAnterior = extraerPublicIdDeUrl(evento.imagenUrl);
+        evento.imagenUrl = imagenFile.path;
+      }
+
+      await evento.save({ transaction });
+      return { status: 200, evento, publicIdAnterior };
+    });
+
+    if (resultado.status !== 200) {
+      // No se guardó nada: la imagen recién subida no la usa nadie.
+      if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
+      return res.status(resultado.status).json(resultado.cuerpo);
+    }
+    const { evento, publicIdAnterior } = resultado;
+    if (publicIdAnterior) eliminarImagenCloudinary(publicIdAnterior);
 
     //auditoria
     req.auditoriaMensaje = `Se actualizó el evento #${id}: "${evento.titulo}"`;
@@ -292,6 +322,13 @@ export const inscribirseEvento = async (req, res) => {
 
       if (evento.estado !== 'programado') {
         return { status: 400, cuerpo: { exito: false, mensaje: 'Este evento ya no admite inscripciones.' } };
+      }
+
+      // Un evento que sigue 'programado' pero cuya fecha ya pasó (nadie lo marcó como finalizado) aceptaba
+      // inscripciones. Se compara con la fecha de HOY en hora argentina (las dos son 'AAAA-MM-DD', así que se
+      // comparan como texto): un evento de hoy todavía acepta inscripciones.
+      if (evento.fecha < fechaHoyArgentina()) {
+        return { status: 400, cuerpo: { exito: false, mensaje: 'El evento ya se realizó.' } };
       }
 
       // Verificamos que no esté ya inscripto

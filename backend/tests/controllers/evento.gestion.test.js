@@ -65,7 +65,9 @@ afterAll(async () => {
 const comoAdmin = (req) => req.set('Authorization', `Bearer ${tokenAdmin}`);
 const comoSocio = (req) => req.set('Authorization', `Bearer ${tokenSocio}`);
 const evento = (datos = {}) =>
-  Evento.create({ titulo: 'Taller de exportación', descripcion: 'Descripción', fecha: '2026-12-10', estado: 'programado', ...datos });
+  // Fecha lejana a propósito: desde que se rechazan las inscripciones a eventos pasados, una fecha cercana
+  // haría fallar estos tests el día que esa fecha pase.
+  Evento.create({ titulo: 'Taller de exportación', descripcion: 'Descripción', fecha: '2099-12-10', estado: 'programado', ...datos });
 const UUID_INEXISTENTE = '00000000-0000-4000-8000-000000000000';
 const nuevoEvento = { titulo: 'Charla de financiamiento', descripcion: 'Líneas de crédito para PyMEs', fecha: '2026-12-15' };
 
@@ -132,7 +134,7 @@ describe('PUT /api/eventos/admin/:id (editar)', () => {
 
     expect(respuesta.status).toBe(200);
     await existente.reload();
-    expect(existente).toMatchObject({ titulo: 'Taller actualizado', estado: 'finalizado', lugar: 'Maipú 651', cupoMaximo: 20, fecha: '2026-12-10' });
+    expect(existente).toMatchObject({ titulo: 'Taller actualizado', estado: 'finalizado', lugar: 'Maipú 651', cupoMaximo: 20, fecha: '2099-12-10' });
   });
 
   it('mandar el lugar o el cupo vacíos los borra (evento sin lugar definido o sin límite de cupo)', async () => {
@@ -348,7 +350,7 @@ describe('GET /api/eventos/admin/:id/inscriptos', () => {
     const respuesta = await comoAdmin(request(app).get(`/api/eventos/admin/${existente.id}/inscriptos`));
 
     expect(respuesta.status).toBe(200);
-    expect(respuesta.body.evento).toEqual({ id: existente.id, titulo: 'Taller de exportación', fecha: '2026-12-10' });
+    expect(respuesta.body.evento).toEqual({ id: existente.id, titulo: 'Taller de exportación', fecha: '2099-12-10' });
     expect(respuesta.body.total).toBe(1);
     expect(respuesta.body.data[0].socio).toMatchObject({ id: socio.id, razonSocial: 'Empresa Asistente SRL' });
     expect(respuesta.body.data[0].socio).not.toHaveProperty('password');
