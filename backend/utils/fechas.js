@@ -16,6 +16,12 @@ export const ZONA_HORARIA_ARGENTINA = 'America/Argentina/Buenos_Aires';
 // Lo que se muestra cuando no hay fecha o no es válida (igual que el frontend): nunca "Invalid Date".
 export const SIN_FECHA = '-';
 
+// Hora actual en Argentina como "HH:MM" (24 h), esté donde esté el servidor. Es el mismo formato en que se
+// guardan horaInicio y horaFin de los eventos, así que se pueden comparar como texto ("09:30" < "18:00").
+// hourCycle 'h23' evita que la medianoche salga como "24:00".
+export const horaActualArgentina = (momento = new Date()) =>
+  momento.toLocaleTimeString('en-GB', { timeZone: ZONA_HORARIA_ARGENTINA, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+
 const FECHA_SIN_HORA = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 // Fecha de calendario de un texto "YYYY-MM-DD", o null si no es una fecha real (2026-02-30, etc.).

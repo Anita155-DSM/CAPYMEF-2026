@@ -7,6 +7,7 @@ import { generarCertificadoAsistencia } from '../services/certificado.service.js
 import { ocultarLugarSiCorresponde, tieneEnlacePrivado } from '../services/privacidadEvento.service.js';
 import { contarInscriptos } from '../services/inscripcion.service.js';
 import { fechaHoyArgentina } from '../services/cuota.service.js';
+import { horaActualArgentina } from '../utils/fechas.js';
 import { sequelize } from '../config/database.js';
 
 // ==========================================
@@ -327,8 +328,17 @@ export const inscribirseEvento = async (req, res) => {
       // Un evento que sigue 'programado' pero cuya fecha ya pasó (nadie lo marcó como finalizado) aceptaba
       // inscripciones. Se compara con la fecha de HOY en hora argentina (las dos son 'AAAA-MM-DD', así que se
       // comparan como texto): un evento de hoy todavía acepta inscripciones.
-      if (evento.fecha < fechaHoyArgentina()) {
+      const hoy = fechaHoyArgentina();
+      if (evento.fecha < hoy) {
         return { status: 400, cuerpo: { exito: false, mensaje: 'El evento ya se realizó.' } };
+      }
+
+      // Un evento de hoy con hora de inicio cierra las inscripciones al empezar (desde esa misma hora, en hora
+      // argentina): la inscripción sirve para planificar el cupo y, en los virtuales, es lo que da acceso al link;
+      // anotarse con el evento en marcha no ayuda a ninguna de las dos cosas. Si llega alguien tarde, el admin
+      // puede marcarle la asistencia igual. Sin hora de inicio no hay contra qué cortar: se permite todo el día.
+      if (evento.fecha === hoy && evento.horaInicio && horaActualArgentina() >= evento.horaInicio) {
+        return { status: 400, cuerpo: { exito: false, mensaje: 'Las inscripciones cerraron al comenzar el evento.' } };
       }
 
       // Verificamos que no esté ya inscripto
