@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken';
 // (El webhook y el retorno de Mercado Pago tienen sus propios archivos de test.)
 // Nada sale a internet: Mercado Pago, la descarga del PDF guardado y la generación del PDF son falsos.
 vi.mock('../../services/pasarela.service.js', () => ({ crearOrdenDePago: vi.fn(), procesarNotificacionPago: vi.fn() }));
-vi.mock('../../services/comprobanteGuardado.service.js', () => ({ descargarPdfGuardado: vi.fn(), esUrlDeCloudinary: vi.fn() }));
+vi.mock('../../services/comprobanteGuardado.service.js', async (importOriginal) => ({ ...(await importOriginal()), descargarPdfGuardado: vi.fn() }));
 vi.mock('../../services/comprobante.service.js', () => ({ generarComprobantePago: vi.fn() }));
 vi.mock('../../config/mailer.js', () => ({ enviarMailComprobantePago: vi.fn(), enviarMailRecuperacion: vi.fn() }));
 vi.mock('../../services/cloudinary.service.js', () => ({ subirPDFCloudinary: vi.fn(), eliminarImagenCloudinary: vi.fn(), extraerPublicIdDeUrl: vi.fn() }));
@@ -78,12 +78,12 @@ describe('GET /api/pagos/mis-cuotas', () => {
     expect(respuesta.body.data.map((c) => c.mes_anio)).toEqual(['2026-11', '2026-10']);
   });
 
-  it('cada cuota pagada trae su pago, sin los datos internos de Tesorería', async () => {
+  it('cada cuota pagada trae su pago, sin los datos internos de Tesorería ni la URL de Cloudinary del comprobante', async () => {
     await pagadaCon(yo, { confirmadoPor: 99, confirmadoAt: new Date(), observaciones: 'nota interna' });
 
     const [conPago] = (await conToken(request(app).get('/api/pagos/mis-cuotas'))).body.data;
 
-    expect(Object.keys(conPago.pago).sort()).toEqual(['fechaPago', 'id', 'metodoPago', 'montoAbonado', 'origenPago', 'urlComprobante']);
+    expect(Object.keys(conPago.pago).sort()).toEqual(['fechaPago', 'id', 'metodoPago', 'montoAbonado', 'origenPago', 'tieneComprobante']);
   });
 
   it('una cuota pendiente viene con pago null', async () => {

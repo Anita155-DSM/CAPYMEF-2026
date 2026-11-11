@@ -13,10 +13,13 @@ vi.mock('../../services/cloudinary.service.js', () => ({
   eliminarImagenCloudinary: vi.fn(),
   extraerPublicIdDeUrl: vi.fn(),
 }));
+// La descarga del PDF guardado también es falsa (tiene sus propios tests); el resto del servicio es real.
+vi.mock('../../services/comprobanteGuardado.service.js', async (importOriginal) => ({ ...(await importOriginal()), descargarPdfGuardado: vi.fn() }));
 
 const { generarComprobantePago } = await import('../../services/comprobante.service.js');
 const { enviarMailComprobantePago } = await import('../../config/mailer.js');
 const { subirPDFCloudinary } = await import('../../services/cloudinary.service.js');
+const { descargarPdfGuardado } = await import('../../services/comprobanteGuardado.service.js');
 const { Cuota } = await import('../../models/cuota.models.js');
 const { Pago } = await import('../../models/pago.models.js');
 const { Notificacion } = await import('../../models/notificacion.models.js');
@@ -44,6 +47,7 @@ beforeEach(async () => {
   generarComprobantePago.mockResolvedValue(PDF);
   enviarMailComprobantePago.mockResolvedValue();
   subirPDFCloudinary.mockResolvedValue({ secure_url: URL_COMPROBANTE });
+  descargarPdfGuardado.mockResolvedValue(null);
   await reiniciarBase();
   await asegurarTarifasIniciales();
   admin = await crearUsuario({ rol: 'admin', razonSocial: 'Admin que carga' });
@@ -254,14 +258,29 @@ describe('GET /api/cuotas/:id/comprobante', () => {
     return pagada;
   };
 
-  it('si el comprobante está guardado en Cloudinary redirige a ese archivo (el original del momento del pago)', async () => {
+  it('si el comprobante está guardado, entrega ESE PDF a través del servidor (sin redirigir a Cloudinary)', async () => {
+    const guardado = Buffer.from('%PDF-1.4 el original guardado');
+    descargarPdfGuardado.mockResolvedValue(guardado);
     const pagada = await pagadaCon({ urlComprobante: URL_COMPROBANTE });
 
-    const respuesta = await comoAdmin(request(app).get(`/api/cuotas/${pagada.id}/comprobante`));
+    const respuesta = await comoAdmin(request(app).get(`/api/cuotas/${pagada.id}/comprobante`)).buffer(true);
 
-    expect(respuesta.status).toBe(302);
-    expect(respuesta.headers.location).toBe(URL_COMPROBANTE);
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.headers.location).toBeUndefined();
+    expect(respuesta.headers['content-type']).toBe('application/pdf');
+    expect(Buffer.from(respuesta.body).equals(guardado)).toBe(true);
+    expect(descargarPdfGuardado).toHaveBeenCalledWith(URL_COMPROBANTE);
     expect(generarComprobantePago).not.toHaveBeenCalled();
+  });
+
+  it('si el guardado no se puede traer, lo regenera (plan B)', async () => {
+    const pagada = await pagadaCon({ urlComprobante: URL_COMPROBANTE });
+
+    const respuesta = await comoAdmin(request(app).get(`/api/cuotas/${pagada.id}/comprobante`)).buffer(true);
+
+    expect(respuesta.status).toBe(200);
+    expect(Buffer.from(respuesta.body).equals(PDF)).toBe(true);
+    expect(generarComprobantePago).toHaveBeenCalledOnce();
   });
 
   it('si no está guardado (pagos viejos) lo regenera y lo manda como PDF descargable', async () => {

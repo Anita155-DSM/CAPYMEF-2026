@@ -81,14 +81,14 @@ describe('subirPDFCloudinary', () => {
     return recibido;
   };
 
-  it('sube el PDF desde memoria con la carpeta y el nombre indicados, como PDF', async () => {
+  it('sube el PDF desde memoria con la carpeta y el nombre indicados, como PDF privado (authenticated)', async () => {
     const recibido = simularSubida();
     const pdf = Buffer.from('%PDF-1.4 contenido');
 
     const resultado = await subirPDFCloudinary(pdf, { folder: 'capymef_comprobantes_pago', public_id: 'comprobante-9' });
 
     expect(upload_stream).toHaveBeenCalledWith(
-      { folder: 'capymef_comprobantes_pago', public_id: 'comprobante-9', resource_type: 'auto', format: 'pdf' },
+      { folder: 'capymef_comprobantes_pago', public_id: 'comprobante-9', resource_type: 'auto', format: 'pdf', type: 'authenticated' },
       expect.any(Function)
     );
     expect(Buffer.concat(recibido).equals(pdf)).toBe(true);

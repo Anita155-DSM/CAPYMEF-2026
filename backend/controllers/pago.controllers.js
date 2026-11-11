@@ -12,7 +12,7 @@ import {
   formatearPeriodo,
 } from '../services/notificacion.service.js';
 import { evaluarCategoriaSocio } from '../services/categoria.service.js';
-import { descargarPdfGuardado } from '../services/comprobanteGuardado.service.js';
+import { descargarPdfGuardado, pagoSinUrlDeComprobante } from '../services/comprobanteGuardado.service.js';
 import { CODIGOS_AUTH } from '../middlewares/codigosAuth.js';
 import { esCuentaDeGestion } from '../services/abonaCuota.service.js';
 import { validarPagoContraCuota } from '../services/validarPagoMP.service.js';
@@ -323,13 +323,25 @@ export const obtenerMisCuotas = async (req, res) => {
       include: [{
         model: Pago,
         as: 'pago',
-        // Sin datos internos de Tesorería (confirmadoPor, etc.)
-        attributes: ['id', 'montoAbonado', 'fechaPago', 'metodoPago', 'origenPago', 'urlComprobante'],
+        // Sin datos internos de Tesorería (confirmadoPor, etc.) ni la URL de Cloudinary del comprobante: es
+        // privado y se descarga con GET /api/pagos/mis-cuotas/:id/comprobante, que verifica que sea del socio.
+        attributes: ['id', 'montoAbonado', 'fechaPago', 'metodoPago', 'origenPago'],
       }],
       order: [['mes_anio', 'DESC']],
     });
 
-    res.status(200).json({ exito: true, data: cuotas });
+    // tieneComprobante: la cuota se puede descargar (está pagada y tiene su pago), igual que lo que exige
+    // descargarMiComprobante. Reemplaza a la URL, que el frontend usaba para abrir Cloudinary directo.
+    const data = cuotas.map((cuota) => {
+      const datos = cuota.toJSON();
+      return {
+        ...datos,
+        pago: pagoSinUrlDeComprobante(datos.pago),
+        tieneComprobante: datos.estado === 'pagada' && Boolean(datos.pago),
+      };
+    });
+
+    res.status(200).json({ exito: true, data });
   } catch (error) {
     console.error('Error al obtener las cuotas del socio:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al obtener tus cuotas.' });

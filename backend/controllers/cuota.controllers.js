@@ -13,6 +13,7 @@ import { Pago } from '../models/pago.models.js';
 import { generarComprobantePago } from '../services/comprobante.service.js';
 import { enviarMailComprobantePago } from '../config/mailer.js';
 import { subirPDFCloudinary } from '../services/cloudinary.service.js';
+import { descargarPdfGuardado, pagoSinUrlDeComprobante } from '../services/comprobanteGuardado.service.js';
 import { evaluarCategoriaSocio } from '../services/categoria.service.js';
 
 // ==========================================
@@ -190,7 +191,8 @@ export const registrarPagoManual = async (req, res) => {
     res.status(200).json({
       exito: true,
       mensaje: 'El pago ha sido registrado e impactado correctamente.',
-      data: { cuota, pago: nuevoPago }
+      // Sin la URL del comprobante (es privado): se descarga con GET /api/cuotas/:id/comprobante.
+      data: { cuota, pago: pagoSinUrlDeComprobante(nuevoPago) }
     });
 
   } catch (error) {
@@ -247,19 +249,18 @@ export const descargarComprobante = async (req, res) => {
       return res.status(400).json({ exito: false, mensaje: 'Esta cuota todavía no tiene un pago registrado.' });
     }
 
-    // Si ya tenemos el comprobante guardado en Cloudinary, redirigimos directo:
-    // es un snapshot fiel del momento del pago, y más rápido que regenerarlo.
-    if (cuota.pago.urlComprobante) {
-      return res.redirect(cuota.pago.urlComprobante);
+    // Se entrega el MISMO PDF que se guardó al pagar, pero a través del servidor, igual que la descarga del
+    // socio. Antes se redirigía a la URL de Cloudinary: el navegador terminaba con el link del archivo, y con
+    // los comprobantes ahora privados esa URL ya no abre. Si el guardado no está o no se puede traer
+    // (pagos viejos sin URL, Cloudinary caído), se regenera como plan B.
+    let pdfBuffer = await descargarPdfGuardado(cuota.pago.urlComprobante);
+    if (!pdfBuffer) {
+      pdfBuffer = await generarComprobantePago({
+        socio: cuota.socio,
+        cuota: { mes_anio: cuota.mes_anio },
+        pago: cuota.pago,
+      });
     }
-
-    // Fallback: pagos registrados ANTES de este cambio no tienen la URL guardada.
-    // Para esos, seguimos regenerando el PDF al vuelo como antes.
-    const pdfBuffer = await generarComprobantePago({
-      socio: cuota.socio,
-      cuota: { mes_anio: cuota.mes_anio },
-      pago: cuota.pago,
-    });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="comprobante-${cuota.mes_anio}.pdf"`);
@@ -305,7 +306,8 @@ export const obtenerPagosSinConfirmar = async (req, res) => {
       order: [['fechaPago', 'ASC']],
     });
 
-    res.status(200).json({ exito: true, total: pagos.length, data: pagos });
+    // Sin la URL del comprobante (es privado): Tesorería lo descarga con GET /api/cuotas/:id/comprobante.
+    res.status(200).json({ exito: true, total: pagos.length, data: pagos.map(pagoSinUrlDeComprobante) });
   } catch (error) {
     console.error('Error al obtener pagos sin confirmar:', error);
     res.status(500).json({ exito: false, mensaje: 'Error al consultar los pagos sin confirmar.' });
