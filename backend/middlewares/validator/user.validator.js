@@ -5,6 +5,10 @@ import { validarResultado } from './validarResultado.js';
 export const CATEGORIAS_DEL_REGISTRO = ['activo', 'adherente'];
 export const CATEGORIAS_QUE_ASIGNA_LA_CAMARA = ['padrino', 'honorario'];
 
+// La columna users.telefono es VARCHAR(20) (models/user.models.js): un teléfono más largo hacía fallar el
+// guardado en la base con un 500. Con este tope se responde un 400 que dice qué está mal.
+export const LARGO_MAXIMO_TELEFONO = 20;
+
 // Middleware genérico que revisa si express-validator atrapó algún error
 // export const validarResultado = (req, res, next) => {
 //   const errores = validationResult(req);
@@ -125,6 +129,22 @@ export const validacionActualizarSocio = [
   body('estado')
     .optional()
     .isIn(['pendiente', 'aprobado', 'rechazado', 'inactivo']).withMessage('El estado no es válido.'),
+
+  validarResultado
+];
+
+// ==========================================
+// Reglas para que el socio edite su propio perfil (PUT /api/auth/perfil)
+// ==========================================
+// El controlador solo toma teléfono y localidad. Hasta ahora esta ruta no tenía validador: un teléfono de
+// más de 20 caracteres llegaba a la base y terminaba en un 500. El teléfono sigue siendo opcional (si no se
+// manda, o llega vacío, el controlador deja el que estaba) y no se le exige un formato: no había ninguno.
+export const validacionActualizarPerfil = [
+  body('telefono')
+    .optional()
+    .trim() // igual que en el registro: los espacios de los costados no cuentan ni se guardan
+    .isLength({ max: LARGO_MAXIMO_TELEFONO })
+    .withMessage(`El teléfono puede tener como máximo ${LARGO_MAXIMO_TELEFONO} caracteres.`),
 
   validarResultado
 ];

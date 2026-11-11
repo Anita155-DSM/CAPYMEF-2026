@@ -256,7 +256,7 @@ describe('GET /api/admin/usuarios', () => {
 
 describe('reportes de distribución', () => {
   beforeEach(async () => {
-    // Además del admin y el socio del beforeEach general (Comercio, Formosa):
+    // Además del admin y el socio del beforeEach general (los dos Comercio, Formosa; el admin no cuenta):
     await crearUsuario({ rubro: 'Industria', localidad: 'Clorinda' });
     await crearUsuario({ rubro: 'Industria', localidad: 'Clorinda' });
     await crearUsuario({ rubro: 'Industria', localidad: 'Clorinda' });
@@ -264,20 +264,20 @@ describe('reportes de distribución', () => {
     await crearUsuario({ rubro: 'Agropecuario', localidad: 'Pirané', estado: 'pendiente' });
   });
 
-  it('por rubro: cuenta solo cuentas aprobadas, de mayor a menor', async () => {
+  it('por rubro: cuenta solo socios aprobados (sin admins), de mayor a menor', async () => {
     const respuesta = await get('/reportes/distribucion-rubros');
 
     expect(respuesta.status).toBe(200);
     expect(respuesta.body.totalRubros).toBe(2);
-    expect(respuesta.body.data.map((f) => [f.rubro, Number(f.cantidad)])).toEqual([['Industria', 3], ['Comercio', 2]]);
+    expect(respuesta.body.data.map((f) => [f.rubro, Number(f.cantidad)])).toEqual([['Industria', 3], ['Comercio', 1]]);
   });
 
-  it('por localidad: cuenta solo cuentas aprobadas, de mayor a menor', async () => {
+  it('por localidad: cuenta solo socios aprobados (sin admins), de mayor a menor', async () => {
     const respuesta = await get('/reportes/distribucion-localidad');
 
     expect(respuesta.status).toBe(200);
     expect(respuesta.body.totalLocalidades).toBe(2);
-    expect(respuesta.body.data.map((f) => [f.localidad, Number(f.cantidad)])).toEqual([['Clorinda', 3], ['Formosa', 2]]);
+    expect(respuesta.body.data.map((f) => [f.localidad, Number(f.cantidad)])).toEqual([['Clorinda', 3], ['Formosa', 1]]);
   });
 });
 

@@ -5,6 +5,7 @@ import { Auditoria } from "../models/auditoria.models.js";
 import { calcularResumenInicio } from "../services/resumenInicio.service.js";
 import { registrarFechaAprobacion } from "../services/padron.service.js";
 import { fechaHoyArgentina } from "../services/cuota.service.js";
+import { FILTRO_SOLO_SOCIOS } from "../services/abonaCuota.service.js";
 
 // ============================================================================
 // PANTALLA: DASHBOARD DE REPORTES (Gráficos y Geolocalización)
@@ -20,7 +21,9 @@ export const obtenerDistribucionPorLocalidad = async (req, res) => {
         "localidad",
         [fn("COUNT", col("id")), "cantidad"]
       ],
-      where: { estado: "aprobado" }, // Contamos solo a los socios activos/aprobados
+      // Solo socios aprobados. Los admin son cuentas de gestión, no socios: antes se contaban y una cuenta
+      // admin inflaba la cantidad de socios de su localidad. Mismo filtro que la generación de cuotas.
+      where: { estado: "aprobado", ...FILTRO_SOLO_SOCIOS },
       group: ["localidad"],
       order: [[literal("cantidad"), "DESC"]]
     });
@@ -49,7 +52,8 @@ export const obtenerDistribucionPorRubro = async (req, res) => {
         "rubro",
         [fn("COUNT", col("id")), "cantidad"]
       ],
-      where: { estado: "aprobado" },
+      // Solo socios aprobados, sin las cuentas de gestión (admin): mismo criterio que el reporte por localidad.
+      where: { estado: "aprobado", ...FILTRO_SOLO_SOCIOS },
       group: ["rubro"],
       order: [[literal("cantidad"), "DESC"]]
     });
