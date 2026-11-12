@@ -1,5 +1,6 @@
 import logo from "@/assets/img/logo.png";
 import { FaCalendarDays, FaChevronRight, FaShareNodes } from "react-icons/fa6";
+import { formatearFecha } from "@/shared/utils/fechas";
 import { urlImagen } from "@/shared/utils/imagenes";
 
 export default function NoticiaCard({ titulo, subtitulo, imagenUrl, fecha, categoria, onLeerMas, className = "", estiloNoticias = false }) {
@@ -32,7 +33,7 @@ export default function NoticiaCard({ titulo, subtitulo, imagenUrl, fecha, categ
         {/* FECHA */}
         <div className="text-[11px] font-semibold text-navy uppercase tracking-wider mb-2 flex items-center gap-1.5">
           {estiloNoticias && <FaCalendarDays className="text-primary" aria-hidden="true" />}
-          <span>{fecha ? new Date(fecha).toLocaleDateString('es-AR') : ""}</span>
+          <span>{fecha ? formatearFecha(fecha) : ""}</span>
           {!estiloNoticias && categoria && <><span className="w-1 h-1 rounded-full bg-primary" aria-hidden="true"></span><span>{categoria}</span></>}
         </div>
 

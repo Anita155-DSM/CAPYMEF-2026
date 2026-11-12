@@ -1,5 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
+  FaCheckToSlot,
   FaFileExcel,
   FaPenToSquare,
   FaTriangleExclamation,
@@ -10,12 +12,13 @@ import Paginacion from "@/shared/ui/Paginacion";
 import BuscadorSocios from "../components/BuscadorSocios";
 import TablaSocios from "../components/TablaSocios";
 import EditarSocioModal from "../components/EditarSocioModal";
+import PadronVotantesSection from "../components/PadronVotantesSection";
 import { useBuscador } from "../hooks/useBuscador";
 import { useUsuarios } from "../hooks/useUsuarios";
 import { exportarPadronExcel } from "../utils/exportarPadron";
 
-// Los "pendientes" viven en Solicitudes / Registros.
-const noPendiente = (u) => u.estado !== "pendiente";
+// Los "pendientes" viven en Solicitudes / Registros, y las cuentas admin no son socios.
+const noPendiente = (u) => u.estado !== "pendiente" && u.rol !== "admin";
 
 const SOCIOS_POR_PAGINA = 10;
 
@@ -39,7 +42,23 @@ const claseFiltroEstado = (activo) =>
       : "border border-slate-200 bg-white text-slate-600 hover:border-primary/30 hover:bg-surface-blue hover:text-navy"
   }`;
 
-export default function PadronPage() {
+const claseVista = (activo) =>
+  `inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+    activo ? "bg-sidebar text-white shadow-2xs" : "text-slate-600 hover:text-navy"
+  }`;
+
+export default function PadronPage({ vistaInicial = "general" }) {
+  const [searchParams] = useSearchParams();
+  const vistaParam = searchParams.get("vista");
+  const [vista, setVista] = useState(() =>
+    vistaParam === "votantes" ? "votantes" : vistaInicial
+  );
+
+  useEffect(() => {
+    if (vistaParam === "votantes") setVista("votantes");
+    else if (vistaInicial) setVista(vistaInicial);
+  }, [vistaInicial, vistaParam]);
+
   const { usuarios, cargando, recargar } = useUsuarios(noPendiente);
   const [socioAEditar, setSocioAEditar] = useState(null);
   const [filtroEstado, setFiltroEstado] = useState("todos"); // "todos" | "aprobado" | "inactivo" | "mora"
@@ -157,6 +176,8 @@ export default function PadronPage() {
     },
   ];
 
+  const esVotantes = vista === "votantes";
+
   return (
     <div className="space-y-6">
       {/* Encabezado institucional idéntico a Noticias, Eventos y Registros */}
@@ -165,21 +186,45 @@ export default function PadronPage() {
           aria-hidden
           className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-primary/6"
         />
-        <div className="relative flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div className="relative flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-              Nómina Institucional
+              {esVotantes ? "Asamblea · Padrón Electoral" : "Nómina Institucional"}
             </p>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-navy sm:text-3xl">
-              Padrón de socios
+              {esVotantes ? "Padrón de votantes" : "Padrón de socios"}
             </h1>
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-600">
-              Consultá, filtrá, editá la ficha institucional de las empresas asociadas y exportá el padrón actualizado.
+              {esVotantes
+                ? "Consultá y exportá el listado oficial de socios habilitados para votar en la Asamblea según la fecha de corte."
+                : "Consultá, filtrá, editá la ficha institucional de las empresas asociadas y exportá el padrón actualizado."}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {!cargando && (
+          <div className="flex flex-wrap items-center gap-3 self-start lg:self-end">
+            {/* Selector segmentado: Nómina general | Padrón de votantes */}
+            <div
+              className="inline-flex shrink-0 items-center gap-1 rounded-xl bg-white p-1 shadow-2xs ring-1 ring-slate-200/80"
+              role="group"
+              aria-label="Cambiar vista del padrón"
+            >
+              <button
+                type="button"
+                onClick={() => setVista("general")}
+                className={claseVista(!esVotantes)}
+              >
+                <FaUserGroup /> Nómina general
+              </button>
+              <button
+                type="button"
+                onClick={() => setVista("votantes")}
+                className={claseVista(esVotantes)}
+              >
+                <FaCheckToSlot /> Padrón de votantes
+              </button>
+            </div>
+
+            {!esVotantes && !cargando && (
               <span className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-white px-3.5 py-2 text-xs font-semibold text-navy shadow-2xs sm:text-sm">
                 <FaUserGroup className="text-primary" />
                 Total:{" "}
@@ -187,21 +232,24 @@ export default function PadronPage() {
               </span>
             )}
 
-            <button
-              type="button"
-              onClick={exportar}
-              disabled={cargando || filtrados.length === 0}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#107c41] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#0c5e31] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
-            >
-              <FaFileExcel className="text-sm" />
-              Exportar a Excel
-            </button>
+            {!esVotantes && (
+              <button
+                type="button"
+                onClick={exportar}
+                disabled={cargando || filtrados.length === 0}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#107c41] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#0c5e31] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+              >
+                <FaFileExcel className="text-sm" />
+                Exportar a Excel
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Estado de carga idéntico a Socio, Noticias, Eventos y Registros */}
-      {cargando ? (
+      {esVotantes ? (
+        <PadronVotantesSection />
+      ) : cargando ? (
         <div className="rounded-none border border-slate-200/90 bg-white py-16 text-center shadow-xs">
           <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-sidebar border-t-transparent" />
           <p className="text-sm text-slate-600">Cargando padrón de socios...</p>

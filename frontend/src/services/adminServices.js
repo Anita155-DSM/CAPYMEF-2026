@@ -1,4 +1,5 @@
 import { api } from "@/api/client";
+import { descargarBlob, nombreArchivoSeguro } from "@/shared/utils/seguridad";
 
 // ==========================================
 // SOCIOS Y SOLICITUDES DE ALTA
@@ -15,8 +16,28 @@ export const darDeBajaSocio = (id) =>
   api(`/admin/socios/${id}/baja`, { method: "PUT" });
 
 // ==========================================
-// REPORTES Y AUDITORÍA (DASHBOARD ADMIN)
+// PADRÓN DE VOTANTES (ASAMBLEA)
 // ==========================================
+export function obtenerPadronVotantesAdmin(fecha) {
+  const query = fecha ? `?fecha=${encodeURIComponent(fecha)}` : "";
+  return api(`/admin/padron${query}`);
+}
+
+export async function exportarPadronVotantesCsv(fecha) {
+  const query = fecha ? `?fecha=${encodeURIComponent(fecha)}` : "";
+  const resultado = await api(`/admin/padron/exportar${query}`, { blob: true });
+  if (!resultado.exito) return resultado;
+
+  const sufijo = nombreArchivoSeguro(fecha || "hoy");
+  descargarBlob(resultado.data, `padron-habilitados-${sufijo}.csv`);
+  return { exito: true };
+}
+
+// ==========================================
+// REPORTES, RESUMEN Y AUDITORÍA (DASHBOARD ADMIN)
+// ==========================================
+export const obtenerResumenInicioAdmin = () => api("/admin/resumen-inicio");
+
 export const obtenerDistribucionRubros = () => api("/admin/reportes/distribucion-rubros");
 
 export const obtenerDistribucionLocalidades = () => api("/admin/reportes/distribucion-localidad");

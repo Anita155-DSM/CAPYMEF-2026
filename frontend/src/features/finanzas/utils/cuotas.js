@@ -21,15 +21,22 @@ export function nombrePeriodo(mesAnio) {
   return largo ? `${largo} ${anio}` : mesAnio || "-";
 }
 
-/** "2026-11-10" → "10/11/2026" */
+/** "2026-11-10" → "10/11/2026" (sin corrimiento de zona horaria; si trae hora, usa hora argentina) */
 export function formatearFechaCorta(fechaIso) {
   if (!fechaIso) return null;
-  const partes = String(fechaIso).slice(0, 10).split("-");
-  if (partes.length === 3) {
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-  }
-  const fecha = new Date(fechaIso);
-  return Number.isNaN(fecha.getTime()) ? null : fecha.toLocaleDateString("es-AR");
+  const texto = String(fechaIso).trim();
+  const soloFecha = /^(\d{4})-(\d{2})-(\d{2})$/.exec(texto);
+  if (soloFecha) return `${soloFecha[3]}/${soloFecha[2]}/${soloFecha[1]}`;
+
+  const fecha = new Date(texto);
+  return Number.isNaN(fecha.getTime())
+    ? null
+    : fecha.toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        timeZone: "America/Argentina/Buenos_Aires",
+      });
 }
 
 export const ESTADOS_CUOTA = {

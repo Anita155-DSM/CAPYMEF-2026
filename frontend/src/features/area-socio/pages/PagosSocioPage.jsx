@@ -69,9 +69,9 @@ export default function PagosSocioPage() {
             <FaHandshake />
           </span>
           <div>
-            <p className="font-semibold text-navy">Sos socio {etiquetaCat} de CAPYMEF</p>
+            <p className="font-semibold text-navy">Tu categoría no abona cuota mensual</p>
             <p className="mt-1 text-sm leading-relaxed text-slate-600">
-              Tu categoría societaria ({etiquetaCat}) no registra una cuota mensual obligatoria. Si realizaste alguna contribución o tenés consultas administrativas, podés comunicarte con la Cámara.
+              Sos socio <strong>{etiquetaCat}</strong> de CAPYMEF. Por estatuto, tu categoría societaria no registra una cuota mensual obligatoria. Si realizaste alguna contribución o tenés consultas administrativas, podés comunicarte con la Cámara.
             </p>
             <a
               href="mailto:info@capymef.ar"

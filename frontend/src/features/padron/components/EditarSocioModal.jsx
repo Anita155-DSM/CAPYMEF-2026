@@ -296,6 +296,7 @@ export default function EditarSocioModal({ socio, onClose, onActualizado }) {
                   <input
                     type="text"
                     name="telefono"
+                    maxLength={20}
                     value={form.telefono}
                     onChange={handleChange}
                     required
@@ -308,6 +309,7 @@ export default function EditarSocioModal({ socio, onClose, onActualizado }) {
                   <input
                     type="text"
                     name="localidad"
+                    maxLength={100}
                     value={form.localidad}
                     onChange={handleChange}
                     required
@@ -361,7 +363,7 @@ export default function EditarSocioModal({ socio, onClose, onActualizado }) {
         isOpen={confirmandoBaja}
         icono={FaUserSlash}
         titulo="¿Dar de baja al socio?"
-        mensaje={`Vas a pasar a estado INACTIVO a "${socio.razonSocial}" (CUIT: ${socio.cuit}). Su cuenta no podrá iniciar sesión hasta que vuelva a habilitarse.`}
+        mensaje={`Vas a pasar a estado INACTIVO a "${socio.razonSocial}" (CUIT: ${socio.cuit}). Su cuenta no podrá iniciar sesión hasta que vuelva a habilitarse y se liberarán sus lugares en eventos próximos.`}
         textoConfirmar={procesando ? "Procesando..." : "Dar de baja"}
         onCancelar={() => setConfirmandoBaja(false)}
         onConfirmar={handleInactivar}

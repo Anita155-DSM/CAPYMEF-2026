@@ -2,7 +2,6 @@ import { api } from "@/api/client";
 import { descargarBlob, idValido, nombreArchivoSeguro, urlSegura } from "@/shared/utils/seguridad";
 
 const DOMINIO_MERCADOPAGO = /(^|\.)mercadopago\.com(\.[a-z]{2})?$/i;
-const DOMINIO_CLOUDINARY = /^res\.cloudinary\.com$/i;
 
 const error = (mensaje) => ({ exito: false, mensaje });
 
@@ -46,19 +45,16 @@ export function irAlCheckout(linkPago) {
   if (destino) window.location.assign(destino.href);
 }
 
-/** Abre el comprobante de Cloudinary o descarga el PDF desde el backend. */
+/** Descarga el PDF de la constancia de pago desde el backend. */
 export async function descargarComprobanteCuota(cuota) {
-  const cloudinary = urlSegura(cuota?.pago?.urlComprobante, DOMINIO_CLOUDINARY);
-  if (cloudinary) {
-    window.open(cloudinary.href, "_blank", "noopener,noreferrer");
-    return { exito: true };
-  }
   if (!idValido(cuota?.id)) return error("Cuota inválida.");
 
   const resultado = await api(`/pagos/mis-cuotas/${encodeURIComponent(cuota.id)}/comprobante`, { blob: true });
   if (!resultado.exito) {
-    return resultado.status === 404 ? error("El comprobante todavía no está disponible para descargar.") : resultado;
+    return resultado.status === 404
+      ? error("La constancia de pago todavía no está disponible para descargar.")
+      : resultado;
   }
-  descargarBlob(resultado.data, `comprobante-${nombreArchivoSeguro(cuota.mes_anio)}.pdf`);
+  descargarBlob(resultado.data, `constancia-pago-${nombreArchivoSeguro(cuota.mes_anio)}.pdf`);
   return { exito: true };
 }

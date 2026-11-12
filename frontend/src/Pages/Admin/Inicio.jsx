@@ -4,6 +4,7 @@ import {
   FaArrowRight,
   FaCalendarCheck,
   FaChartPie,
+  FaCheckToSlot,
   FaClipboardCheck,
   FaClipboardList,
   FaHandHoldingDollar,
@@ -15,12 +16,10 @@ import {
   obtenerAuditoriasAdmin,
   obtenerDistribucionLocalidades,
   obtenerDistribucionRubros,
+  obtenerResumenInicioAdmin,
   obtenerTodosLosUsuarios,
 } from "@/services/adminServices";
-import { obtenerDetalleEvento, obtenerEventosSocios } from "@/services/eventosService";
-import { obtenerCuotasAdmin } from "@/services/finanzasServices";
 import { formatearMonto } from "@/features/area-socio/utils/cuotas";
-import { elegirProximoEvento } from "@/features/area-socio/utils/eventos";
 import { nombrePeriodo } from "@/features/finanzas/utils/cuotas";
 import AuditoriaModal from "./AuditoriaModal";
 
@@ -38,7 +37,11 @@ function formatearDiaMes(fechaIso) {
   }
   const f = new Date(fechaIso);
   if (Number.isNaN(f.getTime())) return null;
-  return `${f.getDate()}/${f.getMonth() + 1}`;
+  return f.toLocaleDateString("es-AR", {
+    day: "numeric",
+    month: "numeric",
+    timeZone: "America/Argentina/Buenos_Aires",
+  });
 }
 
 function formatearFechaHoraCorta(fechaIso) {
@@ -50,13 +53,14 @@ function formatearFechaHoraCorta(fechaIso) {
     month: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: "America/Argentina/Buenos_Aires",
   });
 }
 
 export default function Inicio() {
   const [usuarios, setUsuarios] = useState([]);
-  const [cuotas, setCuotas] = useState([]);
-  const [eventos, setEventos] = useState([]);
+  const [resumenInicio, setResumenInicio] = useState(null);
   const [rubros, setRubros] = useState([]);
   const [localidades, setLocalidades] = useState([]);
   const [auditoriasRecientes, setAuditoriasRecientes] = useState([]);
@@ -71,15 +75,13 @@ export default function Inicio() {
       try {
         const [
           resUsuarios,
-          resCuotas,
-          resEventos,
+          resResumen,
           resRubros,
           resLocalidades,
           resAuditorias,
         ] = await Promise.all([
           obtenerTodosLosUsuarios(),
-          obtenerCuotasAdmin(),
-          obtenerEventosSocios(),
+          obtenerResumenInicioAdmin(),
           obtenerDistribucionRubros(),
           obtenerDistribucionLocalidades(),
           obtenerAuditoriasAdmin({ page: 1, limit: 5 }),
@@ -90,11 +92,8 @@ export default function Inicio() {
         if (resUsuarios?.exito && Array.isArray(resUsuarios.data)) {
           setUsuarios(resUsuarios.data);
         }
-        if (resCuotas?.exito && Array.isArray(resCuotas.data)) {
-          setCuotas(resCuotas.data);
-        }
-        if (resEventos?.exito && Array.isArray(resEventos.data)) {
-          setEventos(resEventos.data);
+        if (resResumen?.exito && resResumen.data) {
+          setResumenInicio(resResumen.data);
         }
         if (resRubros?.exito && Array.isArray(resRubros.data)) {
           setRubros(resRubros.data);
@@ -118,10 +117,11 @@ export default function Inicio() {
     };
   }, []);
 
-  // 1. Estadísticas de Padrón y Solicitudes
+  // 1. Estadísticas de Padrón y Solicitudes (excluyendo cuentas de gestión rol === "admin")
   const conteoSocios = useMemo(() => {
-    const aprobados = usuarios.filter((s) => s.estado === "aprobado");
-    const pendientes = usuarios.filter((s) => s.estado === "pendiente").length;
+    const soloSocios = usuarios.filter((s) => s.rol !== "admin");
+    const aprobados = soloSocios.filter((s) => s.estado === "aprobado");
+    const pendientes = soloSocios.filter((s) => s.estado === "pendiente").length;
     const activos = aprobados.filter((s) => s.categoria?.toLowerCase() === "activo").length;
     const padrinos = aprobados.filter((s) => s.categoria?.toLowerCase() === "padrino").length;
     const adherentes = aprobados.filter((s) => s.categoria?.toLowerCase() === "adherente").length;
@@ -139,74 +139,12 @@ export default function Inicio() {
     };
   }, [usuarios]);
 
-  // 2. Estadísticas de Finanzas (Recaudación e Índice de Morosidad reales)
-  const metricasFinanzas = useMemo(() => {
-    if (cuotas.length === 0) {
-      return {
-        periodoEtiqueta: "Sin período activo",
-        recaudadoPeriodo: 0,
-        porcentajeCobrado: 0,
-        pagadasPeriodo: 0,
-        totalPeriodo: 0,
-        porcentajeMorosidad: 0,
-        sociosConDeuda: 0,
-        cuotasImpagasCount: 0,
-      };
-    }
-
-    const periodos = [...new Set(cuotas.map((c) => c.mes_anio).filter(Boolean))].sort().reverse();
-    const ultimoPeriodo = periodos[0];
-    const cuotasUltimoPeriodo = ultimoPeriodo
-      ? cuotas.filter((c) => c.mes_anio === ultimoPeriodo)
-      : cuotas;
-
-    const pagadas = cuotasUltimoPeriodo.filter((c) => c.estado === "pagada");
-    const recaudadoPeriodo = pagadas.reduce((acc, c) => acc + (Number(c.monto) || 0), 0);
-    const porcentajeCobrado =
-      cuotasUltimoPeriodo.length > 0
-        ? Math.round((pagadas.length / cuotasUltimoPeriodo.length) * 100)
-        : 0;
-
-    // Morosidad sobre el total de cuotas emitidas
-    const impagas = cuotas.filter((c) => c.estado === "pendiente" || c.estado === "vencida");
-    const porcentajeMorosidad =
-      cuotas.length > 0 ? Math.round((impagas.length / cuotas.length) * 100) : 0;
-
-    const sociosDeudoresSet = new Set(
-      impagas.map((c) => c.socio?.id || c.usuario_id).filter(Boolean)
-    );
-
-    return {
-      periodoEtiqueta: ultimoPeriodo ? nombrePeriodo(ultimoPeriodo) : "General",
-      recaudadoPeriodo,
-      porcentajeCobrado,
-      pagadasPeriodo: pagadas.length,
-      totalPeriodo: cuotasUltimoPeriodo.length,
-      porcentajeMorosidad,
-      sociosConDeuda: sociosDeudoresSet.size,
-      cuotasImpagasCount: impagas.length,
-    };
-  }, [cuotas]);
-
-  // 3. Próxima capacitación real
-  const proximoEvento = useMemo(() => elegirProximoEvento(eventos), [eventos]);
-  const [detalleProximo, setDetalleProximo] = useState(null);
-
-  useEffect(() => {
-    let activo = true;
-    if (!proximoEvento?.id) {
-      setDetalleProximo(null);
-      return undefined;
-    }
-    obtenerDetalleEvento(proximoEvento.id).then((res) => {
-      if (activo && res?.exito && res.data) {
-        setDetalleProximo(res.data);
-      }
-    });
-    return () => {
-      activo = false;
-    };
-  }, [proximoEvento?.id]);
+  const recaudacion = resumenInicio?.recaudacion;
+  const morosidad = resumenInicio?.morosidad;
+  const proximoEvento = resumenInicio?.proximoEvento;
+  const periodoEtiqueta = resumenInicio?.periodo
+    ? nombrePeriodo(resumenInicio.periodo)
+    : "Mes actual";
 
   return (
     <div className="space-y-6 pb-8">
@@ -243,6 +181,13 @@ export default function Inicio() {
                 Solicitudes pendientes ({conteoSocios.pendientes})
               </Link>
             )}
+
+            <Link
+              to="/admin/padron"
+              className="inline-flex items-center gap-2 rounded-xl border border-primary/25 bg-white px-3.5 py-2 text-xs font-semibold text-primary shadow-2xs transition-colors hover:bg-surface-blue sm:text-sm"
+            >
+              <FaCheckToSlot /> Padrón de votantes
+            </Link>
 
             <button
               type="button"
@@ -282,10 +227,16 @@ export default function Inicio() {
                 </h2>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 <span className="rounded-full bg-surface-blue px-3 py-1 text-xs font-semibold text-primary tabular-nums">
                   Total: {conteoSocios.total}
                 </span>
+                <Link
+                  to="/admin/padron"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-navy"
+                >
+                  Padrón de votantes <FaArrowRight className="text-[10px]" />
+                </Link>
                 <Link
                   to="/admin/socios"
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-navy"
@@ -356,9 +307,9 @@ export default function Inicio() {
             </div>
           </section>
 
-          {/* Indicadores clave con datos reales */}
+          {/* Indicadores clave con datos reales de GET /api/admin/resumen-inicio */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {/* 1. Recaudación */}
+            {/* 1. Recaudación del mes */}
             <section className="flex flex-col justify-between rounded-none border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
               <div>
                 <div className="mb-4 flex items-center justify-between gap-2 border-b border-slate-100 pb-3.5">
@@ -367,21 +318,21 @@ export default function Inicio() {
                       <FaHandHoldingDollar />
                     </span>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-navy sm:text-sm">
-                      Recaudación del período
+                      Recaudación del mes
                     </h3>
                   </div>
                   <span className="rounded-full bg-surface px-2.5 py-0.5 text-[11px] font-semibold text-slate-500">
-                    {metricasFinanzas.periodoEtiqueta}
+                    {periodoEtiqueta}
                   </span>
                 </div>
 
                 <p className="text-2xl font-semibold tracking-tight text-navy tabular-nums sm:text-3xl">
-                  {formatearMonto(metricasFinanzas.recaudadoPeriodo)}
+                  {formatearMonto(recaudacion?.montoRecaudado ?? 0)}
                 </p>
                 <p className="mt-1.5 text-xs font-medium text-slate-500">
-                  {metricasFinanzas.totalPeriodo > 0
-                    ? `${metricasFinanzas.porcentajeCobrado}% de las cuotas cobradas (${metricasFinanzas.pagadasPeriodo}/${metricasFinanzas.totalPeriodo})`
-                    : "Aún no se registran cuotas emitidas"}
+                  {recaudacion?.porcentajeCobrado != null
+                    ? `${recaudacion.porcentajeCobrado}% de las cuotas cobradas (${recaudacion.cuotasPagadas}/${recaudacion.cuotasDelMes})`
+                    : "Sin cuotas emitidas en el período"}
                 </p>
               </div>
 
@@ -395,7 +346,7 @@ export default function Inicio() {
               </div>
             </section>
 
-            {/* 2. Morosidad */}
+            {/* 2. Índice de morosidad */}
             <section className="flex flex-col justify-between rounded-none border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
               <div>
                 <div className="mb-4 flex items-center justify-between gap-2 border-b border-slate-100 pb-3.5">
@@ -410,12 +361,14 @@ export default function Inicio() {
                 </div>
 
                 <p className="text-2xl font-semibold tracking-tight text-navy tabular-nums sm:text-3xl">
-                  {metricasFinanzas.porcentajeMorosidad}%
+                  {morosidad?.indice != null ? `${morosidad.indice}%` : "—"}
                 </p>
                 <p className="mt-1.5 text-xs font-medium text-slate-500">
-                  {metricasFinanzas.cuotasImpagasCount > 0
-                    ? `${metricasFinanzas.sociosConDeuda} ${metricasFinanzas.sociosConDeuda === 1 ? "socio" : "socios"} con cuotas impagas (${metricasFinanzas.cuotasImpagasCount} en total)`
-                    : "Todos los socios se encuentran al día"}
+                  {morosidad?.indice == null
+                    ? "Todavía no hay cuotas generadas para calcular morosidad"
+                    : `${morosidad.sociosEnRiesgo ?? 0} ${
+                        morosidad.sociosEnRiesgo === 1 ? "socio" : "socios"
+                      } en riesgo (${morosidad.umbralRiesgo ?? 2} cuotas impagas)`}
                 </p>
               </div>
 
@@ -429,7 +382,7 @@ export default function Inicio() {
               </div>
             </section>
 
-            {/* 3. Próxima capacitación */}
+            {/* 3. Próximo evento */}
             <section className="flex flex-col justify-between rounded-none border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
               <div>
                 <div className="mb-4 flex items-center justify-between gap-2 border-b border-slate-100 pb-3.5">
@@ -438,7 +391,7 @@ export default function Inicio() {
                       <FaCalendarCheck />
                     </span>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-navy sm:text-sm">
-                      Próxima capacitación
+                      Próximo evento
                     </h3>
                   </div>
                   {proximoEvento?.modalidad && (
@@ -459,9 +412,9 @@ export default function Inicio() {
                       </p>
                     </div>
                     <p className="mt-1.5 text-xs font-medium text-slate-500">
-                      {proximoEvento.cupoMaximo
-                        ? `${detalleProximo?.totalInscriptos ?? 0}/${proximoEvento.cupoMaximo} cupos inscriptos`
-                        : "Cupo libre · Inscripción abierta"}
+                      {proximoEvento.cupoMaximo != null
+                        ? `${proximoEvento.inscriptos ?? 0}/${proximoEvento.cupoMaximo} inscriptos (${proximoEvento.cuposDisponibles ?? 0} disponibles)`
+                        : `${proximoEvento.inscriptos ?? 0} inscriptos · Cupo libre`}
                     </p>
                   </>
                 ) : (
@@ -470,7 +423,7 @@ export default function Inicio() {
                       Sin programar
                     </p>
                     <p className="mt-1.5 text-xs font-medium text-slate-500">
-                      No hay capacitaciones próximas cargadas en agenda.
+                      No hay próximos eventos cargados en agenda.
                     </p>
                   </>
                 )}

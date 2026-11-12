@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import {
   FaBell,
   FaCalendarPlus,
+  FaCircleInfo,
   FaClockRotateLeft,
   FaCoins,
   FaFloppyDisk,
@@ -18,26 +19,20 @@ import {
   marcarCuotasVencidasAdmin,
   obtenerTarifasAdmin,
 } from "@/services/finanzasServices";
-import { formatearMonto, mayuscula } from "../utils/cuotas";
-
-const DESCRIPCION_CATEGORIA = {
-  activo: "Socios plenos con derecho a voto y cuota mensual regular.",
-  adherente: "Socios adherentes o en período de regularización ($0 si no abonan cuota fija).",
-  padrino: "Empresas padrino con aportes voluntarios ($0 si no generan cuota mensual fija).",
-  honorario: "Socios honorarios exentos de cuota social ($0 por defecto).",
-};
+import { formatearMonto } from "../utils/cuotas";
 
 export default function TarifasYPeriodoModal({ onClose, onCambioCuotas }) {
-  const [tarifas, setTarifas] = useState([]);
-  const [editados, setEditados] = useState({});
+  const [montoActual, setMontoActual] = useState(0);
+  const [nuevoMonto, setNuevoMonto] = useState("");
   const [cargando, setCargando] = useState(true);
-  const [guardandoCat, setGuardandoCat] = useState(null);
+  const [guardando, setGuardando] = useState(false);
   const [ejecutandoProceso, setEjecutandoProceso] = useState(null);
-  const [error, setError] = useState("");
+  const [errorCarga, setErrorCarga] = useState("");
+  const [errorMonto, setErrorMonto] = useState("");
 
   useBloquearScroll();
 
-  const bloqueado = Boolean(guardandoCat || ejecutandoProceso);
+  const bloqueado = Boolean(guardando || ejecutandoProceso);
 
   useEffect(() => {
     const alTeclear = (e) => {
@@ -52,14 +47,14 @@ export default function TarifasYPeriodoModal({ onClose, onCambioCuotas }) {
     obtenerTarifasAdmin().then((res) => {
       if (!activo) return;
       if (res.exito && Array.isArray(res.data)) {
-        setTarifas(res.data);
-        const mapaInicial = {};
-        for (const t of res.data) {
-          mapaInicial[t.categoria] = String(Number(t.monto) || 0);
-        }
-        setEditados(mapaInicial);
+        const tarifaActivo = res.data.find(
+          (t) => String(t.categoria).toLowerCase() === "activo"
+        );
+        const valor = Number(tarifaActivo?.monto) || 0;
+        setMontoActual(valor);
+        setNuevoMonto(valor > 0 ? String(valor) : "");
       } else {
-        setError(res.mensaje || "No se pudieron cargar las tarifas vigentes.");
+        setErrorCarga(res.mensaje || "No se pudo cargar la tarifa vigente.");
       }
       setCargando(false);
     });
@@ -68,25 +63,30 @@ export default function TarifasYPeriodoModal({ onClose, onCambioCuotas }) {
     };
   }, []);
 
-  const guardarTarifa = async (categoria) => {
-    const valorNum = Number(editados[categoria]);
-    if (Number.isNaN(valorNum) || valorNum < 0) {
-      toast.error("Ingresá un monto válido mayor o igual a 0.");
-      return;
-    }
+  const actualizarCuota = async (e) => {
+    e.preventDefault();
+    setErrorMonto("");
+    setGuardando(true);
 
-    setGuardandoCat(categoria);
-    const res = await actualizarTarifaAdmin(categoria, valorNum);
-    setGuardandoCat(null);
+    const res = await actualizarTarifaAdmin("activo", nuevoMonto);
+    setGuardando(false);
 
     if (!res.exito) {
-      toast.error(res.mensaje || "No se pudo actualizar la tarifa.");
+      const msg =
+        (Array.isArray(res.errores) && res.errores[0]?.mensaje) ||
+        res.mensaje ||
+        "No se pudo actualizar el monto de la cuota.";
+      setErrorMonto(msg);
+      toast.error(msg);
       return;
     }
 
-    toast.success(res.mensaje || `Tarifa de ${mayuscula(categoria)} actualizada.`);
-    setTarifas((prev) =>
-      prev.map((t) => (t.categoria === categoria ? { ...t, monto: valorNum } : t))
+    const actualizado = Number(res.data?.monto ?? nuevoMonto) || 0;
+    setMontoActual(actualizado);
+    setNuevoMonto(String(actualizado));
+    toast.success(
+      res.mensaje ||
+        "Cuota mensual actualizada. Se aplicará a las cuotas que se generen a partir de ahora."
     );
   };
 
@@ -116,7 +116,7 @@ export default function TarifasYPeriodoModal({ onClose, onCambioCuotas }) {
         onClick={(e) => e.stopPropagation()}
         className="animacion-modal relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white text-navy shadow-2xl"
       >
-        {/* Cabecera estilo Socio */}
+        {/* Cabecera institucional */}
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-5 pt-5 pb-4 sm:px-7 sm:pt-6">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -128,10 +128,10 @@ export default function TarifasYPeriodoModal({ onClose, onCambioCuotas }) {
               id="titulo-modal-tarifas"
               className="mt-2.5 text-xl font-semibold leading-snug text-navy sm:text-2xl"
             >
-              Tarifas y procesos del período
+              Modificar monto de la cuota y período
             </h2>
             <p className="mt-0.5 text-xs text-slate-500">
-              Configurá el valor mensual de la cuota por categoría o ejecutá procesos administrativos del mes.
+              Actualizá el valor mensual de la cuota de los socios Activos o ejecutá procesos administrativos del mes.
             </p>
           </div>
 
@@ -148,10 +148,10 @@ export default function TarifasYPeriodoModal({ onClose, onCambioCuotas }) {
 
         {/* Cuerpo scrollable */}
         <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-7">
-          {/* 1. Tarifas por categoría */}
+          {/* 1. Modificar el monto de la cuota (Solo Activos) */}
           <div>
             <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              <FaCoins className="text-primary" /> Monto mensual por categoría de socio
+              <FaCoins className="text-primary" /> Cuota social mensual (Socios Activos)
             </p>
 
             {cargando ? (
@@ -160,70 +160,97 @@ export default function TarifasYPeriodoModal({ onClose, onCambioCuotas }) {
                   <div className="absolute inset-0 rounded-full border-3 border-surface-blue" />
                   <div className="absolute inset-0 animate-spin rounded-full border-3 border-primary border-t-transparent" />
                 </div>
-                <p className="mt-3 text-xs font-semibold text-navy">Cargando tarifas...</p>
+                <p className="mt-3 text-xs font-semibold text-navy">Cargando cuota vigente...</p>
               </div>
-            ) : error ? (
+            ) : errorCarga ? (
               <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-medium text-red-700">
-                {error}
+                {errorCarga}
               </p>
             ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {tarifas.map((tarifa) => {
-                  const cat = tarifa.categoria;
-                  const valorActual = Number(tarifa.monto) || 0;
-                  const valorInput = editados[cat] ?? String(valorActual);
-                  const cambioPendiente = Number(valorInput) !== valorActual;
-                  const guardandoEsta = guardandoCat === cat;
+              <form
+                onSubmit={actualizarCuota}
+                noValidate
+                className="space-y-4 rounded-xl border border-slate-200/80 bg-surface/60 p-4 sm:p-5"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 pb-3.5">
+                  <div>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      Categoría alcanzada
+                    </span>
+                    <p className="mt-0.5 text-base font-bold text-navy">
+                      Socio Activo
+                    </p>
+                  </div>
 
-                  return (
-                    <div
-                      key={cat}
-                      className="flex flex-col justify-between rounded-xl border border-slate-200/80 bg-surface/60 p-4"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-sm font-bold capitalize text-navy">
-                            {mayuscula(cat)}
-                          </span>
-                          <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-primary shadow-2xs">
-                            Actual: {formatearMonto(valorActual)}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-                          {DESCRIPCION_CATEGORIA[cat] || "Valor mensual para nuevas cuotas generadas."}
-                        </p>
-                      </div>
+                  <div className="text-right">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      Monto actual vigente
+                    </span>
+                    <p className="mt-0.5 text-xl font-bold text-primary tabular-nums sm:text-2xl">
+                      {formatearMonto(montoActual)}
+                    </p>
+                  </div>
+                </div>
 
-                      <div className="mt-3 flex items-center gap-2">
-                        <div className="relative flex-1">
-                          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">
-                            $
-                          </span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="100"
-                            value={valorInput}
-                            onChange={(e) =>
-                              setEditados((prev) => ({ ...prev, [cat]: e.target.value }))
-                            }
-                            className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-7 pr-3 text-sm font-semibold text-navy tabular-nums focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => guardarTarifa(cat)}
-                          disabled={!cambioPendiente || bloqueado}
-                          className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-xs font-semibold text-white shadow-2xs transition-colors hover:bg-navy disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
-                        >
-                          <FaFloppyDisk />
-                          {guardandoEsta ? "..." : "Guardar"}
-                        </button>
-                      </div>
+                <div>
+                  <label
+                    htmlFor="input-nuevo-monto-cuota"
+                    className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-500"
+                  >
+                    Nuevo monto mensual ($)
+                  </label>
+                  <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+                    <div className="relative flex-1">
+                      <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
+                        $
+                      </span>
+                      <input
+                        id="input-nuevo-monto-cuota"
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={nuevoMonto}
+                        onChange={(e) => {
+                          setNuevoMonto(e.target.value);
+                          if (errorMonto) setErrorMonto("");
+                        }}
+                        placeholder="Ej: 25000"
+                        className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-8 pr-3.5 text-sm font-semibold text-navy tabular-nums focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
+                      />
                     </div>
-                  );
-                })}
-              </div>
+
+                    <button
+                      type="submit"
+                      disabled={bloqueado}
+                      className="inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-navy disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                    >
+                      <FaFloppyDisk />
+                      {guardando ? "Actualizando..." : "Actualizar cuota"}
+                    </button>
+                  </div>
+                </div>
+
+                {errorMonto && (
+                  <p
+                    role="alert"
+                    className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium text-red-700"
+                  >
+                    {errorMonto}
+                  </p>
+                )}
+
+                <div className="flex items-start gap-2.5 rounded-xl border border-primary/15 bg-surface-blue/70 px-3.5 py-3 text-xs leading-relaxed text-slate-700">
+                  <FaCircleInfo className="mt-0.5 shrink-0 text-primary" />
+                  <div>
+                    <p className="font-semibold text-navy">
+                      Se aplicará a las cuotas que se generen a partir de ahora; las ya emitidas no cambian.
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">
+                      Por estatuto, únicamente la categoría <strong>Activo</strong> abona cuota social mensual. Las categorías Adherente, Padrino y Honorario no generan cuota fija y el cambio queda registrado en auditoría.
+                    </p>
+                  </div>
+                </div>
+              </form>
             )}
           </div>
 
@@ -238,7 +265,7 @@ export default function TarifasYPeriodoModal({ onClose, onCambioCuotas }) {
                 <div>
                   <p className="text-sm font-semibold text-navy">Generar cuotas del mes actual</p>
                   <p className="mt-0.5 text-xs text-slate-500">
-                    Emite las cuotas del período en curso para todos los socios aprobados que aún no la tengan.
+                    Emite las cuotas del período en curso para todos los socios Activos aprobados que aún no la tengan.
                   </p>
                 </div>
                 <button
@@ -307,4 +334,3 @@ export default function TarifasYPeriodoModal({ onClose, onCambioCuotas }) {
     document.body
   );
 }
-

@@ -27,6 +27,8 @@ const ESTILOS_TIPO = {
   categoria_recuperada: { Icono: FaArrowTrendUp, clase: "bg-green-100 text-green-600" },
   // Para administradores
   pago_por_confirmar: { Icono: FaHourglassHalf, clase: "bg-amber-100 text-amber-600" },
+  pago_mp_no_coincide: { Icono: FaTriangleExclamation, clase: "bg-red-100 text-red-600" },
+  login_bloqueado: { Icono: FaTriangleExclamation, clase: "bg-amber-100 text-amber-600" },
   resumen_vencidas: { Icono: FaTriangleExclamation, clase: "bg-red-100 text-red-600" },
   socio_degradado: { Icono: FaUserMinus, clase: "bg-red-100 text-red-600" },
   socio_recuperado: { Icono: FaUserCheck, clase: "bg-green-100 text-green-600" },
@@ -51,7 +53,9 @@ export function tiempoRelativo(fecha, ahora = Date.now()) {
   if (dias === 1) return "ayer";
   if (dias < 7) return `hace ${dias} días`;
 
-  return new Date(momento).toLocaleDateString("es-AR");
+  return new Date(momento).toLocaleDateString("es-AR", {
+    timeZone: "America/Argentina/Buenos_Aires",
+  });
 }
 
 /** Solo rutas internas ("/socios/pagos"): nunca seguimos un enlace externo que venga del servidor. */
@@ -72,6 +76,7 @@ const DESTINO_POR_TIPO = {
   categoria_degradada: "/socios/empresa",
   categoria_recuperada: "/socios/empresa",
   pago_por_confirmar: "/admin/finanzas",
+  pago_mp_no_coincide: "/admin/finanzas",
   resumen_vencidas: "/admin/finanzas",
   socio_degradado: "/admin/socios",
   socio_recuperado: "/admin/socios",

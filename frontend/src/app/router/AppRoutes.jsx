@@ -92,6 +92,7 @@ export default function AppRoutes() {
             <Route path="finanzas" element={<FinanzasAdmin />} />
             <Route path="registros" element={<RegistrosAdmin />} />
             <Route path="socios" element={<SociosAdmin />} />
+            <Route path="padron" element={<SociosAdmin vistaInicial="votantes" />} />
           </Route>
         </Route>
 

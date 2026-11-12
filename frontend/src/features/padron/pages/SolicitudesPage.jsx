@@ -9,7 +9,7 @@ import RevisarSolicitudModal from "../components/RevisarSolicitudModal";
 import { useBuscador } from "../hooks/useBuscador";
 import { useUsuarios } from "../hooks/useUsuarios";
 
-const soloPendientes = (u) => u.estado === "pendiente";
+const soloPendientes = (u) => u.estado === "pendiente" && u.rol !== "admin";
 
 const ESTILO_CATEGORIA = {
   activo: "bg-surface-blue text-primary border-primary/20",

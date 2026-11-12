@@ -13,6 +13,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [avisoBloqueo, setAvisoBloqueo] = useState("");
   const { usuario, login } = useAuth();
   const location = useLocation();
 
@@ -25,8 +26,16 @@ export default function Login() {
   }, [usuario, navigate, location.state]);
 
   const handleLogin = (data) => {
+    setAvisoBloqueo("");
     const loginPromise = iniciarSesion(data).then((result) => {
-      if (!result.exito) throw new Error(result.mensaje || "Credenciales incorrectas");
+      if (!result.exito) {
+        if (result.status === 429 || result.codigo === "CUENTA_BLOQUEADA_TEMPORALMENTE") {
+          setAvisoBloqueo(
+            result.mensaje || "Demasiados intentos fallidos. Probá de nuevo en unos minutos."
+          );
+        }
+        throw new Error(result.mensaje || "Credenciales incorrectas");
+      }
       return result;
     });
 
@@ -103,9 +112,18 @@ export default function Login() {
             </div>
           </div>
 
+          {avisoBloqueo && (
+            <div
+              role="alert"
+              className="mt-3 rounded-[6px] border border-amber-300 bg-amber-50 px-3.5 py-2.5 text-[13px] font-medium leading-snug text-amber-900"
+            >
+              {avisoBloqueo}
+            </div>
+          )}
+
           <button
             type="submit"
-            className="mt-5 flex h-12 items-center justify-center gap-2 rounded-[9px] bg-[#0877a8] px-5 text-[15px] font-bold text-white shadow-[0_3px_5px_rgba(2,74,106,0.25)] transition-colors hover:bg-[#05648f]"
+            className="mt-5 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[9px] bg-[#0877a8] px-5 text-[15px] font-bold text-white shadow-[0_3px_5px_rgba(2,74,106,0.25)] transition-colors hover:bg-[#05648f]"
           >
             Iniciar Sesión
             <FiArrowRight size={19} strokeWidth={2.5} />

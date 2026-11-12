@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner";
 import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
 import ConfirmDialog from "@/shared/ui/ConfirmDialog";
+import { fechaHoyArgentina } from "@/shared/utils/fechas";
 import { urlImagen } from "@/shared/utils/imagenes";
 import {
   eliminarGastoAdmin,
@@ -30,7 +31,7 @@ export default function GastosOperativosModal({ onClose }) {
   const [gastoAEliminar, setGastoAEliminar] = useState(null);
   const [eliminando, setEliminando] = useState(false);
 
-  const hoyIso = new Date().toISOString().slice(0, 10);
+  const hoyIso = fechaHoyArgentina();
   const [fecha, setFecha] = useState(hoyIso);
   const [concepto, setConcepto] = useState("");
   const [monto, setMonto] = useState("");
