@@ -3,6 +3,7 @@ import {
   obtenerEventosPublicos,
   obtenerEventosSocios,
   obtenerEventoPorId,
+  obtenerEventosAdmin,
   crearEvento,
   actualizarEvento,
   eliminarEvento,
@@ -13,7 +14,7 @@ import {
   descargarMiCertificado,
   descargarCertificadoAdmin,
 } from '../controllers/evento.controllers.js';
-import { verificarToken } from '../middlewares/authMiddleware.js';
+import { verificarToken, verificarTokenOpcional } from '../middlewares/authMiddleware.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 import { uploadEvento } from '../middlewares/multer/multerEventos.js';
 import { validacionEvento, validacionActualizarEvento } from '../middlewares/validator/evento.validator.js';
@@ -45,6 +46,9 @@ router.get('/:id/certificado', verificarToken, descargarMiCertificado);
 // ==========================================
 // Rutas Administrativas
 // ==========================================
+// Listado completo (incluye cancelados). Tiene que ir ANTES que '/:id': si no, '/:id' la captura y
+// router.param rechaza 'admin' como UUID con un 400.
+router.get('/admin', verificarToken, verificarAdmin, obtenerEventosAdmin);
 router.post('/admin', verificarToken, verificarAdmin, uploadEvento.single('imagen'), validacionEvento, crearEvento);
 router.put('/admin/:id', verificarToken, verificarAdmin, uploadEvento.single('imagen'), validacionActualizarEvento, actualizarEvento);
 router.delete('/admin/:id', verificarToken, verificarAdmin, eliminarEvento);
@@ -55,6 +59,8 @@ router.get('/admin/:eventoId/inscriptos/:inscripcionId/certificado', verificarTo
 // ==========================================
 // Ruta con parámetro dinámico: SIEMPRE al final, para no "tapar" las rutas literales de arriba
 // ==========================================
-router.get('/:id', obtenerEventoPorId);
+// Token opcional: con un token válido de admin o de un inscripto, la respuesta incluye el link de la
+// reunión virtual; sin token (o con uno inválido) se responde como a un visitante, sin el link.
+router.get('/:id', verificarTokenOpcional, obtenerEventoPorId);
 
 export default router;

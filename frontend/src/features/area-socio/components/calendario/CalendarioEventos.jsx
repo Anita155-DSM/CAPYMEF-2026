@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import {
   FaChevronLeft,
   FaChevronRight,
-  FaCircleCheck,
 } from "react-icons/fa6";
 import dayjs from "@/shared/utils/fechas";
 import { yaTermino } from "../../utils/eventos";
@@ -11,8 +10,9 @@ const DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sáb
 
 /**
  * Calendario mensual interactivo para socios.
- * Mantiene la disposición limpia, compacta y centrada del diseño original,
- * integrando la paleta institucional y la leyenda de estados solicitada.
+ * - Círculo azul: evento programado
+ * - Círculo verde: evento en el que el socio ya está inscripto
+ * - Círculo gris: evento finalizado
  */
 export default function CalendarioEventos({ mes, onCambiarMes, eventos = [], onSeleccionar }) {
   // Celdas: huecos iniciales hasta el primer lunes + días del mes
@@ -30,7 +30,7 @@ export default function CalendarioEventos({ mes, onCambiarMes, eventos = [], onS
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+    <div className="overflow-hidden rounded-none border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
       {/* Barra superior de mes y controles de navegación */}
       <div className="flex items-center justify-between border-b-2 border-primary/20 pb-2.5 text-primary">
         <button
@@ -82,7 +82,7 @@ export default function CalendarioEventos({ mes, onCambiarMes, eventos = [], onS
         ))}
       </div>
 
-      {/* Grilla de días mensual: altura reducida y disposición limpia */}
+      {/* Grilla de días mensual */}
       <div className="grid grid-cols-7 border-b border-gray-100 pb-3 pt-1">
         {celdas.map((dia, i) => {
           const delDia = eventosDelDia(dia);
@@ -91,17 +91,26 @@ export default function CalendarioEventos({ mes, onCambiarMes, eventos = [], onS
           const terminados = tieneEventos && delDia.every(yaTermino);
           const inscripto = delDia.some((e) => e.yaInscripto);
 
-          // Círculo del número de día
-          let claseNumero = "flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full text-xs sm:text-sm transition-colors";
+          // Círculo del número de día: verde si está inscripto, azul si está programado, gris si terminó
+          let claseNumero =
+            "flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full text-xs sm:text-sm transition-colors";
           if (tieneEventos) {
-            claseNumero += ` font-bold text-white ${terminados ? "bg-gray-400" : "bg-primary shadow-xs"}`;
+            claseNumero += ` font-bold text-white ${
+              terminados
+                ? "bg-gray-400"
+                : inscripto
+                ? "bg-emerald-600 shadow-xs"
+                : "bg-primary shadow-xs"
+            }`;
           } else {
             claseNumero += " text-navy font-medium";
           }
 
           if (esHoy) {
-            claseNumero += " ring-2 ring-primary ring-offset-2 ring-offset-white font-bold text-primary";
-            if (!tieneEventos) claseNumero += " bg-surface-blue";
+            claseNumero += ` ring-2 ${
+              inscripto && !terminados ? "ring-emerald-600" : "ring-primary"
+            } ring-offset-2 ring-offset-white font-bold`;
+            if (!tieneEventos) claseNumero += " bg-surface-blue text-primary";
           }
 
           return (
@@ -117,7 +126,7 @@ export default function CalendarioEventos({ mes, onCambiarMes, eventos = [], onS
                     }${esHoy ? " (hoy)" : ""}`
                   : undefined
               }
-              className={`flex min-h-[62px] sm:min-h-[72px] flex-col items-center justify-start px-1 pt-1.5 transition-colors ${
+              className={`flex min-h-[62px] flex-col items-center justify-start px-1 pt-1.5 transition-colors sm:min-h-[72px] ${
                 dia && tieneEventos
                   ? "cursor-pointer rounded-lg hover:bg-surface-blue/60"
                   : dia
@@ -128,22 +137,21 @@ export default function CalendarioEventos({ mes, onCambiarMes, eventos = [], onS
               <span className={claseNumero}>{dia || ""}</span>
 
               {tieneEventos && (
-                <div className="mt-0.5 flex w-full flex-col items-center">
+                <div className="mt-1 flex w-full flex-col items-center">
                   <span
                     className={`w-full truncate text-center text-[10px] font-semibold leading-tight sm:text-[11px] ${
-                      terminados ? "text-gray-500" : "text-navy"
+                      terminados ? "text-gray-500" : inscripto ? "text-emerald-700" : "text-navy"
                     }`}
                     title={delDia[0].titulo}
                   >
                     {delDia[0].titulo}
                   </span>
 
-                  <span className="mt-0.5 flex items-center gap-1 text-[10px] font-bold text-primary">
-                    {delDia.length > 1 && <span>+{delDia.length - 1} más</span>}
-                    {inscripto && (
-                      <FaCircleCheck className="text-[11px] text-emerald-600" title="Estás inscripto" />
-                    )}
-                  </span>
+                  {delDia.length > 1 && (
+                    <span className="mt-0.5 text-[10px] font-bold text-primary">
+                      +{delDia.length - 1} más
+                    </span>
+                  )}
                 </div>
               )}
             </button>
@@ -151,14 +159,14 @@ export default function CalendarioEventos({ mes, onCambiarMes, eventos = [], onS
         })}
       </div>
 
-      {/* Leyenda de referencias (mantenida y solicitada por el usuario) */}
+      {/* Leyenda de referencias */}
       <div className="mt-3.5 flex flex-col gap-2 pt-1 text-xs text-gray-600 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-4">
           <span className="flex items-center gap-1.5">
             <span className="h-3 w-3 rounded-full bg-primary" /> Evento programado
           </span>
           <span className="flex items-center gap-1.5">
-            <FaCircleCheck className="text-emerald-600" /> Estás inscripto
+            <span className="h-3 w-3 rounded-full bg-emerald-600" /> Estás inscripto
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-3 w-3 rounded-full bg-gray-400" /> Finalizado

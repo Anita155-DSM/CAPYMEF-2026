@@ -4,6 +4,11 @@ import { Evento } from '../models/evento.models.js';
 import { Inscripcion } from '../models/inscripcion.models.js';
 import { User } from '../models/user.models.js';
 import { generarCertificadoAsistencia } from '../services/certificado.service.js';
+import { ocultarLugarSiCorresponde, tieneEnlacePrivado } from '../services/privacidadEvento.service.js';
+import { contarInscriptos } from '../services/inscripcion.service.js';
+import { fechaHoyArgentina } from '../services/cuota.service.js';
+import { horaActualArgentina } from '../utils/fechas.js';
+import { sequelize } from '../config/database.js';
 
 // ==========================================
 // Helpers para manejo de imagen en Cloudinary
@@ -43,6 +48,20 @@ const parsearLogosExternos = (valor) => {
   }
 };
 
+// Arma el listado que ven los usuarios logueados: cada evento con `yaInscripto` y con el link de la
+// reunión solo si quien consulta es admin o está inscripto en ese evento (ver privacidadEvento.service.js).
+// Lo usan /socios y /admin, así las dos respuestas tienen la misma forma.
+const armarListadoParaUsuario = async (eventos, usuario) => {
+  const inscripciones = await Inscripcion.findAll({ where: { usuario_id: usuario.id } });
+  const idsInscriptos = new Set(inscripciones.map((i) => i.evento_id));
+  const esAdmin = usuario.rol === 'admin';
+
+  return eventos.map((evento) => {
+    const yaInscripto = idsInscriptos.has(evento.id);
+    return ocultarLugarSiCorresponde({ ...evento.toJSON(), yaInscripto }, esAdmin || yaInscripto);
+  });
+};
+
 // ==========================================
 // 1. EVENTOS PARA LA LANDING (Públicos, sin login)
 // ==========================================
@@ -53,7 +72,10 @@ export const obtenerEventosPublicos = async (req, res) => {
       order: [['fecha', 'ASC']],
     });
 
-    res.status(200).json({ exito: true, data: eventos });
+    // Sin login nadie puede ver el link de una reunión virtual.
+    const data = eventos.map((evento) => ocultarLugarSiCorresponde(evento.toJSON(), false));
+
+    res.status(200).json({ exito: true, data });
   } catch (error) {
     console.error('Error al obtener eventos públicos:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
@@ -70,15 +92,8 @@ export const obtenerEventosSocios = async (req, res) => {
       order: [['fecha', 'ASC']],
     });
 
-    const inscripciones = await Inscripcion.findAll({
-      where: { usuario_id: req.usuario.id },
-    });
-    const idsInscriptos = new Set(inscripciones.map((i) => i.evento_id));
-
-    const data = eventos.map((evento) => ({
-      ...evento.toJSON(),
-      yaInscripto: idsInscriptos.has(evento.id),
-    }));
+    // Un socio no inscripto no recibe el link de la reunión (antes lo recibía cualquier socio).
+    const data = await armarListadoParaUsuario(eventos, req.usuario);
 
     res.status(200).json({ exito: true, data });
   } catch (error) {
@@ -88,8 +103,28 @@ export const obtenerEventosSocios = async (req, res) => {
 };
 
 // ==========================================
+// 2.b LISTADO COMPLETO PARA EL ADMIN (incluye cancelados)
+// ==========================================
+// Por qué existe: el panel admin usaba GET /socios, que excluye los cancelados, así que un evento
+// cancelado desaparecía del panel y no se podía volver a editar ni borrar. Acá van TODOS, con el link
+// completo (el admin lo necesita para editar el evento) y con la misma forma que /socios.
+export const obtenerEventosAdmin = async (req, res) => {
+  try {
+    const eventos = await Evento.findAll({ order: [['fecha', 'ASC']] });
+    const data = await armarListadoParaUsuario(eventos, req.usuario);
+
+    res.status(200).json({ exito: true, data });
+  } catch (error) {
+    console.error('Error al obtener los eventos para el admin:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
+  }
+};
+
+// ==========================================
 // 3. OBTENER UN EVENTO POR ID (con cupo disponible calculado)
 // ==========================================
+// La ruta no exige login (verificarTokenOpcional): sin token, o con uno inválido, se responde como a un
+// visitante anónimo, sin el link de una reunión virtual.
 export const obtenerEventoPorId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -99,12 +134,20 @@ export const obtenerEventoPorId = async (req, res) => {
       return res.status(404).json({ exito: false, mensaje: 'Evento no encontrado.' });
     }
 
-    const totalInscriptos = await Inscripcion.count({ where: { evento_id: id } });
-    const cupoDisponible = evento.cupoMaximo != null ? evento.cupoMaximo - totalInscriptos : null;
+    const totalInscriptos = await contarInscriptos(id);
+    // Nunca negativo (mínimo 0), igual que en resumen-inicio: si hubiera más inscriptos que cupo (datos viejos,
+    // anteriores al control de la edición), se muestra "sin lugares" y no un número que no tiene sentido.
+    const cupoDisponible = evento.cupoMaximo != null ? Math.max(evento.cupoMaximo - totalInscriptos, 0) : null;
+
+    // Solo se consulta la inscripción si hace falta (evento con link privado y alguien logueado).
+    let puedeVerEnlace = req.usuario?.rol === 'admin';
+    if (!puedeVerEnlace && req.usuario && tieneEnlacePrivado(evento)) {
+      puedeVerEnlace = Boolean(await Inscripcion.findOne({ where: { evento_id: id, usuario_id: req.usuario.id } }));
+    }
 
     res.status(200).json({
       exito: true,
-      data: { ...evento.toJSON(), totalInscriptos, cupoDisponible },
+      data: ocultarLugarSiCorresponde({ ...evento.toJSON(), totalInscriptos, cupoDisponible }, puedeVerEnlace),
     });
   } catch (error) {
     console.error('Error al obtener el evento:', error);
@@ -161,33 +204,60 @@ export const actualizarEvento = async (req, res) => {
     const { id } = req.params;
     const { titulo, descripcion, fecha, horaInicio, horaFin, modalidad, lugar, cupoMaximo, estado, logosExternos } = req.body;
 
-    const evento = await Evento.findByPk(id);
+    // Va en una transacción que bloquea la fila del evento, igual que inscribirseEvento: así ninguna inscripción
+    // se puede colar entre el conteo de inscriptos y el guardado del cupo nuevo (la inscripción espera a que
+    // esta edición termine, y después cuenta con el cupo ya cambiado).
+    const resultado = await sequelize.transaction(async (transaction) => {
+      const evento = await Evento.findByPk(id, { transaction, lock: transaction.LOCK.UPDATE });
 
-    if (!evento) {
-      if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
-      return res.status(404).json({ exito: false, mensaje: 'Evento no encontrado.' });
-    }
-
-    if (titulo) evento.titulo = titulo;
-    if (descripcion) evento.descripcion = descripcion;
-    if (fecha) evento.fecha = fecha;
-    if (horaInicio !== undefined) evento.horaInicio = horaInicio || null;
-    if (horaFin !== undefined) evento.horaFin = horaFin || null;
-    if (modalidad) evento.modalidad = modalidad;
-    if (lugar !== undefined) evento.lugar = lugar || null;
-    if (cupoMaximo !== undefined) evento.cupoMaximo = cupoMaximo || null;
-    if (estado) evento.estado = estado;
-    if (logosExternos !== undefined) evento.logosExternos = parsearLogosExternos(logosExternos);
-
-    if (imagenFile) {
-      if (evento.imagenUrl) {
-        const publicIdAnterior = extraerPublicIdDeUrl(evento.imagenUrl);
-        eliminarImagenCloudinary(publicIdAnterior);
+      if (!evento) {
+        return { status: 404, cuerpo: { exito: false, mensaje: 'Evento no encontrado.' } };
       }
-      evento.imagenUrl = imagenFile.path;
-    }
 
-    await evento.save();
+      if (titulo) evento.titulo = titulo;
+      if (descripcion) evento.descripcion = descripcion;
+      if (fecha) evento.fecha = fecha;
+      if (horaInicio !== undefined) evento.horaInicio = horaInicio || null;
+      if (horaFin !== undefined) evento.horaFin = horaFin || null;
+      if (modalidad) evento.modalidad = modalidad;
+      if (lugar !== undefined) evento.lugar = lugar || null;
+      if (cupoMaximo !== undefined) evento.cupoMaximo = cupoMaximo || null;
+      if (estado) evento.estado = estado;
+      if (logosExternos !== undefined) evento.logosExternos = parsearLogosExternos(logosExternos);
+
+      // El cupo no puede quedar por debajo de los que ya están inscriptos: antes se guardaba (por ejemplo, cupo
+      // 20 con 25 inscriptos) y el evento mostraba un cupo disponible negativo. Bajarlo justo al número de
+      // inscriptos sí se permite (queda lleno), y subirlo o quitarlo (null = sin límite) siempre.
+      // Solo se revisa si el cupo cambia: editar otro dato de un evento que ya estuviera excedido no se bloquea.
+      if (evento.changed('cupoMaximo') && evento.cupoMaximo != null) {
+        const inscriptos = await contarInscriptos(id, { transaction });
+        if (Number(evento.cupoMaximo) < inscriptos) {
+          return {
+            status: 400,
+            cuerpo: { exito: false, mensaje: `Ya hay ${inscriptos} inscriptos: el cupo no puede ser menor a ${inscriptos}.` },
+          };
+        }
+      }
+
+      // La imagen anterior se borra de Cloudinary recién DESPUÉS de guardar (ver abajo): antes se borraba
+      // primero, y si el guardado fallaba el evento quedaba apuntando a una imagen que ya no existía.
+      let publicIdAnterior = null;
+      if (imagenFile) {
+        if (evento.imagenUrl) publicIdAnterior = extraerPublicIdDeUrl(evento.imagenUrl);
+        evento.imagenUrl = imagenFile.path;
+      }
+
+      await evento.save({ transaction });
+      return { status: 200, evento, publicIdAnterior };
+    });
+
+    if (resultado.status !== 200) {
+      // No se guardó nada: la imagen recién subida no la usa nadie.
+      if (imagenFile) eliminarImagenCloudinary(imagenFile.filename);
+      return res.status(resultado.status).json(resultado.cuerpo);
+    }
+    const { evento, publicIdAnterior } = resultado;
+    if (publicIdAnterior) eliminarImagenCloudinary(publicIdAnterior);
 
     //auditoria
     req.auditoriaMensaje = `Se actualizó el evento #${id}: "${evento.titulo}"`;
@@ -239,36 +309,63 @@ export const inscribirseEvento = async (req, res) => {
     const { id } = req.params; // ID del evento
     const usuarioId = req.usuario.id;
 
-    const evento = await Evento.findByPk(id);
+    // Antes se contaban los inscriptos y después se creaba la inscripción por separado: si dos socios pedían el
+    // último lugar al mismo tiempo, los dos contaban "queda 1" y entraban los dos (el evento quedaba con uno de
+    // más). Ahora todo pasa en una transacción que empieza BLOQUEANDO la fila del evento (SELECT ... FOR UPDATE
+    // en Postgres): el segundo pedido espera a que el primero termine y recién ahí cuenta, ya con la inscripción
+    // nueva incluida. El bloqueo es solo de ese evento: las inscripciones a otros eventos no esperan.
+    const resultado = await sequelize.transaction(async (transaction) => {
+      const evento = await Evento.findByPk(id, { transaction, lock: transaction.LOCK.UPDATE });
 
-    if (!evento) {
-      return res.status(404).json({ exito: false, mensaje: 'Evento no encontrado.' });
-    }
-
-    if (evento.estado !== 'programado') {
-      return res.status(400).json({ exito: false, mensaje: 'Este evento ya no admite inscripciones.' });
-    }
-
-    // Verificamos que no esté ya inscripto
-    const inscripcionExistente = await Inscripcion.findOne({
-      where: { evento_id: id, usuario_id: usuarioId },
-    });
-    if (inscripcionExistente) {
-      return res.status(400).json({ exito: false, mensaje: 'Ya estás inscripto a este evento.' });
-    }
-
-    // Verificamos el cupo, si el evento tiene límite
-    if (evento.cupoMaximo != null) {
-      const totalInscriptos = await Inscripcion.count({ where: { evento_id: id } });
-      if (totalInscriptos >= evento.cupoMaximo) {
-        return res.status(400).json({ exito: false, mensaje: 'El cupo para este evento ya está completo.' });
+      if (!evento) {
+        return { status: 404, cuerpo: { exito: false, mensaje: 'Evento no encontrado.' } };
       }
-    }
 
-    const nuevaInscripcion = await Inscripcion.create({
-      evento_id: id,
-      usuario_id: usuarioId,
+      if (evento.estado !== 'programado') {
+        return { status: 400, cuerpo: { exito: false, mensaje: 'Este evento ya no admite inscripciones.' } };
+      }
+
+      // Un evento que sigue 'programado' pero cuya fecha ya pasó (nadie lo marcó como finalizado) aceptaba
+      // inscripciones. Se compara con la fecha de HOY en hora argentina (las dos son 'AAAA-MM-DD', así que se
+      // comparan como texto): un evento de hoy todavía acepta inscripciones.
+      const hoy = fechaHoyArgentina();
+      if (evento.fecha < hoy) {
+        return { status: 400, cuerpo: { exito: false, mensaje: 'El evento ya se realizó.' } };
+      }
+
+      // Un evento de hoy con hora de inicio cierra las inscripciones al empezar (desde esa misma hora, en hora
+      // argentina): la inscripción sirve para planificar el cupo y, en los virtuales, es lo que da acceso al link;
+      // anotarse con el evento en marcha no ayuda a ninguna de las dos cosas. Si llega alguien tarde, el admin
+      // puede marcarle la asistencia igual. Sin hora de inicio no hay contra qué cortar: se permite todo el día.
+      if (evento.fecha === hoy && evento.horaInicio && horaActualArgentina() >= evento.horaInicio) {
+        return { status: 400, cuerpo: { exito: false, mensaje: 'Las inscripciones cerraron al comenzar el evento.' } };
+      }
+
+      // Verificamos que no esté ya inscripto
+      const inscripcionExistente = await Inscripcion.findOne({
+        where: { evento_id: id, usuario_id: usuarioId },
+        transaction,
+      });
+      if (inscripcionExistente) {
+        return { status: 400, cuerpo: { exito: false, mensaje: 'Ya estás inscripto a este evento.' } };
+      }
+
+      // Verificamos el cupo, si el evento tiene límite. Se cuenta DENTRO de la transacción, con el evento bloqueado.
+      if (evento.cupoMaximo != null) {
+        const totalInscriptos = await contarInscriptos(id, { transaction });
+        if (totalInscriptos >= evento.cupoMaximo) {
+          return { status: 400, cuerpo: { exito: false, mensaje: 'El cupo para este evento ya está completo.' } };
+        }
+      }
+
+      const nuevaInscripcion = await Inscripcion.create({ evento_id: id, usuario_id: usuarioId }, { transaction });
+      return { status: 201, evento, nuevaInscripcion };
     });
+
+    if (resultado.status !== 201) {
+      return res.status(resultado.status).json(resultado.cuerpo);
+    }
+    const { evento, nuevaInscripcion } = resultado;
 
     //auditoria
     req.auditoriaMensaje = `El usuario se inscribió al evento "${evento.titulo}"`;
@@ -280,6 +377,11 @@ export const inscribirseEvento = async (req, res) => {
       data: nuevaInscripcion,
     });
   } catch (error) {
+    // Respaldo del índice único (evento_id, usuario_id): si el mismo socio manda dos pedidos a la vez, la base
+    // rechaza el segundo. Es el mismo caso que "ya estás inscripto", no un error del servidor.
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ exito: false, mensaje: 'Ya estás inscripto a este evento.' });
+    }
     console.error('Error al inscribirse al evento:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }

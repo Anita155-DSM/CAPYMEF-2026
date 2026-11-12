@@ -1,36 +1,35 @@
 import { useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
-  FaClipboardList,
-  FaDollarSign,
-  FaHome,
-  FaRegCalendarCheck,
-  FaTimes,
-  FaUserFriends,
-} from "react-icons/fa";
-import { GiAcousticMegaphone } from "react-icons/gi";
+  FaCalendarCheck,
+  FaClipboardCheck,
+  FaHouse,
+  FaMoneyBillWave,
+  FaNewspaper,
+  FaUserGroup,
+  FaXmark,
+} from "react-icons/fa6";
 import logo from "@/assets/img/logo.png";
 import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
 
 const OPCIONES_MENU = [
-  { nombre: "Inicio", ruta: "/admin/inicio", Icono: FaHome },
-  { nombre: "Noticias", ruta: "/admin/noticias", Icono: GiAcousticMegaphone },
-  { nombre: "Eventos", ruta: "/admin/eventos", Icono: FaRegCalendarCheck },
-  { nombre: "Finanzas", ruta: "/admin/finanzas", Icono: FaDollarSign },
-  { nombre: "Registros", ruta: "/admin/registros", Icono: FaClipboardList },
-  { nombre: "Socios", ruta: "/admin/socios", Icono: FaUserFriends },
-  { nombre: "VISTA SOCIO (TEST)", ruta: "/socios", Icono: FaUserFriends },
+  { nombre: "Inicio", ruta: "/admin/inicio", icono: FaHouse },
+  { nombre: "Noticias", ruta: "/admin/noticias", icono: FaNewspaper },
+  { nombre: "Eventos", ruta: "/admin/eventos", icono: FaCalendarCheck },
+  { nombre: "Finanzas", ruta: "/admin/finanzas", icono: FaMoneyBillWave },
+  { nombre: "Registros", ruta: "/admin/registros", icono: FaClipboardCheck },
+  { nombre: "Socios", ruta: "/admin/socios", icono: FaUserGroup },
 ];
 
 const claseItem = ({ isActive }) =>
-  `flex items-center gap-4 border-l-4 px-8 py-4 transition-all ${
-    isActive ? "border-white bg-[#4A789C]" : "border-transparent hover:border-white hover:bg-[#4A789C]"
+  `group flex w-full items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-left text-sm transition-all duration-200 ${
+    isActive
+      ? "bg-white/16 font-semibold text-white shadow-xs ring-1 ring-white/20"
+      : "font-medium text-white/75 hover:bg-white/8 hover:text-white"
   }`;
 
 /**
- * Menú lateral del admin.
- *  - Pantallas grandes (lg+): fijo a la izquierda.
- *  - Celular/tablet: cajón que se abre con el botón de hamburguesa del header.
+ * Menú lateral del administrador (unificado con el diseño de SidebarSocio).
  */
 export default function SidebarAdmin({ abierto, onCerrar }) {
   useBloquearScroll(abierto);
@@ -45,37 +44,78 @@ export default function SidebarAdmin({ abierto, onCerrar }) {
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col bg-sidebar text-white shadow-xl transition-transform duration-300 lg:static lg:z-20 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-linear-to-b from-navy via-sidebar to-[#143d60] text-white shadow-xl transition-transform duration-300 lg:translate-x-0 ${
           abierto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <button
-          type="button"
-          onClick={onCerrar}
-          aria-label="Cerrar menú"
-          className="absolute right-4 top-4 text-2xl text-white/90 hover:text-white lg:hidden"
-        >
-          <FaTimes />
-        </button>
-
-        <div className="mb-10 mt-8 flex justify-center">
-          <Link to="/admin/inicio" onClick={onCerrar} aria-label="Ir al inicio del panel de administración">
-            <img src={logo} alt="logo CAPYMEF" className="w-40 opacity-90" />
+        {/* Cabecera institucional con logo */}
+        <div className="flex h-20 shrink-0 items-center justify-between gap-2.5 border-b border-white/10 px-5">
+          <Link
+            to="/admin/inicio"
+            onClick={onCerrar}
+            aria-label="Ir al inicio del panel de administración"
+            className="flex min-w-0 flex-1 items-center gap-3"
+          >
+            <img
+              src={logo}
+              alt="logo CAPYMEF"
+              className="h-10 w-auto shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+            />
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7cc8f5]">
+                CAPYMEF
+              </span>
+              <span className="block truncate text-xs font-medium leading-tight text-white/90">
+                Administración
+              </span>
+            </div>
           </Link>
+          <button
+            type="button"
+            className="rounded-lg p-1.5 text-xl text-white/80 hover:bg-white/10 hover:text-white lg:hidden"
+            onClick={onCerrar}
+            aria-label="Cerrar menú"
+          >
+            <FaXmark />
+          </button>
         </div>
 
-        <nav aria-label="Menú del administrador" className="flex flex-1 flex-col gap-1 overflow-y-auto">
-          {OPCIONES_MENU.map(({ nombre, ruta, Icono }) => (
+        {/* Navegación principal */}
+        <div className="px-5 pt-6 pb-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+            Navegación
+          </p>
+        </div>
+
+        <nav aria-label="Menú del administrador" className="flex-1 space-y-1.5 overflow-y-auto px-3 py-2">
+          {OPCIONES_MENU.map(({ nombre, icono: Icono, ruta }) => (
             <NavLink key={ruta} to={ruta} onClick={onCerrar} className={claseItem}>
-              <Icono className="text-xl" />
-              <span className="text-sm font-bold tracking-wider">{nombre}</span>
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-base transition-colors ${
+                      isActive
+                        ? "bg-primary text-white shadow-xs"
+                        : "bg-white/6 text-white/80 group-hover:bg-white/12 group-hover:text-white"
+                    }`}
+                  >
+                    <Icono />
+                  </span>
+                  <span className="truncate">{nombre}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
       </aside>
 
       {abierto && (
-        <button type="button" className="fixed inset-0 z-30 bg-navy/50 lg:hidden" onClick={onCerrar} aria-label="Cerrar menú" />
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-navy/50 backdrop-blur-[2px] lg:hidden"
+          onClick={onCerrar}
+          aria-label="Cerrar menú"
+        />
       )}
     </>
   );

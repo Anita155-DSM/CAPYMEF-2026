@@ -4,8 +4,32 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { User } from '../models/user.models.js';
 import { enviarMailRecuperacion } from '../config/mailer.js';
+import { VERSION_TERMINOS, aceptoLosTerminos } from '../config/terminos.js';
+import { Auditoria } from '../models/auditoria.models.js';
+import { CODIGOS_AUTH } from '../middlewares/codigosAuth.js';
+import { notificarAdmins } from '../services/notificacion.service.js';
+import {
+  consultarBloqueo,
+  registrarIntentoFallido,
+  limpiarIntentos,
+  normalizarEmail,
+  MAXIMO_INTENTOS_FALLIDOS,
+  DURACION_BLOQUEO_MS,
+} from '../services/intentosLogin.service.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
+// Costo de bcrypt de todas las contraseñas (registro y restablecimiento). Está en un solo lugar para que el hash
+// de relleno de abajo cueste siempre lo mismo que uno real.
+const COSTO_BCRYPT = 10;
+
+// Hash de relleno para el login con un email que no existe. Sin esto, ese caso respondía sin pasar por bcrypt,
+// unos milisegundos más rápido que una contraseña incorrecta de un email real: midiendo los tiempos se podía
+// saber qué emails están registrados. Comparando contra este hash, los dos casos tardan lo mismo.
+// Se genera una sola vez al cargar el módulo, con un texto al azar que nadie conoce (ninguna contraseña coincide),
+// y con el mismo costo que los hashes reales. Es asíncrono (una promesa que se espera al usarla) para no frenar
+// el arranque del servidor mientras se calcula; para el primer login ya está listo.
+const hashDeRelleno = bcrypt.hash(crypto.randomBytes(32).toString('hex'), COSTO_BCRYPT);
 
 // Función auxiliar para borrar archivos subidos si falla el registro
 const eliminarArchivo = (filePath) => {
@@ -34,7 +58,14 @@ export const registrarUsuario = async (req, res) => {
 
   try {
     // Extraemos todos los campos, incluyendo los nuevos del Estatuto
-    const { razonSocial, cuit, email, password, telefono, localidad, categoria, rubro, actividad, tamano_empresa } = req.body;
+    const { razonSocial, cuit, email, password, telefono, localidad, categoria, rubro, actividad, tamano_empresa, aceptaTerminos } = req.body;
+
+    // Aceptación de los términos: la fecha la pone el servidor y la versión el backend. Si el cliente mandara
+    // terminosVersion o terminosAceptadosAt, se ignoran (no se toman del body). En el modo transitorio (el
+    // frontend todavía no manda el campo) la cuenta se crea sin fecha ni versión.
+    const aceptoTerminos = aceptoLosTerminos(aceptaTerminos);
+    const terminosAceptadosAt = aceptoTerminos ? new Date() : null;
+    const terminosVersion = aceptoTerminos ? VERSION_TERMINOS : null;
 
     // A. Validar comprobante AFIP/DGR (express-validator valida texto, nosotros validamos el archivo acá)
     if (!constanciaFile) {
@@ -61,7 +92,7 @@ export const registrarUsuario = async (req, res) => {
     }
 
     // C. Encriptar contraseña
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(COSTO_BCRYPT);
     const passwordHash = await bcrypt.hash(password, salt);
 
     // D. Crear el registro en PostgreSQL con todos los datos
@@ -76,13 +107,17 @@ export const registrarUsuario = async (req, res) => {
       rubro,             // NUEVO
       actividad,         // NUEVO
       tamano_empresa,    // NUEVO
+      terminosAceptadosAt,
+      terminosVersion,
       constanciaUrl: constanciaFile.path,
       estado: 'pendiente',      // Queda pendiente de aprobación
       rol: 'socio'
     });
 
     //auditoria
-    req.auditoriaMensaje = `Nueva solicitud de registro recibida de la empresa ${razonSocial} (CUIT: ${cuit})`;
+    // Queda constancia de qué versión de los términos aceptó (la fecha es la del propio registro de auditoría).
+    req.auditoriaMensaje = `Nueva solicitud de registro recibida de la empresa ${razonSocial} (CUIT: ${cuit}). ` +
+      (aceptoTerminos ? `Aceptó los términos y condiciones versión ${terminosVersion}.` : 'Sin registro de aceptación de los términos.');
     req.auditoriaCodigo = 'REGISTRO_SOCIO_SOLICITUD';
 
     res.status(201).json({
@@ -104,6 +139,59 @@ export const registrarUsuario = async (req, res) => {
   }
 };
 
+
+// ==========================================
+// Intentos fallidos de login (ver services/intentosLogin.service.js)
+// ==========================================
+// Suma el intento fallido, avisa si con este intento el email quedó bloqueado y responde el 401 de siempre.
+// El 401 es el mismo exista o no la cuenta, y el intento que provoca el bloqueo todavía responde 401 (recién el
+// siguiente recibe el 429).
+const responderCredencialesInvalidas = async (req, res, email) => {
+  const intento = registrarIntentoFallido(email);
+  if (intento.bloqueadoAhora) await avisarBloqueoDeLogin(req, email, intento.bloqueadoHasta);
+  return res.status(401).json({
+    exito: false,
+    mensaje: 'Credenciales inválidas (usuario o contraseña incorrectos).',
+  });
+};
+
+// Deja constancia del bloqueo en la auditoría y avisa a los admins. Se registra a mano porque el interceptor de
+// auditoría solo guarda las respuestas exitosas (2xx), y esta es un 401. Nunca se guarda la contraseña.
+// Nunca lanza error: si la auditoría o el aviso fallan, el bloqueo ya quedó hecho y el login responde igual.
+const avisarBloqueoDeLogin = async (req, email, bloqueadoHasta) => {
+  const emailNormalizado = normalizarEmail(email);
+  const ip = req.ip || req.socket?.remoteAddress || null;
+  const minutos = Math.round(DURACION_BLOQUEO_MS / 60000);
+  const descripcion = `Se bloqueó el inicio de sesión de ${emailNormalizado} por ${minutos} minutos tras ${MAXIMO_INTENTOS_FALLIDOS} intentos fallidos (última IP: ${ip || 'desconocida'}).`;
+
+  try {
+    await Auditoria.create({
+      usuarioId: null,
+      usuarioNombre: emailNormalizado.slice(0, 100), // la columna es de 100 caracteres
+      usuarioRol: 'ANONIMO',
+      modulo: 'AUTH',
+      accionTipo: 'BLOQUEO',
+      codigoTecnico: 'LOGIN_BLOQUEADO',
+      descripcion,
+      ipAddress: ip ? String(ip).slice(0, 45) : null,
+      userAgent: req.headers['user-agent'] || null,
+    });
+  } catch (error) {
+    console.error('No se pudo registrar en la auditoría el bloqueo de login:', error.message);
+  }
+
+  // La referencia identifica ESTE bloqueo (email + momento en que vence): si por algo se llamara dos veces, no se
+  // duplica el aviso; un bloqueo posterior del mismo email sí avisa de nuevo. El email va resumido en un hash
+  // porque la columna referencia es de 120 caracteres y un email puede ser largo.
+  const huellaEmail = crypto.createHash('sha256').update(emailNormalizado).digest('hex').slice(0, 16);
+  await notificarAdmins({
+    tipo: 'login_bloqueado',
+    titulo: 'Inicio de sesión bloqueado por intentos fallidos',
+    mensaje: descripcion,
+    referencia: `login-bloqueado:${huellaEmail}:${bloqueadoHasta}`,
+  });
+};
+
 // ==========================================
 // 2. INICIO DE SESIÓN (LOGIN)
 // ==========================================
@@ -111,25 +199,42 @@ export const loginUsuario = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Email bloqueado por intentos fallidos: se corta ACÁ, antes de buscar la cuenta y de comparar la contraseña.
+    // Así, durante el bloqueo, probar contraseñas no sirve de nada (ni la correcta entra) y la respuesta es la
+    // misma exista o no el email.
+    const bloqueo = consultarBloqueo(email);
+    if (bloqueo.bloqueado) {
+      res.set('Retry-After', String(bloqueo.segundosRestantes));
+      return res.status(429).json({
+        exito: false,
+        mensaje: `Demasiados intentos fallidos. Probá de nuevo en ${bloqueo.minutosRestantes} ${bloqueo.minutosRestantes === 1 ? 'minuto' : 'minutos'}.`,
+        codigo: CODIGOS_AUTH.CUENTA_BLOQUEADA_TEMPORALMENTE,
+      });
+    }
+
     // Buscar al usuario
     const usuario = await User.findOne({ where: { email } });
 
     if (!usuario) {
-      return res.status(401).json({
-        exito: false,
-        mensaje: 'Credenciales inválidas (usuario o contraseña incorrectos).',
-      });
+      // Un email que no existe cuenta igual que una contraseña incorrecta: si no se contara, que un email nunca
+      // se bloquee delataría que no está registrado.
+      // Se compara igual contra el hash de relleno (siempre da false) para que tarde lo mismo que una contraseña
+      // incorrecta de un email existente. String(): bcrypt exige texto, igual que en la comparación real.
+      await bcrypt.compare(String(password), await hashDeRelleno);
+      return await responderCredencialesInvalidas(req, res, email);
     }
 
     // Validar Contraseña
     const passwordEsCorrecta = await bcrypt.compare(password, usuario.password);
 
     if (!passwordEsCorrecta) {
-      return res.status(401).json({
-        exito: false,
-        mensaje: 'Credenciales inválidas (usuario o contraseña incorrectos).',
-      });
+      return await responderCredencialesInvalidas(req, res, email);
     }
+
+    // Credenciales correctas: se borra el contador de fallidos de este email. Se hace acá (y no recién al final)
+    // porque quien sabe la contraseña ya demostró que no está adivinando, aunque su cuenta esté pendiente o
+    // inactiva y no pueda entrar por eso (esos 403 no cuentan como intento fallido).
+    limpiarIntentos(email);
 
     // Validar Estado de la Cuenta
     if (usuario.estado === 'pendiente') {
@@ -336,13 +441,16 @@ export const restablecerPassword = async (req, res) => {
       return res.status(400).json({ exito: false, mensaje: 'El link de recuperación es inválido o ya venció.' });
     }
 
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(COSTO_BCRYPT);
     usuario.password = await bcrypt.hash(password, salt);
     usuario.resetPasswordToken = null;
     usuario.resetPasswordExpires = null;
     // Marca el momento del cambio: verificarToken rechaza cualquier sesión abierta antes de este instante.
     usuario.passwordChangedAt = new Date();
     await usuario.save();
+    // Quien restablece la contraseña por mail demostró ser el dueño del email: se levanta el bloqueo por
+    // intentos fallidos, si lo tenía, para que pueda entrar enseguida con la contraseña nueva.
+    limpiarIntentos(usuario.email);
 
     //auditoria
     req.auditoriaMensaje = `El usuario ${usuario.email} restableció su contraseña`;

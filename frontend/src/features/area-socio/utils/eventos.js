@@ -30,6 +30,12 @@ export const finDelEvento = (e) => dayjs(`${dia(e)}T${e.horaFin || e.horaInicio 
  */
 export const yaTermino = (e) => e.estado === "finalizado" || finDelEvento(e).isBefore(dayjs());
 
+/** Devuelve el próximo evento programado que todavía no haya terminado, o null. */
+export const elegirProximoEvento = (eventos = []) =>
+  eventos
+    .filter((e) => e.estado !== "cancelado" && !yaTermino(e))
+    .sort((a, b) => inicioDelEvento(a).diff(inicioDelEvento(b)))[0] || null;
+
 /** "18:00:00" → "18:00" */
 const hhmm = (hora) => String(hora || "").slice(0, 5);
 

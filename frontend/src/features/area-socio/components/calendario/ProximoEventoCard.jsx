@@ -26,7 +26,7 @@ export default function ProximoEventoCard({ evento, onClick }) {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
-      className="group w-full shrink-0 cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-primary/40 hover:shadow-md sm:p-5 lg:w-96"
+      className="group w-full shrink-0 cursor-pointer rounded-none border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-primary/40 hover:shadow-md sm:w-96 sm:p-5"
     >
       <div className="mb-3 flex items-center justify-between gap-2 border-b border-gray-100 pb-2.5">
         <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">

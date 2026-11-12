@@ -3,6 +3,7 @@ import { ejecutarGeneracionCuotas, obtenerCuotas, obtenerCuotasPendientes, regis
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 import { paramUuid } from '../middlewares/validarParametros.js';
+import { validacionPagoManual } from '../middlewares/validator/cuota.validator.js';
 
 const router = Router();
 
@@ -27,7 +28,7 @@ router.get('/:id/comprobante', descargarComprobante); // redescarga de un compro
 // Gestión financiera y cobranzas
 router.get('/pendientes', obtenerCuotasPendientes); //obtener cuotas pendientes
 router.get('/resumen-financiero', obtenerResumenFinanciero); //resumen financiero 
-router.put('/:id/pagar', registrarPagoManual); //cuando la pasarela nos confirme un pago exitoso llamamos a registrarPagoManual
+router.put('/:id/pagar', validacionPagoManual, registrarPagoManual); //cuando la pasarela nos confirme un pago exitoso llamamos a registrarPagoManual
 router.get('/pagos/sin-confirmar', obtenerPagosSinConfirmar); // pagos que Tesorería todavía no verificó
 router.put('/pagos/confirmar', confirmarPagos); // body: { "pagoIds": ["uuid1", "uuid2", ...] }
 

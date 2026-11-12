@@ -5,6 +5,14 @@ import { User } from '../models/user.models.js';
 // Solo se usan para sembrar la tabla la primera vez; después manda lo que cargue el admin.
 const MONTOS_INICIALES = { activo: 10000, adherente: 0, padrino: 0, honorario: 0 };
 
+// Por estatuto, solo los socios Activos pagan cuota mensual, así que es la única tarifa que el admin puede
+// cambiar (la actualiza el Consejo Directivo, una vez por año). Si se pudiera poner un monto a otra
+// categoría, abonaCuota (abonaCuota.service.js) empezaría a cobrarle cuota a esos socios.
+export const CATEGORIA_CON_CUOTA = 'activo';
+
+// Tope de seguridad contra errores de tipeo (un cero de más). Está muy por encima de cualquier cuota real.
+export const MONTO_MAXIMO_TARIFA = 10_000_000;
+
 // Las categorías válidas salen del modelo User, así no hay dos listas que desincronizar.
 export const categoriasValidas = () => User.rawAttributes.categoria.values;
 

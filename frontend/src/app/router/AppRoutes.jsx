@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { useAuth } from "@/app/providers/AuthContext";
 import RequireAuth from "./RequireAuth.jsx";
 
 import MainLayout from "@/layouts/MainLayout.jsx";
@@ -33,18 +34,32 @@ function ScrollToTop() {
   return null;
 }
 
+/**
+ * Si el usuario ya inició sesión, no debe ver la landing ni las pantallas de login:
+ * se lo redirige automáticamente a su panel (/socios o /admin/inicio) hasta que cierre sesión.
+ */
+function SoloInvitado() {
+  const { usuario } = useAuth();
+  if (usuario) {
+    return <Navigate to={usuario.rol === "admin" ? "/admin/inicio" : "/socios"} replace />;
+  }
+  return <Outlet />;
+}
+
 export default function AppRoutes() {
   return (
     <>
       <ScrollToTop />
       <Routes>
-        {/* PÚBLICAS */}
-        <Route path="/" element={<Home />} />
-        <Route path="/noticias" element={<Noticias />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        {/* PÚBLICAS (solo accesibles cuando NO hay sesión iniciada) */}
+        <Route element={<SoloInvitado />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/noticias" element={<Noticias />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+        </Route>
 
         {/* /profile ya no existe como página propia: redirigimos a Mi empresa */}
         <Route path="/profile" element={<Navigate to="/socios/empresa" replace />} />

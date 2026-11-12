@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.models.js';
+import { CODIGOS_AUTH } from './codigosAuth.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -15,8 +16,10 @@ const cargarUsuarioHabilitado = async (decodificado) => {
     attributes: ['id', 'email', 'rol', 'estado', 'categoria', 'passwordChangedAt'],
   });
 
-  if (!usuario) return { usuario: null, motivo: 'La cuenta ya no existe.' };
-  if (usuario.estado !== 'aprobado') return { usuario: null, motivo: 'Tu cuenta no está habilitada.' };
+  // Los tres casos en que la cuenta no puede operar llevan el código SESION_INVALIDA: el frontend tiene
+  // que cerrar la sesión, porque ese token ya no le va a servir.
+  if (!usuario) return { usuario: null, motivo: 'La cuenta ya no existe.', codigo: CODIGOS_AUTH.SESION_INVALIDA };
+  if (usuario.estado !== 'aprobado') return { usuario: null, motivo: 'Tu cuenta no está habilitada.', codigo: CODIGOS_AUTH.SESION_INVALIDA };
 
   // Si la contraseña se cambió DESPUÉS de emitido el token, ese token ya no vale. Sin esto, quien
   // hubiera robado una sesión seguía adentro hasta 8 horas aunque el dueño restableciera su clave.
@@ -25,7 +28,7 @@ const cargarUsuarioHabilitado = async (decodificado) => {
   if (usuario.passwordChangedAt) {
     const cambioEnSegundos = Math.floor(usuario.passwordChangedAt.getTime() / 1000);
     if (!decodificado.iat || decodificado.iat < cambioEnSegundos) {
-      return { usuario: null, motivo: 'La sesión ya no es válida. Iniciá sesión nuevamente.' };
+      return { usuario: null, motivo: 'La sesión ya no es válida. Iniciá sesión nuevamente.', codigo: CODIGOS_AUTH.SESION_INVALIDA };
     }
   }
 
@@ -50,6 +53,7 @@ export const verificarToken = async (req, res, next) => {
     return res.status(401).json({
       exito: false,
       mensaje: 'Acceso denegado. No se proporcionó un token de sesión.',
+      codigo: CODIGOS_AUTH.SIN_SESION,
     });
   }
 
@@ -62,14 +66,15 @@ export const verificarToken = async (req, res, next) => {
     return res.status(403).json({
       exito: false,
       mensaje: 'Token inválido o expirado.',
+      codigo: CODIGOS_AUTH.TOKEN_INVALIDO,
     });
   }
 
   try {
-    const { usuario, motivo } = await cargarUsuarioHabilitado(decodificado);
+    const { usuario, motivo, codigo } = await cargarUsuarioHabilitado(decodificado);
 
     if (!usuario) {
-      return res.status(403).json({ exito: false, mensaje: motivo });
+      return res.status(403).json({ exito: false, mensaje: motivo, codigo });
     }
 
     req.usuario = usuario; // Adjuntamos los datos del usuario a la petición

@@ -5,6 +5,10 @@ import { darDeBajaSocio, obtenerTodosLosUsuarios } from '../controllers/admin.co
 import { obtenerDistribucionPorLocalidad, obtenerDistribucionPorRubro } from '../controllers/admin.controllers.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 import { validacionActualizarSocio } from '../middlewares/validator/user.validator.js';
+import { obtenerResumenInicio } from '../controllers/admin.controllers.js';
+import { obtenerPadron, exportarPadron } from '../controllers/padron.controllers.js';
+import { obtenerTarifas, actualizarTarifa } from '../controllers/tarifa.controllers.js';
+import { validacionTarifa } from '../middlewares/validator/tarifa.validator.js';
 import { paramEntero } from '../middlewares/validarParametros.js';
 
 const router = Router();
@@ -30,6 +34,18 @@ router.get("/reportes/distribucion-localidad", obtenerDistribucionPorLocalidad);
 
 // enpoint de registros de logs (de acciones de quien hizo que, solo puede acceder el administrador)
 router.get('/auditorias', obtenerAuditorias)
+
+// Cifras reales para las tarjetas del inicio del panel (antes eran inventadas en el frontend)
+router.get('/resumen-inicio', obtenerResumenInicio);
+
+// Padrón de socios habilitados para votar en Asamblea (?fecha=YYYY-MM-DD opcional, por defecto hoy)
+router.get('/padron', obtenerPadron);
+router.get('/padron/exportar', exportarPadron);
+
+// Tarifas (monto de la cuota mensual). Reutiliza el controlador de /api/tarifas: solo se puede cambiar la
+// de los Activos, y rige para las cuotas que se generen de ahí en adelante.
+router.get('/tarifas', obtenerTarifas);
+router.put('/tarifas/:categoria', validacionTarifa, actualizarTarifa);
 
 
 export default router;
