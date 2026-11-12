@@ -12,7 +12,10 @@ import {
   formatearPeriodo,
 } from '../services/notificacion.service.js';
 import { evaluarCategoriaSocio } from '../services/categoria.service.js';
-import { descargarPdfGuardado } from '../services/comprobanteGuardado.service.js';
+import { descargarPdfGuardado, pagoSinUrlDeComprobante } from '../services/comprobanteGuardado.service.js';
+import { CODIGOS_AUTH } from '../middlewares/codigosAuth.js';
+import { esCuentaDeGestion } from '../services/abonaCuota.service.js';
+import { validarPagoContraCuota } from '../services/validarPagoMP.service.js';
 
 // ==========================================
 // 1. INICIAR PAGO ONLINE (Socio logueado)
@@ -33,8 +36,11 @@ export const iniciarPagoOnline = async (req, res) => {
     }
 
     // Un socio solo puede pagar SU PROPIA cuota, no la de otro.
-    if (cuota.usuario_id !== usuarioId) {
-      return res.status(403).json({ exito: false, mensaje: 'No tenés permiso para pagar esta cuota.' });
+    // Una cuenta de gestión (admin) no paga cuota (ver abonaCuota.service.js): aunque haya quedado con
+    // una cuota vieja a su nombre, no puede iniciar el pago. Misma respuesta que una cuota ajena.
+    if (cuota.usuario_id !== usuarioId || esCuentaDeGestion(req.usuario)) {
+      // SIN_PERMISOS: la sesión es válida (solo que la cuota es de otro), así que no hay que cerrarla.
+      return res.status(403).json({ exito: false, mensaje: 'No tenés permiso para pagar esta cuota.', codigo: CODIGOS_AUTH.SIN_PERMISOS });
     }
 
     if (cuota.estado === 'pagada') {
@@ -55,8 +61,136 @@ export const iniciarPagoOnline = async (req, res) => {
 };
 
 // ==========================================
+// RETORNO DEL PAGO — puente hacia el frontend (pensado para desarrollo local)
+// ==========================================
+// Mercado Pago no acepta direcciones locales en back_urls. En desarrollo las back_urls apuntan acá
+// (al backend, que tiene dirección pública https) y esta ruta redirige al frontend local.
+// Ver armarRetornoPago en services/pasarela.service.js.
+//
+// OJO: lo que llega en la query (por ejemplo status=approved) NO es de fiar: lo puede escribir
+// cualquiera en la barra de direcciones. Solo se reenvía para que el frontend lo MUESTRE. La que
+// decide si la cuota está pagada es el webhook, que consulta el pago real en Mercado Pago.
+const RESULTADOS_RETORNO = new Set(['exitoso', 'pendiente', 'fallido']);
+
+// Únicos parámetros que se reenvían (los que manda Mercado Pago al volver). Todo lo demás se descarta.
+const PARAMETROS_RETORNO = [
+  'payment_id', 'status', 'external_reference', 'merchant_order_id', 'collection_id',
+  'collection_status', 'payment_type', 'preference_id', 'site_id', 'processing_mode',
+  'merchant_account_id',
+];
+const LARGO_MAXIMO_PARAMETRO = 100;
+
+export const redirigirRetornoPago = (req, res) => {
+  const { resultado } = req.params;
+  if (!RESULTADOS_RETORNO.has(resultado)) {
+    return res.status(404).json({ exito: false, mensaje: 'Ruta no encontrada.' });
+  }
+
+  // El destino sale SIEMPRE del .env, nunca de la petición: si saliera de la query, cualquiera
+  // podría usar nuestra dirección para mandar gente a otro sitio (redirección abierta).
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (typeof frontendUrl !== 'string' || frontendUrl.trim() === '') {
+    console.error('Retorno de pago: FRONTEND_URL no está definido en la configuración del servidor.');
+    return res.status(500).json({ exito: false, mensaje: 'Error de configuración del servidor.' });
+  }
+
+  // Solo texto de hasta 100 caracteres: un parámetro repetido llega como array y se descarta.
+  const parametros = new URLSearchParams();
+  for (const nombre of PARAMETROS_RETORNO) {
+    const valor = req.query[nombre];
+    if (typeof valor === 'string' && valor.length <= LARGO_MAXIMO_PARAMETRO) parametros.append(nombre, valor);
+  }
+
+  const query = parametros.toString();
+  const destino = `${frontendUrl.trim().replace(/\/+$/, '')}/pago-${resultado}${query ? `?${query}` : ''}`;
+  return res.redirect(302, destino);
+};
+
+// ==========================================
 // 2. WEBHOOK — Mercado Pago nos avisa que cambió el estado de un pago
 // ==========================================
+
+// Lo que se hace DESPUÉS de responderle a Mercado Pago: avisos internos y comprobante (PDF, mail y
+// subida a Cloudinary). Antes el webhook esperaba todo esto y tardaba 14 a 20 segundos en responder;
+// Mercado Pago espera la respuesta un tiempo limitado y, si no llega, reintenta el aviso.
+// El pago ya quedó registrado cuando esto corre, así que nada de lo que pase acá puede deshacerlo.
+//
+// Orden: primero los avisos y después el comprobante. El aviso a Tesorería ("pago por confirmar") es
+// lo operativo importante y no tiene que esperar al mail ni a la subida del PDF. El aviso al socio
+// dice "ya podés descargar tu comprobante", y es cierto aunque llegue antes: si el PDF todavía no se
+// subió (o falló), descargarMiComprobante lo regenera.
+// Los dos avisos van en paralelo y con allSettled: si uno falla, el otro se manda igual, y el
+// comprobante se intenta de todos modos.
+//
+// Si el servidor se reinicia justo después de responder, el comprobante no se pierde:
+// descargarMiComprobante lo regenera cuando el pago no tiene urlComprobante.
+//
+// Se llama sin await, así que NUNCA puede terminar en una promesa rechazada sin capturar (eso puede
+// tirar abajo el proceso): todo va dentro de un try/catch que solo deja el error en el log.
+const completarPagoEnSegundoPlano = async ({ cuota, nuevoPago }) => {
+  try {
+    // Los dos textos se arman ANTES de llamar a nada: si armar uno fallara, no queda ningún aviso ya
+    // lanzado cuya promesa nadie espera.
+    // Al socio: confirmación de que su pago ya figura.
+    const avisoSocio = {
+      usuarioId: cuota.usuario_id,
+      tipo: 'pago_registrado',
+      titulo: 'Recibimos tu pago',
+      mensaje: `Registramos tu pago de ${formatearMonto(nuevoPago.montoAbonado)} por la cuota de ${formatearPeriodo(cuota.mes_anio)}. Ya podés descargar tu comprobante desde la sección de pagos.`,
+      referencia: `pago-registrado:${nuevoPago.id}`,
+    };
+    // A los administradores: hay un pago online que Tesorería todavía debe verificar contra el banco.
+    const avisoAdmins = {
+      tipo: 'pago_por_confirmar',
+      titulo: 'Pago online por confirmar',
+      mensaje: `${cuota.socio.razonSocial} pagó ${formatearMonto(nuevoPago.montoAbonado)} (cuota ${formatearPeriodo(cuota.mes_anio)}). Falta la confirmación de Tesorería.`,
+      referencia: `pago-por-confirmar:${nuevoPago.id}`,
+    };
+    const avisos = await Promise.allSettled([crearNotificacion(avisoSocio), notificarAdmins(avisoAdmins)]);
+    for (const aviso of avisos) {
+      if (aviso.status === 'rejected') {
+        console.error(`Error al crear un aviso del pago online ${nuevoPago.id}:`, aviso.reason);
+      }
+    }
+
+    // Comprobante + mail + Cloudinary, mismo patrón que en el pago manual.
+    try {
+      const pdfBuffer = await generarComprobantePago({
+        socio: cuota.socio,
+        cuota: { mes_anio: cuota.mes_anio },
+        pago: nuevoPago,
+      });
+
+      try {
+        await enviarMailComprobantePago(
+          cuota.socio.email,
+          { razonSocial: cuota.socio.razonSocial, mesAnio: cuota.mes_anio, monto: nuevoPago.montoAbonado },
+          pdfBuffer
+        );
+      } catch (errorMail) {
+        console.error('Error al enviar el mail de comprobante (pago online):', errorMail.message);
+      }
+
+      try {
+        const resultadoCloudinary = await subirPDFCloudinary(pdfBuffer, {
+          folder: 'capymef_comprobantes_pago',
+          public_id: `comprobante-${nuevoPago.id}`,
+        });
+        nuevoPago.urlComprobante = resultadoCloudinary.secure_url;
+        await nuevoPago.save();
+      } catch (errorCloudinary) {
+        console.error('Error al subir el comprobante a Cloudinary (pago online):', errorCloudinary.message);
+      }
+    } catch (errorComprobante) {
+      console.error('Error al generar el comprobante (pago online):', errorComprobante.message);
+    }
+  } catch (error) {
+    // Lo que no atrapan los try internos (por ejemplo, una cuota cuyo socio ya no existe, que rompe al
+    // armar el texto del aviso) termina acá: queda en el log y el proceso sigue.
+    console.error(`Error en el trabajo posterior al pago ${nuevoPago?.id} (el pago ya está registrado):`, error);
+  }
+};
+
 // OJO: esta ruta NO tiene verificarToken. Quien la llama es el servidor de
 // Mercado Pago, no un usuario logueado — no tiene forma de mandar un JWT nuestro.
 export const recibirWebhook = async (req, res) => {
@@ -81,7 +215,8 @@ export const recibirWebhook = async (req, res) => {
       return res.status(200).json({ recibido: true });
     }
 
-    const { aprobado, cuotaId, montoPagado, idTransaccionExterna } = await procesarNotificacionPago(paymentId);
+    const pagoMP = await procesarNotificacionPago(paymentId);
+    const { aprobado, cuotaId, montoPagado, idTransaccionExterna } = pagoMP;
 
     if (!aprobado || !cuotaId) {
       return res.status(200).json({ recibido: true }); // pago rechazado/pendiente: no hacemos nada todavía
@@ -94,6 +229,33 @@ export const recibirWebhook = async (req, res) => {
     if (!cuota || cuota.estado === 'pagada') {
       // Ya procesada (o no existe): respondemos 200 igual, para no reintentos infinitos.
       return res.status(200).json({ recibido: true });
+    }
+
+    // El pago tiene que corresponder EXACTAMENTE a esta cuota (aprobado, en pesos, por el monto de la
+    // cuota y con su referencia). Si no, no se registra nada: un pago de $1 con la referencia de una cuota
+    // de $10.000 no puede dejarla pagada. Se responde 200 igual (si no, Mercado Pago reintenta sin fin) y
+    // se avisa a los admins para que lo revisen a mano.
+    const validacion = validarPagoContraCuota(pagoMP, cuota);
+    if (!validacion.valido) {
+      // En el log solo ids y montos: nada de datos personales del socio.
+      console.warn(
+        `Pago de Mercado Pago ${idTransaccionExterna} rechazado para la cuota ${cuota.id}: ${validacion.motivos.join('; ')} ` +
+        `(esperado ${cuota.monto} ARS, recibido ${montoPagado} ${pagoMP.moneda ?? '?'}).`
+      );
+      res.status(200).json({ recibido: true });
+      // El aviso va después de responder, como el resto de lo no crítico. Si Mercado Pago reenvía el mismo
+      // aviso no se duplica: la referencia incluye el id del pago y crearNotificacion no repite una alerta
+      // con el mismo usuario, tipo y referencia. notificarAdmins nunca lanza error.
+      notificarAdmins({
+        tipo: 'pago_mp_no_coincide',
+        titulo: 'Pago de Mercado Pago que no coincide con la cuota: revisar',
+        mensaje:
+          `Mercado Pago informó el pago ${idTransaccionExterna} para la cuota de ${cuota.socio?.razonSocial || 'un socio'} ` +
+          `(${formatearPeriodo(cuota.mes_anio)}), pero ${validacion.motivos.join('; ')}. Se esperaban ${formatearMonto(cuota.monto)} ` +
+          `y se recibieron ${formatearMonto(montoPagado)} (${pagoMP.moneda ?? 'sin moneda'}). La cuota NO se marcó como pagada.`,
+        referencia: `pago-mp-no-coincide:${idTransaccionExterna}`,
+      });
+      return;
     }
 
     // Evitamos procesar 2 veces la misma transacción si el webhook llega duplicado.
@@ -133,62 +295,18 @@ export const recibirWebhook = async (req, res) => {
     // en el momento. Nunca lanza error: no puede romper el procesamiento del webhook.
     await evaluarCategoriaSocio(cuota.usuario_id);
 
-    // Alertas internas. Van ANTES del comprobante (que puede tardar o fallar) y no pueden
-    // romper el webhook: crearNotificacion/notificarAdmins nunca lanzan error.
-    // Al socio: confirmación de que su pago ya figura.
-    await crearNotificacion({
-      usuarioId: cuota.usuario_id,
-      tipo: 'pago_registrado',
-      titulo: 'Recibimos tu pago',
-      mensaje: `Registramos tu pago de ${formatearMonto(nuevoPago.montoAbonado)} por la cuota de ${formatearPeriodo(cuota.mes_anio)}. Ya podés descargar tu comprobante desde la sección de pagos.`,
-      referencia: `pago-registrado:${nuevoPago.id}`,
-    });
-    // A los administradores: hay un pago online que Tesorería todavía debe verificar contra el banco.
-    await notificarAdmins({
-      tipo: 'pago_por_confirmar',
-      titulo: 'Pago online por confirmar',
-      mensaje: `${cuota.socio.razonSocial} pagó ${formatearMonto(nuevoPago.montoAbonado)} (cuota ${formatearPeriodo(cuota.mes_anio)}). Falta la confirmación de Tesorería.`,
-      referencia: `pago-por-confirmar:${nuevoPago.id}`,
-    });
-
-    // Comprobante + mail + Cloudinary, mismo patrón que en el pago manual.
-    try {
-      const pdfBuffer = await generarComprobantePago({
-        socio: cuota.socio,
-        cuota: { mes_anio: cuota.mes_anio },
-        pago: nuevoPago,
-      });
-
-      try {
-        await enviarMailComprobantePago(
-          cuota.socio.email,
-          { razonSocial: cuota.socio.razonSocial, mesAnio: cuota.mes_anio, monto: nuevoPago.montoAbonado },
-          pdfBuffer
-        );
-      } catch (errorMail) {
-        console.error('Error al enviar el mail de comprobante (pago online):', errorMail.message);
-      }
-
-      try {
-        const resultadoCloudinary = await subirPDFCloudinary(pdfBuffer, {
-          folder: 'capymef_comprobantes_pago',
-          public_id: `comprobante-${nuevoPago.id}`,
-        });
-        nuevoPago.urlComprobante = resultadoCloudinary.secure_url;
-        await nuevoPago.save();
-      } catch (errorCloudinary) {
-        console.error('Error al subir el comprobante a Cloudinary (pago online):', errorCloudinary.message);
-      }
-    } catch (errorComprobante) {
-      console.error('Error al generar el comprobante (pago online):', errorComprobante.message);
-    }
-
+    // Lo crítico ya quedó guardado (el pago, la cuota pagada y la categoría): se responde YA, para
+    // que Mercado Pago no reintente el aviso mientras se arma el comprobante.
     res.status(200).json({ recibido: true });
+
+    // Comprobante, mail, Cloudinary y avisos, después de responder (ver completarPagoEnSegundoPlano).
+    completarPagoEnSegundoPlano({ cuota, nuevoPago });
   } catch (error) {
     console.error('Error al procesar webhook de Mercado Pago:', error);
     // Igual respondemos 200: si devolvemos error, Mercado Pago reintenta el webhook
     // indefinidamente, y como ya logueamos el error, preferimos investigarlo manualmente.
-    res.status(200).json({ recibido: true });
+    // Si la respuesta ya salió, no se puede responder dos veces.
+    if (!res.headersSent) res.status(200).json({ recibido: true });
   }
 };
 
@@ -205,13 +323,25 @@ export const obtenerMisCuotas = async (req, res) => {
       include: [{
         model: Pago,
         as: 'pago',
-        // Sin datos internos de Tesorería (confirmadoPor, etc.)
-        attributes: ['id', 'montoAbonado', 'fechaPago', 'metodoPago', 'origenPago', 'urlComprobante'],
+        // Sin datos internos de Tesorería (confirmadoPor, etc.) ni la URL de Cloudinary del comprobante: es
+        // privado y se descarga con GET /api/pagos/mis-cuotas/:id/comprobante, que verifica que sea del socio.
+        attributes: ['id', 'montoAbonado', 'fechaPago', 'metodoPago', 'origenPago'],
       }],
       order: [['mes_anio', 'DESC']],
     });
 
-    res.status(200).json({ exito: true, data: cuotas });
+    // tieneComprobante: la cuota se puede descargar (está pagada y tiene su pago), igual que lo que exige
+    // descargarMiComprobante. Reemplaza a la URL, que el frontend usaba para abrir Cloudinary directo.
+    const data = cuotas.map((cuota) => {
+      const datos = cuota.toJSON();
+      return {
+        ...datos,
+        pago: pagoSinUrlDeComprobante(datos.pago),
+        tieneComprobante: datos.estado === 'pagada' && Boolean(datos.pago),
+      };
+    });
+
+    res.status(200).json({ exito: true, data });
   } catch (error) {
     console.error('Error al obtener las cuotas del socio:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor al obtener tus cuotas.' });

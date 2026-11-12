@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { loginUsuario, registrarUsuario, obtenerPerfil, actualizarPerfil, recuperarPassword, restablecerPassword } from '../controllers/user.controllers.js';
-import { validacionRegistro, validacionLogin } from '../middlewares/validator/user.validator.js';
+import { validacionRegistro, validacionLogin, validacionActualizarPerfil } from '../middlewares/validator/user.validator.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { uploadNube } from '../middlewares/multer/multerCloudinary.js';
 import { limitadorLoginPorIp, limitadorLoginPorCuenta, limitadorRecuperacion, limitadorRestablecer } from '../middlewares/rateLimiters.js';
@@ -15,6 +15,6 @@ router.put('/restablecer-password/:token', limitadorRestablecer, restablecerPass
 
 // Rutas Protegidas (SÍ requieren token)
 router.get('/perfil', verificarToken, obtenerPerfil);
-router.put('/perfil', verificarToken, actualizarPerfil);
+router.put('/perfil', verificarToken, validacionActualizarPerfil, actualizarPerfil);
 
 export default router;

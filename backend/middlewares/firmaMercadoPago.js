@@ -8,6 +8,11 @@
 //   - 'log': verifica y escribe el resultado en la consola, pero deja pasar siempre. Sirve para
 //            confirmar con avisos reales que las firmas dan "ok" antes de exigirlas.
 //   - 'enforce': rechaza con 401 los avisos sin firma válida.
+//     Excepción: los avisos de un tema distinto de 'payment' (por ejemplo merchant_order) se
+//     responden 200 sin exigir firma y sin pasar al controlador. Mercado Pago los manda en el
+//     formato viejo (?id=...&topic=...) y SIN x-signature; el controlador ya los ignora, así que
+//     exigirles firma no protege nada, y un 401 haría que Mercado Pago los reintente sin fin.
+//     Los avisos de 'payment' (o sin tema) siempre necesitan firma válida.
 // Cualquier otro valor se trata como 'enforce': ante un error de tipeo en la configuración es más
 // seguro rechazar (fallar cerrado) que dejar el webhook abierto sin que nadie se dé cuenta.
 //
@@ -26,6 +31,13 @@ const leerModo = () => {
 export const verificarOrigenWebhook = (req, res, next) => {
   const modo = leerModo();
   if (modo === 'off') return next();
+
+  // Mismo cálculo del tema que el controlador (recibirWebhook), para que los dos decidan igual.
+  const topic = req.query.topic || req.query.type || req.body?.type;
+  if (modo === 'enforce' && topic && topic !== 'payment') {
+    // Se reconoce y se ignora, como hace el controlador: no se llama a next().
+    return res.status(200).json({ recibido: true });
+  }
 
   // El id del recurso viene en la query (?data.id=...); el cuerpo es solo un respaldo.
   const resultado = verificarFirmaMercadoPago({

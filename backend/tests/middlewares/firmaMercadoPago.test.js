@@ -189,3 +189,80 @@ describe('verificarOrigenWebhook - modo desconocido', () => {
     expect((await avisoFirmado()).status).toBe(200);
   });
 });
+
+describe('verificarOrigenWebhook - avisos de un tema distinto de payment', () => {
+  // App aparte con un controlador espía: así se distingue "el middleware respondió y cortó" de
+  // "el aviso pasó al controlador" (los dos responderían 200).
+  const controladorFalso = vi.fn((req, res) => res.status(200).json({ llegoAlControlador: true }));
+  const appConEspia = express();
+  appConEspia.use(express.json());
+  appConEspia.post('/webhook', verificarOrigenWebhook, controladorFalso);
+
+  beforeEach(() => {
+    controladorFalso.mockClear();
+  });
+
+  it('en enforce, un merchant_order sin firma (formato viejo) responde 200 y no pasa al controlador', async () => {
+    // Es el aviso real que mandó Mercado Pago: ?id=...&topic=merchant_order y sin x-signature.
+    configurar({ modo: 'enforce' });
+
+    const respuesta = await request(appConEspia).post('/webhook?id=987654&topic=merchant_order').send({});
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body).toEqual({ recibido: true });
+    expect(controladorFalso).not.toHaveBeenCalled();
+  });
+
+  it('en enforce, type=merchant_order en el cuerpo sin firma responde 200 y no pasa al controlador', async () => {
+    configurar({ modo: 'enforce' });
+
+    const respuesta = await request(appConEspia).post('/webhook').send({ type: 'merchant_order', data: { id: '987654' } });
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body).toEqual({ recibido: true });
+    expect(controladorFalso).not.toHaveBeenCalled();
+  });
+
+  it('en enforce, topic=payment sin firma sigue respondiendo 401', async () => {
+    configurar({ modo: 'enforce' });
+
+    const respuesta = await request(appConEspia).post('/webhook?id=987654&topic=payment').send({});
+
+    expect(respuesta.status).toBe(401);
+    expect(controladorFalso).not.toHaveBeenCalled();
+  });
+
+  it('en enforce, un aviso sin tema y sin firma sigue respondiendo 401', async () => {
+    // Sin tema el controlador lo procesaría como un pago: tiene que exigir firma.
+    configurar({ modo: 'enforce' });
+
+    const respuesta = await request(appConEspia).post(`/webhook?data.id=${DATA_ID}`).send({});
+
+    expect(respuesta.status).toBe(401);
+    expect(controladorFalso).not.toHaveBeenCalled();
+  });
+
+  it('en enforce, type=payment con firma válida pasa al controlador', async () => {
+    configurar({ modo: 'enforce' });
+
+    const respuesta = await request(appConEspia)
+      .post(`/webhook?data.id=${DATA_ID}&type=payment`)
+      .set('x-signature', FIRMA_VALIDA)
+      .set('x-request-id', REQUEST_ID)
+      .send({});
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body).toEqual({ llegoAlControlador: true });
+    expect(controladorFalso).toHaveBeenCalledTimes(1);
+  });
+
+  it('en log, un merchant_order sigue verificándose (anota el motivo) y pasa al controlador', async () => {
+    configurar({ modo: 'log' });
+
+    const respuesta = await request(appConEspia).post('/webhook?id=987654&topic=merchant_order').send({});
+
+    expect(respuesta.status).toBe(200);
+    expect(controladorFalso).toHaveBeenCalledTimes(1);
+    expect(espiaLog.mock.calls.flat().join(' ')).toContain('faltan_encabezados');
+  });
+});

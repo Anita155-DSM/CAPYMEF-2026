@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { iniciarPagoOnline, recibirWebhook, obtenerMisCuotas, descargarMiComprobante } from '../controllers/pago.controllers.js';
+import { iniciarPagoOnline, recibirWebhook, obtenerMisCuotas, descargarMiComprobante, redirigirRetornoPago } from '../controllers/pago.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { paramUuid } from '../middlewares/validarParametros.js';
 import { verificarOrigenWebhook } from '../middlewares/firmaMercadoPago.js';
@@ -21,5 +21,9 @@ router.post('/:id/iniciar', verificarToken, iniciarPagoOnline);
 // Como no hay token, se verifica la firma del aviso para que nadie pueda mandar uno falso
 // (según MP_WEBHOOK_MODE: off / log / enforce).
 router.post('/webhook', verificarOrigenWebhook, recibirWebhook);
+
+// Vuelta del socio desde Mercado Pago (puente para desarrollo local, ver redirigirRetornoPago).
+// Pública: la abre el navegador del socio al terminar de pagar, y solo redirige al frontend.
+router.get('/retorno/:resultado', redirigirRetornoPago);
 
 export default router;

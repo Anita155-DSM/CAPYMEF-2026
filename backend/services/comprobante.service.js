@@ -1,4 +1,9 @@
 import PDFDocument from 'pdfkit';
+import { formatearFechaArgentina, formatearFechaHoraArgentina } from '../utils/fechas.js';
+
+// La Cámara factura por ARCA: este PDF es solo una constancia y tiene que decirlo.
+export const LEYENDA_NO_FACTURA =
+  'Documento no válido como factura. La factura correspondiente es emitida por la Cámara a través de ARCA.';
 
 /**
  * Genera el PDF de un comprobante de pago y lo devuelve como Buffer
@@ -31,17 +36,21 @@ export const generarComprobantePago = ({ socio, cuota, pago }) => {
       .fillColor('#1D7BB6')
       .text('Cámara de Pequeñas y Medianas Empresas de Formosa', { align: 'center' });
 
+    // Por qué "Constancia" y no "Recibo": la Cámara no emite recibos, factura a través de ARCA. Este PDF
+    // solo deja constancia de que el pago quedó registrado en el sistema y no puede presentarse como
+    // recibo ni como factura (lo mismo dicen los términos y condiciones del sitio).
     doc.moveDown(1.5);
     doc
       .fontSize(16)
       .fillColor('#000000')
-      .text('Recibo de Pago', { align: 'center', underline: true });
+      .text('Constancia de Pago', { align: 'center', underline: true });
     doc.moveDown(1);
 
-    // ===== Datos del recibo =====
+    // ===== Datos de la constancia =====
     doc.fontSize(11).fillColor('#000000');
-    doc.text(`Recibo N°: ${pago.id}`);
-    doc.text(`Fecha de pago: ${new Date(pago.fechaPago).toLocaleDateString('es-AR')}`);
+    doc.text(`Constancia N°: ${pago.id}`);
+    // fechaPago es una fecha sin hora: con new Date(...) salía un día antes (ver utils/fechas.js).
+    doc.text(`Fecha de pago: ${formatearFechaArgentina(pago.fechaPago)}`);
     doc.moveDown(0.8);
 
     // ===== Datos del socio =====
@@ -62,11 +71,20 @@ export const generarComprobantePago = ({ socio, cuota, pago }) => {
     doc.moveDown(1.5);
 
     // ===== Pie =====
+    // Leyenda obligatoria y visible (en negrita y más oscura que el resto del pie): quien reciba este
+    // PDF tiene que saber que no sirve como factura.
     doc
+      .font('Helvetica-Bold')
+      .fontSize(10)
+      .fillColor('#333333')
+      .text(LEYENDA_NO_FACTURA, { align: 'center' });
+    doc.moveDown(0.5);
+    doc
+      .font('Helvetica')
       .fontSize(9)
       .fillColor('#666666')
       .text(
-        `Comprobante generado automáticamente por el sistema de CAPYMEF el ${new Date().toLocaleString('es-AR')}.`,
+        `Comprobante generado automáticamente por el sistema de CAPYMEF el ${formatearFechaHoraArgentina(new Date())}.`,
         { align: 'center' }
       );
 

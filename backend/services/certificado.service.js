@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit';
+import { formatearFechaArgentina, formatearFechaHoraArgentina } from '../utils/fechas.js';
 
 /**
  * Descarga una imagen desde una URL y la devuelve como Buffer, para poder
@@ -106,7 +107,8 @@ export const generarCertificadoAsistencia = async ({ socio, evento }) => {
       .text(`"${evento.titulo}"`, { align: 'center' });
 
     doc.moveDown(0.5);
-    const fechaFormateada = new Date(evento.fecha).toLocaleDateString('es-AR', {
+    // evento.fecha es una fecha sin hora: con new Date(...) el certificado podía decir el día anterior.
+    const fechaFormateada = formatearFechaArgentina(evento.fecha, {
       day: 'numeric', month: 'long', year: 'numeric',
     });
     doc
@@ -159,7 +161,7 @@ export const generarCertificadoAsistencia = async ({ socio, evento }) => {
       .fontSize(8)
       .fillColor('#999999')
       .text(
-        `Certificado generado automáticamente por el sistema de CAPYMEF el ${new Date().toLocaleString('es-AR')}.`,
+        `Certificado generado automáticamente por el sistema de CAPYMEF el ${formatearFechaHoraArgentina(new Date())}.`,
         50,
         doc.page.height - 35,
         { align: 'center', width: anchoPagina - 100 }

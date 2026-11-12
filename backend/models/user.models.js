@@ -51,6 +51,11 @@ export const User = sequelize.define('User', {
     type: DataTypes.ENUM('socio', 'admin'),
     defaultValue: 'socio'
   },
+  // Momento en que la administración aprobó la cuenta. Hace falta para la antigüedad que exige el
+  // Estatuto para votar en Asamblea (6 meses): createdAt es la fecha del REGISTRO, que puede ser muy
+  // anterior a la aprobación. Se completa al aprobar y no se pisa si la cuenta se vuelve a aprobar.
+  // null en los socios aprobados antes de este campo: para ellos el padrón usa createdAt (aproximado).
+  fechaAprobacion: { type: DataTypes.DATE, allowNull: true },
    // ==========================================
   // 5. Recuperación de contraseña
   // ==========================================
@@ -64,6 +69,13 @@ export const User = sequelize.define('User', {
     allowNull: false,
      defaultValue: false, // true solo si el sistema lo pasó a Adherente por mora; permite devolverlo a Activo al regularizar
   },
+  // ==========================================
+  // 6. Aceptación de los términos y condiciones (relevancia legal)
+  // ==========================================
+  // Cuándo y qué versión aceptó al registrarse. Los pone el servidor (la fecha) y el backend (la versión, ver
+  // config/terminos.js): nunca vienen del cliente. null en las cuentas registradas antes de este control.
+  terminosAceptadosAt: { type: DataTypes.DATE, allowNull: true },
+  terminosVersion: { type: DataTypes.STRING(20), allowNull: true },
 },
 {
   paranoid: true,

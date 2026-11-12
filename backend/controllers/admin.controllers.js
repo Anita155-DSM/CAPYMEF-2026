@@ -2,6 +2,27 @@
 import { User } from "../models/user.models.js"; 
 import { fn, col, literal, Op } from "sequelize";
 import { Auditoria } from "../models/auditoria.models.js";
+import { calcularResumenInicio } from "../services/resumenInicio.service.js";
+import { registrarFechaAprobacion } from "../services/padron.service.js";
+import { fechaHoyArgentina } from "../services/cuota.service.js";
+import { FILTRO_SOLO_SOCIOS } from "../services/abonaCuota.service.js";
+import { dejaDeTenerAcceso, liberarInscripcionesFuturas } from "../services/inscripcion.service.js";
+import { sequelize } from "../config/database.js";
+
+// Guarda la cuenta y, si con este cambio deja de estar aprobada (baja, rechazo u otro estado sin acceso),
+// libera sus lugares en eventos que todavía no ocurrieron. Antes la baja dejaba las inscripciones y el socio
+// seguía ocupando cupo sin poder ir. Va todo en una transacción: si falla una parte, no queda ni la baja sin
+// liberar los lugares ni los lugares liberados sin la baja.
+// Lo usan los tres caminos por los que el admin le quita el acceso a una cuenta: la baja, el rechazo de una
+// solicitud y la edición del estado.
+const guardarCuentaYLiberarLugares = async (usuario) => {
+  // changed() se consulta ANTES de guardar: después de save() ya no hay cambios pendientes.
+  const liberar = dejaDeTenerAcceso(usuario);
+  await sequelize.transaction(async (transaction) => {
+    await usuario.save({ transaction });
+    if (liberar) await liberarInscripcionesFuturas(usuario.id, { transaction });
+  });
+};
 
 // ============================================================================
 // PANTALLA: DASHBOARD DE REPORTES (Gráficos y Geolocalización)
@@ -17,7 +38,9 @@ export const obtenerDistribucionPorLocalidad = async (req, res) => {
         "localidad",
         [fn("COUNT", col("id")), "cantidad"]
       ],
-      where: { estado: "aprobado" }, // Contamos solo a los socios activos/aprobados
+      // Solo socios aprobados. Los admin son cuentas de gestión, no socios: antes se contaban y una cuenta
+      // admin inflaba la cantidad de socios de su localidad. Mismo filtro que la generación de cuotas.
+      where: { estado: "aprobado", ...FILTRO_SOLO_SOCIOS },
       group: ["localidad"],
       order: [[literal("cantidad"), "DESC"]]
     });
@@ -46,7 +69,8 @@ export const obtenerDistribucionPorRubro = async (req, res) => {
         "rubro",
         [fn("COUNT", col("id")), "cantidad"]
       ],
-      where: { estado: "aprobado" },
+      // Solo socios aprobados, sin las cuentas de gestión (admin): mismo criterio que el reporte por localidad.
+      where: { estado: "aprobado", ...FILTRO_SOLO_SOCIOS },
       group: ["rubro"],
       order: [[literal("cantidad"), "DESC"]]
     });
@@ -137,7 +161,10 @@ export const gestionarSolicitud = async (req, res) => {
 
     // Actualizamos el campo unificado
     usuario.estado = nuevoEstado;
-    await usuario.save();
+    // Al aprobar se guarda la fecha: la antigüedad para votar en Asamblea se cuenta desde acá
+    // (si ya tenía una aprobación anterior, se conserva).
+    registrarFechaAprobacion(usuario);
+    await guardarCuentaYLiberarLugares(usuario);
 
     //auditoria
     req.auditoriaMensaje = `Se ${nuevoEstado === 'aprobado' ? 'aprobó' : 'rechazó'} la solicitud de registro del socio: ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
@@ -165,7 +192,7 @@ export const darDeBajaSocio = async (req, res) => {
 
     // Cambiamos su estado para que la barrera del login lo bloquee
     usuario.estado = "inactivo";
-    await usuario.save();
+    await guardarCuentaYLiberarLugares(usuario);
 
     //auditoria
     req.auditoriaMensaje = `Se dio de baja al socio ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
@@ -214,7 +241,11 @@ export const actualizarSocio = async (req, res) => {
       usuario.degradadoPorMora = false;
     }
 
-    await usuario.save();
+    // Si la edición deja la cuenta aprobada y nunca se había registrado la aprobación, se registra ahora
+    // (mismo criterio que al aprobar una solicitud).
+    registrarFechaAprobacion(usuario);
+
+    await guardarCuentaYLiberarLugares(usuario);
 
     //auditoria
     req.auditoriaMensaje = `Se actualizaron los datos del socio ${usuario.razonSocial} (CUIT: ${usuario.cuit})`;
@@ -335,5 +366,20 @@ export const obtenerAuditorias = async (req, res) => {
       exito: false,
       mensaje: 'Error al consultar la auditoría del sistema'
     });
+  }
+};
+
+// ==========================================
+// RESUMEN PARA EL INICIO DEL PANEL (tarjetas de recaudación, morosidad y próximo evento)
+// ==========================================
+// Devuelve números crudos (no textos como "$1.850.000"): el formato lo decide el frontend.
+// Las reglas de cada cifra están documentadas en services/resumenInicio.service.js.
+export const obtenerResumenInicio = async (req, res) => {
+  try {
+    const data = await calcularResumenInicio({ hoy: fechaHoyArgentina() });
+    res.status(200).json({ exito: true, data });
+  } catch (error) {
+    console.error("Error al calcular el resumen del inicio:", error);
+    res.status(500).json({ exito: false, mensaje: "Error interno del servidor al calcular el resumen." });
   }
 };

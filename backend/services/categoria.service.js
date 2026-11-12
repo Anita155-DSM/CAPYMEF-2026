@@ -2,6 +2,7 @@ import { Op } from 'sequelize';
 import { User } from '../models/user.models.js';
 import { Cuota } from '../models/cuota.models.js';
 import { crearNotificacion, notificarAdmins } from './notificacion.service.js';
+import { esCuentaDeGestion, FILTRO_SOLO_SOCIOS } from './abonaCuota.service.js';
 
 // ==========================================
 // Regla de la Cámara: un socio Activo con 3 cuotas vencidas sin pagar pasa a Adherente,
@@ -24,11 +25,13 @@ const hoyArgentina = () =>
 export const evaluarCategoriaSocio = async (usuarioId) => {
   try {
     const socio = await User.findByPk(usuarioId, {
-      attributes: ['id', 'razonSocial', 'categoria', 'estado', 'degradadoPorMora'],
+      attributes: ['id', 'razonSocial', 'categoria', 'estado', 'degradadoPorMora', 'rol'],
     });
 
     // Solo se evalúan cuentas habilitadas. Padrino y honorario nunca se tocan.
     if (!socio || socio.estado !== 'aprobado') return null;
+    // Una cuenta de gestión (admin) no paga cuota, así que tampoco se degrada ni se recupera por mora.
+    if (esCuentaDeGestion(socio)) return null;
 
     const vencidas = await Cuota.count({ where: { usuario_id: socio.id, estado: 'vencida' } });
     const hoy = hoyArgentina();
@@ -106,6 +109,7 @@ export const evaluarCategoriasDeTodos = async () => {
   const candidatos = await User.findAll({
     where: {
       estado: 'aprobado',
+      ...FILTRO_SOLO_SOCIOS, // las cuentas de gestión (admin) no entran en la regla de mora
       [Op.or]: [
         { categoria: 'activo' },
         { categoria: 'adherente', degradadoPorMora: true },
