@@ -19,6 +19,7 @@ import logo from "@/assets/img/logo.png";
 import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
 import { urlImagen } from "@/shared/utils/imagenes";
 import ConfirmDialog from "@/shared/ui/ConfirmDialog";
+import NoticiaDetalle from "./NoticiaDetalle";
 
 const inputClase =
   "w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-navy placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors";
@@ -29,6 +30,7 @@ const labelClase =
 /**
  * Modal unificado para Crear y Editar noticias desde Administración.
  * Sigue el mismo diseño visual que NoticiaModal y EventoFormModal.
+ * Al crear, debajo del formulario hay una vista previa en vivo de cómo va quedando la noticia.
  */
 export default function EditarNoticiaModal({
   noticia = null,
@@ -54,6 +56,8 @@ export default function EditarNoticiaModal({
     preview: noticia?.imagenUrl ? urlImagen(noticia.imagenUrl) : null,
   });
   const [guardando, setGuardando] = useState(false);
+  // Fecha fija para la vista previa (se calcula una sola vez al abrir el modal)
+  const [fechaPrevia] = useState(() => new Date().toISOString());
   const {
     categorias,
     cargando: cargandoCategorias,
@@ -75,6 +79,15 @@ export default function EditarNoticiaModal({
     form.categoria && !categorias.includes(form.categoria)
       ? [form.categoria, ...categorias]
       : categorias;
+
+  // Noticia tal como se vería hoy, con textos de ejemplo mientras los campos están vacíos
+  const noticiaPrevia = {
+    titulo: form.titulo.trim() || "Título de la noticia",
+    subtitulo: form.subtitulo.trim(),
+    contenido: form.contenido.trim() || "El contenido de la noticia aparecerá acá a medida que lo escribas…",
+    categoria: form.categoria,
+    fechaPublicacion: fechaPrevia,
+  };
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -142,12 +155,16 @@ export default function EditarNoticiaModal({
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4 backdrop-blur-xs sm:p-6"
-        onMouseDown={(e) => e.target === e.currentTarget && onClose()}
-      >
+      {/* Toda la pantalla hace scroll: el formulario arriba y, al crear, la vista previa abajo */}
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-navy/60 backdrop-blur-xs">
         <div
-          className="animacion-modal max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl sm:max-w-3xl sm:p-7"
+          className="flex min-h-full flex-col items-center justify-center gap-6 p-4 sm:p-6"
+          onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+        >
+        <div
+          className={`animacion-modal w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl sm:max-w-3xl sm:p-7 ${
+            esCrear ? "" : "max-h-[90vh] overflow-y-auto"
+          }`}
           role="dialog"
           aria-modal="true"
           aria-label={esCrear ? "Publicar nueva noticia" : "Editar noticia"}
@@ -387,6 +404,16 @@ export default function EditarNoticiaModal({
               </div>
             </div>
           </form>
+        </div>
+
+        {esCrear && (
+          <section className="w-full max-w-2xl sm:max-w-3xl" aria-label="Vista previa de la noticia">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-white">Así se verá tu noticia</p>
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl sm:p-7">
+              <NoticiaDetalle noticia={noticiaPrevia} imagenDirecta={imagen.preview} />
+            </div>
+          </section>
+        )}
         </div>
       </div>
 

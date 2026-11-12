@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   FiActivity,
+  FiArrowLeft,
   FiArrowRight,
   FiAward,
   FiBriefcase,
+  FiCheck,
   FiCheckCircle,
   FiChevronDown,
   FiEye,
@@ -37,6 +39,25 @@ const CATEGORIAS = [
 ];
 
 const MAX_ARCHIVO_MB = 5;
+
+// Los 3 pasos del registro y los campos que se validan antes de avanzar
+const PASOS = [
+  {
+    titulo: "Tus datos",
+    descripcion: "Con estos datos vas a ingresar a tu cuenta.",
+    campos: ["email", "password", "confirmarPassword", "telefono", "cuit"],
+  },
+  {
+    titulo: "Tu empresa",
+    descripcion: "Contanos a qué se dedica tu empresa.",
+    campos: ["razonSocial", "rubro", "actividad", "tamano_empresa"],
+  },
+  {
+    titulo: "Ubicación y categoría",
+    descripcion: "Último paso: dónde estás y qué categoría de socio querés.",
+    campos: ["localidad", "categoria", "constancia", "consentimiento"],
+  },
+];
 
 const claseCampo = (hayError, extra = "pr-3") =>
   `h-10 w-full rounded-[3px] border bg-[#edf2fc] pl-10 text-[14px] text-[#1d2d3a] shadow-sm outline-none placeholder:text-[#a2aab2] focus:ring-2 ${extra} ${
@@ -83,21 +104,74 @@ function BotonOjo({ visible, alternar, etiqueta }) {
   );
 }
 
+function IndicadorPasos({ actual }) {
+  return (
+    <ol className="mb-5 flex items-center justify-center" aria-label="Progreso del registro">
+      {PASOS.map((p, i) => {
+        const completo = i < actual;
+        const activo = i === actual;
+        return (
+          <li key={p.titulo} className="flex items-center" aria-current={activo ? "step" : undefined}>
+            <div className="flex flex-col items-center gap-1">
+              <span
+                className={`grid h-8 w-8 place-items-center rounded-full text-[13px] font-bold transition-colors ${
+                  completo || activo ? "bg-[#0877a8] text-white" : "bg-[#dfe6ee] text-[#68727b]"
+                }`}
+              >
+                {completo ? <FiCheck size={16} strokeWidth={3} /> : i + 1}
+              </span>
+              <span className={`text-[11px] font-semibold ${activo ? "text-[#0877a8]" : "text-[#89939d]"}`}>
+                <span className="hidden sm:inline">{p.titulo}</span>
+                <span className="sm:hidden">Paso {i + 1}</span>
+              </span>
+            </div>
+            {i < PASOS.length - 1 && (
+              <span
+                className={`mx-2 mb-5 h-0.5 w-8 rounded sm:w-14 ${completo ? "bg-[#0877a8]" : "bg-[#dfe6ee]"}`}
+                aria-hidden="true"
+              />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export default function Register() {
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
-    watch,
+    control,
+    trigger,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm();
+  const [paso, setPaso] = useState(0);
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
   const [verTerminos, setVerTerminos] = useState(false);
 
-  const password = watch("password");
-  const nombreArchivo = watch("constancia")?.[0]?.name;
+  const nombreArchivo = useWatch({ control, name: "constancia" })?.[0]?.name;
+  const esUltimoPaso = paso === PASOS.length - 1;
+
+  // Valida solo los campos del paso actual antes de avanzar
+  const siguiente = async () => {
+    const valido = await trigger(PASOS[paso].campos);
+    if (valido) setPaso((actual) => actual + 1);
+  };
+  const atras = () => setPaso((actual) => Math.max(0, actual - 1));
+
+  // Enter en los pasos 1 y 2 avanza en lugar de enviar la solicitud
+  const alEnviar = (e) => {
+    if (!esUltimoPaso) {
+      e.preventDefault();
+      siguiente();
+      return undefined;
+    }
+    return handleSubmit(handleRegister, handleInvalidRegister)(e);
+  };
 
   const handleRegister = async (data) => {
     try {
@@ -140,7 +214,10 @@ export default function Register() {
     }
   };
 
-  const handleInvalidRegister = () => {
+  // Si hay errores en un paso anterior, volvemos a ese paso
+  const handleInvalidRegister = (errs) => {
+    const pasoConError = PASOS.findIndex((p) => p.campos.some((campo) => errs[campo]));
+    if (pasoConError !== -1) setPaso(pasoConError);
     toast.error("Completá todos los campos obligatorios antes de registrarte.");
   };
 
@@ -160,30 +237,78 @@ export default function Register() {
         backgroundSize: "34px 34px, 46px 46px",
       }}
     >
-      <main className="w-full max-w-[1040px] overflow-hidden rounded-[9px] border-t-[4px] border-[#2084b6] bg-[#f5f7f9] px-5 pt-6 shadow-[0_12px_35px_rgba(2,18,32,0.28)] sm:px-10 sm:pt-7">
+      <main className="w-full max-w-[560px] overflow-hidden rounded-[9px] border-t-[4px] border-[#2084b6] bg-[#f5f7f9] px-5 pt-6 shadow-[0_12px_35px_rgba(2,18,32,0.28)] sm:px-10 sm:pt-7">
         <header className="border-b border-[#dfe6ee] pb-4 text-center">
           <h1 className="text-[24px] font-bold tracking-[-0.03em] sm:text-[27px]">
             Crear cuenta de socio
           </h1>
           <p className="mx-auto mt-1 max-w-[560px] text-[13px] leading-[1.5] text-[#68727b]">
-            Completá tus datos comerciales. El equipo administrativo revisará tu solicitud.
+            Completá los 3 pasos. El equipo administrativo revisará tu solicitud.
           </p>
         </header>
 
-        <form
-          noValidate
-          onSubmit={handleSubmit(handleRegister, handleInvalidRegister)}
-          className="mt-5 flex w-full flex-col"
-        >
-          <div className="grid grid-cols-1 gap-x-5 gap-y-3.5 sm:grid-cols-2 lg:grid-cols-3">
-            <CampoForm id="razonSocial" label="Razón Social" icono={FiBriefcase} error={errors.razonSocial && obligatorio}>
+        <IndicadorPasos actual={paso} />
+
+        <form noValidate onSubmit={alEnviar} className="flex w-full flex-col">
+          {/* Todos los pasos quedan montados (solo se oculta el que no corresponde) para no perder lo escrito ni el archivo */}
+          <div hidden={paso !== 0} className="flex flex-col gap-3.5">
+            <div>
+              <h2 className="text-[17px] font-bold text-[#162b3d]">{PASOS[0].titulo}</h2>
+              <p className="text-[13px] text-[#68727b]">{PASOS[0].descripcion}</p>
+            </div>
+            <CampoForm id="email" label="Correo electrónico" icono={FiMail} error={errors.email && obligatorio}>
               <input
-                id="razonSocial"
-                type="text"
-                placeholder="Nombre de tu empresa"
-                autoComplete="organization"
-                className={claseCampo(errors.razonSocial)}
-                {...register("razonSocial", { required: true })}
+                id="email"
+                type="email"
+                placeholder="ejemplo@correo.com"
+                autoComplete="email"
+                className={claseCampo(errors.email)}
+                {...register("email", { required: true })}
+              />
+            </CampoForm>
+
+            <CampoForm id="password" label="Contraseña" icono={FiLock} error={errors.password && (errors.password.message || obligatorio)}>
+              <input
+                id="password"
+                type={mostrarPassword ? "text" : "password"}
+                placeholder="Mínimo 8 caracteres"
+                autoComplete="new-password"
+                className={claseCampo(errors.password, "pr-11")}
+                {...register("password", {
+                  required: true,
+                  pattern: {
+                    value: /^(?=.*[A-Z])(?=.*\d).{8,}$/,
+                    message: "Mínimo 8 caracteres, una mayúscula y un número.",
+                  },
+                })}
+              />
+              <BotonOjo visible={mostrarPassword} alternar={() => setMostrarPassword((v) => !v)} etiqueta="contraseña" />
+            </CampoForm>
+
+            <CampoForm id="confirmarPassword" label="Confirmar contraseña" icono={FiLock} error={errors.confirmarPassword && (errors.confirmarPassword.message || "Confirmá tu contraseña.")}>
+              <input
+                id="confirmarPassword"
+                type={mostrarConfirmacion ? "text" : "password"}
+                placeholder="Repetí tu contraseña"
+                autoComplete="new-password"
+                className={claseCampo(errors.confirmarPassword, "pr-11")}
+                {...register("confirmarPassword", {
+                  required: true,
+                  validate: (valor, valores) => valor === valores.password || "Las contraseñas no coinciden.",
+                })}
+              />
+              <BotonOjo visible={mostrarConfirmacion} alternar={() => setMostrarConfirmacion((v) => !v)} etiqueta="confirmación de contraseña" />
+            </CampoForm>
+
+            <CampoForm id="telefono" label="Teléfono" icono={FiPhone} error={errors.telefono && obligatorio}>
+              <input
+                id="telefono"
+                type="tel"
+                maxLength={20}
+                placeholder="3704 123456"
+                autoComplete="tel"
+                className={claseCampo(errors.telefono)}
+                {...register("telefono", { required: true, maxLength: 20 })}
               />
             </CampoForm>
 
@@ -200,16 +325,21 @@ export default function Register() {
                 })}
               />
             </CampoForm>
+          </div>
 
-            <CampoForm id="telefono" label="Teléfono" icono={FiPhone} error={errors.telefono && obligatorio}>
+          <div hidden={paso !== 1} className="flex flex-col gap-3.5">
+            <div>
+              <h2 className="text-[17px] font-bold text-[#162b3d]">{PASOS[1].titulo}</h2>
+              <p className="text-[13px] text-[#68727b]">{PASOS[1].descripcion}</p>
+            </div>
+            <CampoForm id="razonSocial" label="Razón Social" icono={FiBriefcase} error={errors.razonSocial && obligatorio}>
               <input
-                id="telefono"
-                type="tel"
-                maxLength={20}
-                placeholder="3704 123456"
-                autoComplete="tel"
-                className={claseCampo(errors.telefono)}
-                {...register("telefono", { required: true, maxLength: 20 })}
+                id="razonSocial"
+                type="text"
+                placeholder="Nombre de tu empresa"
+                autoComplete="organization"
+                className={claseCampo(errors.razonSocial)}
+                {...register("razonSocial", { required: true })}
               />
             </CampoForm>
 
@@ -252,22 +382,13 @@ export default function Register() {
                 ))}
               </select>
             </CampoForm>
+          </div>
 
-            <CampoForm id="categoria" label="Categoría" icono={FiAward} flecha error={errors.categoria && obligatorio}>
-              <select
-                id="categoria"
-                required
-                defaultValue=""
-                className={`${claseCampo(errors.categoria, "pr-9 appearance-none cursor-pointer")} invalid:text-[#a2aab2]`}
-                {...register("categoria", { required: true })}
-              >
-                <option value="" disabled>Seleccioná una opción</option>
-                {CATEGORIAS.map((c) => (
-                  <option key={c.valor} value={c.valor} className="text-[#1d2d3a]">{c.texto}</option>
-                ))}
-              </select>
-            </CampoForm>
-
+          <div hidden={paso !== 2} className="flex flex-col gap-3.5">
+            <div>
+              <h2 className="text-[17px] font-bold text-[#162b3d]">{PASOS[2].titulo}</h2>
+              <p className="text-[13px] text-[#68727b]">{PASOS[2].descripcion}</p>
+            </div>
             <CampoForm id="localidad" label="Localidad" icono={FiMapPin} flecha error={errors.localidad && obligatorio}>
               <select
                 id="localidad"
@@ -283,6 +404,21 @@ export default function Register() {
                       <option key={ciudad} value={ciudad} className="text-[#1d2d3a]">{ciudad}</option>
                     ))}
                   </optgroup>
+                ))}
+              </select>
+            </CampoForm>
+
+            <CampoForm id="categoria" label="Categoría" icono={FiAward} flecha error={errors.categoria && obligatorio}>
+              <select
+                id="categoria"
+                required
+                defaultValue=""
+                className={`${claseCampo(errors.categoria, "pr-9 appearance-none cursor-pointer")} invalid:text-[#a2aab2]`}
+                {...register("categoria", { required: true })}
+              >
+                <option value="" disabled>Seleccioná una opción</option>
+                {CATEGORIAS.map((c) => (
+                  <option key={c.valor} value={c.valor} className="text-[#1d2d3a]">{c.texto}</option>
                 ))}
               </select>
             </CampoForm>
@@ -316,52 +452,6 @@ export default function Register() {
               )}
             </div>
 
-            <CampoForm id="email" label="Correo electrónico" icono={FiMail} error={errors.email && obligatorio}>
-              <input
-                id="email"
-                type="email"
-                placeholder="ejemplo@correo.com"
-                autoComplete="email"
-                className={claseCampo(errors.email)}
-                {...register("email", { required: true })}
-              />
-            </CampoForm>
-
-            <CampoForm id="password" label="Contraseña" icono={FiLock} error={errors.password && (errors.password.message || obligatorio)}>
-              <input
-                id="password"
-                type={mostrarPassword ? "text" : "password"}
-                placeholder="Mínimo 8 caracteres"
-                autoComplete="new-password"
-                className={claseCampo(errors.password, "pr-11")}
-                {...register("password", {
-                  required: true,
-                  pattern: {
-                    value: /^(?=.*[A-Z])(?=.*\d).{8,}$/,
-                    message: "Mínimo 8 caracteres, una mayúscula y un número.",
-                  },
-                })}
-              />
-              <BotonOjo visible={mostrarPassword} alternar={() => setMostrarPassword((v) => !v)} etiqueta="contraseña" />
-            </CampoForm>
-
-            <CampoForm id="confirmarPassword" label="Confirmar contraseña" icono={FiLock} error={errors.confirmarPassword && (errors.confirmarPassword.message || "Confirmá tu contraseña.")}>
-              <input
-                id="confirmarPassword"
-                type={mostrarConfirmacion ? "text" : "password"}
-                placeholder="Repetí tu contraseña"
-                autoComplete="new-password"
-                className={claseCampo(errors.confirmarPassword, "pr-11")}
-                {...register("confirmarPassword", {
-                  required: true,
-                  validate: (valor) => valor === password || "Las contraseñas no coinciden.",
-                })}
-              />
-              <BotonOjo visible={mostrarConfirmacion} alternar={() => setMostrarConfirmacion((v) => !v)} etiqueta="confirmación de contraseña" />
-            </CampoForm>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="flex items-start gap-2 text-[13px] text-[#4a5966]">
                 <input
@@ -386,15 +476,45 @@ export default function Register() {
                 <p className="mt-1 text-[11px] text-red-600">Debés aceptar los términos para continuar.</p>
               )}
             </div>
+          </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-[9px] bg-[#0877a8] px-5 text-[15px] font-bold text-white shadow-[0_3px_5px_rgba(2,74,106,0.25)] transition-colors hover:bg-[#05648f] disabled:cursor-not-allowed disabled:opacity-60 lg:w-auto lg:min-w-[240px] cursor-pointer"
-            >
-              {isSubmitting ? "Enviando..." : "Enviar solicitud"}
-              {!isSubmitting && <FiArrowRight size={19} strokeWidth={2.5} />}
-            </button>
+          <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {paso > 0 ? (
+              <button
+                key="atras"
+                type="button"
+                onClick={atras}
+                disabled={isSubmitting}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-[9px] border border-[#c9d6e2] bg-white px-5 text-[15px] font-bold text-[#4a5966] transition-colors hover:bg-[#edf2fc] disabled:opacity-60 sm:w-auto cursor-pointer"
+              >
+                <FiArrowLeft size={19} strokeWidth={2.5} />
+                Atrás
+              </button>
+            ) : (
+              <span className="hidden sm:block" />
+            )}
+
+            {esUltimoPaso ? (
+              <button
+                key="enviar"
+                type="submit"
+                disabled={isSubmitting}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-[9px] bg-[#0877a8] px-5 text-[15px] font-bold text-white shadow-[0_3px_5px_rgba(2,74,106,0.25)] transition-colors hover:bg-[#05648f] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[200px] cursor-pointer"
+              >
+                {isSubmitting ? "Enviando..." : "Enviar solicitud"}
+                {!isSubmitting && <FiArrowRight size={19} strokeWidth={2.5} />}
+              </button>
+            ) : (
+              <button
+                key="siguiente"
+                type="button"
+                onClick={siguiente}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-[9px] bg-[#0877a8] px-5 text-[15px] font-bold text-white shadow-[0_3px_5px_rgba(2,74,106,0.25)] transition-colors hover:bg-[#05648f] sm:w-auto sm:min-w-[200px] cursor-pointer"
+              >
+                Siguiente
+                <FiArrowRight size={19} strokeWidth={2.5} />
+              </button>
+            )}
           </div>
         </form>
 

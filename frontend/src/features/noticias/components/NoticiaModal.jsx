@@ -1,23 +1,14 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import {
-  FaCalendarDays,
-  FaTag,
-  FaXmark,
-} from "react-icons/fa6";
 import { useBloquearScroll } from "@/shared/hooks/useBloquearScroll";
-import { formatearFechaLarga } from "@/shared/utils/fechas";
-import { urlImagen } from "@/shared/utils/imagenes";
+import NoticiaDetalle from "./NoticiaDetalle";
 
 /**
  * Modal detallado de noticia para socios y visitantes.
  * Estilo visual unificado con el modal de eventos (EventoDetalleModal):
  * - Fondo con desenfoque suave y base institucional (bg-navy/60 backdrop-blur-xs)
  * - Mismo contenedor redondeado (rounded-2xl) con animación de entrada (animacion-modal)
- * - Encabezado limpio con fecha de publicación a la izquierda y categoría + botón cerrar a la derecha
- * - Imagen adaptada a todo el ancho disponible (h-64 sm:h-80 w-full object-cover rounded-xl)
- * - Cuerpo de contenido con tipografía clara y legible
- * - Pie de acciones con botón de cierre estandarizado
+ * El contenido (cabecera, título, imagen, cuerpo y pie) vive en NoticiaDetalle.
  */
 export default function NoticiaModal({ noticia, onClose }) {
   useBloquearScroll(Boolean(noticia));
@@ -31,8 +22,6 @@ export default function NoticiaModal({ noticia, onClose }) {
 
   if (!noticia) return null;
 
-  const imagen = urlImagen(noticia.imagenUrl);
-
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4 backdrop-blur-xs sm:p-6"
@@ -44,83 +33,7 @@ export default function NoticiaModal({ noticia, onClose }) {
         aria-modal="true"
         aria-label={noticia.titulo}
       >
-        {/* Cabecera del modal: Fecha a la izquierda y categoría + botón de cierre a la derecha */}
-        <div className="flex items-center justify-between gap-4">
-          {noticia.fechaPublicacion ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-              <FaCalendarDays className="text-[12px]" />
-              <span>{formatearFechaLarga(noticia.fechaPublicacion)}</span>
-            </span>
-          ) : (
-            <span />
-          )}
-
-          <div className="ml-auto flex shrink-0 items-center gap-2.5">
-            {noticia.categoria ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-blue px-2.5 py-1 text-xs font-bold text-primary">
-                <FaTag className="text-[11px]" />
-                {noticia.categoria}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-blue px-2.5 py-1 text-xs font-bold text-primary">
-                Novedad institucional
-              </span>
-            )}
-
-            <button
-              type="button"
-              aria-label="Cerrar ventana"
-              onClick={onClose}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-            >
-              <FaXmark className="text-xl" />
-            </button>
-          </div>
-        </div>
-
-        {/* Título principal de la noticia */}
-        <h2 className="mt-3 text-xl font-bold leading-snug text-navy sm:text-2xl">
-          {noticia.titulo}
-        </h2>
-
-        {/* Subtítulo si está presente */}
-        {noticia.subtitulo && (
-          <p className="mt-2.5 border-l-4 border-primary pl-3.5 text-sm font-medium italic text-gray-600 sm:text-base">
-            {noticia.subtitulo}
-          </p>
-        )}
-
-        {/* Imagen de la noticia adaptada a todo el ancho disponible */}
-        {imagen && (
-          <img
-            src={imagen}
-            alt={noticia.titulo}
-            className="mt-4 h-64 sm:h-80 w-full rounded-xl object-cover shadow-xs"
-          />
-        )}
-
-        {/* Cuerpo o contenido completo de la noticia */}
-        <div className="mt-5">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-gray-500">
-            Contenido
-          </p>
-          <div className="rounded-xl border border-gray-100 bg-white p-4">
-            <p className="max-h-72 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-gray-700 sm:text-base">
-              {noticia.contenido}
-            </p>
-          </div>
-        </div>
-
-        {/* Pie de acciones con botón de cierre */}
-        <div className="mt-6 flex items-center justify-end border-t border-gray-100 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-gray-300 bg-white px-5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-          >
-            Cerrar
-          </button>
-        </div>
+        <NoticiaDetalle noticia={noticia} onClose={onClose} />
       </div>
     </div>,
     document.body
