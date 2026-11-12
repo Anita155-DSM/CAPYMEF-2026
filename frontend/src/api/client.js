@@ -1,5 +1,9 @@
 const BASE_URL = import.meta.env.VITE_API_URL;
 
+// Solo estos tres códigos indican que la sesión dejó de ser válida.
+// SIN_PERMISOS (403) y CUENTA_BLOQUEADA_TEMPORALMENTE (429) NUNCA deben cerrar la sesión.
+const CODIGOS_CIERRE_SESION = new Set(["SIN_SESION", "TOKEN_INVALIDO", "SESION_INVALIDA"]);
+
 /**
  * Hace una petición al backend y SIEMPRE devuelve { exito, mensaje, data }.
  * Ejemplos:
@@ -34,8 +38,9 @@ export async function api(ruta, { method = "GET", body, headers = {}, blob = fal
   }
 
   const { status } = response;
+  const retryAfter = Number(response.headers?.get?.("Retry-After")) || null;
 
-  // 2. Archivo (PDF, imagen…): si salió bien devolvemos el Blob en `data`
+  // 2. Archivo (PDF, CSV, imagen…): si salió bien devolvemos el Blob en `data`
   if (blob && response.ok) return { exito: true, status, data: await response.blob() };
 
   // 3. Respuesta sin contenido (por ejemplo, un DELETE que devuelve 204)
@@ -50,15 +55,30 @@ export async function api(ruta, { method = "GET", body, headers = {}, blob = fal
     return { exito: false, status, mensaje: `Error del servidor (${status}).` };
   }
 
-  // 5. Token vencido o inválido (el backend usa 401 sin token y 403 con token malo):
-  //    avisamos al AuthProvider para que cierre la sesión
-  const tokenInvalido = status === 401 || (status === 403 && /token/i.test(data?.mensaje || ""));
-  if (token && tokenInvalido) window.dispatchEvent(new Event("sesion-expirada"));
+  // 5. Sesión vencida o inválida: cerramos sesión únicamente con los 3 códigos de sesión
+  if (token && CODIGOS_CIERRE_SESION.has(data?.codigo)) {
+    window.dispatchEvent(new Event("sesion-expirada"));
+  }
+
+  // Si el backend devuelve errores de validación (errores[0].mensaje), priorizamos ese mensaje específico
+  const mensajeValidacion =
+    Array.isArray(data?.errores) && data.errores[0]?.mensaje ? data.errores[0].mensaje : null;
 
   // 6. Si el backend no mandó "exito", lo deducimos del status HTTP
   if (data?.exito === undefined) {
-    return { exito: response.ok, status, data, mensaje: data?.mensaje };
+    return {
+      exito: response.ok,
+      status,
+      data,
+      mensaje: mensajeValidacion || data?.mensaje,
+      ...(retryAfter ? { retryAfter } : {}),
+    };
   }
 
-  return { ...data, status };
+  return {
+    ...data,
+    ...(mensajeValidacion ? { mensaje: mensajeValidacion } : {}),
+    ...(retryAfter ? { retryAfter } : {}),
+    status,
+  };
 }

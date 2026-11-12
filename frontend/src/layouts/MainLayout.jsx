@@ -12,6 +12,7 @@ const TITULOS_RUTA = {
   "/admin/finanzas": "Finanzas y cuotas",
   "/admin/registros": "Solicitudes pendientes",
   "/admin/socios": "Padrón de socios",
+  "/admin/padron": "Padrón de votantes",
 };
 
 export default function MainLayout() {

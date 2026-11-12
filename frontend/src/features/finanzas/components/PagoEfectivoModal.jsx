@@ -194,14 +194,14 @@ export default function PagoEfectivoModal({ cuota, onRegistrado, onClose }) {
 
               <label className="block">
                 <span className={etiquetaCampoClase}>
-                  <FaReceipt className="text-primary" /> N.º de recibo / operación (opcional)
+                  <FaReceipt className="text-primary" /> N.º de constancia / operación (opcional)
                 </span>
                 <input
                   type="text"
                   maxLength={100}
                   value={nroComprobante}
                   onChange={(e) => setNroComprobante(e.target.value)}
-                  placeholder="Ej: Recibo #0042 o ID bancario"
+                  placeholder="Ej: Constancia #0042 o ID bancario"
                   className={campoInputClase}
                 />
               </label>

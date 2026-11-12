@@ -33,18 +33,18 @@ export function registrarPagoEfectivo(cuota, opciones = "") {
   });
 }
 
-/** Descarga el PDF del comprobante de una cuota ya pagada. */
+/** Descarga el PDF de la constancia de pago de una cuota ya pagada. */
 export async function descargarComprobanteAdmin(cuota) {
   if (!idValido(cuota?.id)) return { exito: false, mensaje: "Cuota inválida." };
 
   const resultado = await api(`/cuotas/${encodeURIComponent(cuota.id)}/comprobante`, { blob: true });
   if (!resultado.exito) {
     return resultado.status === 400 || resultado.status === 404
-      ? { exito: false, mensaje: "Esta cuota todavía no tiene un comprobante disponible." }
+      ? { exito: false, mensaje: "Esta cuota todavía no tiene una constancia disponible." }
       : resultado;
   }
 
-  const nombre = `comprobante-${nombreArchivoSeguro(cuota.socio?.razonSocial)}-${nombreArchivoSeguro(cuota.mes_anio)}.pdf`;
+  const nombre = `constancia-pago-${nombreArchivoSeguro(cuota.socio?.razonSocial)}-${nombreArchivoSeguro(cuota.mes_anio)}.pdf`;
   descargarBlob(resultado.data, nombre);
   return { exito: true };
 }
@@ -82,18 +82,19 @@ export const marcarCuotasVencidasAdmin = () => api("/cuotas/marcar-vencidas", { 
 export const enviarRecordatoriosAdmin = () => api("/cuotas/enviar-recordatorios", { method: "POST" });
 
 // ==========================================
-// TARIFAS POR CATEGORÍA
+// TARIFAS POR CATEGORÍA (/api/admin/tarifas)
 // ==========================================
 
-/** Obtiene las tarifas vigentes de cada categoría de socio. */
-export const obtenerTarifasAdmin = () => api("/tarifas");
+/** Obtiene las tarifas vigentes de cada categoría de socio (GET /admin/tarifas). */
+export const obtenerTarifasAdmin = () => api("/admin/tarifas");
 
-/** Actualiza el monto mensual de una categoría (PUT /tarifas/:categoria). */
-export function actualizarTarifaAdmin(categoria, monto) {
+/** Actualiza el monto mensual de la cuota de los socios Activos (PUT /admin/tarifas/activo). */
+export function actualizarTarifaAdmin(categoria = "activo", monto) {
   if (!categoria) return Promise.resolve({ exito: false, mensaje: "Categoría inválida." });
-  return api(`/tarifas/${encodeURIComponent(categoria)}`, {
+  const valor = typeof monto === "string" ? monto.trim() : monto;
+  return api(`/admin/tarifas/${encodeURIComponent(categoria)}`, {
     method: "PUT",
-    body: { monto: Number(monto) },
+    body: { monto: valor },
   });
 }
 

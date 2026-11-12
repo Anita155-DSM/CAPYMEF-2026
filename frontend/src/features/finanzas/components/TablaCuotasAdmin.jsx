@@ -72,11 +72,11 @@ function BotonAccion({ cuota, descargandoId, onDescargar, onPagarEfectivo }) {
       onClick={() => onDescargar(cuota)}
       disabled={descargando}
       className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-primary/25 bg-surface-blue/60 px-3.5 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-      title="Descargar comprobante PDF"
-      aria-label={`Descargar comprobante de ${nombreCuota(cuota.mes_anio)}`}
+      title="Descargar constancia de pago PDF"
+      aria-label={`Descargar constancia de ${nombreCuota(cuota.mes_anio)}`}
     >
       <FaFileArrowDown className="text-xs" />
-      <span>{descargando ? "Descargando..." : "Comprobante"}</span>
+      <span>{descargando ? "Descargando..." : "Constancia"}</span>
     </button>
   );
 }

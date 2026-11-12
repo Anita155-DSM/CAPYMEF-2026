@@ -34,7 +34,6 @@ const RUBROS = ["Comercio", "Industria", "Servicios", "Agropecuario", "Otro"];
 const CATEGORIAS = [
   { valor: "activo", texto: "Activo" },
   { valor: "adherente", texto: "Adherente" },
-  { valor: "padrino", texto: "Padrino" },
 ];
 
 const MAX_ARCHIVO_MB = 5;
@@ -114,6 +113,7 @@ export default function Register() {
       formData.append("tamano_empresa", data.tamano_empresa);
       formData.append("rubro", data.rubro);
       formData.append("actividad", data.actividad);
+      formData.append("aceptaTerminos", data.consentimiento ? "true" : "false");
 
       if (data.constancia && data.constancia[0]) {
         formData.append("constancia", data.constancia[0]);
@@ -124,11 +124,15 @@ export default function Register() {
       if (result.exito) {
         toast.success("Registrado Correctamente. Queda pendiente de revisión.");
         navigate("/login");
-      } else if (result.errores) {
-        const listaDeErrores = result.errores.map((err) => `- ${err.mensaje}`).join("\n");
-        toast.error("Revisá los siguientes campos:\n" + listaDeErrores);
+      } else if (Array.isArray(result.errores) && result.errores.length > 0) {
+        if (result.errores.length === 1) {
+          toast.error(result.errores[0].mensaje);
+        } else {
+          const listaDeErrores = result.errores.map((err) => `- ${err.mensaje}`).join("\n");
+          toast.error("Revisá los siguientes campos:\n" + listaDeErrores);
+        }
       } else {
-        toast.error("Atención: " + result.mensaje);
+        toast.error(result.mensaje || "No se pudo completar el registro.");
       }
     } catch (error) {
       console.error(error);
@@ -201,10 +205,11 @@ export default function Register() {
               <input
                 id="telefono"
                 type="tel"
+                maxLength={20}
                 placeholder="3704 123456"
                 autoComplete="tel"
                 className={claseCampo(errors.telefono)}
-                {...register("telefono", { required: true })}
+                {...register("telefono", { required: true, maxLength: 20 })}
               />
             </CampoForm>
 

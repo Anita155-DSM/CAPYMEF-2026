@@ -82,7 +82,7 @@ export default function TarjetaCuota({ cuota, cuotas, errorCuotas }) {
               onClick={() => descargar(cuota)}
               className="inline-flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-navy shadow-2xs transition-colors hover:border-primary/30 hover:bg-surface-blue hover:text-primary disabled:opacity-60 sm:px-4 sm:py-2.5 sm:text-sm"
             >
-              {procesando ? "Descargando..." : "Comprobante"} <FaDownload />
+              {procesando ? "Descargando..." : "Constancia"} <FaDownload />
             </button>
           ) : (
             <button

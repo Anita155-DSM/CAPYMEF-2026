@@ -13,11 +13,21 @@ export function formatearPeriodo(mesAnio) {
 export const formatearMonto = (monto) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" }).format(Number(monto) || 0);
 
-/** "2026-09-10" → "10/09/2026" (sin pasar por Date, así no hay corrimiento de zona horaria) */
+/** "2026-09-10" → "10/09/2026" (sin corrimiento de zona horaria; si trae hora, usa hora argentina) */
 export function formatearFechaCuota(fecha) {
   if (!fecha) return "-";
-  const [anio, mes, dia] = String(fecha).slice(0, 10).split("-");
-  return dia ? `${dia}/${mes}/${anio}` : "-";
+  const texto = String(fecha).trim();
+  const soloFecha = /^(\d{4})-(\d{2})-(\d{2})$/.exec(texto);
+  if (soloFecha) return `${soloFecha[3]}/${soloFecha[2]}/${soloFecha[1]}`;
+
+  const momento = new Date(texto);
+  if (Number.isNaN(momento.getTime())) return "-";
+  return momento.toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "America/Argentina/Buenos_Aires",
+  });
 }
 
 export const ordenarPorPeriodo = (cuotas = []) =>

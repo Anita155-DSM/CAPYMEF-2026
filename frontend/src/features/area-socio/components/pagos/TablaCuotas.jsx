@@ -56,7 +56,7 @@ export default function TablaCuotas({ cuotas, procesando, onPagar, onDescargar }
                       onClick={() => onDescargar(cuota)}
                       className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-navy shadow-2xs transition-colors hover:border-primary/30 hover:bg-surface-blue hover:text-primary disabled:opacity-60"
                     >
-                      {procesando === `comprobante-${cuota.id}` ? "Descargando..." : "Comprobante"}{" "}
+                      {procesando === `comprobante-${cuota.id}` ? "Descargando..." : "Constancia"}{" "}
                       <FaDownload className="text-xs" />
                     </button>
                   ) : (

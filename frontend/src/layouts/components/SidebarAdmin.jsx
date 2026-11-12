@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
   FaCalendarCheck,
+  FaCheckToSlot,
   FaClipboardCheck,
   FaHouse,
   FaMoneyBillWave,
@@ -19,6 +20,7 @@ const OPCIONES_MENU = [
   { nombre: "Finanzas", ruta: "/admin/finanzas", icono: FaMoneyBillWave },
   { nombre: "Registros", ruta: "/admin/registros", icono: FaClipboardCheck },
   { nombre: "Socios", ruta: "/admin/socios", icono: FaUserGroup },
+  { nombre: "Padrón votantes", ruta: "/admin/padron", icono: FaCheckToSlot },
 ];
 
 const claseItem = ({ isActive }) =>
