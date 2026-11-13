@@ -90,6 +90,14 @@ export const evaluarConfiguracion = (entorno, opciones) => {
     if (falta(env[nombre])) reglaIncumplida(`Falta la variable obligatoria ${nombre}: ${efecto}.`);
   }
 
+  // Términos y condiciones (ver config/terminos.js): mientras el frontend no mande aceptaTerminos, la exigencia
+  // va apagada a propósito (modo transitorio). Por eso es un AVISO y no un error: tenerla apagada es una decisión
+  // válida y no tiene que impedir el arranque. Solo en producción: en desarrollo es lo normal.
+  // Se compara igual que terminosObligatorios(): solo el texto exacto 'true' la activa.
+  if (produccion && env.TERMINOS_OBLIGATORIOS !== 'true') {
+    avisos.push("TERMINOS_OBLIGATORIOS no está en 'true': el registro de socios no exige aceptar los términos y condiciones (activarla cuando el frontend mande aceptaTerminos).");
+  }
+
   return { errores, avisos };
 };
 

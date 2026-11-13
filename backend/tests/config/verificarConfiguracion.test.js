@@ -22,6 +22,7 @@ const entornoCorrecto = () => ({
   CLOUDINARY_CLOUD_NAME: 'nube',
   CLOUDINARY_API_KEY: 'api-key-inventada',
   CLOUDINARY_API_SECRET: 'api-secret-inventado',
+  TERMINOS_OBLIGATORIOS: 'true', // una producción completa exige aceptar los términos
 });
 const enProduccion = (entorno) => evaluarConfiguracion(entorno, { produccion: true });
 const enDesarrollo = (entorno) => evaluarConfiguracion(entorno, { produccion: false });
@@ -293,5 +294,85 @@ describe('verificarConfiguracion', () => {
     expect(espiaWarn).toHaveBeenCalled();
     expect(espiaError).not.toHaveBeenCalled();
     expect(espiaExit).not.toHaveBeenCalled();
+  });
+});
+
+describe('evaluarConfiguracion - términos y condiciones (TERMINOS_OBLIGATORIOS)', () => {
+  const AVISO = "TERMINOS_OBLIGATORIOS no está en 'true': el registro de socios no exige aceptar los términos y condiciones (activarla cuando el frontend mande aceptaTerminos).";
+  const sinTerminos = () => {
+    const entorno = entornoCorrecto();
+    delete entorno.TERMINOS_OBLIGATORIOS;
+    return entorno;
+  };
+
+  it('en producción sin TERMINOS_OBLIGATORIOS es una ADVERTENCIA, no un error (no corta el arranque)', () => {
+    expect(enProduccion(sinTerminos())).toEqual({ errores: [], avisos: [AVISO] });
+  });
+
+  it.each(['false', 'TRUE', ' true', '1', ''])("en producción con TERMINOS_OBLIGATORIOS='%s' también avisa (solo 'true' la activa)", (valor) => {
+    expect(enProduccion({ ...entornoCorrecto(), TERMINOS_OBLIGATORIOS: valor }).avisos).toEqual([AVISO]);
+  });
+
+  it("en producción con TERMINOS_OBLIGATORIOS='true' no hay ninguna advertencia", () => {
+    expect(enProduccion(entornoCorrecto())).toEqual({ errores: [], avisos: [] });
+  });
+
+  it('en desarrollo no agrega nada (tenerla apagada es lo normal)', () => {
+    expect(enDesarrollo(sinTerminos())).toEqual({ errores: [], avisos: [] });
+  });
+
+  it('el aviso nombra la variable pero no muestra su valor', () => {
+    const { avisos } = enProduccion({ ...entornoCorrecto(), TERMINOS_OBLIGATORIOS: 'valor-raro-xyz' });
+
+    expect(avisos.join(' ')).not.toContain('valor-raro-xyz');
+  });
+});
+
+describe('verificarConfiguracion - términos y condiciones', () => {
+  const nodeEnvOriginal = process.env.NODE_ENV;
+
+  // Una configuración de producción completa e inventada (no depende del .env real de quien corre los tests).
+  const configurarProduccion = (terminos) => {
+    for (const [nombre, valor] of Object.entries(entornoCorrecto())) vi.stubEnv(nombre, valor);
+    vi.stubEnv('TERMINOS_OBLIGATORIOS', terminos);
+    process.env.NODE_ENV = 'production';
+  };
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    process.env.NODE_ENV = nodeEnvOriginal;
+    vi.restoreAllMocks();
+  });
+
+  it('en producción sin TERMINOS_OBLIGATORIOS muestra la advertencia y el servidor arranca igual', () => {
+    configurarProduccion(undefined);
+    const espiaWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const espiaError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const espiaExit = vi.spyOn(process, 'exit').mockImplementation(() => {});
+
+    verificarConfiguracion();
+
+    expect(espiaWarn).toHaveBeenCalledWith(expect.stringMatching(/^\[configuración\] Aviso: TERMINOS_OBLIGATORIOS no está en 'true'/));
+    expect(espiaError).not.toHaveBeenCalled();
+    expect(espiaExit).not.toHaveBeenCalled();
+  });
+
+  it("en producción con TERMINOS_OBLIGATORIOS='true' no muestra esa advertencia", () => {
+    configurarProduccion('true');
+    const espiaWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(process, 'exit').mockImplementation(() => {});
+
+    verificarConfiguracion();
+
+    expect(espiaWarn.mock.calls.flat().join(' ')).not.toContain('TERMINOS_OBLIGATORIOS');
+  });
+
+  it('en los tests (NODE_ENV=test) sigue sin hacer nada, aunque falte TERMINOS_OBLIGATORIOS', () => {
+    vi.stubEnv('TERMINOS_OBLIGATORIOS', undefined);
+    const espiaWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    verificarConfiguracion();
+
+    expect(espiaWarn).not.toHaveBeenCalled();
   });
 });
