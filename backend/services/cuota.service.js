@@ -12,6 +12,7 @@ import {
 } from './notificacion.service.js';
 import { evaluarCategoriasDeTodos } from './categoria.service.js';
 import { abonaCuota, FILTRO_SOLO_SOCIOS, INCLUDE_SOLO_SOCIOS } from './abonaCuota.service.js';
+import { enviarMailRecordatorioCuota, smtpConfigurado } from '../config/mailer.js';
 
 const ZONA_HORARIA = 'America/Argentina/Buenos_Aires';
 
@@ -19,6 +20,77 @@ const ZONA_HORARIA = 'America/Argentina/Buenos_Aires';
 // El locale 'en-CA' devuelve justamente ese formato.
 export const fechaHoyArgentina = () =>
   new Date().toLocaleDateString('en-CA', { timeZone: ZONA_HORARIA });
+
+// ==========================================
+// Mails de los recordatorios de cuotas
+// ==========================================
+// El recordatorio del día 7 y el aviso de cuota vencida también van por mail ("en caso de atraso el sistema tiene
+// que emitir un recordatorio"). El aviso de cuota nueva del día 1 NO va por mail: sería un mail por mes a cada
+// socio solo para decir que la cuota existe, y la notificación interna alcanza.
+// Para no repetir, el mail se manda SOLO si la notificación se creó en ese momento: si ya existía (el cron corrió
+// dos veces, el servidor se reinició, o un admin lo ejecutó a mano), ese socio ya recibió su mail.
+
+// Socio de la cuota, con lo justo para el mail. Mismo filtro de siempre: sin cuentas de gestión (admin).
+const INCLUDE_SOCIO_CON_CONTACTO = [{
+  association: 'socio',
+  attributes: ['email', 'razonSocial', 'estado'],
+  where: FILTRO_SOLO_SOCIOS,
+  paranoid: false,
+}];
+
+// De a pocos a la vez: el servidor de correo puede rechazar muchos envíos simultáneos.
+const MAILS_EN_PARALELO = 5;
+
+// Cada aviso de configuración faltante se muestra una sola vez (no una vez por socio ni en cada corrida).
+const avisosMostrados = new Set();
+// Solo para los tests: vuelve a mostrar los avisos de configuración.
+export const reiniciarAvisosDeMails = () => avisosMostrados.clear();
+const avisarUnaVez = (clave, mensaje) => {
+  if (avisosMostrados.has(clave)) return;
+  avisosMostrados.add(clave);
+  console.warn(`[mails de cuotas] ${mensaje}`);
+};
+
+// "socio@dominio.com" -> "so***@dominio.com": el log no muestra la dirección completa.
+const enmascararEmail = (email) => {
+  const [usuario = '', dominio = ''] = String(email).split('@');
+  return `${usuario.slice(0, 2)}***@${dominio || '?'}`;
+};
+
+// ¿A esta cuota le corresponde mail? Solo si la notificación es nueva y la cuenta está aprobada (una cuenta dada de
+// baja, rechazada o pendiente no recibe nada) y tiene email.
+const correspondeMail = (notificacionNueva, cuota) =>
+  notificacionNueva && cuota.socio?.estado === 'aprobado' && Boolean(cuota.socio?.email);
+
+// Manda los mails de a MAILS_EN_PARALELO. Un mail que falla queda en el log (sin la dirección completa ni el
+// detalle del error, que puede incluirla) y no corta el cron ni los demás envíos. Devuelve cuántos salieron.
+const enviarMailsDeCuotas = async (envios) => {
+  if (envios.length === 0) return 0;
+  if (!smtpConfigurado()) {
+    avisarUnaVez('smtp', 'El SMTP no está configurado (SMTP_HOST, SMTP_USER, SMTP_PASS): los recordatorios solo quedan como notificación interna.');
+    return 0;
+  }
+  if (typeof process.env.FRONTEND_URL !== 'string' || process.env.FRONTEND_URL.trim() === '') {
+    avisarUnaVez('frontend', 'FRONTEND_URL no está configurada: los mails no incluyen la dirección de la plataforma.');
+  }
+
+  let enviados = 0;
+  for (let i = 0; i < envios.length; i += MAILS_EN_PARALELO) {
+    const tanda = envios.slice(i, i + MAILS_EN_PARALELO);
+    const resultados = await Promise.allSettled(tanda.map(({ email, datos }) => enviarMailRecordatorioCuota(email, datos)));
+    resultados.forEach((resultado, j) => {
+      if (resultado.status === 'fulfilled') enviados++;
+      else console.error(`[mails de cuotas] No se pudo enviar el mail (${tanda[j].datos.tipo}) de la cuota ${tanda[j].cuotaId} a ${enmascararEmail(tanda[j].email)}: ${resultado.reason?.code || 'error de envío'}`);
+    });
+  }
+  return enviados;
+};
+
+const envioDe = (cuota, tipo) => ({
+  cuotaId: cuota.id,
+  email: cuota.socio.email,
+  datos: { tipo, razonSocial: cuota.socio.razonSocial, mesAnio: cuota.mes_anio, monto: cuota.monto, fechaVencimiento: cuota.fecha_vencimiento },
+});
 
 export const generarCuotasDelMes = async () => {
   try {
@@ -130,6 +202,7 @@ export const marcarCuotasVencidas = async () => {
   });
 
   let marcadas = 0;
+  let mailsEnviados = 0;
 
   if (porVencer.length > 0) {
     const ids = porVencer.map((cuota) => cuota.id);
@@ -144,18 +217,22 @@ export const marcarCuotasVencidas = async () => {
     // Avisamos solo por las que efectivamente quedaron vencidas.
     const vencidas = await Cuota.findAll({
       where: { id: ids, estado: 'vencida' },
-      attributes: ['id', 'usuario_id', 'mes_anio', 'monto'],
+      attributes: ['id', 'usuario_id', 'mes_anio', 'monto', 'fecha_vencimiento'],
+      include: INCLUDE_SOCIO_CON_CONTACTO,
     });
 
+    const envios = [];
     for (const cuota of vencidas) {
-      await crearNotificacion({
+      const nueva = await crearNotificacion({
         usuarioId: cuota.usuario_id,
         tipo: 'cuota_vencida',
         titulo: `Tu cuota de ${formatearPeriodo(cuota.mes_anio)} está vencida`,
         mensaje: `Tenés pendiente ${formatearMonto(cuota.monto)}. Podés regularizarla desde la sección de pagos.`,
         referencia: `cuota-vencida:${cuota.id}`,
       });
+      if (correspondeMail(nueva, cuota)) envios.push(envioDe(cuota, 'vencida'));
     }
+    mailsEnviados = await enviarMailsDeCuotas(envios);
   }
 
   // Aviso a los administradores solo el día en que vencen cuotas nuevas (no todos los días):
@@ -186,7 +263,7 @@ export const marcarCuotasVencidas = async () => {
     console.error('No se pudieron evaluar las categorías de los socios:', errorCategorias.message);
   }
 
-  return { exito: true, marcadas, fechaCorte: hoy, categorias };
+  return { exito: true, marcadas, fechaCorte: hoy, categorias, mailsEnviados };
 };
 
 // Recordatorio previo al vencimiento: avisa a quienes todavía tienen la cuota pendiente
@@ -200,10 +277,11 @@ export const enviarRecordatoriosDeVencimiento = async () => {
   const pendientes = await Cuota.findAll({
     where: { estado: 'pendiente', fecha_vencimiento: { [Op.gte]: hoy } },
     attributes: ['id', 'usuario_id', 'mes_anio', 'monto', 'fecha_vencimiento'],
-    include: INCLUDE_SOLO_SOCIOS,
+    include: INCLUDE_SOCIO_CON_CONTACTO,
   });
 
   let enviados = 0;
+  const envios = [];
 
   for (const cuota of pendientes) {
     const dias = diasEntre(hoy, cuota.fecha_vencimiento);
@@ -217,8 +295,11 @@ export const enviarRecordatoriosDeVencimiento = async () => {
       referencia: `recordatorio:${cuota.id}`,
     });
     if (creada) enviados++;
+    if (correspondeMail(creada, cuota)) envios.push(envioDe(cuota, 'por_vencer'));
   }
 
-  console.log(` Recordatorios de vencimiento enviados: ${enviados}`);
-  return { exito: true, enviados, fechaCorte: hoy };
+  const mailsEnviados = await enviarMailsDeCuotas(envios);
+
+  console.log(` Recordatorios de vencimiento enviados: ${enviados} (mails: ${mailsEnviados})`);
+  return { exito: true, enviados, fechaCorte: hoy, mailsEnviados };
 };

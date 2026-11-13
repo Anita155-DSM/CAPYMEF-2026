@@ -14,6 +14,8 @@ vi.stubEnv('SMTP_HOST', 'smtp.prueba.test');
 vi.stubEnv('SMTP_PORT', '2525');
 vi.stubEnv('SMTP_USER', 'usuario-de-prueba');
 vi.stubEnv('SMTP_PASS', 'clave-de-prueba');
+// Se carga el módulo como en producción: en NODE_ENV=test usa un transporte que no envía (ver el último bloque).
+vi.stubEnv('NODE_ENV', 'production');
 
 const { enviarMailRecuperacion, enviarMailComprobantePago } = await import('../../config/mailer.js');
 // La configuración del transporte se lee una sola vez, al importar el módulo: se guarda antes de que
@@ -100,5 +102,17 @@ describe('enviarMailComprobantePago', () => {
 
     expect(mailEnviado().html).toContain('¡Gracias por tu pago, Empresa SA!');
     expect(mailEnviado().html).toContain('$12.500,50');
+  });
+});
+
+describe('transporte en los tests (red de seguridad)', () => {
+  it('con NODE_ENV=test usa jsonTransport: arma el mail pero no lo envía, aunque el .env tenga un SMTP real', async () => {
+    vi.resetModules();
+    createTransport.mockClear();
+    vi.stubEnv('NODE_ENV', 'test');
+
+    await import('../../config/mailer.js');
+
+    expect(createTransport).toHaveBeenCalledWith({ jsonTransport: true });
   });
 });

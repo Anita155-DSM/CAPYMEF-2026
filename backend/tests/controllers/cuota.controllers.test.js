@@ -7,7 +7,12 @@ import jwt from 'jsonwebtoken';
 // Nada sale a internet: el PDF del comprobante, el mail y la subida a Cloudinary son falsos (cada uno
 // tiene sus propios tests). Router, controlador, notificaciones, categorías y base (SQLite) son reales.
 vi.mock('../../services/comprobante.service.js', () => ({ generarComprobantePago: vi.fn() }));
-vi.mock('../../config/mailer.js', () => ({ enviarMailComprobantePago: vi.fn(), enviarMailRecuperacion: vi.fn() }));
+vi.mock('../../config/mailer.js', () => ({
+  enviarMailComprobantePago: vi.fn(),
+  enviarMailRecuperacion: vi.fn(),
+  enviarMailRecordatorioCuota: vi.fn(async () => {}),
+  smtpConfigurado: () => true,
+}));
 vi.mock('../../services/cloudinary.service.js', () => ({
   subirPDFCloudinary: vi.fn(),
   eliminarImagenCloudinary: vi.fn(),

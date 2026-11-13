@@ -12,6 +12,9 @@ import {
 import { asegurarTarifasIniciales } from '../../services/tarifa.service.js';
 import { reiniciarBase, cerrarBase, crearUsuario } from '../helpers/baseDeDatos.js';
 
+// Los recordatorios de cuotas también van por mail: el mailer es falso (el contenido se prueba en recordatoriosPorMail.test.js).
+vi.mock('../../config/mailer.js', () => ({ enviarMailRecordatorioCuota: vi.fn(async () => {}), smtpConfigurado: () => true }));
+
 // Estas funciones las corre el cron (día 1, día 7 y todos los días a las 00:05). Dependen de la fecha
 // de hoy en Argentina, así que solo se simula el reloj (Date): la base y todo lo demás son reales.
 const fijarHoy = (fechaHoraArgentina) => vi.setSystemTime(new Date(`${fechaHoraArgentina}-03:00`));
@@ -240,7 +243,7 @@ describe('enviarRecordatoriosDeVencimiento (día 7)', () => {
 
     const resultado = await enviarRecordatoriosDeVencimiento();
 
-    expect(resultado).toEqual({ exito: true, enviados: 1, fechaCorte: '2026-11-07' });
+    expect(resultado).toEqual({ exito: true, enviados: 1, fechaCorte: '2026-11-07', mailsEnviados: 1 });
     const [aviso] = await notificaciones('recordatorio_cuota');
     expect(aviso.titulo).toBe('Tu cuota de 11/2026 vence en 3 días');
     expect(aviso.mensaje).toBe('Recordá abonar $10.000 hasta el 10/11/2026 para estar al día.');

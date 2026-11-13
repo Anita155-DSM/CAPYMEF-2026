@@ -4,6 +4,8 @@ import express from 'express';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { DataTypes } from 'sequelize';
+// Los recordatorios de cuotas también van por mail: el mailer es falso (el contenido se prueba en recordatoriosPorMail.test.js).
+vi.mock('../../config/mailer.js', () => ({ enviarMailRecordatorioCuota: vi.fn(async () => {}), smtpConfigurado: () => true }));
 import { Cuota } from '../../models/cuota.models.js';
 import { Evento } from '../../models/evento.models.js';
 import { Notificacion } from '../../models/notificacion.models.js';
