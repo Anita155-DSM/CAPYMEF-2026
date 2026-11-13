@@ -10,7 +10,7 @@ import { DataTypes } from 'sequelize';
 // Cloudinary como privados ("authenticated"), ningún JSON devuelve su URL, y hay endpoints que entregan una URL
 // temporal (al dueño o a un admin). Las imágenes de noticias y eventos siguen públicas.
 // Cloudinary es falso: el SDK se reemplaza por uno que anota subidas, firmas y borrados. Las subidas pasan por el
-// multer y el CloudinaryStorage reales, así se comprueba lo que de verdad le llegaría a Cloudinary.
+// multer real (en memoria) y la subida real de subirACloudinary.js, así se comprueba lo que de verdad le llegaría a Cloudinary.
 const { upload_stream, destroy, private_download_url } = vi.hoisted(() => ({
   upload_stream: vi.fn(), destroy: vi.fn(), private_download_url: vi.fn(),
 }));

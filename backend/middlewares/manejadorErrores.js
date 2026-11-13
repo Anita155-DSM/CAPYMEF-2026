@@ -45,6 +45,14 @@ export const manejadorErrores = (err, req, res, next) => {
     return res.status(400).json({ exito: false, mensaje: err.message });
   }
 
+  // Cloudinary no pudo guardar un archivo subido (ver middlewares/multer/subirACloudinary.js): 502, porque el
+  // que falló es el servicio externo, no el pedido. El mensaje es para el usuario; en el log va solo el código y
+  // el mensaje de Cloudinary (no el objeto entero, que trae la configuración del pedido).
+  if (err.name === 'ErrorDeSubidaACloudinary') {
+    console.error('Cloudinary no pudo guardar un archivo subido:', err.causa?.http_code ?? '', err.causa?.message ?? 'sin detalle');
+    return res.status(502).json({ exito: false, mensaje: err.message });
+  }
+
   // Origen no permitido por CORS.
   if (err.message === 'Bloqueado por CORS') {
     return res.status(403).json({ exito: false, mensaje: 'Origen no permitido.' });

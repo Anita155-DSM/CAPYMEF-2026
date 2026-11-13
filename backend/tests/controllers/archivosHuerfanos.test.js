@@ -10,7 +10,7 @@ import { DataTypes } from 'sequelize';
 // el archivo se tiene que borrar (validarResultado), para que no quede huérfano. Vale para todas las subidas:
 // constancia del registro y comprobante de gasto (privados) e imágenes de noticias y eventos (públicas).
 // Cloudinary es falso: el SDK se reemplaza por uno que anota subidas y borrados. Las subidas pasan por el multer
-// y el CloudinaryStorage reales. El borrado del servicio se envuelve en un espía que por defecto llama al real.
+// real (en memoria) y la subida real de middlewares/multer/subirACloudinary.js. El borrado del servicio se envuelve en un espía que por defecto llama al real.
 const { upload_stream, destroy } = vi.hoisted(() => ({ upload_stream: vi.fn(), destroy: vi.fn() }));
 vi.mock('cloudinary', () => ({ v2: { config: vi.fn(), uploader: { upload_stream, destroy }, utils: { private_download_url: vi.fn() } } }));
 vi.mock('../../config/mailer.js', () => ({ enviarMailRecuperacion: vi.fn(), enviarMailComprobantePago: vi.fn() }));
@@ -234,16 +234,51 @@ describe('si multer mismo rechaza el archivo', () => {
     await noSeBorroNada();
   });
 
-  it('un archivo de más de 5 MB responde 413, y si llegó a subirse una parte, se borra como privado', async () => {
+  it('un archivo de más de 5 MB responde 413 sin subir nada a Cloudinary (ni nada que borrar)', async () => {
     const grande = Buffer.concat([PDF, Buffer.alloc(5 * 1024 * 1024 + 10)]);
 
     const respuesta = await registro().attach('constancia', grande, { filename: 'grande.pdf', contentType: 'application/pdf' });
 
     expect(respuesta.status).toBe(413);
-    // La parte que alcanzó a llegar a Cloudinary la borra multer al abortar, y ahora con el tipo authenticated
-    // (el borrado de multer-storage-cloudinary no lo indicaba y el archivo privado quedaba huérfano).
-    expect(upload_stream).toHaveBeenCalledOnce();
-    await seBorro('capymef_constancias/subido', BORRADO_PRIVADO);
+    // Antes (multer-storage-cloudinary) el archivo se iba subiendo mientras llegaba, y al pasar el tope multer
+    // tenía que borrar la parte ya subida. Ahora multer lo lee en memoria y lo corta antes de subir nada.
+    expect(upload_stream).not.toHaveBeenCalled();
+    await noSeBorroNada();
     expect(await User.count({ where: { email: 'nueva@empresa.com' } })).toBe(0);
+  });
+
+  it('si Cloudinary falla al subir la constancia, responde 502, no crea la cuenta y no queda nada que borrar', async () => {
+    upload_stream.mockImplementation((opciones, callback) =>
+      new Writable({ write(chunk, _, listo) { listo(); }, final(listo) { listo(); callback({ message: 'Server Error', http_code: 500 }); } })
+    );
+
+    const respuesta = await conConstancia(registro());
+
+    expect(respuesta.status).toBe(502);
+    expect(respuesta.body).toEqual({ exito: false, mensaje: 'No se pudo guardar el archivo. Probá de nuevo en unos minutos.' });
+    expect(await User.count({ where: { email: 'nueva@empresa.com' } })).toBe(0);
+    await noSeBorroNada();
+  });
+
+  it('si Cloudinary falla al subir el ticket de un gasto, responde 502 y no registra el gasto', async () => {
+    upload_stream.mockImplementation((opciones, callback) =>
+      new Writable({ write(chunk, _, listo) { listo(); }, final(listo) { listo(); callback({ message: 'Server Error', http_code: 500 }); } })
+    );
+
+    const respuesta = await request(app).post('/api/gastos').set('Authorization', tokenAdmin)
+      .field('fecha', '2026-11-05').field('concepto', 'Luz').field('monto', '100')
+      .attach('comprobante', PDF, { filename: 'factura.pdf', contentType: 'application/pdf' });
+
+    expect(respuesta.status).toBe(502);
+    expect(await Gasto.count()).toBe(0);
+  });
+
+  it('un archivo de exactamente 5 MB todavía se acepta y se sube', async () => {
+    const justo = Buffer.concat([PDF, Buffer.alloc(5 * 1024 * 1024 - PDF.length)]);
+
+    const respuesta = await registro().attach('constancia', justo, { filename: 'justo.pdf', contentType: 'application/pdf' });
+
+    expect(respuesta.status).toBe(201);
+    expect(upload_stream).toHaveBeenCalledOnce();
   });
 });

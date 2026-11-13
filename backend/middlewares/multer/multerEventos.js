@@ -1,22 +1,13 @@
-import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import multer from 'multer';
 import path from 'path';
+import { crearSubidaACloudinary } from './subirACloudinary.js';
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'capymef_eventos',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    resource_type: 'image'
-  }
-});
+// Imágenes PÚBLICAS (sin type 'authenticated'): se muestran en la página pública de eventos.
+// La configuración de Cloudinary y la subida están en subirACloudinary.js (ver el por qué ahí).
+const opcionesDeSubida = {
+  folder: 'capymef_eventos',
+  allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+  resource_type: 'image',
+};
 
 // Filtro LOCAL (igual que en multerNoticias.js y multerCloudinary.js): rechaza el
 // archivo antes de gastar el viaje de red a Cloudinary, en vez de confiar solo en
@@ -40,8 +31,5 @@ export const fileFilter = (req, file, cb) => {
   }
 };
 
-export const uploadEvento = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB máximo
-  fileFilter
-});
+// 5 MB máximo (el tope por defecto de crearSubidaACloudinary), cortado antes de subir.
+export const uploadEvento = crearSubidaACloudinary({ opcionesDeSubida, fileFilter });

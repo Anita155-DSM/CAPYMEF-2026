@@ -1,15 +1,8 @@
-import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import multer from 'multer';
 import path from 'path';
-import { eliminarArchivoDeCloudinary } from '../../services/cloudinary.service.js';
+import { crearSubidaACloudinary } from './subirACloudinary.js';
 
-// 1. Configuramos Cloudinary leyendo tus variables de entorno seguras
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+// 1. La configuración de Cloudinary y la subida en sí están en subirACloudinary.js (multer en memoria +
+// upload_stream), que reemplazó a multer-storage-cloudinary al pasar a Cloudinary 2.x.
 
 // 2. Filtro LOCAL: rechaza el archivo ANTES de intentar subirlo a Cloudinary.
 // "allowed_formats" de abajo no filtra nada por sí solo — solo le dice a Cloudinary
@@ -45,29 +38,17 @@ export const fileFilter = (req, file, cb) => {
 export const CARPETA_CONSTANCIAS = 'capymef_constancias';
 export const CARPETA_GASTOS = 'capymef_gastos';
 
-const crearSubidaPrivada = (folder) => {
-  const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-      folder,
-      allowed_formats: ['jpg', 'png', 'jpeg', 'pdf', 'webp'],
-      resource_type: 'auto', // Permite tanto imágenes como documentos PDF
-      type: 'authenticated', // privado: sin URL firmada no se puede abrir
-    },
-  });
-  // Cuando multer aborta una petición (por ejemplo, un archivo que supera los 5 MB), borra lo que ya llegó a
-  // subir llamando a _removeFile. El de multer-storage-cloudinary llama a destroy solo con el public_id, y un
-  // archivo privado no se borra así (Cloudinary lo busca entre los públicos): quedaba huérfano. Acá se borra a
-  // partir de su URL, que dice si es privado y de qué tipo de recurso es. Nunca devuelve error a multer.
-  storage._removeFile = (req, file, callback) => {
-    eliminarArchivoDeCloudinary(file.path).then(() => callback(null), () => callback(null));
-  };
-  return multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB máximo
-    fileFilter,
-  });
-};
+// Con multer en memoria, un archivo que supera los 5 MB se corta antes de subir nada. Antes, con el storage de
+// Cloudinary, una parte ya podía haber llegado a subirse y había que borrarla al abortar (_removeFile).
+const crearSubidaPrivada = (folder) => crearSubidaACloudinary({
+  opcionesDeSubida: {
+    folder,
+    allowed_formats: ['jpg', 'png', 'jpeg', 'pdf', 'webp'],
+    resource_type: 'auto', // Permite tanto imágenes como documentos PDF
+    type: 'authenticated', // privado: sin URL firmada no se puede abrir
+  },
+  fileFilter, // 5 MB máximo (el tope por defecto de crearSubidaACloudinary)
+});
 
 // 4. Los middlewares listos para usar en las rutas
 export const uploadConstancia = crearSubidaPrivada(CARPETA_CONSTANCIAS); // registro de socios
