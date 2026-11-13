@@ -380,13 +380,12 @@ describe('borrado de un archivo que ya se subió', () => {
     await vi.waitFor(() => expect(destroy).toHaveBeenCalledWith('capymef_constancias/archivo-subido', { type: 'authenticated', resource_type: 'image', invalidate: true }));
   });
 
-  it('un gasto que no se puede guardar borra el comprobante privado recién subido', async () => {
-    // Sin concepto: la base rechaza el gasto.
+  it('un gasto rechazado (sin concepto) borra el comprobante privado recién subido', async () => {
     const respuesta = await request(app).post('/api/gastos').set('Authorization', tokenAdmin)
       .field('fecha', '2026-11-05').field('monto', '100')
       .attach('comprobante', PDF, { filename: 'factura.pdf', contentType: 'application/pdf' });
 
-    expect(respuesta.status).toBe(500);
+    expect(respuesta.status).toBe(400);
     await vi.waitFor(() => expect(destroy).toHaveBeenCalledWith('capymef_gastos/archivo-subido', { type: 'authenticated', resource_type: 'image', invalidate: true }));
   });
 

@@ -117,14 +117,23 @@ describe('POST /api/gastos', () => {
     expect(registro.descripcion).toBe('Se registró un egreso por $15400.5 (Concepto: Factura REFSA Luz)');
   });
 
-  it('si no se puede guardar, no deja nada en la base, borra el comprobante ya subido y no muestra el error interno', async () => {
-    // Sin concepto: la base lo rechaza (no hay validador para gastos, ver informe).
+  it('sin concepto lo corta el validador con 400, no guarda nada y borra el comprobante ya subido', async () => {
     const respuesta = await registrar({ fecha: '2026-11-05', monto: 100 }, { conComprobante: true });
+
+    expect(respuesta.status).toBe(400);
+    expect(respuesta.body.errores).toEqual([{ campo: 'concepto', mensaje: 'El concepto del gasto es obligatorio.' }]);
+    expect(await Gasto.count()).toBe(0);
+    // Se borra a partir de la URL del archivo subido (así sabe si es privado o público).
+    await vi.waitFor(() => expect(eliminarArchivoDeCloudinary).toHaveBeenCalledWith('https://res.cloudinary.com/demo/image/upload/v1/capymef/ticket.jpg'));
+  });
+
+  it('si falla la base, responde 500 sin mostrar el error interno y borra el comprobante ya subido', async () => {
+    vi.spyOn(Gasto, 'create').mockRejectedValue(new Error('relation "gastos" does not exist'));
+
+    const respuesta = await registrar(gastoValido, { conComprobante: true });
 
     expect(respuesta.status).toBe(500);
     expect(respuesta.body).toEqual({ exito: false, mensaje: 'Error interno del servidor.' });
-    expect(await Gasto.count()).toBe(0);
-    // Se borra a partir de la URL del archivo subido (así sabe si es privado o público).
     expect(eliminarArchivoDeCloudinary).toHaveBeenCalledWith('https://res.cloudinary.com/demo/image/upload/v1/capymef/ticket.jpg');
   });
 });

@@ -2,6 +2,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 import path from 'path';
+import { eliminarArchivoDeCloudinary } from '../../services/cloudinary.service.js';
 
 // 1. Configuramos Cloudinary leyendo tus variables de entorno seguras
 cloudinary.config({
@@ -44,20 +45,29 @@ export const fileFilter = (req, file, cb) => {
 export const CARPETA_CONSTANCIAS = 'capymef_constancias';
 export const CARPETA_GASTOS = 'capymef_gastos';
 
-const crearSubidaPrivada = (folder) =>
-  multer({
-    storage: new CloudinaryStorage({
-      cloudinary,
-      params: {
-        folder,
-        allowed_formats: ['jpg', 'png', 'jpeg', 'pdf', 'webp'],
-        resource_type: 'auto', // Permite tanto imágenes como documentos PDF
-        type: 'authenticated', // privado: sin URL firmada no se puede abrir
-      },
-    }),
+const crearSubidaPrivada = (folder) => {
+  const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder,
+      allowed_formats: ['jpg', 'png', 'jpeg', 'pdf', 'webp'],
+      resource_type: 'auto', // Permite tanto imágenes como documentos PDF
+      type: 'authenticated', // privado: sin URL firmada no se puede abrir
+    },
+  });
+  // Cuando multer aborta una petición (por ejemplo, un archivo que supera los 5 MB), borra lo que ya llegó a
+  // subir llamando a _removeFile. El de multer-storage-cloudinary llama a destroy solo con el public_id, y un
+  // archivo privado no se borra así (Cloudinary lo busca entre los públicos): quedaba huérfano. Acá se borra a
+  // partir de su URL, que dice si es privado y de qué tipo de recurso es. Nunca devuelve error a multer.
+  storage._removeFile = (req, file, callback) => {
+    eliminarArchivoDeCloudinary(file.path).then(() => callback(null), () => callback(null));
+  };
+  return multer({
+    storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB máximo
     fileFilter,
   });
+};
 
 // 4. Los middlewares listos para usar en las rutas
 export const uploadConstancia = crearSubidaPrivada(CARPETA_CONSTANCIAS); // registro de socios

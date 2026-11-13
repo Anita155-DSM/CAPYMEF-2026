@@ -4,6 +4,7 @@ import { verificarToken } from '../middlewares/authMiddleware.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
 import { uploadGasto } from '../middlewares/multer/multerCloudinary.js'; // Sube el comprobante a Cloudinary como archivo privado
 import { paramUuid } from '../middlewares/validarParametros.js';
+import { validacionGasto } from '../middlewares/validator/gasto.validator.js';
 
 const router = Router();
 
@@ -16,7 +17,8 @@ router.use(verificarToken);
 router.use(verificarAdmin);
 
 // Rutas de Finanzas -> Egresos
-router.post('/', uploadGasto.single('comprobante'), registrarGasto);
+// El validador va después de multer (necesita los campos del formulario); si rechaza, borra el comprobante subido.
+router.post('/', uploadGasto.single('comprobante'), validacionGasto, registrarGasto);
 router.get('/', obtenerGastos);
 router.get('/:id/comprobante', obtenerComprobanteGasto); // URL temporal del comprobante (privado)
 router.delete('/:id', eliminarGasto);
