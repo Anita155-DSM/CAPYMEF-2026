@@ -1,5 +1,35 @@
 import { body } from 'express-validator';
 import { validarResultado } from './validarResultado.js';
+import { motivoUrlDeLogoInvalida, MAXIMO_LOGOS_EXTERNOS } from '../../services/urlSegura.service.js';
+
+// Logos externos de los certificados. Llegan como un texto JSON (por el multipart/form-data, ej.
+// '["https://..."]') o como array si el pedido es JSON. El SERVIDOR los descarga al generar cada certificado,
+// así que no alcanza con "parece un link": antes se aceptaba cualquier http(s), incluida una dirección interna
+// (riesgo de SSRF, ver services/urlSegura.service.js). Ahora: como máximo 5, y cada uno https, sin usuario ni
+// contraseña, puerto 443, hasta 255 caracteres y con un dominio público (ni IP, ni localhost).
+// Es la misma regla al crear y al editar (antes estaba copiada dos veces).
+const validarLogosExternos = (valor) => {
+  if (!valor) return true;
+  let parseado = valor;
+  if (!Array.isArray(valor)) {
+    try {
+      parseado = JSON.parse(valor);
+    } catch {
+      throw new Error('logosExternos debe ser un array de URLs en formato JSON.');
+    }
+  }
+  if (!Array.isArray(parseado)) {
+    throw new Error('logosExternos debe ser un array.');
+  }
+  if (parseado.length > MAXIMO_LOGOS_EXTERNOS) {
+    throw new Error(`Podés cargar como máximo ${MAXIMO_LOGOS_EXTERNOS} logos externos.`);
+  }
+  parseado.forEach((url, indice) => {
+    const motivo = motivoUrlDeLogoInvalida(url);
+    if (motivo) throw new Error(`El logo ${indice + 1} no es válido: ${motivo}.`);
+  });
+  return true;
+};
 
 // export const validarResultado = (req, res, next) => {
 //   const errores = validationResult(req);
@@ -52,28 +82,10 @@ export const validacionEvento = [
     .optional()
     .isIn(['programado', 'finalizado', 'cancelado']).withMessage('Estado inválido.'),
 
-  // logosExternos llega como un string JSON (por el multipart/form-data), por eso
-  // se valida con un chequeo personalizado en vez de isArray/isURL directo.
+  // logosExternos: ver validarLogosExternos (arriba).
   body('logosExternos')
     .optional()
-    .custom((valor) => {
-      if (!valor) return true;
-      let parseado;
-      try {
-        parseado = JSON.parse(valor);
-      } catch {
-        throw new Error('logosExternos debe ser un array de URLs en formato JSON.');
-      }
-      if (!Array.isArray(parseado)) {
-        throw new Error('logosExternos debe ser un array.');
-      }
-      const regexUrl = /^https?:\/\/.+/i;
-      const todasValidas = parseado.every((url) => typeof url === 'string' && regexUrl.test(url));
-      if (!todasValidas) {
-        throw new Error('Todas las URLs de logosExternos deben ser links válidos (http/https).');
-      }
-      return true;
-    }),
+    .custom(validarLogosExternos),
 
   validarResultado
 ];
@@ -111,23 +123,6 @@ export const validacionActualizarEvento = [
     .isIn(['programado', 'finalizado', 'cancelado']).withMessage('Estado inválido.'),
   body('logosExternos')
     .optional()
-    .custom((valor) => {
-      if (!valor) return true;
-      let parseado;
-      try {
-        parseado = JSON.parse(valor);
-      } catch {
-        throw new Error('logosExternos debe ser un array de URLs en formato JSON.');
-      }
-      if (!Array.isArray(parseado)) {
-        throw new Error('logosExternos debe ser un array.');
-      }
-      const regexUrl = /^https?:\/\/.+/i;
-      const todasValidas = parseado.every((url) => typeof url === 'string' && regexUrl.test(url));
-      if (!todasValidas) {
-        throw new Error('Todas las URLs de logosExternos deben ser links válidos (http/https).');
-      }
-      return true;
-    }),
+    .custom(validarLogosExternos),
   validarResultado
 ];

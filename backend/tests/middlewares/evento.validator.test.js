@@ -34,7 +34,7 @@ describe('validacionEvento (crear)', () => {
       lugar: 'https://meet.ejemplo.test/abc',
       cupoMaximo: '50',
       estado: 'programado',
-      logosExternos: JSON.stringify(['https://logos.test/gobierno.png', 'http://logos.test/sponsor.jpg']),
+      logosExternos: JSON.stringify(['https://logos.test/gobierno.png', 'https://logos.test/sponsor.jpg']),
     });
 
     expect(respuesta.status).toBe(200);
@@ -86,8 +86,8 @@ describe('validacionEvento (crear)', () => {
   it.each([
     ['no es JSON', 'https://logo.test/a.png', 'logosExternos debe ser un array de URLs en formato JSON.'],
     ['es JSON pero no un array', JSON.stringify({ url: 'https://logo.test/a.png' }), 'logosExternos debe ser un array.'],
-    ['tiene una URL sin http/https', JSON.stringify(['https://logo.test/a.png', 'ftp://logo.test/b.png']), 'Todas las URLs de logosExternos deben ser links válidos (http/https).'],
-    ['tiene algo que no es texto', JSON.stringify([123]), 'Todas las URLs de logosExternos deben ser links válidos (http/https).'],
+    ['tiene una URL que no es https', JSON.stringify(['https://logo.test/a.png', 'ftp://logo.test/b.png']), 'El logo 2 no es válido: tiene que empezar con https://.'],
+    ['tiene algo que no es texto', JSON.stringify([123]), 'El logo 1 no es válido: no es un link válido.'],
   ])('logosExternos que %s se rechaza con un mensaje claro', async (_, logosExternos, mensaje) => {
     const respuesta = await crear({ logosExternos });
 
