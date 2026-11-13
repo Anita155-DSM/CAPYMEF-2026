@@ -233,6 +233,8 @@ describe('GET /api/admin/resumen-inicio', () => {
       recaudacion: { montoRecaudado: 15000, cuotasDelMes: 1, cuotasPagadas: 1, porcentajeCobrado: 100 },
       morosidad: { indice: 0, sociosConDeuda: 0, sociosConCuotas: 1, sociosEnRiesgo: 0, umbralRiesgo: 2, cuotasVencidas: 0 },
       proximoEvento: null,
+      // El admin no cuenta como socio: solo el socio Activo aprobado.
+      socios: { totalSocios: 1, porCategoria: { activo: 1, adherente: 0, padrino: 0, honorario: 0 }, solicitudesPendientes: 0, degradadosPorMora: 0 },
     });
   });
 });

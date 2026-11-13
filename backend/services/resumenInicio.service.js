@@ -23,6 +23,7 @@
 // 3) PRÓXIMA CAPACITACIÓN — el modelo Evento no distingue "capacitación" de otros eventos.
 //    [A confirmar] Se toma el próximo EVENTO cualquiera: no cancelado, con fecha de hoy en adelante, el más
 //    cercano (desempata la hora de inicio). Con sus inscriptos y su cupo. null si no hay ninguno.
+// 4) SOCIOS — conteos del padrón (ver calcularSocios, más abajo).
 //
 // Rendimiento: la base es remota y cada consulta tarda, así que todo son conteos y sumas agregadas
 // (count / sum / count agrupado), sin recorrer registros con una consulta por cada uno.
@@ -114,13 +115,44 @@ const buscarProximoEvento = async (hoy) => {
   };
 };
 
+// 4) SOCIOS — conteos para las tarjetas del padrón del inicio. Antes los calculaba el frontend descargando TODOS
+//    los usuarios (GET /admin/usuarios) y filtrándolos en el navegador; además contaba a las cuentas de gestión
+//    (admin), que no son socios. Acá son consultas de conteo, sin admins (FILTRO_SOLO_SOCIOS).
+//    - totalSocios: socios aprobados (el padrón). Es la suma de porCategoria.
+//    - porCategoria: aprobados de cada categoría; todas las categorías aparecen, en 0 si no hay ninguno.
+//    - solicitudesPendientes: cuentas en estado pendiente (esperan aprobación).
+//    - degradadosPorMora: aprobados que el sistema pasó a Adherente por mora (subconjunto de adherente).
+//    Rechazados e inactivos no cuentan en ningún número (el frontend tampoco los usa).
+const calcularSocios = async () => {
+  const [aprobadosPorCategoria, solicitudesPendientes, degradadosPorMora] = await Promise.all([
+    User.count({ where: { estado: 'aprobado', ...FILTRO_SOLO_SOCIOS }, group: ['categoria'] }),
+    User.count({ where: { estado: 'pendiente', ...FILTRO_SOLO_SOCIOS } }),
+    User.count({ where: { estado: 'aprobado', degradadoPorMora: true, ...FILTRO_SOLO_SOCIOS } }),
+  ]);
+
+  // Todas las categorías del modelo, en 0, así el frontend nunca recibe una clave faltante ni null.
+  const porCategoria = Object.fromEntries(User.rawAttributes.categoria.values.map((categoria) => [categoria, 0]));
+  for (const { categoria, count } of aprobadosPorCategoria) {
+    if (categoria in porCategoria) porCategoria[categoria] = Number(count);
+  }
+
+  return {
+    totalSocios: Object.values(porCategoria).reduce((suma, cantidad) => suma + cantidad, 0),
+    porCategoria,
+    solicitudesPendientes,
+    degradadosPorMora,
+  };
+};
+
 // hoy: "YYYY-MM-DD" (fecha argentina). Se recibe por parámetro para poder probar cualquier fecha.
 export const calcularResumenInicio = async ({ hoy }) => {
   const periodo = hoy.slice(0, 7);
-  const [recaudacion, morosidad, proximoEvento] = await Promise.all([
+  const [recaudacion, morosidad, proximoEvento, socios] = await Promise.all([
     calcularRecaudacion(periodo),
     calcularMorosidad(),
     buscarProximoEvento(hoy),
+    calcularSocios(),
   ]);
-  return { periodo, recaudacion, morosidad, proximoEvento };
+  // socios es nuevo; las claves anteriores quedan iguales.
+  return { periodo, recaudacion, morosidad, proximoEvento, socios };
 };
