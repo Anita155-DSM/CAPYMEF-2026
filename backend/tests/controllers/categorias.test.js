@@ -8,7 +8,7 @@ import { DataTypes } from 'sequelize';
 // Nada sale a internet: la subida de la constancia a Cloudinary, la consulta a Mercado Pago, el mail, la
 // subida del comprobante y el PDF son falsos. Los routers, los controladores y la base (SQLite) son reales.
 vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({
-  uploadNube: {
+  uploadConstancia: {
     single: () => (req, res, next) => {
       req.file = { path: 'https://res.cloudinary.com/demo/raw/upload/constancia.pdf', filename: 'constancia' };
       next();

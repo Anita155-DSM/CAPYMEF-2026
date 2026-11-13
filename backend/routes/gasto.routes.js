@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { registrarGasto, obtenerGastos, eliminarGasto } from '../controllers/gasto.controllers.js';
+import { registrarGasto, obtenerGastos, eliminarGasto, obtenerComprobanteGasto } from '../controllers/gasto.controllers.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 import { verificarAdmin } from '../middlewares/roleMiddleware.js';
-import { uploadNube } from '../middlewares/multer/multerCloudinary.js'; // Antes apuntaba a multerMiddleware.js (deprecado, disco local); ahora sube el comprobante directo a Cloudinary
+import { uploadGasto } from '../middlewares/multer/multerCloudinary.js'; // Sube el comprobante a Cloudinary como archivo privado
 import { paramUuid } from '../middlewares/validarParametros.js';
 
 const router = Router();
@@ -16,8 +16,9 @@ router.use(verificarToken);
 router.use(verificarAdmin);
 
 // Rutas de Finanzas -> Egresos
-router.post('/', uploadNube.single('comprobante'), registrarGasto);
+router.post('/', uploadGasto.single('comprobante'), registrarGasto);
 router.get('/', obtenerGastos);
+router.get('/:id/comprobante', obtenerComprobanteGasto); // URL temporal del comprobante (privado)
 router.delete('/:id', eliminarGasto);
 
 export default router;

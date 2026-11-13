@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import fs from 'fs';
 import crypto from 'crypto';
 import { User } from '../models/user.models.js';
 import { enviarMailRecuperacion } from '../config/mailer.js';
+import { eliminarArchivoDeCloudinary, urlTemporalDeArchivo, reemplazarUrlPorIndicador } from '../services/cloudinary.service.js';
 import { VERSION_TERMINOS, aceptoLosTerminos } from '../config/terminos.js';
 import { Auditoria } from '../models/auditoria.models.js';
 import { CODIGOS_AUTH } from '../middlewares/codigosAuth.js';
@@ -31,11 +31,11 @@ const COSTO_BCRYPT = 10;
 // el arranque del servidor mientras se calcula; para el primer login ya está listo.
 const hashDeRelleno = bcrypt.hash(crypto.randomBytes(32).toString('hex'), COSTO_BCRYPT);
 
-// Función auxiliar para borrar archivos subidos si falla el registro
-const eliminarArchivo = (filePath) => {
-  if (filePath && fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
+// Si el registro no se completa, la constancia ya subida se borra de Cloudinary. Antes se intentaba borrar
+// como un archivo del disco (fs.unlinkSync) con la URL de Cloudinary: no borraba nada y la constancia quedaba
+// guardada sin cuenta asociada. Ahora es privada, así que se borra indicando su tipo (ver cloudinary.service.js).
+const eliminarConstanciaSubida = (archivo) => {
+  if (archivo?.path) eliminarArchivoDeCloudinary(archivo.path);
 };
 
 // Reglas de contraseña para el restablecimiento. DEBEN ser las mismas que en el registro
@@ -83,7 +83,7 @@ export const registrarUsuario = async (req, res) => {
     });
 
     if (usuarioExistente) {
-      eliminarArchivo(constanciaFile.path); // Borramos el archivo subido para no ocupar espacio
+      eliminarConstanciaSubida(constanciaFile); // Borramos el archivo subido para no ocupar espacio
       const mensaje = usuarioExistente.email === email 
         ? 'El correo electrónico ya se encuentra registrado.' 
         : 'El CUIT ingresado ya se encuentra registrado.';
@@ -133,7 +133,7 @@ export const registrarUsuario = async (req, res) => {
       },
     });
   } catch (error) {
-    if (constanciaFile) eliminarArchivo(constanciaFile.path);
+    eliminarConstanciaSubida(constanciaFile);
     console.error('Error al registrar solicitud de socio:', error.message);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -323,9 +323,34 @@ export const obtenerPerfil = async (req, res) => {
       return res.status(404).json({ exito: false, mensaje: 'Usuario no encontrado.' });
     }
 
-    res.status(200).json({ exito: true, data: usuario });
+    // Sin la URL de la constancia (es privada): tieneConstancia dice si hay una, y la URL temporal se pide a
+    // GET /api/auth/perfil/constancia.
+    res.status(200).json({ exito: true, data: reemplazarUrlPorIndicador(usuario, 'constanciaUrl', 'tieneConstancia') });
   } catch (error) {
     console.error('Error al obtener perfil:', error.message);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
+  }
+};
+
+// ==========================================
+// 3.b CONSTANCIA DE AFIP/DGR DEL SOCIO LOGUEADO (URL temporal)
+// ==========================================
+// Solo la propia: el id sale del token, nunca de la URL. Devuelve una URL que vence en minutos.
+export const obtenerMiConstancia = async (req, res) => {
+  try {
+    const usuario = await User.findByPk(req.usuario.id, { attributes: ['id', 'constanciaUrl'] });
+    const urlGuardada = usuario?.constanciaUrl;
+    if (!urlGuardada) {
+      return res.status(404).json({ exito: false, mensaje: 'No hay ninguna constancia cargada.' });
+    }
+    const data = urlTemporalDeArchivo(urlGuardada);
+    if (!data) {
+      // Una URL que no es de Cloudinary (por ejemplo, un archivo local de antes de usar Cloudinary).
+      return res.status(404).json({ exito: false, mensaje: 'El archivo no está disponible.' });
+    }
+    res.status(200).json({ exito: true, data });
+  } catch (error) {
+    console.error('Error al obtener la constancia del socio:', error.message);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
 };

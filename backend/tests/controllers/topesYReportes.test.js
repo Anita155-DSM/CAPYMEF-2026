@@ -12,12 +12,14 @@ import { DataTypes } from 'sequelize';
 // Nada sale a internet: el PDF del comprobante, el mail y Cloudinary son falsos.
 vi.mock('../../services/comprobante.service.js', () => ({ generarComprobantePago: vi.fn(async () => Buffer.from('%PDF-1.4')) }));
 vi.mock('../../config/mailer.js', () => ({ enviarMailComprobantePago: vi.fn(async () => {}), enviarMailRecuperacion: vi.fn() }));
-vi.mock('../../services/cloudinary.service.js', () => ({
+vi.mock('../../services/cloudinary.service.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  eliminarArchivoDeCloudinary: vi.fn(),
   subirPDFCloudinary: vi.fn(async () => ({ secure_url: 'https://res.cloudinary.com/demo/raw/upload/comprobante.pdf' })),
   eliminarImagenCloudinary: vi.fn(),
   extraerPublicIdDeUrl: vi.fn(),
 }));
-vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({ uploadNube: { single: () => (req, res, next) => next() } }));
+vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({ uploadConstancia: { single: () => (req, res, next) => next() } }));
 
 const { Cuota } = await import('../../models/cuota.models.js');
 const { Pago } = await import('../../models/pago.models.js');

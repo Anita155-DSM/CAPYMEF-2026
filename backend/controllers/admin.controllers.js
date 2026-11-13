@@ -8,6 +8,7 @@ import { fechaHoyArgentina } from "../services/cuota.service.js";
 import { FILTRO_SOLO_SOCIOS } from "../services/abonaCuota.service.js";
 import { dejaDeTenerAcceso, liberarInscripcionesFuturas } from "../services/inscripcion.service.js";
 import { sequelize } from "../config/database.js";
+import { urlTemporalDeArchivo, reemplazarUrlPorIndicador } from "../services/cloudinary.service.js";
 
 // Guarda la cuenta y, si con este cambio deja de estar aprobada (baja, rechazo u otro estado sin acceso),
 // libera sus lugares en eventos que todavía no ocurrieron. Antes la baja dejaba las inscripciones y el socio
@@ -105,7 +106,9 @@ export const obtenerTodosLosUsuarios = async (req, res) => {
     res.status(200).json({
       exito: true,
       total: usuarios.length,
-      data: usuarios,
+      // Sin la URL de la constancia (es privada): tieneConstancia, y la URL temporal se pide a
+      // GET /api/admin/socios/:id/constancia.
+      data: usuarios.map((usuario) => reemplazarUrlPorIndicador(usuario, 'constanciaUrl', 'tieneConstancia')),
     });
   } catch (error) {
     console.error("Error al obtener la lista de usuarios:", error);
@@ -176,6 +179,33 @@ export const gestionarSolicitud = async (req, res) => {
     });
   } catch (error) {
     console.error("Error al gestionar solicitud:", error);
+    res.status(500).json({ exito: false, mensaje: "Error interno del servidor." });
+  }
+};
+
+// ==========================================
+// CONSTANCIA DE AFIP/DGR DE UN SOCIO (URL temporal, solo admin)
+// ==========================================
+// La usa la administración para revisar una solicitud o la ficha de un socio. Devuelve una URL que vence en
+// minutos (la constancia es privada en Cloudinary). El acceso de admin lo exige verificarAdmin en la ruta.
+export const obtenerConstanciaDeSocio = async (req, res) => {
+  try {
+    const usuario = await User.findByPk(req.params.id, { attributes: ['id', 'constanciaUrl'] });
+    if (!usuario) {
+      return res.status(404).json({ exito: false, mensaje: "Usuario no encontrado." });
+    }
+    const urlGuardada = usuario.constanciaUrl;
+    if (!urlGuardada) {
+      return res.status(404).json({ exito: false, mensaje: 'Este socio no tiene ninguna constancia cargada.' });
+    }
+    const data = urlTemporalDeArchivo(urlGuardada);
+    if (!data) {
+      // Una URL que no es de Cloudinary (por ejemplo, un archivo local de antes de usar Cloudinary).
+      return res.status(404).json({ exito: false, mensaje: 'El archivo no está disponible.' });
+    }
+    res.status(200).json({ exito: true, data });
+  } catch (error) {
+    console.error("Error al obtener la constancia del socio:", error.message);
     res.status(500).json({ exito: false, mensaje: "Error interno del servidor." });
   }
 };

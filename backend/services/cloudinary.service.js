@@ -71,6 +71,57 @@ export const urlTemporalDeDescarga = (url, { minutos = MINUTOS_URL_TEMPORAL } = 
   });
 };
 
+// ==========================================
+// Archivos privados que se le muestran al usuario (constancias del registro, comprobantes de gastos)
+// ==========================================
+// Para un archivo privado ("authenticated"), una URL firmada que vence a los pocos minutos. A diferencia de
+// urlTemporalDeDescarga (que usa solo el servidor), esta sí se le entrega al navegador, después de que el
+// endpoint verificó que quien la pide puede ver ese archivo (el dueño o un admin). Aunque se comparta o quede en
+// el historial, a los minutos ya no abre nada.
+// Las URLs públicas viejas ("upload", subidas antes de este cambio) se devuelven tal cual: siguen funcionando
+// hasta que se migren. Devuelve { url, expiraEn, esPdf }, o null si la URL no es de Cloudinary o no se entiende.
+// esPdf sale de la extensión guardada: la URL temporal es de api.cloudinary.com y no termina en ".pdf", así que
+// el frontend no puede deducirlo de la URL.
+export const urlTemporalDeArchivo = (urlGuardada, { minutos = MINUTOS_URL_TEMPORAL } = {}) => {
+  const datos = leerUrlDeCloudinary(urlGuardada);
+  if (!datos) return null;
+  const esPdf = datos.formato === 'pdf';
+  if (datos.tipoEntrega !== 'authenticated') return { url: urlGuardada, expiraEn: null, esPdf };
+
+  const vencimiento = Math.floor(Date.now() / 1000) + minutos * 60;
+  const url = cloudinary.utils.private_download_url(datos.publicId, datos.formato || undefined, {
+    resource_type: datos.resourceType,
+    type: 'authenticated',
+    expires_at: vencimiento,
+  });
+  return { url, expiraEn: new Date(vencimiento * 1000).toISOString(), esPdf };
+};
+
+// Borra de Cloudinary el archivo de una URL guardada, sea pública o privada. Un archivo privado solo se borra
+// si se le dice a destroy que es "authenticated" (y de qué tipo de recurso es): con eliminarImagenCloudinary,
+// que llama a destroy solo con el public_id, Cloudinary lo busca entre los públicos y no lo encuentra.
+// Nunca lanza error (se llama desde los catch, igual que eliminarImagenCloudinary).
+export const eliminarArchivoDeCloudinary = async (urlGuardada) => {
+  const datos = leerUrlDeCloudinary(urlGuardada);
+  if (!datos) return;
+  try {
+    await cloudinary.uploader.destroy(datos.publicId, {
+      type: datos.tipoEntrega,
+      resource_type: datos.resourceType,
+      invalidate: true, // que la red de Cloudinary deje de servir la copia que tenga guardada
+    });
+  } catch (error) {
+    console.error('Error al borrar un archivo de Cloudinary:', error.message);
+  }
+};
+
+// Para responder un registro sin la URL de su archivo privado: saca el campo con la URL y deja un indicador
+// (true/false). El frontend usa el indicador para mostrar el botón, y pide la URL temporal al endpoint propio.
+export const reemplazarUrlPorIndicador = (datos, campoUrl, campoIndicador) => {
+  const { [campoUrl]: url, ...resto } = typeof datos?.toJSON === 'function' ? datos.toJSON() : datos;
+  return { ...resto, [campoIndicador]: Boolean(url) };
+};
+
 /**
  * Sube un PDF que ya está en memoria (Buffer) directo a Cloudinary, sin pasar por disco.
  * Usado SOLO para comprobantes de pago, que se generan al vuelo con pdfkit.

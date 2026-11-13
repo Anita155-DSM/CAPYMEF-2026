@@ -11,7 +11,7 @@ import { DataTypes } from 'sequelize';
 // TERMINOS_OBLIGATORIOS=false (modo transitorio). En los tests, por defecto, es obligatoria.
 // La subida de la constancia es falsa (pone siempre un archivo); solo se simula el reloj (Date).
 vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({
-  uploadNube: {
+  uploadConstancia: {
     single: () => (req, res, next) => {
       req.file = { path: 'https://res.cloudinary.com/demo/raw/upload/constancia.pdf', filename: 'constancia' };
       next();

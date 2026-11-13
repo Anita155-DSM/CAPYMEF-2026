@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 // La subida del comprobante a Cloudinary y su borrado son falsos (nada sale a internet). La subida falsa
 // pone un archivo en req.file solo si la petición trae el encabezado "x-con-comprobante".
 vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({
-  uploadNube: {
+  uploadGasto: {
     single: () => (req, res, next) => {
       if (req.headers['x-con-comprobante']) {
         req.file = { path: 'https://res.cloudinary.com/demo/image/upload/v1/capymef/ticket.jpg', filename: 'capymef/ticket' };
@@ -16,9 +16,15 @@ vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({
     },
   },
 }));
-vi.mock('../../services/cloudinary.service.js', () => ({ eliminarImagenCloudinary: vi.fn(), extraerPublicIdDeUrl: vi.fn(), subirPDFCloudinary: vi.fn() }));
+// Se simula solo lo que hablaría con Cloudinary (borrar y subir); el resto del servicio es el real.
+vi.mock('../../services/cloudinary.service.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  eliminarArchivoDeCloudinary: vi.fn(),
+  eliminarImagenCloudinary: vi.fn(),
+  subirPDFCloudinary: vi.fn(),
+}));
 
-const { eliminarImagenCloudinary } = await import('../../services/cloudinary.service.js');
+const { eliminarArchivoDeCloudinary } = await import('../../services/cloudinary.service.js');
 const { Gasto } = await import('../../models/gasto.models.js');
 const { Auditoria } = await import('../../models/auditoria.models.js');
 const { default: gastoRoutes } = await import('../../routes/gasto.routes.js');
@@ -118,7 +124,8 @@ describe('POST /api/gastos', () => {
     expect(respuesta.status).toBe(500);
     expect(respuesta.body).toEqual({ exito: false, mensaje: 'Error interno del servidor.' });
     expect(await Gasto.count()).toBe(0);
-    expect(eliminarImagenCloudinary).toHaveBeenCalledWith('capymef/ticket');
+    // Se borra a partir de la URL del archivo subido (así sabe si es privado o público).
+    expect(eliminarArchivoDeCloudinary).toHaveBeenCalledWith('https://res.cloudinary.com/demo/image/upload/v1/capymef/ticket.jpg');
   });
 });
 

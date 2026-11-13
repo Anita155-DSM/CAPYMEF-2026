@@ -11,7 +11,7 @@ import { DataTypes } from 'sequelize';
 // largo del VARCHAR, así que estos tests prueban que el validador corta ANTES de llegar a la base.
 // Nada sale a internet: la subida de la constancia, el PDF del comprobante, el mail y Cloudinary son falsos.
 vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({
-  uploadNube: {
+  uploadConstancia: {
     single: () => (req, res, next) => {
       req.file = { path: 'https://res.cloudinary.com/demo/raw/upload/constancia.pdf', filename: 'constancia' };
       next();

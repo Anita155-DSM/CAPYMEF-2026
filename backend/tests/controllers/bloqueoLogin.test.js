@@ -9,7 +9,7 @@ import crypto from 'node:crypto';
 // Se usa el router real de autenticación (con sus limitadores por IP) y solo se simula el reloj (Date).
 // Cada pedido sale de una IP distinta: así se prueba el bloqueo POR EMAIL (el que frena a quien ataca una cuenta
 // desde muchas IP) sin que el limitador por IP + email de rateLimiters.js se adelante.
-vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({ uploadNube: { single: () => (req, res, next) => next() } }));
+vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({ uploadConstancia: { single: () => (req, res, next) => next() } }));
 vi.mock('../../config/mailer.js', () => ({ enviarMailRecuperacion: vi.fn(async () => {}), enviarMailComprobantePago: vi.fn() }));
 
 const { User } = await import('../../models/user.models.js');

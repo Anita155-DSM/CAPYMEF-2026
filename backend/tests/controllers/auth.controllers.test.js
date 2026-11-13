@@ -10,7 +10,7 @@ import crypto from 'node:crypto';
 // El router de autenticación, los validadores, los limitadores, el controlador y la base (SQLite) son reales.
 // La subida falsa pone un archivo en req.file, salvo que la petición traiga el encabezado "x-sin-archivo".
 vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({
-  uploadNube: {
+  uploadConstancia: {
     single: () => (req, res, next) => {
       if (!req.headers['x-sin-archivo']) {
         req.file = { path: 'https://res.cloudinary.com/demo/raw/upload/constancia.pdf', filename: 'constancia' };
@@ -20,6 +20,8 @@ vi.mock('../../middlewares/multer/multerCloudinary.js', () => ({
   },
 }));
 vi.mock('../../config/mailer.js', () => ({ enviarMailRecuperacion: vi.fn(async () => {}), enviarMailComprobantePago: vi.fn() }));
+// Si el registro no se completa, la constancia subida se borra de Cloudinary: ese borrado también es falso.
+vi.mock('../../services/cloudinary.service.js', async (importOriginal) => ({ ...(await importOriginal()), eliminarArchivoDeCloudinary: vi.fn() }));
 
 const { enviarMailRecuperacion } = await import('../../config/mailer.js');
 const { User } = await import('../../models/user.models.js');

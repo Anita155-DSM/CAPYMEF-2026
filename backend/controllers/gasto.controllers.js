@@ -1,5 +1,9 @@
 import { Gasto } from '../models/gasto.models.js';
-import { eliminarImagenCloudinary } from '../services/cloudinary.service.js';
+import { eliminarArchivoDeCloudinary, urlTemporalDeArchivo, reemplazarUrlPorIndicador } from '../services/cloudinary.service.js';
+
+// El comprobante de un gasto es privado en Cloudinary: ningún JSON devuelve su URL, sino tieneComprobante, y la
+// URL temporal se pide a GET /api/gastos/:id/comprobante.
+const sinUrlDeComprobante = (gasto) => reemplazarUrlPorIndicador(gasto, 'url_comprobante', 'tieneComprobante');
 
 // ==========================================
 // 1. REGISTRAR UN NUEVO GASTO (Egreso)
@@ -25,10 +29,11 @@ export const registrarGasto = async (req, res) => {
     res.status(201).json({
       exito: true,
       mensaje: 'Gasto registrado correctamente.',
-      data: nuevoGasto,
+      data: sinUrlDeComprobante(nuevoGasto),
     });
   } catch (error) {
-    if (comprobanteFile) eliminarImagenCloudinary(comprobanteFile.filename);
+    // El comprobante ya subido se borra (es privado: se borra indicando su tipo, ver cloudinary.service.js).
+    if (comprobanteFile) eliminarArchivoDeCloudinary(comprobanteFile.path);
     console.error('Error al registrar gasto:', error);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
@@ -43,9 +48,34 @@ export const obtenerGastos = async (req, res) => {
       order: [['fecha', 'DESC'], ['createdAt', 'DESC']],
     });
 
-    res.status(200).json({ exito: true, data: gastos });
+    res.status(200).json({ exito: true, data: gastos.map(sinUrlDeComprobante) });
   } catch (error) {
     console.error('Error al obtener gastos:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
+  }
+};
+
+// ==========================================
+// 2.b COMPROBANTE DE UN GASTO (URL temporal, solo admin)
+// ==========================================
+export const obtenerComprobanteGasto = async (req, res) => {
+  try {
+    const gasto = await Gasto.findByPk(req.params.id, { attributes: ['id', 'url_comprobante'] });
+    if (!gasto) {
+      return res.status(404).json({ exito: false, mensaje: 'Gasto no encontrado.' });
+    }
+    const urlGuardada = gasto.url_comprobante;
+    if (!urlGuardada) {
+      return res.status(404).json({ exito: false, mensaje: 'Este gasto no tiene comprobante.' });
+    }
+    const data = urlTemporalDeArchivo(urlGuardada);
+    if (!data) {
+      // Una URL que no es de Cloudinary (por ejemplo, un archivo local de antes de usar Cloudinary).
+      return res.status(404).json({ exito: false, mensaje: 'El archivo no está disponible.' });
+    }
+    res.status(200).json({ exito: true, data });
+  } catch (error) {
+    console.error('Error al obtener el comprobante del gasto:', error.message);
     res.status(500).json({ exito: false, mensaje: 'Error interno del servidor.' });
   }
 };
